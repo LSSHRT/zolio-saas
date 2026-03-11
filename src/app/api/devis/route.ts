@@ -2,18 +2,22 @@ import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 export async function POST(request: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
     const body = await request.json();
     const { client, lignes, tva } = body;
 
     const sheets = await getGoogleSheetsClient();
 
-    // Générer le numéro de devis
+    // Générer le numéro de devis (colonne B au lieu de A car A = userId)
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:A",
+      range: "Devis_Emis!B:B",
     });
     const count = existing.data.values?.length || 1;
     const year = new Date().getFullYear();
@@ -25,13 +29,14 @@ export async function POST(request: Request) {
     const tauxTVA = parseFloat(tva) || 10;
     const totalTTC = totalHT * (1 + tauxTVA / 100);
 
-    // 1. Écrire l'en-tête du devis
+    // 1. Écrire l'en-tête du devis (On ajoute le userId en 1er)
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:I",
+      range: "Devis_Emis!A:J", // On passe de A:I à A:J
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
+          userId,
           numeroDevis,
           date,
           client.nom,
@@ -45,8 +50,9 @@ export async function POST(request: Request) {
       },
     });
 
-    // 2. Écrire les lignes de détail du devis
+    // 2. Écrire les lignes de détail du devis (On ajoute le userId)
     const lignesValues = lignes.map((l: any) => [
+      userId,
       numeroDevis,
       l.nomPrestation,
       l.quantite,
@@ -57,7 +63,7 @@ export async function POST(request: Request) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:F",
+      range: "Lignes_Devis!A:G", // On passe de A:F à A:G
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: lignesValues,
@@ -105,26 +111,33 @@ export async function POST(request: Request) {
 
 export async function GET() {
   try {
+    const { userId } = await auth();
+    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:I",
+      range: "Devis_Emis!A:J", // A est mnt userId
     });
 
     const rows = response.data.values;
     if (!rows || rows.length <= 1) return NextResponse.json([]);
 
     const dataRows = rows.slice(1);
-    const devis = dataRows.map((row) => ({
-      numero: row[0] || "",
-      date: row[1] || "",
-      nomClient: row[2] || "",
-      emailClient: row[3] || "",
-      totalHT: row[4] || "",
-      tva: row[5] || "",
-      totalTTC: row[6] || "",
-      statut: row[7] || "",
-      lienPdf: row[8] || "",
+    
+    // On ne garde que les devis du user connecté
+    const myDevis = dataRows.filter((row) => row[0] === userId);
+
+    const devis = myDevis.map((row) => ({
+      numero: row[1] || "",
+      date: row[2] || "",
+      nomClient: row[3] || "",
+      emailClient: row[4] || "",
+      totalHT: row[5] || "",
+      tva: row[6] || "",
+      totalTTC: row[7] || "",
+      statut: row[8] || "",
+      lienPdf: row[9] || "",
     }));
 
     return NextResponse.json(devis);

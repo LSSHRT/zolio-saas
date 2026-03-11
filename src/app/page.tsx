@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { UserButton, useUser } from "@clerk/nextjs";
 
 interface Devis {
   numero: string;
@@ -16,6 +17,7 @@ interface Devis {
 }
 
 export default function Dashboard() {
+  const { user, isLoaded } = useUser();
   const [devis, setDevis] = useState<Devis[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -50,8 +52,8 @@ export default function Dashboard() {
             <Bell size={24} />
             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full" />
           </button>
-          <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-slate-500">
-            <User size={20} />
+          <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-slate-500">
+            {isLoaded ? <UserButton /> : <User size={20} />}
           </div>
         </div>
       </header>
@@ -62,7 +64,7 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            Bonjour, Valentin 👋
+            Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
           </h1>
           <p className="text-slate-500 text-sm mt-1">Gérez vos devis en quelques secondes.</p>
         </div>

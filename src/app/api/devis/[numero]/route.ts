@@ -1,49 +1,54 @@
 import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 // Récupérer les lignes de détail d'un devis spécifique
 export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
+    const { userId } = await auth();
+    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
     const { numero } = await params;
     const sheets = await getGoogleSheetsClient();
 
     // Récupérer l'en-tête du devis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:I",
+      range: "Devis_Emis!A:J",
     });
     const devisRows = devisRes.data.values || [];
-    const devisRow = devisRows.find((r) => r[0] === numero);
+    // Vérifier que le devis appartient bien au user connecté
+    const devisRow = devisRows.find((r) => r[0] === userId && r[1] === numero);
 
     if (!devisRow) {
-      return NextResponse.json({ error: "Devis introuvable" }, { status: 404 });
+      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
     }
 
     // Récupérer les lignes de détail
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:F",
+      range: "Lignes_Devis!A:G",
     });
     const allLignes = lignesRes.data.values || [];
     const lignes = allLignes
-      .filter((r) => r[0] === numero)
+      .filter((r) => r[0] === userId && r[1] === numero) // Match userId ET numero
       .map((r) => ({
-        nomPrestation: r[1] || "",
-        quantite: parseFloat(r[2]) || 0,
-        unite: r[3] || "",
-        prixUnitaire: parseFloat(r[4]) || 0,
-        totalLigne: parseFloat(r[5]) || 0,
+        nomPrestation: r[2] || "",
+        quantite: parseFloat(r[3]) || 0,
+        unite: r[4] || "",
+        prixUnitaire: parseFloat(r[5]) || 0,
+        totalLigne: parseFloat(r[6]) || 0,
       }));
 
     return NextResponse.json({
-      numero: devisRow[0],
-      date: devisRow[1],
-      nomClient: devisRow[2],
-      emailClient: devisRow[3],
-      totalHT: devisRow[4],
-      tva: devisRow[5],
-      totalTTC: devisRow[6],
-      statut: devisRow[7],
+      numero: devisRow[1],
+      date: devisRow[2],
+      nomClient: devisRow[3],
+      emailClient: devisRow[4],
+      totalHT: devisRow[5],
+      tva: devisRow[6],
+      totalTTC: devisRow[7],
+      statut: devisRow[8],
       lignes,
     });
   } catch (error) {
@@ -55,6 +60,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
 // Mettre à jour un devis existant (modifier les lignes et renvoyer)
 export async function PUT(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
+    const { userId } = await auth();
+    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
     const { numero } = await params;
     const body = await request.json();
     const { lignes, tva } = body;
@@ -70,26 +78,27 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 1. Trouver et mettre à jour la ligne dans Devis_Emis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:I",
+      range: "Devis_Emis!A:J",
     });
     const devisRows = devisRes.data.values || [];
-    const rowIndex = devisRows.findIndex((r) => r[0] === numero);
+    const rowIndex = devisRows.findIndex((r) => r[0] === userId && r[1] === numero);
 
     if (rowIndex === -1) {
-      return NextResponse.json({ error: "Devis introuvable" }, { status: 404 });
+      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
     }
 
     // Mettre à jour la ligne d'en-tête du devis
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!A${rowIndex + 1}:I${rowIndex + 1}`,
+      range: `Devis_Emis!A${rowIndex + 1}:J${rowIndex + 1}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
+          userId,
           numero,
           date,
-          devisRows[rowIndex][2], // nom client
-          devisRows[rowIndex][3], // email client
+          devisRows[rowIndex][3], // nom client
+          devisRows[rowIndex][4], // email client
           totalHT.toFixed(2),
           `${tauxTVA}%`,
           totalTTC.toFixed(2),
@@ -102,15 +111,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 2. Supprimer les anciennes lignes de détail et réécrire
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:F",
+      range: "Lignes_Devis!A:G",
     });
     const allLignes = lignesRes.data.values || [];
 
-    // Garder les lignes qui ne sont PAS liées à ce devis
-    const otherLignes = allLignes.filter((r, i) => i === 0 || r[0] !== numero);
+    // Garder les lignes qui ne sont PAS liées à ce devis (ou qui n'appartiennent pas à ce user)
+    // C'est à dire on supprime seulement les lignes de CE user ET de CE numero
+    const otherLignes = allLignes.filter((r, i) => i === 0 || !(r[0] === userId && r[1] === numero));
 
     // Ajouter les nouvelles lignes
     const newLignes = lignes.map((l: any) => [
+      userId,
       numero,
       l.nomPrestation,
       l.quantite,
@@ -124,7 +135,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // Effacer tout puis réécrire
     await sheets.spreadsheets.values.clear({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:F",
+      range: "Lignes_Devis!A:G",
     });
 
     if (updatedLignes.length > 0) {
@@ -144,8 +155,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       numeroDevis: numero,
       date,
       client: {
-        nom: devisRows[rowIndex][2],
-        email: devisRows[rowIndex][3],
+        nom: devisRows[rowIndex][3],
+        email: devisRows[rowIndex][4],
         telephone: "",
         adresse: "",
       },
@@ -159,8 +170,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       try {
         await sendDevisEmail(
-          devisRows[rowIndex][3], // email client
-          devisRows[rowIndex][2], // nom client
+          devisRows[rowIndex][4], // email client
+          devisRows[rowIndex][3], // nom client
           numero,
           totalTTC.toFixed(2),
           pdfBuffer
@@ -188,20 +199,30 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
 // Supprimer un devis
 export async function DELETE(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
+    const { userId } = await auth();
+    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
     const { numero } = await params;
     const sheets = await getGoogleSheetsClient();
 
     // 1. Supprimer la ligne dans Devis_Emis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:I",
+      range: "Devis_Emis!A:J",
     });
     const devisRows = devisRes.data.values || [];
-    const otherDevis = devisRows.filter((r, i) => i === 0 || r[0] !== numero);
+    
+    // Vérification Propriétaire
+    const ownerCheck = devisRows.find(r => r[0] === userId && r[1] === numero);
+    if (!ownerCheck) {
+      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
+    }
+
+    const otherDevis = devisRows.filter((r, i) => i === 0 || !(r[0] === userId && r[1] === numero));
 
     await sheets.spreadsheets.values.clear({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:I",
+      range: "Devis_Emis!A:J",
     });
     if (otherDevis.length > 0) {
       await sheets.spreadsheets.values.update({
@@ -215,14 +236,14 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
     // 2. Supprimer les lignes de détail associées
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:F",
+      range: "Lignes_Devis!A:G",
     });
     const allLignes = lignesRes.data.values || [];
-    const otherLignes = allLignes.filter((r, i) => i === 0 || r[0] !== numero);
+    const otherLignes = allLignes.filter((r, i) => i === 0 || !(r[0] === userId && r[1] === numero));
 
     await sheets.spreadsheets.values.clear({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:F",
+      range: "Lignes_Devis!A:G",
     });
     if (otherLignes.length > 0) {
       await sheets.spreadsheets.values.update({

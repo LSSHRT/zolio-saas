@@ -15,19 +15,19 @@ async function initializeSheets() {
     const requiredSheets = [
       {
         title: "Clients",
-        headers: ["ID_Client", "Nom", "Email", "Telephone", "Adresse", "Date_Ajout"]
+        headers: ["userId", "ID_Client", "Nom", "Email", "Telephone", "Adresse", "Date_Ajout"]
       },
       {
         title: "Catalogue_Prestations",
-        headers: ["ID_Prestation", "Categorie", "Nom_Prestation", "Unite", "Prix_Unitaire_HT", "Cout_Matiere_Estime"]
+        headers: ["userId", "ID_Prestation", "Categorie", "Nom_Prestation", "Unite", "Prix_Unitaire_HT", "Cout_Matiere_Estime"]
       },
       {
         title: "Devis_Emis",
-        headers: ["Numero_Devis", "Date", "Nom_Client", "Email_Client", "Total_HT", "TVA", "Total_TTC", "Statut", "Lien_PDF"]
+        headers: ["userId", "Numero_Devis", "Date", "Nom_Client", "Email_Client", "Total_HT", "TVA", "Total_TTC", "Statut", "Lien_PDF"]
       },
       {
         title: "Lignes_Devis",
-        headers: ["Numero_Devis", "Nom_Prestation", "Quantite", "Unite", "Prix_Unitaire", "Total_Ligne"]
+        headers: ["userId", "Numero_Devis", "Nom_Prestation", "Quantite", "Unite", "Prix_Unitaire", "Total_Ligne"]
       }
     ];
 
