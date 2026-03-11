@@ -9,9 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@stripe/stripe-js": "^8.9.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/nodemailer": "^7.0.11",
+    "canvas-confetti": "^1.9.4",
+    "dotenv": "^17.3.1",
+    "framer-motion": "^12.35.2",
+    "googleapis": "^171.4.0",
+    "jspdf": "^4.2.0",
+    "lucide-react": "^0.577.0",
     "next": "16.1.6",
+    "nodemailer": "^8.0.2",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "stripe": "^20.4.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
