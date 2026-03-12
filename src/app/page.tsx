@@ -150,6 +150,34 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Banner Stats Rapides */}
+        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-900 dark:to-indigo-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+          
+          <div className="relative z-10">
+            <p className="text-blue-100 text-sm font-medium mb-1">Chiffre d'Affaires Global</p>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-4">
+              {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(CA_TTC)}
+            </h2>
+            
+            <div className="flex gap-6 border-t border-white/20 pt-4">
+              <div>
+                <p className="text-blue-100 text-xs mb-0.5">Devis total</p>
+                <p className="font-semibold">{devis.length}</p>
+              </div>
+              <div>
+                <p className="text-blue-100 text-xs mb-0.5">Devis acceptés</p>
+                <p className="font-semibold">{devis.filter(d => d.statut === 'Accepté').length}</p>
+              </div>
+              <div>
+                <p className="text-blue-100 text-xs mb-0.5">En attente</p>
+                <p className="font-semibold">{devis.filter(d => d.statut === 'En attente' || d.statut === 'En attente (Modifié)').length}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Action Widgets */}
         <div className="flex gap-4">
           {/* Create CTA */}
@@ -159,7 +187,7 @@ export default function Dashboard() {
               className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-purple-500/30 flex flex-col justify-between aspect-square"
             >
               <div className="w-12 h-12 bg-white dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
-                <Plus size={24} className="text-white" />
+                <Plus size={24} className="text-blue-600 dark:text-white" />
               </div>
               <div>
                 <h2 className="font-semibold text-lg leading-tight mb-1">Nouveau<br/>Devis</h2>
