@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save } from "lucide-react";
 import Link from "next/link";
 
-interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; }
+interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
@@ -44,12 +44,19 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const totalHTBase = lignes.reduce((s, l) => s + l.totalLigne, 0);
   const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
   const totalHT = totalHTBase - montantRemise;
-  const totalTTC = totalHT * (1 + parseFloat(tva) / 100);
+  // TTC calculé avec TVA par ligne
+  const totalTTC = lignes.reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
 
   const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT }]);
+    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva }]);
     setShowAddPrestation(false);
     setSearchPrestation("");
+  };
+
+  const updateTva = (idx: number, newTva: string) => {
+    const updated = [...lignes];
+    updated[idx].tva = newTva;
+    setLignes(updated);
   };
 
   const updateQty = (idx: number, qty: number) => {

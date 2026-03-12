@@ -31,6 +31,7 @@ interface LigneDevis {
   unite: string;
   prixUnitaire: number;
   totalLigne: number;
+  tva?: string;
 }
 
 interface DevisData {
@@ -128,9 +129,10 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
   doc.text("Prestation", 20, y);
-  doc.text("Qté", 110, y);
-  doc.text("Unité", 125, y);
-  doc.text("P.U. HT", 148, y, { align: "right" });
+  doc.text("Qté", 100, y);
+  doc.text("Unité", 115, y);
+  doc.text("TVA", 130, y);
+  doc.text("P.U. HT", 150, y, { align: "right" });
   doc.text("Total HT", pageWidth - 20, y, { align: "right" });
 
   y += 8;
@@ -144,9 +146,10 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
 
   for (const ligne of data.lignes) {
     doc.text(ligne.nomPrestation.substring(0, 40), 20, y + 2);
-    doc.text(String(ligne.quantite), 112, y + 2);
-    doc.text(ligne.unite, 125, y + 2);
-    doc.text(`${ligne.prixUnitaire.toFixed(2)}€`, 148, y + 2, { align: "right" });
+    doc.text(String(ligne.quantite), 102, y + 2);
+    doc.text(ligne.unite, 115, y + 2);
+    doc.text(ligne.tva ? `${ligne.tva}%` : (data.tva !== "Multi" ? data.tva : "20%"), 130, y + 2);
+    doc.text(`${ligne.prixUnitaire.toFixed(2)}€`, 150, y + 2, { align: "right" });
     doc.text(`${ligne.totalLigne.toFixed(2)}€`, pageWidth - 20, y + 2, { align: "right" });
     y += 10;
 
@@ -188,10 +191,29 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   y += 8;
 
   doc.setTextColor(100, 116, 139);
-  doc.text(`TVA (${data.tva})`, 125, y);
-  doc.setTextColor(15, 23, 42);
-  const tvaAmount = (parseFloat(data.totalTTC) - parseFloat(data.totalHT)).toFixed(2);
-  doc.text(`${tvaAmount}€`, pageWidth - 20, y, { align: "right" });
+  if (data.tva === "Multi") {
+    // Calculate TVAs per rate
+    const tvaMap: Record<string, number> = {};
+    for (const l of data.lignes) {
+      const rate = l.tva || "20";
+      if (!tvaMap[rate]) tvaMap[rate] = 0;
+      tvaMap[rate] += l.totalLigne * (parseFloat(rate)/100);
+    }
+    for (const [rate, amount] of Object.entries(tvaMap)) {
+      doc.setTextColor(100, 116, 139);
+      doc.text(`TVA (${rate}%)`, 125, y);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${amount.toFixed(2)}€`, pageWidth - 20, y, { align: "right" });
+      y += 8;
+    }
+    y -= 8; // Adjust to prevent double increment
+  } else {
+    doc.setTextColor(100, 116, 139);
+    doc.text(`TVA (${data.tva})`, 125, y);
+    doc.setTextColor(15, 23, 42);
+    const tvaAmount = (parseFloat(data.totalTTC) - parseFloat(data.totalHT)).toFixed(2);
+    doc.text(`${tvaAmount}€`, pageWidth - 20, y, { align: "right" });
+  }
 
   y += 12;
   doc.setFillColor(color.r, color.g, color.b);
@@ -342,9 +364,10 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(9);
   doc.setTextColor(100, 116, 139);
   doc.text("Prestation", 20, y);
-  doc.text("Qté", 110, y);
-  doc.text("Unité", 125, y);
-  doc.text("P.U. HT", 148, y, { align: "right" });
+  doc.text("Qté", 100, y);
+  doc.text("Unité", 115, y);
+  doc.text("TVA", 130, y);
+  doc.text("P.U. HT", 150, y, { align: "right" });
   doc.text("Total HT", pageWidth - 20, y, { align: "right" });
 
   y += 8;
@@ -358,9 +381,10 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
 
   for (const ligne of data.lignes) {
     doc.text(ligne.nomPrestation.substring(0, 40), 20, y + 2);
-    doc.text(String(ligne.quantite), 112, y + 2);
-    doc.text(ligne.unite, 125, y + 2);
-    doc.text(`${ligne.prixUnitaire.toFixed(2)}€`, 148, y + 2, { align: "right" });
+    doc.text(String(ligne.quantite), 102, y + 2);
+    doc.text(ligne.unite, 115, y + 2);
+    doc.text(ligne.tva ? `${ligne.tva}%` : (data.tva !== "Multi" ? data.tva : "20%"), 130, y + 2);
+    doc.text(`${ligne.prixUnitaire.toFixed(2)}€`, 150, y + 2, { align: "right" });
     doc.text(`${ligne.totalLigne.toFixed(2)}€`, pageWidth - 20, y + 2, { align: "right" });
     y += 10;
 
@@ -402,10 +426,29 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   y += 8;
 
   doc.setTextColor(100, 116, 139);
-  doc.text(`TVA (${data.tva})`, 125, y);
-  doc.setTextColor(15, 23, 42);
-  const tvaAmount = (parseFloat(data.totalTTC) - parseFloat(data.totalHT)).toFixed(2);
-  doc.text(`${tvaAmount}€`, pageWidth - 20, y, { align: "right" });
+  if (data.tva === "Multi") {
+    // Calculate TVAs per rate
+    const tvaMap: Record<string, number> = {};
+    for (const l of data.lignes) {
+      const rate = l.tva || "20";
+      if (!tvaMap[rate]) tvaMap[rate] = 0;
+      tvaMap[rate] += l.totalLigne * (parseFloat(rate)/100);
+    }
+    for (const [rate, amount] of Object.entries(tvaMap)) {
+      doc.setTextColor(100, 116, 139);
+      doc.text(`TVA (${rate}%)`, 125, y);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`${amount.toFixed(2)}€`, pageWidth - 20, y, { align: "right" });
+      y += 8;
+    }
+    y -= 8; // Adjust to prevent double increment
+  } else {
+    doc.setTextColor(100, 116, 139);
+    doc.text(`TVA (${data.tva})`, 125, y);
+    doc.setTextColor(15, 23, 42);
+    const tvaAmount = (parseFloat(data.totalTTC) - parseFloat(data.totalHT)).toFixed(2);
+    doc.text(`${tvaAmount}€`, pageWidth - 20, y, { align: "right" });
+  }
 
   y += 12;
   doc.setFillColor(color.r, color.g, color.b); // Emerald green for Invoice

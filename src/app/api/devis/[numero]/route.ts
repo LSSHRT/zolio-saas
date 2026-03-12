@@ -27,7 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     // Récupérer les lignes de détail
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:G",
+      range: "Lignes_Devis!A:H",
     });
     const allLignes = lignesRes.data.values || [];
     const lignes = allLignes
@@ -38,6 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
         unite: r[4] || "",
         prixUnitaire: parseFloat(r[5]) || 0,
         totalLigne: parseFloat(r[6]) || 0,
+        tva: r[7] || "20",
       }));
 
     return NextResponse.json({
@@ -85,8 +86,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
 
     // Recalculer les totaux
     const totalHT = lignes.reduce((s: number, l: any) => s + l.totalLigne, 0);
-    const tauxTVA = parseFloat(tva) || 10;
-    const totalTTC = totalHT * (1 + tauxTVA / 100);
+    const totalTTC = lignes.reduce((s: number, l: any) => s + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
+    const tvaRates = [...new Set(lignes.map((l: any) => l.tva || "0"))];
+    const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
     const date = new Date().toLocaleDateString("fr-FR");
 
     // 1. Trouver et mettre à jour la ligne dans Devis_Emis
@@ -114,7 +116,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           devisRows[rowIndex][3], // nom client
           devisRows[rowIndex][4], // email client
           totalHT.toFixed(2),
-          `${tauxTVA}%`,
+          tvaLabel,
           totalTTC.toFixed(2),
           "En attente (Modifié)",
           "",
@@ -127,7 +129,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 2. Supprimer les anciennes lignes de détail et réécrire
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:G",
+      range: "Lignes_Devis!A:H",
     });
     const allLignes = lignesRes.data.values || [];
 
@@ -144,6 +146,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       l.unite,
       l.prixUnitaire,
       l.totalLigne.toFixed(2),
+      l.tva || "20",
     ]);
 
     const updatedLignes = [...otherLignes, ...newLignes];
@@ -151,7 +154,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // Effacer tout puis réécrire
     await sheets.spreadsheets.values.clear({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:G",
+      range: "Lignes_Devis!A:H",
     });
 
     if (updatedLignes.length > 0) {
@@ -180,7 +183,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
         entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
       lignes,
       totalHT: totalHT.toFixed(2),
-      tva: `${tauxTVA}%`,
+      tva: tvaLabel,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
       remise: remise ? remise.toString() : "",
@@ -206,7 +209,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       numero,
       date,
       totalHT: totalHT.toFixed(2),
-      tva: `${tauxTVA}%`,
+      tva: tvaLabel,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
       remise: remise ? remise.toString() : "",
@@ -255,7 +258,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
     // 2. Trouver les lignes dans Lignes_Devis
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Lignes_Devis!A:G",
+      range: "Lignes_Devis!A:H",
     });
     const allLignes = lignesRes.data.values || [];
     

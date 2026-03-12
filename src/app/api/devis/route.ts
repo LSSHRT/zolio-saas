@@ -39,8 +39,11 @@ export async function POST(request: Request) {
 
     // Calculer les totaux
     const totalHT = lignes.reduce((sum: number, l: any) => sum + l.totalLigne, 0);
-    const tauxTVA = parseFloat(tva) || 10;
-    const totalTTC = totalHT * (1 + tauxTVA / 100);
+    // Multi-TVA: on calcule le TTC ligne par ligne
+    const totalTTC = lignes.reduce((sum: number, l: any) => sum + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
+    // Pour la rétrocompatibilité ou l'affichage global de l'en-tête (on peut mettre "Multi" si plusieurs TVA)
+    const tvaRates = [...new Set(lignes.map((l: any) => l.tva || "0"))];
+    const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
 
     // 1. Écrire l'en-tête du devis (On ajoute le userId en 1er)
     await sheets.spreadsheets.values.append({
@@ -55,7 +58,7 @@ export async function POST(request: Request) {
           client.nom,
           client.email,
           totalHT.toFixed(2),
-          `${tauxTVA}%`,
+          tvaLabel,
           totalTTC.toFixed(2),
           "En attente",
           "", // Lien PDF
@@ -74,11 +77,12 @@ export async function POST(request: Request) {
       l.unite,
       l.prixUnitaire,
       l.totalLigne.toFixed(2),
+      l.tva || "20", // Colonne H
     ]);
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:G", // On passe de A:F à A:G
+      range: "Lignes_Devis!A:H", // On passe de A:F à A:G
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: lignesValues,
@@ -94,7 +98,7 @@ export async function POST(request: Request) {
         entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
       lignes,
       totalHT: totalHT.toFixed(2),
-      tva: `${tauxTVA}%`,
+      tva: tvaLabel,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
       remise: remise ? remise.toString() : "",
@@ -116,7 +120,7 @@ export async function POST(request: Request) {
       date,
       client,
       totalHT: totalHT.toFixed(2),
-      tva: `${tauxTVA}%`,
+      tva: tvaLabel,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
       remise: remise ? remise.toString() : "",

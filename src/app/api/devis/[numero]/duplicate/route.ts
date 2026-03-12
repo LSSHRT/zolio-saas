@@ -39,7 +39,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
     // 2. Récupérer les lignes
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:G",
+      range: "Lignes_Devis!A:H",
     });
     const allLignes = lignesRes.data.values || [];
     const oldLignes = allLignes.filter((r) => r[0] === userId && r[1] === numero);
@@ -88,7 +88,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
     if (newLignesValues.length > 0) {
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Lignes_Devis!A:G",
+        range: "Lignes_Devis!A:H",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: newLignesValues,
@@ -103,6 +103,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
       unite: l[4] || "",
       prixUnitaire: parseFloat(l[5]) || 0,
       totalLigne: parseFloat(l[6]) || 0,
+      tva: l[7] || "20",
     }));
 
     const pdfBuffer = await generateDevisPDF({

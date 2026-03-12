@@ -8,7 +8,7 @@ import { useUser } from "@clerk/nextjs";
 
 interface Client { id: string; nom: string; email: string; telephone: string; adresse: string; dateAjout: string; }
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
-interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; }
+interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
 
 export default function NouveauDevisPage() {
   const { user, isLoaded } = useUser();
@@ -53,11 +53,18 @@ export default function NouveauDevisPage() {
   const totalHTBase = lignes.reduce((s, l) => s + l.totalLigne, 0);
   const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
   const totalHT = totalHTBase - montantRemise;
-  const totalTTC = totalHT * (1 + parseFloat(tva) / 100);
+  // TTC est calculé en fonction de la TVA de chaque ligne ou de la TVA globale
+  const totalTTC = lignes.reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
 
   const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT }]);
+    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva }]);
     setSearchPrestation("");
+  };
+
+  const updateTva = (idx: number, newTva: string) => {
+    const updated = [...lignes];
+    updated[idx].tva = newTva;
+    setLignes(updated);
   };
 
   const updateQty = (idx: number, qty: number) => {
@@ -300,7 +307,13 @@ export default function NouveauDevisPage() {
                         </div>
                         <input type="number" min="1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
                           className="w-16 text-center py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
-                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
+                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
+                            <option value="0">0%</option>
+                            <option value="5.5">5.5%</option>
+                            <option value="10">10%</option>
+                            <option value="20">20%</option>
+                          </select>
+                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
                         <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
                       </div>
                     ))}

@@ -118,3 +118,27 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
 }
 
+[2026-03-12 22:17] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "completion confirmation",
+    "EXPECTATION": "The assistant should clearly confirm whether all requested features have been implemented and deployed.",
+    "NEW INSTRUCTION": "WHEN user asks if everything is implemented THEN summarize completed changes and confirm deployment or list remaining steps"
+}
+
+[2026-03-12 22:17] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The user wants the assistant to finish the previously interrupted explanation and provide the remaining steps.",
+    "NEW INSTRUCTION": "WHEN user says \"fini\", \"continue\", or \"pas fini\" THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-12 22:18] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The user wants confirmation of what has been implemented and for the assistant to continue and finish if anything remains.",
+    "NEW INSTRUCTION": "WHEN user asks if all implemented or says continue THEN summarize status, finish remaining work, and confirm deployment"
+}
+
