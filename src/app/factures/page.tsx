@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2 } from "lucide-react";
+import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2, Download } from "lucide-react";
 import Link from "next/link";
 
 interface Facture {
@@ -58,6 +58,30 @@ export default function FacturesPage() {
     }
   };
 
+  
+  const handleExportCSV = () => {
+    const headers = ["Numéro", "Date", "Client", "Email", "Total HT", "TVA", "Total TTC", "Statut"];
+    const rows = factures.map((f: Facture) => [
+      f.numero,
+      f.date,
+      f.nomClient,
+      f.emailClient,
+      f.totalHT,
+      f.tva,
+      f.totalTTC,
+      f.statut
+    ]);
+    const csvContent = [headers, ...rows].map(e => e.join(";")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "export_comptable_factures.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleBulkDelete = async () => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
     setIsDeletingBulk(true);
@@ -88,6 +112,13 @@ export default function FacturesPage() {
           </motion.div>
         </Link>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Factures</h1>
+      
+        <div className="flex gap-2">
+          <button onClick={handleExportCSV} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+            <Download size={16} />
+            <span className="hidden sm:inline">Export Comptable</span>
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 px-6 flex flex-col gap-6">

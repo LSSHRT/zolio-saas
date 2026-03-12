@@ -142,7 +142,7 @@ export async function GET() {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:K", // A est mnt userId
+      range: "Devis_Emis!A:M", // A est mnt userId
     });
 
     const rows = response.data.values;

@@ -182,3 +182,43 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
 }
 
+[2026-03-12 22:42] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "completion confirmation",
+    "EXPECTATION": "The user wants confirmation that everything is implemented and for the assistant to continue and finish remaining work if not.",
+    "NEW INSTRUCTION": "WHEN user asks if everything implemented or says continue THEN summarize status, finish remaining work, and confirm deployment"
+}
+
+[2026-03-12 22:44] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "completion confirmation",
+    "EXPECTATION": "The assistant should confirm if everything is implemented and continue to finish remaining work if not.",
+    "NEW INSTRUCTION": "WHEN user asks if everything implemented or says continue THEN summarize status, complete remaining tasks, and confirm deployment"
+}
+
+[2026-03-12 22:46] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user agrees with parts of the proposed solution (items 3 and 4) and wants them implemented.",
+    "NEW INSTRUCTION": "WHEN user selects items from proposed list THEN implement chosen items and confirm deployment"
+}
+
+[2026-03-12 22:47] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "partial solution approval",
+    "EXPECTATION": "The user wants items 3 and 4 from the proposed list to be implemented.",
+    "NEW INSTRUCTION": "WHEN user selects items from proposed list THEN implement chosen items and confirm deployment"
+}
+
+[2026-03-12 22:47] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "partial solution approval",
+    "EXPECTATION": "The user wants items 3 and 4 from the proposed list to be implemented.",
+    "NEW INSTRUCTION": "WHEN user selects items from proposed list THEN implement chosen items and confirm deployment"
+}
+

@@ -42,6 +42,7 @@ interface DevisData {
   acompte?: string;
   remise?: string;
   entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; cgv?: string; };
+  signatureBase64?: string;
   lignes: LigneDevis[];
   totalHT: string;
   tva: string;

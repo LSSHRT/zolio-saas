@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List, Mail } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List, Mail, PenTool } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -89,6 +89,12 @@ export default function DevisPage() {
     setIsDeletingBulk(false);
   };
 
+
+    const handleCopySignLink = (numero: string) => {
+    const link = `${window.location.origin}/signer/${numero}`;
+    navigator.clipboard.writeText(link);
+    alert("Lien de signature copié ! Envoyez-le à votre client.");
+  };
 
   const handleUpdateStatut = async (numero: string, newStatut: string) => {
     setUpdatingStatut(numero);
@@ -252,6 +258,9 @@ export default function DevisPage() {
                            <Link href={`/devis/${d.numero}`} className="flex-1">
                              <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
                            </Link>
+                           {pending && (
+                             <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">Faire signer</button>
+                           )}
                         </div>
                       </motion.div>
                     )

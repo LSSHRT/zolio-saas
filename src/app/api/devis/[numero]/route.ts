@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     // Récupérer l'en-tête du devis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:K",
+      range: "Devis_Emis!A:M",
     });
     const devisRows = devisRes.data.values || [];
     // Vérifier que le devis appartient bien au user connecté
@@ -51,6 +51,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       totalTTC: devisRow[7],
       statut: devisRow[8],
       acompte: devisRow[10] || "",
+      remise: devisRow[11] || "",
+      signatureBase64: devisRow[12] || "",
       lignes,
     });
   } catch (error) {
@@ -94,7 +96,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 1. Trouver et mettre à jour la ligne dans Devis_Emis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:K",
+      range: "Devis_Emis!A:M",
     });
     const devisRows = devisRes.data.values || [];
     const rowIndex = devisRows.findIndex((r) => r[0] === userId && r[1] === numero);
@@ -106,7 +108,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // Mettre à jour la ligne d'en-tête du devis
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!A${rowIndex + 1}:K${rowIndex + 1}`,
+      range: `Devis_Emis!A${rowIndex + 1}:M${rowIndex + 1}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
