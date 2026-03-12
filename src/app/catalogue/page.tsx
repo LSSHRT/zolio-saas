@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil, Upload } from "lucide-react";
 import Link from "next/link";
 
 interface Prestation {
@@ -23,26 +23,52 @@ const SEED_CATALOG = [
   { categorie: "Préparation", nom: "Dépose de papier peint", unite: "m²", prixUnitaireHT: 8, coutMatiere: 0 },
   { categorie: "Préparation", nom: "Ponçage mécanique", unite: "m²", prixUnitaireHT: 6, coutMatiere: 0.5 },
   { categorie: "Préparation", nom: "Impression fixante (Sous-couche)", unite: "m²", prixUnitaireHT: 7, coutMatiere: 1.5 },
+  { categorie: "Préparation", nom: "Rebouchage trous et fissures", unite: "forfait", prixUnitaireHT: 45, coutMatiere: 5 },
+  { categorie: "Préparation", nom: "Protection des sols et meubles", unite: "m²", prixUnitaireHT: 3, coutMatiere: 1 },
   // Peinture
   { categorie: "Peinture", nom: "Peinture acrylique mate (2 couches)", unite: "m²", prixUnitaireHT: 12, coutMatiere: 3 },
   { categorie: "Peinture", nom: "Peinture velours (2 couches)", unite: "m²", prixUnitaireHT: 14, coutMatiere: 4 },
   { categorie: "Peinture", nom: "Peinture satinée (2 couches)", unite: "m²", prixUnitaireHT: 15, coutMatiere: 4 },
   { categorie: "Peinture", nom: "Peinture laque (boiseries)", unite: "ml", prixUnitaireHT: 18, coutMatiere: 5 },
   { categorie: "Peinture", nom: "Peinture plafond sans traces", unite: "m²", prixUnitaireHT: 16, coutMatiere: 3.5 },
+  { categorie: "Peinture", nom: "Peinture radiateur", unite: "unité", prixUnitaireHT: 35, coutMatiere: 5 },
+  { categorie: "Peinture", nom: "Peinture porte (2 faces)", unite: "unité", prixUnitaireHT: 65, coutMatiere: 10 },
   // Sol
   { categorie: "Sol", nom: "Pose de parquet flottant", unite: "m²", prixUnitaireHT: 25, coutMatiere: 2 },
   { categorie: "Sol", nom: "Pose de plinthes", unite: "ml", prixUnitaireHT: 8, coutMatiere: 1 },
   { categorie: "Sol", nom: "Ragréage sol", unite: "m²", prixUnitaireHT: 12, coutMatiere: 4 },
   { categorie: "Sol", nom: "Pose de carrelage standard (hors fourniture)", unite: "m²", prixUnitaireHT: 45, coutMatiere: 5 },
+  { categorie: "Sol", nom: "Pose de moquette", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
+  { categorie: "Sol", nom: "Pose de lino", unite: "m²", prixUnitaireHT: 14, coutMatiere: 2 },
+  { categorie: "Sol", nom: "Dépose de revêtement de sol existant", unite: "m²", prixUnitaireHT: 9, coutMatiere: 0 },
   // Plomberie
   { categorie: "Plomberie", nom: "Recherche de fuite", unite: "forfait", prixUnitaireHT: 150, coutMatiere: 0 },
   { categorie: "Plomberie", nom: "Remplacement mitigeur", unite: "unité", prixUnitaireHT: 80, coutMatiere: 0 },
   { categorie: "Plomberie", nom: "Pose de WC suspendu", unite: "unité", prixUnitaireHT: 350, coutMatiere: 20 },
+  { categorie: "Plomberie", nom: "Débouchage canalisation", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 0 },
+  { categorie: "Plomberie", nom: "Pose de chauffe-eau électrique", unite: "unité", prixUnitaireHT: 250, coutMatiere: 30 },
+  { categorie: "Plomberie", nom: "Création arrivée/évacuation d'eau", unite: "forfait", prixUnitaireHT: 180, coutMatiere: 25 },
   // Électricité
   { categorie: "Électricité", nom: "Création prise de courant", unite: "unité", prixUnitaireHT: 90, coutMatiere: 15 },
   { categorie: "Électricité", nom: "Remplacement tableau électrique", unite: "forfait", prixUnitaireHT: 800, coutMatiere: 300 },
+  { categorie: "Électricité", nom: "Pose de luminaire/spot", unite: "unité", prixUnitaireHT: 45, coutMatiere: 5 },
+  { categorie: "Électricité", nom: "Tirage de ligne électrique", unite: "ml", prixUnitaireHT: 12, coutMatiere: 3 },
+  { categorie: "Électricité", nom: "Mise aux normes installation", unite: "forfait", prixUnitaireHT: 1500, coutMatiere: 400 },
   // Menuiserie
   { categorie: "Menuiserie", nom: "Pose porte intérieure", unite: "unité", prixUnitaireHT: 150, coutMatiere: 10 },
+  { categorie: "Menuiserie", nom: "Montage meuble standard", unite: "heure", prixUnitaireHT: 45, coutMatiere: 0 },
+  { categorie: "Menuiserie", nom: "Pose de cuisine aménagée", unite: "ml", prixUnitaireHT: 120, coutMatiere: 15 },
+  { categorie: "Menuiserie", nom: "Réglage de fenêtre", unite: "unité", prixUnitaireHT: 40, coutMatiere: 0 },
+  // Maçonnerie / Façade
+  { categorie: "Façade", nom: "Création ouverture mur porteur", unite: "forfait", prixUnitaireHT: 1200, coutMatiere: 150 },
+  { categorie: "Façade", nom: "Montage cloison placo (BA13)", unite: "m²", prixUnitaireHT: 35, coutMatiere: 12 },
+  { categorie: "Façade", nom: "Pose de faux plafond (BA13)", unite: "m²", prixUnitaireHT: 45, coutMatiere: 15 },
+  { categorie: "Façade", nom: "Isolation thermique (laine de verre)", unite: "m²", prixUnitaireHT: 25, coutMatiere: 10 },
+  { categorie: "Façade", nom: "Ravalement de façade (peinture)", unite: "m²", prixUnitaireHT: 35, coutMatiere: 8 },
+  // Extérieur / Autre
+  { categorie: "Autre", nom: "Nettoyage fin de chantier", unite: "forfait", prixUnitaireHT: 150, coutMatiere: 10 },
+  { categorie: "Autre", nom: "Évacuation des gravats", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 20 },
+  { categorie: "Autre", nom: "Déplacement / Frais kilométriques", unite: "forfait", prixUnitaireHT: 50, coutMatiere: 10 }
 ];
 
 export default function CataloguePage() {
@@ -132,8 +158,76 @@ export default function CataloguePage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const text = event.target?.result as string;
+      if (!text) return;
+      
+      const lines = text.split('\n').filter(line => line.trim().length > 0);
+      if (lines.length < 2) return alert("Le fichier CSV est vide ou ne contient pas de données valides.");
+      
+      const separator = lines[0].includes(';') ? ';' : ',';
+      
+      if (!confirm(`Voulez-vous importer ces ${lines.length - 1} prestations depuis votre fichier ?`)) {
+        e.target.value = ''; // reset input
+        return;
+      }
+      
+      setLoading(true);
+      let newItems = [];
+      try {
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(separator).map(c => c.trim().replace(/^"|"$/g, ''));
+          
+          // Essayer de déduire les colonnes: Categorie, Nom, Unite, PrixHT, CoutMatiere
+          // Au minimum: Nom (col 1 ou 0) et PrixHT (col 2 ou 3)
+          let categorie = "Autre";
+          let nom = "Prestation sans nom";
+          let unite = "forfait";
+          let prixUnitaireHT = 0;
+          let coutMatiere = 0;
+          
+          if (columns.length >= 4) {
+            categorie = columns[0] || "Autre";
+            nom = columns[1] || "Prestation sans nom";
+            unite = columns[2] || "forfait";
+            prixUnitaireHT = parseFloat(columns[3].replace(',', '.')) || 0;
+            if (columns[4]) coutMatiere = parseFloat(columns[4].replace(',', '.')) || 0;
+          } else if (columns.length >= 2) {
+            nom = columns[0] || "Prestation sans nom";
+            prixUnitaireHT = parseFloat(columns[1].replace(',', '.')) || 0;
+          }
+
+          const item = { categorie, nom, unite, prixUnitaireHT, coutMatiere };
+          
+          await fetch("/api/prestations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(item),
+          });
+        }
+        
+        // Rafraîchir
+        const res = await fetch("/api/prestations");
+        const data = await res.json();
+        setPrestations(Array.isArray(data) ? data : []);
+        alert("Importation terminée avec succès !");
+      } catch (err) {
+        alert("Erreur lors de l'importation du fichier.");
+      }
+      setLoading(false);
+      e.target.value = ''; // reset input
+    };
+    reader.readAsText(file);
+  };
+
   const handleSeed = async () => {
-    if (!confirm("Voulez-vous importer le catalogue type avec 5 prestations de base ?")) return;
+    if (!confirm("Voulez-vous importer le catalogue métier complet (+ de 40 prestations) ?")) return;
     setLoading(true);
     try {
       for (const item of SEED_CATALOG) {
@@ -162,6 +256,10 @@ export default function CataloguePage() {
         </Link>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Catalogue</h1>
         <div className="flex-1" />
+        <label className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Importer un fichier CSV">
+          <Upload size={18} />
+          <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
+        </label>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" }); }}
@@ -220,13 +318,20 @@ export default function CataloguePage() {
             <Package size={48} strokeWidth={1} />
             <p className="text-sm">{search ? "Aucun résultat" : "Aucune prestation"}</p>
             {!search && (
-              <button
-                onClick={handleSeed}
-                className="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
-              >
-                <Download size={16} />
-                Importer catalogue type
-              </button>
+              <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                <button
+                  onClick={handleSeed}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                >
+                  <Download size={16} />
+                  Importer catalogue type (+40)
+                </button>
+                <label className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer">
+                  <Upload size={16} />
+                  Importer depuis CSV
+                  <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
+                </label>
+              </div>
             )}
           </div>
         ) : (
