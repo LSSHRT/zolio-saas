@@ -76,7 +76,7 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Devis professionnel", 20, 35);
+  doc.text("Devis professionnel", 20 + logoWidth, 35);
 
   // Numéro et date à droite
   doc.setFontSize(11);
@@ -183,9 +183,10 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   // === SIGNATURE ===
   doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
-  doc.text("Date et signature précédées de la mention 'Bon pour accord'", 20, y + 25);
+  doc.text("Date et signature précédées de la mention", 20, y + 23);
+  doc.text("'Bon pour accord'", 20, y + 28);
   doc.setDrawColor(203, 213, 225);
-  doc.rect(20, y + 30, 80, 25);
+  doc.rect(20, y + 32, 80, 25);
 
   // === COORDONNÉES BANCAIRES ===
   if (data.entreprise?.iban) {
@@ -248,7 +249,7 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Facture", 20, 35);
+  doc.text("Facture", 20 + logoWidth, 35);
 
   // Numéro et date à droite
   doc.setFontSize(11);
