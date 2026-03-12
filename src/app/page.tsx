@@ -31,6 +31,8 @@ export default function Dashboard() {
       .catch(() => setLoading(false));
   }, []);
 
+  const [showNotifications, setShowNotifications] = useState(false);
+
   // Calculs dynamiques
   const CA_HT = devis.reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
   const CA_TTC = devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
@@ -47,11 +49,48 @@ export default function Dashboard() {
           <span className="text-xl font-extrabold tracking-tight text-slate-900">Zolio</span>
         </div>
         
-        <div className="flex items-center gap-4">
-          <button className="relative text-slate-400 hover:text-slate-600 transition">
+        <div className="flex items-center gap-4 relative">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)}
+            className="relative text-slate-400 hover:text-slate-600 transition"
+          >
             <Bell size={24} />
             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full" />
           </button>
+          
+          {/* Notifications Dropdown */}
+          {showNotifications && (
+            <div className="absolute top-12 right-0 w-80 bg-white border border-slate-100 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="font-bold text-slate-900">Notifications</h3>
+                <span className="text-xs text-blue-500 font-medium cursor-pointer hover:underline">Tout marquer comme lu</span>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                {/* Exemple de notification */}
+                <div className="flex gap-3 p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer">
+                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-blue-500 text-xs font-bold">Z</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-800"><span className="font-semibold">Bienvenue sur Zolio !</span></p>
+                    <p className="text-xs text-slate-500 mt-0.5">Créez votre premier devis dès maintenant.</p>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer">
+                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-purple-500 text-xs font-bold">✨</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-800"><span className="font-semibold">Nouveauté</span></p>
+                    <p className="text-xs text-slate-500 mt-0.5">Le design s'adapte maintenant à vos écrans.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-slate-500">
             {isLoaded ? <UserButton /> : <User size={20} />}
           </div>
