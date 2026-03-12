@@ -36,7 +36,7 @@ export default function Dashboard() {
   const CA_TTC = devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
   const devisRecents = devis.slice(0, 3); // Les 3 derniers devis générés
   return (
-    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       
       {/* Header */}
       <header className="flex items-center justify-between p-6 pt-12 sm:pt-10">

@@ -104,7 +104,7 @@ export default function NouveauDevisPage() {
 
   if (success) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
           className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
           <Check size={48} className="text-emerald-600" />
@@ -131,7 +131,7 @@ export default function NouveauDevisPage() {
   // Paywall
   if (!checkingPro && !isPro) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
           <Link href="/">
             <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
@@ -165,7 +165,7 @@ export default function NouveauDevisPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">

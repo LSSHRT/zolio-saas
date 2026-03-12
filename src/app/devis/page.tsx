@@ -81,7 +81,7 @@ export default function DevisPage() {
   const totalAttente = devis.filter((d) => isEnAttente(d.statut)).reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">

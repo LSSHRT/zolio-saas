@@ -55,7 +55,7 @@ export default function CataloguePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">

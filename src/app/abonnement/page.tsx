@@ -30,7 +30,7 @@ export default function AbonnementPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
       
       {/* Background Decor */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-slate-900 rounded-b-[3rem] overflow-hidden z-0">
