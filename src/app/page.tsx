@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
+import Joyride, { CallBackProps, STATUS } from "react-joyride";
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
@@ -28,6 +29,44 @@ export default function Dashboard() {
   const loading = isLoading && !data;
 
   const [showNotifications, setShowNotifications] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+  useEffect(() => {
+    // Check if user has seen tour
+    const hasSeenTour = localStorage.getItem('zolio_has_seen_tour');
+    if (!hasSeenTour) {
+      setRunTour(true);
+    }
+  }, []);
+
+  const handleJoyrideCallback = (data: CallBackProps) => {
+    const { status } = data;
+    const finishedStatuses: string[] = [STATUS.FINISHED, STATUS.SKIPPED];
+    if (finishedStatuses.includes(status)) {
+      localStorage.setItem('zolio_has_seen_tour', 'true');
+      setRunTour(false);
+    }
+  };
+
+  const steps = [
+    {
+      target: '.tour-dashboard',
+      content: 'Bienvenue sur votre tableau de bord Zolio ! Ici vous trouverez un résumé de votre activité.',
+      disableBeacon: true,
+    },
+    {
+      target: '.tour-nouveau-devis',
+      content: 'Créez votre premier devis rapidement en cliquant ici.',
+    },
+    {
+      target: '.tour-clients',
+      content: 'Gérez votre base de clients et consultez leur historique.',
+    },
+    {
+      target: '.tour-catalogue',
+      content: 'Personnalisez vos prestations pour gagner du temps lors de la création de devis.',
+    }
+  ];
+
 
   // Calculs dynamiques
   const CA_HT = devis.reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
@@ -49,7 +88,7 @@ export default function Dashboard() {
   }).slice(0, 3);
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
+    <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
       <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-blue-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
@@ -59,7 +98,30 @@ export default function Dashboard() {
       <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-blue-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       
+      
+      <Joyride
+        steps={steps}
+        run={runTour}
+        continuous
+        showSkipButton
+        showProgress
+        callback={handleJoyrideCallback}
+        styles={{
+          options: {
+            primaryColor: '#3b82f6',
+            zIndex: 1000,
+          },
+        }}
+        locale={{
+          back: 'Précédent',
+          close: 'Fermer',
+          last: 'Terminer',
+          next: 'Suivant',
+          skip: 'Passer',
+        }}
+      />
       {/* Header */}
+
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between p-6 pt-12 sm:pt-10 transition-all">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 relative rounded-lg overflow-hidden shadow-sm">
@@ -185,7 +247,7 @@ export default function Dashboard() {
         {/* Action Widgets */}
         <div className="flex gap-4">
           {/* Create CTA */}
-          <Link href="/nouveau-devis" className="flex-1">
+          <Link href="/nouveau-devis" className="tour-nouveau-devis flex-1 block">
             <motion.div 
               whileTap={{ scale: 0.96 }}
               className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-purple-500/30 flex flex-col justify-between aspect-square"
