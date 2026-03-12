@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 // Initialisation de Stripe avec la clé secrète (lazy pour éviter le crash au build)
 function getStripe() {
@@ -14,10 +14,12 @@ function getStripe() {
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await currentUser();
+    if (!user) {
       return new NextResponse("Non autorisé", { status: 401 });
     }
+    const userId = user.id;
+    const userEmail = user.emailAddresses[0]?.emailAddress;
 
     const { isAnnual } = await request.json();
     
@@ -31,6 +33,7 @@ export async function POST(request: Request) {
     const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription", 
+      customer_email: userEmail,
       client_reference_id: userId,
       metadata: {
         userId,

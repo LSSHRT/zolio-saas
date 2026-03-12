@@ -41,6 +41,7 @@ export async function POST(req: Request) {
           await client.users.updateUserMetadata(userId, {
             publicMetadata: {
               isPro: true,
+              stripeCustomerId: session.customer as string,
             },
           });
           console.log(`✅ Utilisateur ${userId} passé en Pro via Webhook.`);

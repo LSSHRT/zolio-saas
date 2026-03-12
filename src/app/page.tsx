@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { UserButton, useUser } from "@clerk/nextjs";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
 interface Devis {
   numero: string;
@@ -37,6 +38,21 @@ export default function Dashboard() {
   const CA_HT = devis.reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
   const CA_TTC = devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
   const devisRecents = devis.slice(0, 3); // Les 3 derniers devis générés
+
+  const devisARelancer = devis.filter(d => {
+    if (d.statut === "Accepté" || d.statut === "Refusé") return false;
+    let dateObj = new Date();
+    if (d.date && d.date.includes('/')) {
+       const parts = d.date.split('/');
+       dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+    } else if (d.date) {
+       dateObj = new Date(d.date);
+    }
+    const diffTime = Math.abs(Date.now() - dateObj.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 7;
+  }).slice(0, 3);
+
   return (
     <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       
@@ -110,7 +126,21 @@ export default function Dashboard() {
               </span>
             )}
           </h1>
-          <p className="text-slate-500 text-sm mt-1">Gérez vos devis en quelques secondes.</p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-slate-500 text-sm">Gérez vos devis en quelques secondes.</p>
+            {user?.publicMetadata?.isPro === true && (
+              <button 
+                onClick={async () => {
+                  const res = await fetch("/api/stripe/portal", { method: "POST" });
+                  const data = await res.json();
+                  if (data.url) window.location.href = data.url;
+                }}
+                className="text-xs text-blue-600 font-medium hover:underline bg-blue-50 px-2 py-1 rounded-md"
+              >
+                Gérer l'abonnement
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Action Widgets */}
@@ -198,6 +228,37 @@ export default function Dashboard() {
             const nbValide = devis.filter(d => d.statut === "Accepté").length;
             const nbAttente = devis.filter(d => isEnAttente(d.statut)).length;
 
+            // Préparation des données pour le graphique mensuel
+            const monthNames = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+            const monthlyData = Array.from({ length: 6 }).map((_, i) => {
+              const d = new Date();
+              d.setMonth(d.getMonth() - (5 - i));
+              return { 
+                name: monthNames[d.getMonth()], 
+                month: d.getMonth(),
+                year: d.getFullYear(),
+                CA: 0,
+              };
+            });
+
+            devis.forEach(d => {
+              if (d.statut === "Accepté") {
+                let dateObj = new Date();
+                if (d.date && d.date.includes('/')) {
+                   const parts = d.date.split('/');
+                   dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+                } else if (d.date) {
+                   dateObj = new Date(d.date);
+                }
+                const m = dateObj.getMonth();
+                const y = dateObj.getFullYear();
+                const targetMonth = monthlyData.find(md => md.month === m && md.year === y);
+                if (targetMonth) {
+                  targetMonth.CA += (parseFloat(d.totalHT) || 0);
+                }
+              }
+            });
+
             return (
               <>
                 {/* Deux cartes côte à côte */}
@@ -230,10 +291,31 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* Barre de progression */}
+                {/* Graphique de l'évolution du CA (6 derniers mois) */}
+                <div className="mb-4 h-48 w-full">
+                  {loading ? (
+                     <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">Chargement du graphique...</div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={monthlyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(val) => `${val}€`} />
+                        <Tooltip 
+                          cursor={{ fill: '#f1f5f9' }}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          formatter={(value: any) => [`${value}€`, 'CA HT']}
+                        />
+                        <Bar dataKey="CA" fill="#0ea5e9" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
+                </div>
+
+                {/* Barre de progression (Répartition Validé / Attente) */}
                 <div className="mb-3">
                   <div className="flex justify-between text-[10px] text-slate-500 mb-1.5">
-                    <span>Répartition du CA HT</span>
+                    <span>Répartition du CA HT (Global)</span>
                     <span>{CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€ total</span>
                   </div>
                   <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex">
@@ -279,6 +361,34 @@ export default function Dashboard() {
             );
           })()}
         </div>
+
+        {/* Relances Clients */}
+        {devisARelancer.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+              À relancer
+            </h3>
+            <div className="flex flex-col gap-3">
+              {devisARelancer.map((d, i) => (
+                <Link href={`/devis/${d.numero}`} key={i}>
+                  <div className="flex items-center gap-4 bg-rose-50 p-4 rounded-2xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-white text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
+                      <Bell size={16} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-900 truncate">{d.nomClient}</p>
+                      <p className="text-[10px] text-rose-600">En attente depuis plus de 7 jours</p>
+                    </div>
+                    <div className="font-bold text-slate-800 shrink-0 text-sm">
+                      {d.totalTTC}€
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Dynamic Recent Activity */}
         <div className="mb-4">
