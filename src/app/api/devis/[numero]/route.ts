@@ -70,6 +70,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     const entreprisePhone = meta.companyPhone || "";
     const entrepriseAddress = meta.companyAddress || "";
     const entrepriseSiret = meta.companySiret || "";
+    const entrepriseColor = meta.companyColor || "";
+    const entrepriseLogo = meta.companyLogo || "";
+    const entrepriseIban = meta.companyIban || "";
+    const entrepriseBic = meta.companyBic || "";
+    const entrepriseLegal = meta.companyLegal || "";
 
     const { numero } = await params;
     const body = await request.json();
@@ -168,7 +173,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
         telephone: "",
         adresse: "",
       },
-      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,

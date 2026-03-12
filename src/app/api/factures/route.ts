@@ -16,6 +16,11 @@ export async function POST(request: Request) {
     const entreprisePhone = meta.companyPhone || "";
     const entrepriseAddress = meta.companyAddress || "";
     const entrepriseSiret = meta.companySiret || "";
+    const entrepriseColor = meta.companyColor || "";
+    const entrepriseLogo = meta.companyLogo || "";
+    const entrepriseIban = meta.companyIban || "";
+    const entrepriseBic = meta.companyBic || "";
+    const entrepriseLegal = meta.companyLegal || "";
 
     const body = await request.json();
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
@@ -105,7 +110,7 @@ export async function POST(request: Request) {
       numeroDevis: numeroFacture, // using same interface
       date,
       client,
-      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
       lignes,
       totalHT,
       tva,

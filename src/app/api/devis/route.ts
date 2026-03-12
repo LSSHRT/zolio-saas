@@ -16,6 +16,11 @@ export async function POST(request: Request) {
     const entreprisePhone = meta.companyPhone || "";
     const entrepriseAddress = meta.companyAddress || "";
     const entrepriseSiret = meta.companySiret || "";
+    const entrepriseColor = meta.companyColor || "";
+    const entrepriseLogo = meta.companyLogo || "";
+    const entrepriseIban = meta.companyIban || "";
+    const entrepriseBic = meta.companyBic || "";
+    const entrepriseLegal = meta.companyLegal || "";
 
     const body = await request.json();
     const { client, lignes, tva } = body;
@@ -83,7 +88,7 @@ export async function POST(request: Request) {
       numeroDevis,
       date,
       client,
-      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,

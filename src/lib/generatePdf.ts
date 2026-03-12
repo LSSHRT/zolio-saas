@@ -1,5 +1,14 @@
 import { jsPDF } from "jspdf";
 
+function hexToRgb(hex: string) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : { r: 14, g: 165, b: 233 };
+}
+
 interface LigneDevis {
   nomPrestation: string;
   quantite: number;
@@ -12,7 +21,7 @@ interface DevisData {
   numeroDevis: string;
   date: string;
   client: { nom: string; email: string; telephone: string; adresse: string; };
-  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; };
+  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; };
   lignes: LigneDevis[];
   totalHT: string;
   tva: string;
@@ -24,7 +33,8 @@ export function generateDevisPDF(data: DevisData): Buffer {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // === HEADER ===
-  doc.setFillColor(14, 165, 233); // Primary blue
+  const color = hexToRgb(data.entreprise?.color || "#0ea5e9");
+  doc.setFillColor(color.r, color.g, color.b);
   doc.rect(0, 0, pageWidth, 45, "F");
 
   doc.setTextColor(255, 255, 255);
@@ -130,7 +140,7 @@ export function generateDevisPDF(data: DevisData): Buffer {
   doc.text(`${tvaAmount}€`, pageWidth - 20, y, { align: "right" });
 
   y += 12;
-  doc.setFillColor(14, 165, 233);
+  doc.setFillColor(color.r, color.g, color.b);
   doc.roundedRect(120, y - 7, pageWidth - 135, 14, 3, 3, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -138,11 +148,34 @@ export function generateDevisPDF(data: DevisData): Buffer {
   doc.text("Total TTC", 125, y + 2);
   doc.text(`${data.totalTTC}€`, pageWidth - 22, y + 2, { align: "right" });
 
+  // === SIGNATURE ===
+  doc.setFontSize(10);
+  doc.setTextColor(15, 23, 42);
+  doc.text("Date et signature précédées de la mention 'Bon pour accord'", 20, y + 25);
+  doc.setDrawColor(203, 213, 225);
+  doc.rect(20, y + 30, 80, 25);
+
+  // === COORDONNÉES BANCAIRES ===
+  if (data.entreprise?.iban) {
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Coordonnées bancaires pour le règlement :", 20, y + 25);
+    doc.setFont("helvetica", "normal");
+    doc.text(`IBAN : ${data.entreprise.iban}`, 20, y + 32);
+    if (data.entreprise.bic) {
+      doc.text(`BIC : ${data.entreprise.bic}`, 20, y + 38);
+    }
+  }
+
   // === FOOTER ===
   const footerY = doc.internal.pageSize.getHeight() - 20;
   doc.setTextColor(148, 163, 184);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
+  if (data.entreprise?.legal) {
+    doc.text(data.entreprise.legal, pageWidth / 2, footerY - 5, { align: "center" });
+  }
   doc.text("Devis généré automatiquement par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
   doc.text("Ce devis est valable 30 jours à compter de sa date d'émission.", pageWidth / 2, footerY + 5, { align: "center" });
 
@@ -155,7 +188,8 @@ export function generateFacturePDF(data: DevisData): Buffer {
   const pageWidth = doc.internal.pageSize.getWidth();
 
   // === HEADER ===
-  doc.setFillColor(16, 185, 129); // Emerald green for Invoice
+  const color = hexToRgb(data.entreprise?.color || "#0ea5e9");
+  doc.setFillColor(color.r, color.g, color.b);
   doc.rect(0, 0, pageWidth, 45, "F");
 
   doc.setTextColor(255, 255, 255);
@@ -261,7 +295,7 @@ export function generateFacturePDF(data: DevisData): Buffer {
   doc.text(`${tvaAmount}€`, pageWidth - 20, y, { align: "right" });
 
   y += 12;
-  doc.setFillColor(16, 185, 129); // Emerald green for Invoice
+  doc.setFillColor(color.r, color.g, color.b); // Emerald green for Invoice
   doc.roundedRect(120, y - 7, pageWidth - 135, 14, 3, 3, "F");
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -274,6 +308,9 @@ export function generateFacturePDF(data: DevisData): Buffer {
   doc.setTextColor(148, 163, 184);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
+  if (data.entreprise?.legal) {
+    doc.text(data.entreprise.legal, pageWidth / 2, footerY - 5, { align: "center" });
+  }
   doc.text("Facture générée automatiquement par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
   doc.text("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.", pageWidth / 2, footerY + 5, { align: "center" });
 
