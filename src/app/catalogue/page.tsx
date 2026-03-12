@@ -65,6 +65,21 @@ const SEED_CATALOG = [
   { categorie: "Façade", nom: "Pose de faux plafond (BA13)", unite: "m²", prixUnitaireHT: 45, coutMatiere: 15 },
   { categorie: "Façade", nom: "Isolation thermique (laine de verre)", unite: "m²", prixUnitaireHT: 25, coutMatiere: 10 },
   { categorie: "Façade", nom: "Ravalement de façade (peinture)", unite: "m²", prixUnitaireHT: 35, coutMatiere: 8 },
+  
+  // Toiture / Couverture
+  { categorie: "Toiture", nom: "Nettoyage toiture et démoussage", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
+  { categorie: "Toiture", nom: "Remplacement tuile défectueuse", unite: "unité", prixUnitaireHT: 25, coutMatiere: 5 },
+  { categorie: "Toiture", nom: "Pose de gouttière zinc", unite: "ml", prixUnitaireHT: 45, coutMatiere: 15 },
+  
+  // Climatisation / Chauffage
+  { categorie: "Climatisation", nom: "Entretien annuel climatisation", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 0 },
+  { categorie: "Climatisation", nom: "Pose climatiseur réversible (Mono-split)", unite: "forfait", prixUnitaireHT: 800, coutMatiere: 150 },
+  
+  // Paysagisme / Extérieur
+  { categorie: "Paysagisme", nom: "Tonte de pelouse", unite: "heure", prixUnitaireHT: 40, coutMatiere: 5 },
+  { categorie: "Paysagisme", nom: "Taille de haie", unite: "ml", prixUnitaireHT: 12, coutMatiere: 2 },
+  { categorie: "Paysagisme", nom: "Création de terrasse bois", unite: "m²", prixUnitaireHT: 120, coutMatiere: 50 },
+
   // Extérieur / Autre
   { categorie: "Autre", nom: "Nettoyage fin de chantier", unite: "forfait", prixUnitaireHT: 150, coutMatiere: 10 },
   { categorie: "Autre", nom: "Évacuation des gravats", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 20 },

@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote } from "lucide-react";
+import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote, Receipt } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -309,7 +309,7 @@ export default function Dashboard() {
         </div>
 
         {/* Liens Rapides */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
               className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
@@ -336,7 +336,7 @@ export default function Dashboard() {
             </motion.div>
           </Link>
 
-          <Link href="/calepin" className="col-span-2 md:col-span-1">
+          <Link href="/calepin" className="col-span-1">
             <motion.div whileTap={{ scale: 0.97 }}
               className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
               <div className="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center">
@@ -344,7 +344,20 @@ export default function Dashboard() {
               </div>
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white text-sm">Calepin</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Notes & mesures de chantiers</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">Notes chantier</p>
+              </div>
+            </motion.div>
+          </Link>
+          
+          <Link href="/depenses" className="col-span-1">
+            <motion.div whileTap={{ scale: 0.97 }}
+              className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                <Receipt size={20} />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">Dépenses</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">Achats & Frais</p>
               </div>
             </motion.div>
           </Link>

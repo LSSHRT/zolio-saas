@@ -82,6 +82,30 @@ export default function FacturesPage() {
     document.body.removeChild(link);
   };
 
+  const handleExportURSSAF = () => {
+    // Livre des recettes URSSAF format
+    const headers = ["Date d'encaissement", "Référence de la pièce justificative", "Nom du client", "Nature de la prestation", "Montant encaissé", "Mode de règlement"];
+    const facturesEncaissees = factures.filter((f: Facture) => f.statut === "Payée" || f.statut === "Émise" || parseFloat(f.totalTTC) > 0); // Assuming all factures here are completed
+    
+    const rows = facturesEncaissees.map((f: Facture) => [
+      f.date,
+      f.numero,
+      f.nomClient,
+      "Vente / Prestation de service",
+      f.totalTTC,
+      "Virement / CB" // Mode par défaut
+    ]);
+    const csvContent = [headers, ...rows].map(e => e.join(";")).join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "livre_des_recettes_urssaf.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleBulkDelete = async () => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
     setIsDeletingBulk(true);
@@ -114,6 +138,10 @@ export default function FacturesPage() {
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Factures</h1>
       
         <div className="flex gap-2">
+          <button onClick={handleExportURSSAF} className="flex items-center gap-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+            <FileText size={16} />
+            <span className="hidden sm:inline">Livre Recettes URSSAF</span>
+          </button>
           <button onClick={handleExportCSV} className="flex items-center gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
             <Download size={16} />
             <span className="hidden sm:inline">Export Comptable</span>
