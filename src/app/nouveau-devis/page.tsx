@@ -190,7 +190,7 @@ export default function NouveauDevisPage() {
           <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mb-6 relative">
             <Lock size={32} className="text-slate-400" />
             <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-100 rounded-full border-4 border-white flex items-center justify-center">
-              <Zap size={16} className="text-blue-600" />
+              <Zap size={16} className="text-fuchsia-600" />
             </div>
           </div>
           
@@ -246,8 +246,8 @@ export default function NouveauDevisPage() {
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
               {selectedClient ? (
-                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient.nom.charAt(0)}</div>
+                <div className="bg-fuchsia-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient.nom.charAt(0)}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient.email}</p>
@@ -259,7 +259,7 @@ export default function NouveauDevisPage() {
                   <div className="relative">
                     <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input type="text" placeholder="Rechercher un client..." value={searchClient} onChange={(e) => setSearchClient(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                   </div>
                   <motion.button whileTap={{ scale: 0.96 }} onClick={() => setShowNewClient(true)}
                     className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 text-slate-500 dark:text-slate-400 text-sm">
@@ -269,13 +269,13 @@ export default function NouveauDevisPage() {
                   {showNewClient && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col gap-2 border border-slate-200 dark:border-slate-700">
                       <input required placeholder="Nom" value={newClient.nom} onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <input required type="email" placeholder="Email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <input placeholder="Téléphone" value={newClient.telephone} onChange={(e) => setNewClient({ ...newClient, telephone: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <input placeholder="Adresse" value={newClient.adresse} onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <div className="flex gap-2 mt-1">
                         <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
                         <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient}
@@ -308,7 +308,7 @@ export default function NouveauDevisPage() {
               <div className="relative">
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input type="text" placeholder="Rechercher une prestation..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
               </div>
                 <button
                   onClick={() => setShowForfaits(true)}
@@ -322,8 +322,8 @@ export default function NouveauDevisPage() {
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                 {filteredPrestations.map((p) => (
                   <motion.button key={p.id} whileTap={{ scale: 0.97 }} onClick={() => addLigne(p)}
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-blue-50 hover:border-blue-200 transition">
-                    <Plus size={16} className="text-blue-500 shrink-0" />
+                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-fuchsia-50 hover:border-blue-200 transition">
+                    <Plus size={16} className="text-fuchsia-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
                       <p className="text-[10px] text-slate-400">{p.categorie}</p>
@@ -369,7 +369,7 @@ export default function NouveauDevisPage() {
               <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2">Client</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient?.nom.charAt(0)}</div>
+                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient?.nom.charAt(0)}</div>
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient?.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient?.email}</p>
@@ -408,7 +408,7 @@ export default function NouveauDevisPage() {
               <div className="flex items-center gap-3 mt-4">
                 <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Remise globale (%) :</label>
                 <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
-                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
               </div>
 
 

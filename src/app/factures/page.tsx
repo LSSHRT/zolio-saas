@@ -114,7 +114,7 @@ export default function FacturesPage() {
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Factures</h1>
       
         <div className="flex gap-2">
-          <button onClick={handleExportCSV} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+          <button onClick={handleExportCSV} className="flex items-center gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
             <Download size={16} />
             <span className="hidden sm:inline">Export Comptable</span>
           </button>
@@ -138,7 +138,7 @@ export default function FacturesPage() {
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" placeholder="Rechercher par client ou n° facture..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500" />
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500" />
         </div>
 
         {/* Bulk Actions */}
@@ -164,7 +164,7 @@ export default function FacturesPage() {
         {/* Liste factures */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-blue-500 rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">

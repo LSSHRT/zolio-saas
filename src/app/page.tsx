@@ -107,11 +107,11 @@ export default function Dashboard() {
     <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-blue-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-blue-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       
       
@@ -164,14 +164,14 @@ export default function Dashboard() {
             <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
-                <span className="text-xs text-blue-500 font-medium cursor-pointer hover:underline">Tout marquer comme lu</span>
+                <span className="text-xs text-fuchsia-500 font-medium cursor-pointer hover:underline">Tout marquer comme lu</span>
               </div>
               
               <div className="flex flex-col gap-3">
                 {/* Exemple de notification */}
                 <div className="flex gap-3 p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition cursor-pointer">
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-blue-500 text-xs font-bold">Z</span>
+                    <span className="text-fuchsia-500 text-xs font-bold">Z</span>
                   </div>
                   <div>
                     <p className="text-sm text-slate-800 dark:text-slate-200"><span className="font-semibold">Bienvenue sur Zolio !</span></p>
@@ -206,7 +206,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
             {user?.publicMetadata?.isPro === true && (
-              <span className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
+              <span className="bg-gradient-to-r from-fuchsia-500 to-orange-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
                 PRO
               </span>
             )}
@@ -228,7 +228,7 @@ export default function Dashboard() {
                     alert("Une erreur est survenue.");
                   }
                 }}
-                className="text-xs text-blue-600 font-medium hover:underline bg-blue-50 px-2 py-1 rounded-md"
+                className="text-xs text-fuchsia-600 font-medium hover:underline bg-fuchsia-50 px-2 py-1 rounded-md"
               >
                 Gérer l'abonnement
               </button>
@@ -253,7 +253,7 @@ export default function Dashboard() {
                 navigator.clipboard.writeText(`https://zolio.site/?ref=${user?.id}`);
                 alert("Lien de parrainage copié !");
               }}
-              className="bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 text-xs font-bold py-2 px-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 hover:scale-105 transition-transform"
+              className="bg-white dark:bg-slate-700 text-fuchsia-600 dark:text-blue-400 text-xs font-bold py-2 px-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 hover:scale-105 transition-transform"
             >
               Copier le lien
             </button>
@@ -269,7 +269,7 @@ export default function Dashboard() {
               className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-purple-500/30 flex flex-col justify-between aspect-square"
             >
               <div className="w-12 h-12 bg-white dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
-                <Plus size={24} className="text-blue-600 dark:text-white" />
+                <Plus size={24} className="text-fuchsia-600 dark:text-white" />
               </div>
               <div>
                 <h2 className="font-semibold text-lg leading-tight mb-1">Nouveau<br/>Devis</h2>
@@ -289,7 +289,7 @@ export default function Dashboard() {
             <Link href="/clients" className="flex-1">
               <motion.div whileTap={{ scale: 0.96 }} className="h-full bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] p-4 flex flex-col justify-center border border-slate-100 dark:border-slate-800 shadow-sm cursor-pointer">
                 <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 mb-1">
-                  <Users size={16} className="text-blue-500" />
+                  <Users size={16} className="text-fuchsia-500" />
                   <span className="text-xs font-semibold">Clients</span>
                 </div>
                 <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">Voir →</p>
@@ -313,7 +313,7 @@ export default function Dashboard() {
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
               className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 text-fuchsia-600 flex items-center justify-center">
                 <FileText size={20} />
               </div>
               <div>
@@ -338,7 +338,7 @@ export default function Dashboard() {
         </div>
 
         {/* Banner Stats Rapides */}
-        <div className="bg-gradient-to-br from-blue-500 to-indigo-600 dark:from-blue-900 dark:to-indigo-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 dark:from-blue-900 dark:to-indigo-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
           <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           
@@ -369,7 +369,7 @@ export default function Dashboard() {
         <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-sm p-5">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-slate-900 dark:text-white text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
-            <div className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
+            <div className="bg-fuchsia-50 text-fuchsia-600 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
               <FileText size={12} /> {devis.length} Devis
             </div>
           </div>
@@ -593,7 +593,7 @@ export default function Dashboard() {
               <h3 className="font-bold text-slate-900 dark:text-white mb-1">Votre tableau de bord est bien calme...</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 max-w-[250px]">Et si on créait votre premier devis pour impressionner votre client ?</p>
               <Link href="/nouveau-devis">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-transform hover:scale-105">
+                <button className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-transform hover:scale-105">
                   Créer mon premier devis
                 </button>
               </Link>
@@ -603,7 +603,7 @@ export default function Dashboard() {
               {devisRecents.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
                   <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl hover:bg-slate-100 dark:bg-slate-800 transition cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-fuchsia-600 flex items-center justify-center shrink-0">
                       <Clock size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -623,7 +623,7 @@ export default function Dashboard() {
 
       {/* Bottom Navigation */}
       <nav className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
-        <Link href="/" className="flex flex-col items-center gap-1 text-blue-600">
+        <Link href="/" className="flex flex-col items-center gap-1 text-fuchsia-600">
           <Home size={24} strokeWidth={2.5} />
           <span className="text-[10px] font-bold">Accueil</span>
         </Link>

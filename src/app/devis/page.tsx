@@ -143,10 +143,10 @@ export default function DevisPage() {
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Devis</h1>
         <div className="flex-1" />
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-blue-600 dark:text-white' : 'text-slate-400'}`}>
+          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-fuchsia-600 dark:text-white' : 'text-slate-400'}`}>
             <List size={16} />
           </button>
-          <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-blue-600 dark:text-white' : 'text-slate-400'}`}>
+          <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-fuchsia-600 dark:text-white' : 'text-slate-400'}`}>
             <LayoutGrid size={16} />
           </button>
         </div>
@@ -185,7 +185,7 @@ export default function DevisPage() {
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" placeholder="Rechercher par client ou n° devis..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500" />
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500" />
         </div>
 
         {/* Bulk Actions */}
@@ -259,7 +259,7 @@ export default function DevisPage() {
                              <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
                            </Link>
                            {pending && (
-                             <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-xs font-semibold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">Faire signer</button>
+                             <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-fuchsia-50 dark:bg-blue-900/30 text-fuchsia-600 dark:text-blue-400 text-xs font-semibold rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition">Faire signer</button>
                            )}
                         </div>
                       </motion.div>
@@ -274,7 +274,7 @@ export default function DevisPage() {
         {/* Liste devis */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-blue-500 rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
@@ -304,7 +304,7 @@ export default function DevisPage() {
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 text-fuchsia-600 flex items-center justify-center font-bold text-sm shrink-0">
                         {d.nomClient.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -364,7 +364,7 @@ export default function DevisPage() {
                             const body = encodeURIComponent(`Bonjour ${d.nomClient},\n\nSauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${d.numero} d'un montant de ${d.totalTTC}€.\n\nRestant à votre disposition pour toute question.\n\nCordialement,`);
                             window.location.href = `mailto:${d.emailClient || ''}?subject=${subject}&body=${body}`;
                           }}
-                          className="flex-1 py-2.5 bg-blue-50 border border-blue-200 text-blue-600 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-blue-100 hover:border-blue-400 transition"
+                          className="flex-1 py-2.5 bg-fuchsia-50 border border-blue-200 text-fuchsia-600 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-blue-100 hover:border-blue-400 transition"
                         >
                           <Mail size={16} /> Relancer
                         </motion.button>
@@ -375,7 +375,7 @@ export default function DevisPage() {
                   <div className="flex gap-2 mt-3">
                     <Link href={`/devis/${d.numero}`} className="flex-1">
                       <motion.button whileTap={{ scale: 0.96 }}
-                        className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 transition">
+                        className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-fuchsia-50 hover:border-blue-300 hover:text-fuchsia-600 transition">
                         <Pencil size={14} /> Modifier
                       </motion.button>
                     </Link>
