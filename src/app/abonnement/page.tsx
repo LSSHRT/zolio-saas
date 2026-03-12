@@ -81,7 +81,7 @@ export default function AbonnementPage() {
             whileTap={{ scale: 0.97 }} 
             onClick={handleSubscribe} 
             disabled={loading}
-            className="w-full py-4 rounded-xl bg-slate-900 text-white font-bold text-sm shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2 mb-6"
+            className="w-full py-4 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm shadow-xl shadow-slate-900/20 dark:shadow-slate-100/20 flex items-center justify-center gap-2 mb-6"
           >
             {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>S'abonner à Zolio Pro <Zap size={16} className="text-yellow-400" /></>}
           </motion.button>
