@@ -166,3 +166,19 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
 }
 
+[2026-03-12 22:37] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "completion confirmation",
+    "EXPECTATION": "The user wants confirmation of what has been implemented and for the assistant to continue and finish remaining work if not.",
+    "NEW INSTRUCTION": "WHEN user asks if everything implemented or says continue THEN summarize status, complete remaining tasks, and confirm deployment"
+}
+
+[2026-03-12 22:41] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user wants to proceed with the proposed implementation (Stripe Customer Portal to manage subscriptions) and expects confirmation once deployed.",
+    "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
+}
+

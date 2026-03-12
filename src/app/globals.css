@@ -26,3 +26,39 @@
     background: linear-gradient(135deg, var(--color-primary-blue), var(--color-primary-purple));
   }
 }
+
+
+@layer utilities {
+  .font-mono {
+    font-family: var(--font-mono), monospace;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .7; }
+}
+
+.glow-effect {
+  position: relative;
+}
+.glow-effect::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: -2px; right: -2px; bottom: -2px;
+  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+  z-index: -1;
+  filter: blur(10px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+.glow-effect:hover::before {
+  opacity: 0.5;
+}
+.dark .glow-effect:hover::before {
+  opacity: 0.8;
+}
