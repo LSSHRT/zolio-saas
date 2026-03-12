@@ -203,14 +203,14 @@ export default function CataloguePage() {
             prixUnitaireHT = parseFloat(columns[1].replace(',', '.')) || 0;
           }
 
-          const item = { categorie, nom, unite, prixUnitaireHT, coutMatiere };
-          
-          await fetch("/api/prestations", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(item),
-          });
+          newItems.push({ categorie, nom, unite, prixUnitaireHT, coutMatiere });
         }
+        
+        await fetch("/api/prestations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(newItems),
+        });
         
         // Rafraîchir
         const res = await fetch("/api/prestations");
@@ -227,16 +227,24 @@ export default function CataloguePage() {
   };
 
   const handleSeed = async () => {
-    if (!confirm("Voulez-vous importer le catalogue métier complet (+ de 40 prestations) ?")) return;
+    const qtyStr = prompt(`Combien de prestations voulez-vous importer depuis le catalogue métier ? (Max: ${SEED_CATALOG.length})`, SEED_CATALOG.length.toString());
+    if (!qtyStr) return;
+    
+    const qty = parseInt(qtyStr, 10);
+    if (isNaN(qty) || qty <= 0) return;
+    
+    const limit = Math.min(qty, SEED_CATALOG.length);
+    const itemsToImport = SEED_CATALOG.slice(0, limit);
+
+    if (!confirm(`Voulez-vous importer ces ${limit} prestation(s) métier ?`)) return;
     setLoading(true);
     try {
-      for (const item of SEED_CATALOG) {
-        await fetch("/api/prestations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(item),
-        });
-      }
+      await fetch("/api/prestations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(itemsToImport),
+      });
+
       const res = await fetch("/api/prestations");
       const data = await res.json();
       setPrestations(Array.isArray(data) ? data : []);

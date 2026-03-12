@@ -43,20 +43,43 @@ export async function POST(request: Request) {
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
     const body = await request.json();
-    const { categorie, nom, unite, prixUnitaireHT, coutMatiere } = body;
-
     const sheets = await getGoogleSheetsClient();
+
+    // Check if body is an array for bulk insertion
+    if (Array.isArray(body)) {
+      const existing = await sheets.spreadsheets.values.get({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: "Catalogue_Prestations!B:B",
+      });
+      let baseId = existing.data.values?.length || 1;
+
+      const rows = body.map((item, index) => {
+        const nextId = `PREST-${String(baseId + index).padStart(3, "0")}`;
+        return [userId, nextId, item.categorie, item.nom, item.unite, item.prixUnitaireHT, item.coutMatiere || ""];
+      });
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: "Catalogue_Prestations!A:G",
+        valueInputOption: "USER_ENTERED",
+        requestBody: { values: rows },
+      });
+
+      return NextResponse.json({ success: true, count: rows.length });
+    }
+
+    // Single insertion
+    const { categorie, nom, unite, prixUnitaireHT, coutMatiere } = body;
 
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      // On regarde la colonne B pour compter les ID, car A est userId
       range: "Catalogue_Prestations!B:B",
     });
     const nextId = `PREST-${String((existing.data.values?.length || 1)).padStart(3, "0")}`;
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Catalogue_Prestations!A:G", // On ajoute en A:G
+      range: "Catalogue_Prestations!A:G",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[userId, nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere || ""]],
