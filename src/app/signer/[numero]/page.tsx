@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef, use } from "react";
-import SignatureCanvas from "react-signature-canvas";
+import dynamic from "next/dynamic";
+const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { motion } from "framer-motion";
 import { CheckCircle, AlertCircle, PenTool, Loader2 } from "lucide-react";
-import confetti from "canvas-confetti";
 
 export default function SignerDevis({ params }: { params: Promise<{ numero: string }> }) {
   const unwrappedParams = use(params);
@@ -48,7 +48,9 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
       });
       if (res.ok) {
         setSuccess(true);
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        import("canvas-confetti").then((confetti) => {
+          confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        });
       } else {
         alert("Erreur lors de l'enregistrement de la signature");
       }
@@ -125,7 +127,7 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
               <button onClick={clear} className="text-xs text-violet-600 hover:text-violet-700 font-medium">Effacer</button>
             </div>
             <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
-              <SignatureCanvas 
+              <SignaturePad 
                 ref={sigCanvas} 
                 penColor="black"
                 canvasProps={{ className: "w-full h-48 cursor-crosshair" }} 

@@ -238,3 +238,75 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
 }
 
+[2026-03-12 23:07] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "branding mismatch",
+    "EXPECTATION": "The site colors should visibly match the logo palette after the update.",
+    "NEW INSTRUCTION": "WHEN user reports no brand-color changes THEN request logo, hex colors, affected pages, and screenshots"
+}
+
+[2026-03-12 23:12] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "deployment status confirmation",
+    "EXPECTATION": "The user wants confirmation whether the site has redeployed successfully on Vercel.",
+    "NEW INSTRUCTION": "WHEN user asks about deployment status THEN summarize latest deployment and confirm ready or issues"
+}
+
+[2026-03-12 23:25] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "label clarification",
+    "EXPECTATION": "The 'Sélectionner tout ($0)' label should not imply currency; it should indicate the number of selected items and allow bulk deletion after selection.",
+    "NEW INSTRUCTION": "WHEN implementing bulk selection UI THEN display selected count without currency and show delete button when selection > 0"
+}
+
+[2026-03-12 23:38] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "design inconsistency",
+    "EXPECTATION": "The Calpin page should match the polished design and components used on the other pages.",
+    "NEW INSTRUCTION": "WHEN user reports a page lacks design THEN request page URL, reference page, and screenshots"
+}
+
+[2026-03-12 23:44] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user agrees to proceed with implementing the Stripe Customer Portal to manage subscriptions (cancel/change) and expects confirmation once deployed.",
+    "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
+}
+
+[2026-03-12 23:49] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "completion confirmation",
+    "EXPECTATION": "The assistant should confirm whether everything is implemented and continue to finish remaining work if not.",
+    "NEW INSTRUCTION": "WHEN user asks if everything implemented or says continue THEN summarize status, complete remaining tasks, and confirm deployment"
+}
+
+[2026-03-13 00:02] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The user wants the assistant to continue fixing the previously identified errors and finish the work.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-13 00:03] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should continue fixing the previously identified errors and finish the work.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-13 00:06] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The user wants the assistant to continue fixing the previously identified errors and finish the work.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
