@@ -126,7 +126,13 @@ export default function Dashboard() {
               </div>
               <div>
                 <h2 className="font-semibold text-lg leading-tight mb-1">Nouveau<br/>Devis</h2>
-                <p className="text-white/70 text-xs">Création rapide ⚡️</p>
+                {user?.publicMetadata?.isPro === true ? (
+                  <p className="text-white/70 text-xs">Création rapide ⚡️</p>
+                ) : (
+                  <p className="text-white/90 text-[10px] font-medium bg-white/20 inline-block px-2 py-0.5 rounded-full mt-1">
+                    {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 3)}/3 gratuits`}
+                  </p>
+                )}
               </div>
             </motion.div>
           </Link>

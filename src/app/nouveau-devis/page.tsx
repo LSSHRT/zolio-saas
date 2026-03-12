@@ -26,6 +26,7 @@ export default function NouveauDevisPage() {
 
   const [isPro, setIsPro] = useState(true); // Défaut true pour éviter le flash
   const [checkingPro, setCheckingPro] = useState(true);
+  const [devisCount, setDevisCount] = useState<number | null>(null);
 
   // Formulaire nouveau client rapide
   const [showNewClient, setShowNewClient] = useState(false);
@@ -44,6 +45,7 @@ export default function NouveauDevisPage() {
 
     fetch("/api/clients").then((r) => r.json()).then((d) => setClients(Array.isArray(d) ? d : []));
     fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(Array.isArray(d) ? d : []));
+    fetch("/api/devis").then((r) => r.json()).then((d) => setDevisCount(Array.isArray(d) ? d.length : 0));
   }, [isLoaded, user]);
 
   const totalHT = lignes.reduce((s, l) => s + l.totalLigne, 0);
@@ -129,7 +131,7 @@ export default function NouveauDevisPage() {
   }
 
   // Paywall
-  if (!checkingPro && !isPro) {
+  if (!checkingPro && !isPro && devisCount !== null && devisCount >= 3) {
     return (
       <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
@@ -151,7 +153,7 @@ export default function NouveauDevisPage() {
           
           <h2 className="text-2xl font-bold text-slate-900 mb-3">Fonctionnalité Premium</h2>
           <p className="text-slate-500 text-sm mb-8 px-4 leading-relaxed">
-            La création de devis professionnels est réservée aux abonnés Zolio Pro. Gagnez 5h par semaine dès aujourd'hui.
+            Vous avez atteint la limite de 3 devis gratuits. Passez à la version Zolio Pro pour créer des devis illimités.
           </p>
 
           <Link href="/abonnement" className="w-full">
