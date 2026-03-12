@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const entrepriseLegal = meta.companyLegal || "";
 
     const body = await request.json();
-    const { client, lignes, tva, acompte } = body;
+    const { client, lignes, tva, acompte, remise } = body;
 
     const sheets = await getGoogleSheetsClient();
 
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     // 1. Écrire l'en-tête du devis (On ajoute le userId en 1er)
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:K", // On passe de A:I à A:J
+      range: "Devis_Emis!A:L", // On passe de A:I à A:J
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -59,7 +59,8 @@ export async function POST(request: Request) {
           totalTTC.toFixed(2),
           "En attente",
           "", // Lien PDF
-          acompte ? acompte.toString() : "" // Acompte (%)
+          acompte ? acompte.toString() : "", // Acompte (%)
+          remise ? remise.toString() : "" // Remise globale (%)
         ]],
       },
     });
@@ -96,6 +97,7 @@ export async function POST(request: Request) {
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
+      remise: remise ? remise.toString() : "",
     });
 
     // 4. Envoyer le devis par email (si SMTP configuré)
@@ -117,6 +119,7 @@ export async function POST(request: Request) {
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
+      remise: remise ? remise.toString() : "",
       lignes,
       statut: "En attente",
       emailSent,
@@ -157,6 +160,7 @@ export async function GET() {
       statut: row[8] || "",
       lienPdf: row[9] || "",
       acompte: row[10] || "",
+      remise: row[11] || "",
     }));
 
     return NextResponse.json(devis);

@@ -19,6 +19,7 @@ export default function NouveauDevisPage() {
   const [lignes, setLignes] = useState<LigneDevis[]>([]);
   const [tva, setTva] = useState("10");
   const [acompte, setAcompte] = useState("");
+  const [remise, setRemise] = useState("");
   const [searchClient, setSearchClient] = useState("");
   const [searchPrestation, setSearchPrestation] = useState("");
   const [sending, setSending] = useState(false);
@@ -49,7 +50,9 @@ export default function NouveauDevisPage() {
     fetch("/api/devis").then((r) => r.json()).then((d) => setDevisCount(Array.isArray(d) ? d.length : 0));
   }, [isLoaded, user]);
 
-  const totalHT = lignes.reduce((s, l) => s + l.totalLigne, 0);
+  const totalHTBase = lignes.reduce((s, l) => s + l.totalLigne, 0);
+  const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
+  const totalHT = totalHTBase - montantRemise;
   const totalTTC = totalHT * (1 + parseFloat(tva) / 100);
 
   const addLigne = (p: Prestation) => {
@@ -84,7 +87,7 @@ export default function NouveauDevisPage() {
       const res = await fetch("/api/devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client: selectedClient, lignes, tva, acompte }),
+        body: JSON.stringify({ client: selectedClient, lignes, tva, acompte, remise }),
       });
       const result = await res.json();
       setDevisResult(result);
@@ -336,16 +339,26 @@ export default function NouveauDevisPage() {
                 ))}
               </div>
 
+              
               {/* TVA */}
               <div className="flex items-center gap-3">
                 <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Taux TVA :</label>
                 <select value={tva} onChange={(e) => setTva(e.target.value)}
                   className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none">
                   <option value="0">0% (Auto-entrepreneur)</option>
-                  <option value="10">10% (Rénovation)</option>
-                  <option value="20">20% (Normal)</option>
+                  <option value="5.5">5.5% (Rénovation)</option>
+                  <option value="10">10% (Intermédiaire)</option>
+                  <option value="20">20% (Standard)</option>
                 </select>
               </div>
+
+              {/* Remise */}
+              <div className="flex items-center gap-3 mt-4">
+                <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Remise globale (%) :</label>
+                <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
+                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+
 
               {/* Totaux */}
               <div className="bg-gradient-zolio rounded-2xl p-5 text-white">

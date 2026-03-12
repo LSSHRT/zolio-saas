@@ -79,7 +79,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
 
     const { numero } = await params;
     const body = await request.json();
-    const { lignes, tva, acompte } = body;
+    const { lignes, tva, acompte, remise } = body;
 
     const sheets = await getGoogleSheetsClient();
 
@@ -119,6 +119,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           "En attente (Modifié)",
           "",
           acompte ? acompte.toString() : "",
+          remise ? remise.toString() : "",
         ]],
       },
     });
@@ -182,6 +183,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
+      remise: remise ? remise.toString() : "",
     });
 
     let emailSent = false;
@@ -207,6 +209,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
+      remise: remise ? remise.toString() : "",
       emailSent,
     });
   } catch (error) {

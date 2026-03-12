@@ -39,6 +39,7 @@ interface DevisData {
   client: { nom: string; email: string; telephone: string; adresse: string; };
   isPro?: boolean;
   acompte?: string;
+  remise?: string;
   entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; };
   lignes: LigneDevis[];
   totalHT: string;
@@ -161,11 +162,31 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 116, 139);
-  doc.text("Total HT", 125, y);
+  
+  doc.text(data.remise ? "Total HT (avant remise)" : "Total HT", 125, y);
   doc.setTextColor(15, 23, 42);
-  doc.text(`${data.totalHT}€`, pageWidth - 20, y, { align: "right" });
+  
+  // Le totalHT reçu est APRÈS remise, on doit calculer le HT avant remise pour l'affichage si remise existe
+  let htAffiche = data.totalHT;
+  if (data.remise && parseFloat(data.remise) > 0) {
+     const remisePct = parseFloat(data.remise);
+     const htBase = parseFloat(data.totalHT) / (1 - remisePct / 100);
+     htAffiche = htBase.toFixed(2);
+  }
+  
+  doc.text(`${htAffiche}€`, pageWidth - 20, y, { align: "right" });
+  
+  if (data.remise && parseFloat(data.remise) > 0) {
+     y += 8;
+     doc.setTextColor(100, 116, 139);
+     doc.text(`Remise (${data.remise}%)`, 125, y);
+     doc.setTextColor(16, 185, 129); // emerald
+     const remiseVal = (parseFloat(htAffiche) - parseFloat(data.totalHT)).toFixed(2);
+     doc.text(`-${remiseVal}€`, pageWidth - 20, y, { align: "right" });
+  }
 
   y += 8;
+
   doc.setTextColor(100, 116, 139);
   doc.text(`TVA (${data.tva})`, 125, y);
   doc.setTextColor(15, 23, 42);
@@ -355,11 +376,31 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(100, 116, 139);
-  doc.text("Total HT", 125, y);
+  
+  doc.text(data.remise ? "Total HT (avant remise)" : "Total HT", 125, y);
   doc.setTextColor(15, 23, 42);
-  doc.text(`${data.totalHT}€`, pageWidth - 20, y, { align: "right" });
+  
+  // Le totalHT reçu est APRÈS remise, on doit calculer le HT avant remise pour l'affichage si remise existe
+  let htAffiche = data.totalHT;
+  if (data.remise && parseFloat(data.remise) > 0) {
+     const remisePct = parseFloat(data.remise);
+     const htBase = parseFloat(data.totalHT) / (1 - remisePct / 100);
+     htAffiche = htBase.toFixed(2);
+  }
+  
+  doc.text(`${htAffiche}€`, pageWidth - 20, y, { align: "right" });
+  
+  if (data.remise && parseFloat(data.remise) > 0) {
+     y += 8;
+     doc.setTextColor(100, 116, 139);
+     doc.text(`Remise (${data.remise}%)`, 125, y);
+     doc.setTextColor(16, 185, 129); // emerald
+     const remiseVal = (parseFloat(htAffiche) - parseFloat(data.totalHT)).toFixed(2);
+     doc.text(`-${remiseVal}€`, pageWidth - 20, y, { align: "right" });
+  }
 
   y += 8;
+
   doc.setTextColor(100, 116, 139);
   doc.text(`TVA (${data.tva})`, 125, y);
   doc.setTextColor(15, 23, 42);

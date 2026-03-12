@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -39,7 +39,6 @@ export default function DevisPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
   const handleDuplicate = async (numero: string) => {
     setDuplicating(numero);
@@ -129,16 +128,8 @@ export default function DevisPage() {
             <ArrowLeft size={20} />
           </motion.div>
         </Link>
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Devis</h1>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Devis</h1>
         <div className="flex-1" />
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-blue-600 dark:text-white' : 'text-slate-400'}`}>
-            <List size={16} />
-          </button>
-          <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-blue-600 dark:text-white' : 'text-slate-400'}`}>
-            <LayoutGrid size={16} />
-          </button>
-        </div>
         <Link href="/nouveau-devis">
           <motion.button whileTap={{ scale: 0.9 }}
             className="px-4 py-2 bg-gradient-zolio text-white text-sm font-semibold rounded-xl shadow-lg shadow-purple-500/30 flex items-center gap-2">
@@ -196,66 +187,6 @@ export default function DevisPage() {
           </label>
         </div>
 
-
-        {/* Liste devis */}
-        
-        {/* Vue Kanban */}
-        {viewMode === "kanban" && !loading && filtered.length > 0 && (
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
-            {["En attente", "Accepté", "Refusé"].map(colStatus => {
-              const colDevis = filtered.filter(d => 
-                colStatus === "En attente" ? isEnAttente(d.statut) : d.statut === colStatus
-              );
-              
-              const colConfig = statutConfig[colStatus === "En attente" ? "En attente" : colStatus];
-              const ColIcon = colConfig.icon;
-
-              return (
-                <div key={colStatus} className="min-w-[280px] w-[280px] flex-shrink-0 flex flex-col gap-3 snap-start">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className={`font-bold ${colConfig.color} flex items-center gap-2`}>
-                      <ColIcon size={16} /> {colStatus}
-                    </h3>
-                    <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full text-slate-500 font-semibold">{colDevis.length}</span>
-                  </div>
-                  
-                  {colDevis.map((d, i) => {
-                    const pending = isEnAttente(d.statut);
-                    const isUpdating = updatingStatut === d.numero;
-                    return (
-                      <motion.div
-                        key={d.numero || i}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <p className="font-semibold text-slate-900 dark:text-white text-sm truncate max-w-[150px]">{d.nomClient}</p>
-                            <p className="text-xs text-slate-400">{d.numero}</p>
-                          </div>
-                          <p className="text-sm font-bold text-slate-900 dark:text-white">{d.totalTTC}€</p>
-                        </div>
-                        
-                        {pending && (
-                          <div className="flex gap-2">
-                            <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition"><Check size={14} className="inline mr-1"/>Valider</button>
-                            <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
-                          </div>
-                        )}
-                        <div className="flex gap-2">
-                           <Link href={`/devis/${d.numero}`} className="flex-1">
-                             <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
-                           </Link>
-                        </div>
-                      </motion.div>
-                    )
-                  })}
-                </div>
-              )
-            })}
-          </div>
-        )}
 
         {/* Liste devis */}
         {loading ? (
