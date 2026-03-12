@@ -13,32 +13,64 @@ export async function POST(request: Request) {
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
 
     const sheets = await getGoogleSheetsClient();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
-    // 1. Ensure the sheet exists or generate the invoice number
-    // Try to get Factures_Emises sheet, we'll assume it exists or we can just append.
-    // Let's generate a number based on existing rows.
+    // 1. Vérifier si l'onglet "Factures_Emises" existe, sinon le créer
+    let sheetExists = false;
+    try {
+      const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId });
+      sheetExists = spreadsheet.data.sheets?.some(s => s.properties?.title === "Factures_Emises") || false;
+    } catch(e) {
+      console.error("Erreur vérification onglets:", e);
+    }
+
+    if (!sheetExists) {
+      try {
+        // Créer l'onglet
+        await sheets.spreadsheets.batchUpdate({
+          spreadsheetId,
+          requestBody: {
+            requests: [{
+              addSheet: { properties: { title: "Factures_Emises" } }
+            }]
+          }
+        });
+        
+        // Ajouter la ligne d'en-tête
+        await sheets.spreadsheets.values.append({
+          spreadsheetId,
+          range: "Factures_Emises!A1:J1",
+          valueInputOption: "USER_ENTERED",
+          requestBody: {
+            values: [["ID_Utilisateur", "Numéro", "Date", "Nom_Client", "Email_Client", "Total_HT", "TVA", "Total_TTC", "Statut", "Ref_Devis"]],
+          },
+        });
+        console.log("Onglet Factures_Emises créé avec succès.");
+      } catch (e) {
+        console.error("Erreur création onglet Factures_Emises:", e);
+      }
+    }
+
+    // 2. Générer le numéro de facture
     let count = 1;
     try {
       const existing = await sheets.spreadsheets.values.get({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        spreadsheetId,
         range: "Factures_Emises!B:B",
       });
       count = existing.data.values?.length || 1;
     } catch (e) {
-      // If the sheet doesn't exist, it might fail. But let's assume the owner created it,
-      // or it will be created by the API. (Google Sheets append creates the sheet if it doesn't exist? No, it doesn't).
-      // We will assume 'Factures_Emises' is created by the user or we will just use a generic row.
-      console.error("Impossible de lire Factures_Emises (peut-être qu'elle n'existe pas)", e);
+      console.error("Erreur lecture Factures_Emises:", e);
     }
     
     const year = new Date().getFullYear();
     const numeroFacture = `FAC-${year}-${String(count).padStart(3, "0")}`;
     const date = new Date().toLocaleDateString("fr-FR");
 
-    // 2. Écrire l'en-tête de la facture
+    // 3. Écrire l'en-tête de la facture dans Sheets
     try {
       await sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        spreadsheetId,
         range: "Factures_Emises!A:J",
         valueInputOption: "USER_ENTERED",
         requestBody: {
@@ -57,7 +89,7 @@ export async function POST(request: Request) {
         },
       });
     } catch (e) {
-      console.error("Erreur écriture Factures_Emises", e);
+      console.error("Erreur écriture Factures_Emises:", e);
     }
 
     // 3. Générer le PDF
