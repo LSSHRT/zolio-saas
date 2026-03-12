@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 
 interface Client {
@@ -25,6 +25,7 @@ export default function ClientsPage() {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", email: "", telephone: "", adresse: "" });
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const filtered = clients.filter(
     (c) => c.nom.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
@@ -34,19 +35,36 @@ export default function ClientsPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/clients", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const newClient = await res.json();
-      mutate([...clients, newClient], false);
+      if (editingId) {
+        const res = await fetch(`/api/clients/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        const updatedClient = await res.json();
+        mutate(clients.map((c: Client) => c.id === editingId ? updatedClient : c), false);
+      } else {
+        const res = await fetch("/api/clients", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        const newClient = await res.json();
+        mutate([...clients, newClient], false);
+      }
       setForm({ nom: "", email: "", telephone: "", adresse: "" });
       setShowForm(false);
+      setEditingId(null);
     } catch (err) {
-      alert("Erreur lors de l'ajout du client");
+      alert("Erreur lors de l'enregistrement");
     }
     setSaving(false);
+  };
+
+  const handleEdit = (client: Client) => {
+    setForm({ nom: client.nom, email: client.email || "", telephone: client.telephone || "", adresse: client.adresse || "" });
+    setEditingId(client.id);
+    setShowForm(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -76,7 +94,15 @@ export default function ClientsPage() {
         <div className="flex-1" />
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            if (showForm) {
+              setShowForm(false);
+              setEditingId(null);
+              setForm({ nom: "", email: "", telephone: "", adresse: "" });
+            } else {
+              setShowForm(true);
+            }
+          }}
           className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-purple-500/30"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}
@@ -104,7 +130,7 @@ export default function ClientsPage() {
             onSubmit={handleSubmit}
             className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200 dark:border-slate-700"
           >
-            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Nouveau Client</h2>
+            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier le client" : "Nouveau Client"}</h2>
             <input required placeholder="Nom complet" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -115,7 +141,7 @@ export default function ClientsPage() {
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50">
-              {saving ? "Enregistrement..." : "Ajouter le client"}
+              {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter le client"}
             </motion.button>
           </motion.form>
         )}
@@ -149,12 +175,20 @@ export default function ClientsPage() {
                     <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{client.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">Ajouté le {client.dateAjout}</p>
                   </div>
-                  <button
-                    onClick={() => handleDelete(client.id)}
-                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center">
+                    <button
+                      onClick={() => handleEdit(client)}
+                      className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(client.id)}
+                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-1 ml-13">
                   {client.email && (
