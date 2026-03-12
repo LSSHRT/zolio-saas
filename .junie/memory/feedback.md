@@ -54,3 +54,19 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
 }
 
+[2026-03-12 19:42] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "PDF layout overlap",
+    "EXPECTATION": "The quote PDF should keep payment details out of the signature area and avoid any overlap between 'Bon pour accord' and the 'Date et signature...' text.",
+    "NEW INSTRUCTION": "WHEN generating a quote PDF THEN place IBAN/BIC outside signature box and prevent overlap"
+}
+
+[2026-03-12 19:45] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "dark mode contrast",
+    "EXPECTATION": "The Pro subscription button should remain readable and properly styled in dark theme.",
+    "NEW INSTRUCTION": "WHEN user reports dark-theme button unreadable THEN request page URL, theme mode, and screenshot"
+}
+

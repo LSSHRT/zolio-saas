@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X } from "lucide-react";
+import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface Client {
@@ -47,6 +47,20 @@ export default function ClientsPage() {
       alert("Erreur lors de l'ajout du client");
     }
     setSaving(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer ce client ?")) return;
+    try {
+      const res = await fetch(`/api/clients/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        mutate(clients.filter((c: Client) => c.id !== id), false);
+      } else {
+        alert("Erreur lors de la suppression");
+      }
+    } catch (err) {
+      alert("Erreur lors de la suppression");
+    }
   };
 
   return (
@@ -135,6 +149,12 @@ export default function ClientsPage() {
                     <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{client.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">Ajouté le {client.dateAjout}</p>
                   </div>
+                  <button
+                    onClick={() => handleDelete(client.id)}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
                 <div className="flex flex-col gap-1 ml-13">
                   {client.email && (

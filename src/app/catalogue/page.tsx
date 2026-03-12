@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, X } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface Prestation {
@@ -52,6 +52,20 @@ export default function CataloguePage() {
       alert("Erreur lors de l'ajout");
     }
     setSaving(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cette prestation ?")) return;
+    try {
+      const res = await fetch(`/api/prestations/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setPrestations(prestations.filter((p) => p.id !== id));
+      } else {
+        alert("Erreur lors de la suppression");
+      }
+    } catch (err) {
+      alert("Erreur lors de la suppression");
+    }
   };
 
   return (
@@ -139,6 +153,12 @@ export default function CataloguePage() {
                   <p className="font-bold text-slate-900 dark:text-white text-sm">{p.prixUnitaireHT}€</p>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">HT/{p.unite}</p>
                 </div>
+                <button
+                  onClick={() => handleDelete(p.id)}
+                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
               </motion.div>
             ))}
           </div>
