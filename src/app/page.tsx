@@ -131,9 +131,17 @@ export default function Dashboard() {
             {user?.publicMetadata?.isPro === true && (
               <button 
                 onClick={async () => {
-                  const res = await fetch("/api/stripe/portal", { method: "POST" });
-                  const data = await res.json();
-                  if (data.url) window.location.href = data.url;
+                  try {
+                    const res = await fetch("/api/stripe/portal", { method: "POST" });
+                    const data = await res.json();
+                    if (data.url) {
+                      window.location.href = data.url;
+                    } else {
+                      alert(data.error || "Impossible d'ouvrir le portail d'abonnement.");
+                    }
+                  } catch (err) {
+                    alert("Une erreur est survenue.");
+                  }
                 }}
                 className="text-xs text-blue-600 font-medium hover:underline bg-blue-50 px-2 py-1 rounded-md"
               >

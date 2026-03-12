@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     if (!customerId) {
       return NextResponse.json(
-        { error: "Aucun compte client Stripe trouvé pour cet utilisateur." },
+        { error: "Aucun abonnement Stripe trouvé. Si vous avez activé le mode PRO manuellement, vous n'avez pas de portail client." },
         { status: 404 }
       );
     }
