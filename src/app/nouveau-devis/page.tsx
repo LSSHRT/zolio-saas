@@ -246,7 +246,7 @@ export default function NouveauDevisPage() {
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
               {selectedClient ? (
-                <div className="bg-fuchsia-50 border border-violet-200 rounded-2xl p-4 flex items-center gap-3">
+                <div className="bg-fuchsia-50 border border-violet-200 rounded-2xl p-4 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                   <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient.nom.charAt(0)}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
