@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, FileText, Search, CheckCircle, Clock } from "lucide-react";
+import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface Facture {
@@ -26,6 +26,7 @@ export default function FacturesPage() {
   const [factures, setFactures] = useState<Facture[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/factures")
@@ -39,6 +40,24 @@ export default function FacturesPage() {
   );
 
   const totalEncaisse = factures.reduce((s, f) => s + (parseFloat(f.totalTTC) || 0), 0);
+
+  const handleDelete = async (numero: string) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) return;
+    
+    setDeleting(numero);
+    try {
+      const res = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
+      if (res.ok) {
+        setFactures(factures.filter(f => f.numero !== numero));
+      } else {
+        alert("Erreur lors de la suppression de la facture");
+      }
+    } catch (e) {
+      alert("Erreur réseau");
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
@@ -115,9 +134,19 @@ export default function FacturesPage() {
                       <p className="text-[10px] text-slate-400">Réf Devis</p>
                       <p className="text-sm font-semibold text-slate-700">{f.devisRef || "-"}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-slate-400">Total TTC</p>
-                      <p className="text-lg font-bold text-slate-900">{f.totalTTC}€</p>
+                    <div className="flex items-center gap-4 text-right">
+                      <div>
+                        <p className="text-[10px] text-slate-400">Total TTC</p>
+                        <p className="text-lg font-bold text-slate-900">{f.totalTTC}€</p>
+                      </div>
+                      <button
+                        onClick={() => handleDelete(f.numero)}
+                        disabled={deleting === f.numero}
+                        className="text-red-400 hover:text-red-600 p-2 bg-red-50 hover:bg-red-100 rounded-full transition-colors disabled:opacity-50"
+                        title="Supprimer la facture"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
                   </div>
                 </motion.div>
