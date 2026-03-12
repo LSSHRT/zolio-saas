@@ -310,7 +310,7 @@ export default function Dashboard() {
                 {user?.publicMetadata?.isPro === true ? (
                   <p className="text-white/70 text-xs">Création rapide ⚡️</p>
                 ) : (
-                  <p className="text-white/90 text-[10px] font-medium bg-white dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
+                  <p className="text-white/90 text-[10px] font-medium bg-white/20 dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
                     {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 3)}/3 gratuits`}
                   </p>
                 )}
@@ -415,7 +415,7 @@ export default function Dashboard() {
                 <span>{Math.min((CA_TTC / objectif) * 100, 100).toFixed(0)}%</span>
               </div>
               <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
-                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-slate-800 dark:border-slate-700 dark:text-white" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
+                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-fuchsia-500 dark:shadow-[0_0_10px_rgba(217,70,239,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
               </div>
               <p className="text-[10px] text-violet-200 mt-1.5 text-right">
                 {CA_TTC >= objectif ? '🎉 Objectif atteint !' : `Encore ${(objectif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
