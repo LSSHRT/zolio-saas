@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const entrepriseLegal = meta.companyLegal || "";
 
     const body = await request.json();
-    const { client, lignes, tva } = body;
+    const { client, lignes, tva, acompte } = body;
 
     const sheets = await getGoogleSheetsClient();
 
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     // 1. Écrire l'en-tête du devis (On ajoute le userId en 1er)
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:J", // On passe de A:I à A:J
+      range: "Devis_Emis!A:K", // On passe de A:I à A:J
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -58,7 +58,8 @@ export async function POST(request: Request) {
           `${tauxTVA}%`,
           totalTTC.toFixed(2),
           "En attente",
-          "" // Lien PDF (sera rempli plus tard)
+          "", // Lien PDF
+          acompte ? acompte.toString() : "" // Acompte (%)
         ]],
       },
     });
@@ -94,6 +95,7 @@ export async function POST(request: Request) {
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
+      acompte: acompte ? acompte.toString() : "",
     });
 
     // 4. Envoyer le devis par email (si SMTP configuré)
@@ -114,6 +116,7 @@ export async function POST(request: Request) {
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
+      acompte: acompte ? acompte.toString() : "",
       lignes,
       statut: "En attente",
       emailSent,
@@ -132,7 +135,7 @@ export async function GET() {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:J", // A est mnt userId
+      range: "Devis_Emis!A:K", // A est mnt userId
     });
 
     const rows = response.data.values;
@@ -153,6 +156,7 @@ export async function GET() {
       totalTTC: row[7] || "",
       statut: row[8] || "",
       lienPdf: row[9] || "",
+      acompte: row[10] || "",
     }));
 
     return NextResponse.json(devis);

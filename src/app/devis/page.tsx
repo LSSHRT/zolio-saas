@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Devis {
   numero: string;
@@ -28,6 +29,7 @@ const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DevisPage() {
+  const router = useRouter();
   const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
@@ -36,6 +38,24 @@ export default function DevisPage() {
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
+  const [duplicating, setDuplicating] = useState<string | null>(null);
+
+  const handleDuplicate = async (numero: string) => {
+    setDuplicating(numero);
+    try {
+      const res = await fetch(`/api/devis/${numero}/duplicate`, { method: "POST" });
+      const data = await res.json();
+      if (data.numero) {
+        router.push(`/devis/${data.numero}`);
+      } else {
+        alert("Erreur lors de la duplication");
+        setDuplicating(null);
+      }
+    } catch {
+      alert("Erreur réseau");
+      setDuplicating(null);
+    }
+  };
 
   const handleDelete = async (numero: string) => {
     if (!confirm(`Supprimer définitivement le devis ${numero} ?`)) return;

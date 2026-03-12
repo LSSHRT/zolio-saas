@@ -38,6 +38,7 @@ interface DevisData {
   date: string;
   client: { nom: string; email: string; telephone: string; adresse: string; };
   isPro?: boolean;
+  acompte?: string;
   entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; };
   lignes: LigneDevis[];
   totalHT: string;
@@ -179,6 +180,27 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(12);
   doc.text("Total TTC", 125, y + 2);
   doc.text(`${data.totalTTC}€`, pageWidth - 22, y + 2, { align: "right" });
+
+  if (data.acompte && parseFloat(data.acompte) > 0) {
+    const acomptePct = parseFloat(data.acompte);
+    const totalTTCNum = parseFloat(data.totalTTC);
+    const acompteVal = (totalTTCNum * acomptePct / 100).toFixed(2);
+    const resteVal = (totalTTCNum - parseFloat(acompteVal)).toFixed(2);
+    
+    y += 12;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Acompte demandé (${acomptePct}%)`, 125, y);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`${acompteVal}€`, pageWidth - 20, y, { align: "right" });
+
+    y += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42);
+    doc.text("Reste à payer", 125, y);
+    doc.text(`${resteVal}€`, pageWidth - 20, y, { align: "right" });
+  }
 
   // === SIGNATURE ===
   doc.setFontSize(10);
@@ -352,6 +374,27 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(12);
   doc.text("Total TTC", 125, y + 2);
   doc.text(`${data.totalTTC}€`, pageWidth - 22, y + 2, { align: "right" });
+
+  if (data.acompte && parseFloat(data.acompte) > 0) {
+    const acomptePct = parseFloat(data.acompte);
+    const totalTTCNum = parseFloat(data.totalTTC);
+    const acompteVal = (totalTTCNum * acomptePct / 100).toFixed(2);
+    const resteVal = (totalTTCNum - parseFloat(acompteVal)).toFixed(2);
+    
+    y += 12;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Acompte versé (${acomptePct}%)`, 125, y);
+    doc.setTextColor(15, 23, 42);
+    doc.text(`${acompteVal}€`, pageWidth - 20, y, { align: "right" });
+
+    y += 8;
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42);
+    doc.text("Net à payer", 125, y);
+    doc.text(`${resteVal}€`, pageWidth - 20, y, { align: "right" });
+  }
 
   // === FOOTER ===
   const footerY = doc.internal.pageSize.getHeight() - 20;

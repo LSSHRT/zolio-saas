@@ -18,6 +18,7 @@ export default function NouveauDevisPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [lignes, setLignes] = useState<LigneDevis[]>([]);
   const [tva, setTva] = useState("10");
+  const [acompte, setAcompte] = useState("");
   const [searchClient, setSearchClient] = useState("");
   const [searchPrestation, setSearchPrestation] = useState("");
   const [sending, setSending] = useState(false);
@@ -83,7 +84,7 @@ export default function NouveauDevisPage() {
       const res = await fetch("/api/devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client: selectedClient, lignes, tva }),
+        body: JSON.stringify({ client: selectedClient, lignes, tva, acompte }),
       });
       const result = await res.json();
       setDevisResult(result);

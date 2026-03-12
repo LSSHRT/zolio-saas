@@ -15,6 +15,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [devisInfo, setDevisInfo] = useState<any>(null);
   const [lignes, setLignes] = useState<LigneDevis[]>([]);
   const [tva, setTva] = useState("10");
+  const [acompte, setAcompte] = useState("");
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [searchPrestation, setSearchPrestation] = useState("");
   const [saving, setSaving] = useState(false);
@@ -32,6 +33,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       // Extraire le taux TVA du string "10%"
       const tauxStr = (devisData.tva || "10%").replace("%", "");
       setTva(tauxStr);
+      setAcompte(devisData.acompte || "");
       setPrestations(Array.isArray(prestData) ? prestData : []);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -68,7 +70,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       const res = await fetch(`/api/devis/${numero}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lignes, tva }),
+        body: JSON.stringify({ lignes, tva, acompte }),
       });
       const data = await res.json();
       setResult(data);

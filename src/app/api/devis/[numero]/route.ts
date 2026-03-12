@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     // Récupérer l'en-tête du devis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:J",
+      range: "Devis_Emis!A:K",
     });
     const devisRows = devisRes.data.values || [];
     // Vérifier que le devis appartient bien au user connecté
@@ -49,6 +49,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       tva: devisRow[6],
       totalTTC: devisRow[7],
       statut: devisRow[8],
+      acompte: devisRow[10] || "",
       lignes,
     });
   } catch (error) {
@@ -78,7 +79,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
 
     const { numero } = await params;
     const body = await request.json();
-    const { lignes, tva } = body;
+    const { lignes, tva, acompte } = body;
 
     const sheets = await getGoogleSheetsClient();
 
@@ -91,7 +92,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 1. Trouver et mettre à jour la ligne dans Devis_Emis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:J",
+      range: "Devis_Emis!A:K",
     });
     const devisRows = devisRes.data.values || [];
     const rowIndex = devisRows.findIndex((r) => r[0] === userId && r[1] === numero);
@@ -103,7 +104,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // Mettre à jour la ligne d'en-tête du devis
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!A${rowIndex + 1}:J${rowIndex + 1}`,
+      range: `Devis_Emis!A${rowIndex + 1}:K${rowIndex + 1}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -117,6 +118,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           totalTTC.toFixed(2),
           "En attente (Modifié)",
           "",
+          acompte ? acompte.toString() : "",
         ]],
       },
     });
@@ -179,6 +181,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
+      acompte: acompte ? acompte.toString() : "",
     });
 
     let emailSent = false;
@@ -203,6 +206,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,
       totalTTC: totalTTC.toFixed(2),
+      acompte: acompte ? acompte.toString() : "",
       emailSent,
     });
   } catch (error) {
