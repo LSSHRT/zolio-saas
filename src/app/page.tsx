@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote, Receipt } from "lucide-react";
+import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote, Receipt , Pencil } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,6 +27,34 @@ export default function Dashboard() {
   const { data, error, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
+
+  
+  const [objectif, setObjectif] = useState(5000);
+  useEffect(() => {
+    if (user?.unsafeMetadata?.objectifMensuel) {
+      setObjectif(Number(user.unsafeMetadata.objectifMensuel));
+    }
+  }, [user]);
+
+  const handleUpdateObjectif = async () => {
+    const newVal = prompt("Entrez votre nouvel objectif mensuel (en €) :", objectif.toString());
+    const parsed = Number(newVal);
+    if (newVal && !isNaN(parsed) && parsed > 0) {
+      setObjectif(parsed);
+      try {
+        if (user) {
+          await user.update({
+            unsafeMetadata: {
+              ...user.unsafeMetadata,
+              objectifMensuel: parsed
+            }
+          });
+        }
+      } catch(e) {
+        alert("Erreur lors de la sauvegarde de l'objectif.");
+      }
+    }
+  };
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [runTour, setRunTour] = useState(false);
@@ -377,14 +405,14 @@ export default function Dashboard() {
             {/* Gamification Objectif */}
             <div className="mb-5 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
               <div className="flex justify-between items-center text-xs font-medium mb-2">
-                <span>Objectif (5 000€)</span>
-                <span>{Math.min((CA_TTC / 5000) * 100, 100).toFixed(0)}%</span>
+                <span>Objectif ({objectif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition"><Pencil size={12} /></button></span>
+                <span>{Math.min((CA_TTC / objectif) * 100, 100).toFixed(0)}%</span>
               </div>
               <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
-                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ width: `${Math.min((CA_TTC / 5000) * 100, 100)}%` }}></div>
+                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
               </div>
               <p className="text-[10px] text-violet-200 mt-1.5 text-right">
-                {CA_TTC >= 5000 ? '🎉 Objectif atteint !' : `Encore ${(5000 - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
+                {CA_TTC >= objectif ? '🎉 Objectif atteint !' : `Encore ${(objectif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
               </p>
             </div>
             
