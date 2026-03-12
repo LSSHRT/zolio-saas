@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil } from "lucide-react";
+import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil, Clock, FileText, CheckCircle, Clock as ClockIcon } from "lucide-react";
 import Link from "next/link";
 
 interface Client {
@@ -28,6 +28,7 @@ export default function ClientsPage() {
   const [form, setForm] = useState({ nom: "", email: "", telephone: "", adresse: "" });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [historyClient, setHistoryClient] = useState<Client | null>(null);
 
   const filtered = clients.filter(
     (c) => c.nom.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
@@ -254,6 +255,98 @@ export default function ClientsPage() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+
+function HistoryModal({ client, onClose }: { client: Client; onClose: () => void }) {
+  const { data: devis } = useSWR('/api/devis', fetcher);
+  const { data: factures } = useSWR('/api/factures', fetcher);
+
+  const history = useMemo(() => {
+    let items: any[] = [];
+    if (devis && Array.isArray(devis)) {
+      devis.filter((d: any) => d.clientNom === client.nom || d.clientEmail === client.email).forEach((d: any) => {
+        items.push({ type: 'devis', id: d.numero, date: d.date, montant: d.totalTTC, statut: d.statut });
+      });
+    }
+    if (factures && Array.isArray(factures)) {
+      factures.filter((f: any) => f.clientNom === client.nom || f.clientEmail === client.email).forEach((f: any) => {
+        items.push({ type: 'facture', id: f.numero, date: f.date, montant: f.totalTTC, statut: 'Payé' });
+      });
+    }
+    
+    // Sort by date desc (naive string sort since dates are often DD/MM/YYYY, but let's try our best)
+    // Assuming DD/MM/YYYY
+    return items.sort((a, b) => {
+      const partsA = a.date.split('/');
+      const partsB = b.date.split('/');
+      if (partsA.length === 3 && partsB.length === 3) {
+        const da = new Date(partsA[2], partsA[1] - 1, partsA[0]).getTime();
+        const db = new Date(partsB[2], partsB[1] - 1, partsB[0]).getTime();
+        return db - da;
+      }
+      return b.date.localeCompare(a.date);
+    });
+  }, [devis, factures, client]);
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+      >
+        <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white">Historique Client</h2>
+            <p className="text-sm text-slate-500">{client.nom}</p>
+          </div>
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="p-6 overflow-y-auto">
+          {history.length === 0 ? (
+            <div className="text-center py-8 text-slate-500">Aucune activité enregistrée pour ce client.</div>
+          ) : (
+            <div className="relative border-l-2 border-slate-200 dark:border-slate-700 ml-3 space-y-8">
+              {history.map((item, idx) => (
+                <div key={idx} className="relative pl-6">
+                  <div className={`absolute -left-[11px] bg-white dark:bg-slate-800 p-0.5 rounded-full border-2 ${item.type === 'facture' ? 'border-green-500' : 'border-blue-500'}`}>
+                    {item.type === 'facture' ? (
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <FileText className="w-4 h-4 text-blue-500" />
+                    )}
+                  </div>
+                  <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl">
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-semibold text-slate-800 dark:text-white">
+                        {item.type === 'facture' ? 'Facture' : 'Devis'} #{item.id}
+                      </span>
+                      <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{item.date}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className={`text-xs font-bold px-2 py-1 rounded-full ${
+                        item.statut === 'Accepté' || item.type === 'facture' ? 'bg-green-100 text-green-700' :
+                        item.statut === 'Refusé' ? 'bg-red-100 text-red-700' :
+                        'bg-yellow-100 text-yellow-700'
+                      }`}>
+                        {item.statut || 'En attente'}
+                      </span>
+                      <span className="font-bold text-slate-800 dark:text-white">{item.montant} €</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
     </div>
   );
 }

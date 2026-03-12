@@ -150,3 +150,11 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
 }
 
+[2026-03-12 22:29] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "completion confirmation",
+    "EXPECTATION": "The assistant should confirm if everything is implemented and continue to finish remaining work if not.",
+    "NEW INSTRUCTION": "WHEN user asks if everything implemented or says continue THEN summarize status, complete remaining tasks, and confirm deployment"
+}
+

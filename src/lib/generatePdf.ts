@@ -41,7 +41,7 @@ interface DevisData {
   isPro?: boolean;
   acompte?: string;
   remise?: string;
-  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; };
+  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; cgv?: string; };
   lignes: LigneDevis[];
   totalHT: string;
   tva: string;
@@ -280,7 +280,24 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.text("Ce devis est valable 30 jours à compter de sa date d'émission.", pageWidth / 2, footerY + 5, { align: "center" });
 
   // Retourner un Buffer
+  
+  // === CGV ANNEXE ===
+  if (data.entreprise?.cgv) {
+    doc.addPage();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Conditions Générales de Vente", 20, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(50, 50, 50);
+    const splitCgv = doc.splitTextToSize(data.entreprise.cgv, pageWidth - 40);
+    doc.text(splitCgv, 20, 35);
+  }
+
   return Buffer.from(doc.output("arraybuffer"));
+
 }
 
 export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
@@ -494,5 +511,22 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   doc.text("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.", pageWidth / 2, footerY + 5, { align: "center" });
 
   // Retourner un Buffer
+  
+  // === CGV ANNEXE ===
+  if (data.entreprise?.cgv) {
+    doc.addPage();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Conditions Générales de Vente", 20, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(50, 50, 50);
+    const splitCgv = doc.splitTextToSize(data.entreprise.cgv, pageWidth - 40);
+    doc.text(splitCgv, 20, 35);
+  }
+
   return Buffer.from(doc.output("arraybuffer"));
+
 }

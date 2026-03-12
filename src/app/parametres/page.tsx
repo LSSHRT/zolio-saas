@@ -20,6 +20,7 @@ export default function ParametresEntreprise() {
     companyIban: (user?.unsafeMetadata?.companyIban as string) || (user?.publicMetadata?.companyIban as string) || "",
     companyBic: (user?.unsafeMetadata?.companyBic as string) || (user?.publicMetadata?.companyBic as string) || "",
     companyLegal: (user?.unsafeMetadata?.companyLegal as string) || (user?.publicMetadata?.companyLegal as string) || "",
+    companyCgv: (user?.unsafeMetadata?.companyCgv as string) || (user?.publicMetadata?.companyCgv as string) || "",
     companyColor: (user?.unsafeMetadata?.companyColor as string) || (user?.publicMetadata?.companyColor as string) || "#0ea5e9",
   });
 
@@ -45,6 +46,7 @@ export default function ParametresEntreprise() {
         companyIban: (meta.companyIban as string) || (pubMeta.companyIban as string) || "",
         companyBic: (meta.companyBic as string) || (pubMeta.companyBic as string) || "",
         companyLegal: (meta.companyLegal as string) || (pubMeta.companyLegal as string) || "",
+        companyCgv: (meta.companyCgv as string) || (pubMeta.companyCgv as string) || "",
         companyColor: (meta.companyColor as string) || (pubMeta.companyColor as string) || "#0ea5e9",
       });
     }
@@ -71,6 +73,7 @@ export default function ParametresEntreprise() {
           companyIban: formData.companyIban,
           companyBic: formData.companyBic,
           companyLegal: formData.companyLegal,
+          companyCgv: formData.companyCgv,
           companyColor: formData.companyColor,
         }
       });
@@ -236,6 +239,20 @@ export default function ParametresEntreprise() {
               rows={2}
               placeholder="TVA non applicable, art. 293 B du CGI."
               className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+            />
+          </div>
+
+          
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Conditions Générales de Vente (CGV)</label>
+            <p className="text-xs text-slate-500 mb-2">Ce texte sera ajouté automatiquement en annexe à la fin de tous vos devis.</p>
+            <textarea
+              name="companyCgv"
+              value={formData.companyCgv}
+              onChange={handleChange}
+              rows={6}
+              placeholder="Article 1. Acceptation des conditions...&#10;Article 2. Modalités de paiement..."
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-y"
             />
           </div>
 
