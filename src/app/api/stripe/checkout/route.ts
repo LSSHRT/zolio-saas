@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 
-// Initialisation de Stripe avec la clé secrète
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2026-02-25.clover", // ou la dernière version stable
-});
+// Initialisation de Stripe avec la clé secrète (lazy pour éviter le crash au build)
+function getStripe() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    throw new Error("STRIPE_SECRET_KEY is not set");
+  }
+  return new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2026-02-25.clover",
+  });
+}
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +22,7 @@ export async function POST(request: Request) {
     
     const amount = isAnnual ? 1900 * 12 : 2900; // en centimes (19€*12 ou 29€)
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment", // "subscription" est mieux pour du SaaS, mais demande des Price IDs valides, on fait simple pour le test
       line_items: [
