@@ -1,6 +1,6 @@
 import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 // Récupérer les lignes de détail d'un devis spécifique
 export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
@@ -61,7 +61,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
 export async function PUT(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
+    const user = await currentUser();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
+    const entrepriseName = user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise";
+    const entrepriseEmail = user?.emailAddresses?.[0]?.emailAddress || "";
 
     const { numero } = await params;
     const body = await request.json();
@@ -160,6 +164,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
         telephone: "",
         adresse: "",
       },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,

@@ -2,12 +2,16 @@ import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 
 export async function POST(request: Request) {
   try {
     const { userId } = await auth();
+    const user = await currentUser();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
+    const entrepriseName = user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise";
+    const entrepriseEmail = user?.emailAddresses?.[0]?.emailAddress || "";
 
     const body = await request.json();
     const { client, lignes, tva } = body;
@@ -75,6 +79,7 @@ export async function POST(request: Request) {
       numeroDevis,
       date,
       client,
+      entreprise: { nom: entrepriseName, email: entrepriseEmail },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,

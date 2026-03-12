@@ -12,6 +12,7 @@ interface DevisData {
   numeroDevis: string;
   date: string;
   client: { nom: string; email: string; telephone: string; adresse: string; };
+  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; };
   lignes: LigneDevis[];
   totalHT: string;
   tva: string;
@@ -40,18 +41,34 @@ export function generateDevisPDF(data: DevisData): Buffer {
   doc.text(data.numeroDevis, pageWidth - 20, 25, { align: "right" });
   doc.text(`Date : ${data.date}`, pageWidth - 20, 35, { align: "right" });
 
-  // === CLIENT ===
+  // === INFORMATIONS ===
   doc.setTextColor(15, 23, 42);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Client", 20, 65);
+  doc.text("Émetteur", 20, 65);
+  doc.text("Client", 120, 65);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(data.client.nom, 20, 73);
-  doc.text(data.client.email, 20, 80);
-  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 20, 87);
-  if (data.client.adresse) doc.text(data.client.adresse, 20, 94);
+  
+  // Émetteur
+  if (data.entreprise) {
+    doc.text(data.entreprise.nom, 20, 73);
+    doc.text(data.entreprise.email, 20, 80);
+    if (data.entreprise.telephone) doc.text(`Tél: ${data.entreprise.telephone}`, 20, 87);
+    if (data.entreprise.adresse) doc.text(data.entreprise.adresse, 20, 94);
+  } else {
+    doc.text("Zolio", 20, 73);
+  }
+
+  // Client
+  doc.text(data.client.nom, 120, 73);
+  doc.text(data.client.email, 120, 80);
+  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 120, 87);
+  if (data.client.adresse) {
+    const splitAdresse = doc.splitTextToSize(data.client.adresse, 70);
+    doc.text(splitAdresse, 120, 94);
+  }
 
   // === TABLE HEADER ===
   let y = 110;
@@ -150,18 +167,34 @@ export function generateFacturePDF(data: DevisData): Buffer {
   doc.text(data.numeroDevis, pageWidth - 20, 25, { align: "right" });
   doc.text(`Date : ${data.date}`, pageWidth - 20, 35, { align: "right" });
 
-  // === CLIENT ===
+  // === INFORMATIONS ===
   doc.setTextColor(15, 23, 42);
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
-  doc.text("Client", 20, 65);
+  doc.text("Émetteur", 20, 65);
+  doc.text("Client", 120, 65);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
-  doc.text(data.client.nom, 20, 73);
-  doc.text(data.client.email, 20, 80);
-  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 20, 87);
-  if (data.client.adresse) doc.text(data.client.adresse, 20, 94);
+  
+  // Émetteur
+  if (data.entreprise) {
+    doc.text(data.entreprise.nom, 20, 73);
+    doc.text(data.entreprise.email, 20, 80);
+    if (data.entreprise.telephone) doc.text(`Tél: ${data.entreprise.telephone}`, 20, 87);
+    if (data.entreprise.adresse) doc.text(data.entreprise.adresse, 20, 94);
+  } else {
+    doc.text("Zolio", 20, 73);
+  }
+
+  // Client
+  doc.text(data.client.nom, 120, 73);
+  doc.text(data.client.email, 120, 80);
+  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 120, 87);
+  if (data.client.adresse) {
+    const splitAdresse = doc.splitTextToSize(data.client.adresse, 70);
+    doc.text(splitAdresse, 120, 94);
+  }
 
   // === TABLE HEADER ===
   let y = 110;
