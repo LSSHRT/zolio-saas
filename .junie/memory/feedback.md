@@ -30,3 +30,27 @@
     "NEW INSTRUCTION": "WHEN user says continue or not finished THEN resume and complete implementation and confirm deployment"
 }
 
+[2026-03-12 19:07] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "broken feature",
+    "EXPECTATION": "The 'Gérer l’abonnement' button should open the Stripe Customer Portal and let users manage their plan.",
+    "NEW INSTRUCTION": "WHEN user reports manage subscription button not working THEN request page URL, click path, error text, and console/network screenshots"
+}
+
+[2026-03-12 19:15] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "missing information",
+    "EXPECTATION": "The quote PDF should clearly include the sender company's details (name, address, contact).",
+    "NEW INSTRUCTION": "WHEN generating a quote PDF THEN include company name, address, contacts, and logo in header"
+}
+
+[2026-03-12 19:20] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user agrees with implementing the proposed Customer Portal/manage subscription idea.",
+    "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
+}
+

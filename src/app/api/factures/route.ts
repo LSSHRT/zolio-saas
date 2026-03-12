@@ -10,8 +10,12 @@ export async function POST(request: Request) {
     const user = await currentUser();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const entrepriseName = user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise";
+    const meta = (user?.unsafeMetadata as any) || (user?.publicMetadata as any) || {};
+    const entrepriseName = meta.companyName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise");
     const entrepriseEmail = user?.emailAddresses?.[0]?.emailAddress || "";
+    const entreprisePhone = meta.companyPhone || "";
+    const entrepriseAddress = meta.companyAddress || "";
+    const entrepriseSiret = meta.companySiret || "";
 
     const body = await request.json();
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
@@ -101,7 +105,7 @@ export async function POST(request: Request) {
       numeroDevis: numeroFacture, // using same interface
       date,
       client,
-      entreprise: { nom: entrepriseName, email: entrepriseEmail },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret },
       lignes,
       totalHT,
       tva,

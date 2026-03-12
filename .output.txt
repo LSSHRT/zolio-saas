@@ -1,3 +1,5 @@
+Command finished with exit code 0.
+Command output:
 import { jsPDF } from "jspdf";
 
 interface LigneDevis {
@@ -12,7 +14,7 @@ interface DevisData {
   numeroDevis: string;
   date: string;
   client: { nom: string; email: string; telephone: string; adresse: string; };
-  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; };
+  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; };
   lignes: LigneDevis[];
   totalHT: string;
   tva: string;
@@ -53,15 +55,10 @@ export function generateDevisPDF(data: DevisData): Buffer {
   
   // Émetteur
   if (data.entreprise) {
-    let currentY = 73;
-    doc.text(data.entreprise.nom, 20, currentY); currentY += 7;
-    doc.text(data.entreprise.email, 20, currentY); currentY += 7;
-    if (data.entreprise.telephone) { doc.text(`Tél: ${data.entreprise.telephone}`, 20, currentY); currentY += 7; }
-    if (data.entreprise.siret) { doc.text(`SIRET: ${data.entreprise.siret}`, 20, currentY); currentY += 7; }
-    if (data.entreprise.adresse) {
-      const splitAdresse = doc.splitTextToSize(data.entreprise.adresse, 80);
-      doc.text(splitAdresse, 20, currentY);
-    }
+    doc.text(data.entreprise.nom, 20, 73);
+    doc.text(data.entreprise.email, 20, 80);
+    if (data.entreprise.telephone) doc.text(`Tél: ${data.entreprise.telephone}`, 20, 87);
+    if (data.entreprise.adresse) doc.text(data.entreprise.adresse, 20, 94);
   } else {
     doc.text("Zolio", 20, 73);
   }
@@ -184,15 +181,10 @@ export function generateFacturePDF(data: DevisData): Buffer {
   
   // Émetteur
   if (data.entreprise) {
-    let currentY = 73;
-    doc.text(data.entreprise.nom, 20, currentY); currentY += 7;
-    doc.text(data.entreprise.email, 20, currentY); currentY += 7;
-    if (data.entreprise.telephone) { doc.text(`Tél: ${data.entreprise.telephone}`, 20, currentY); currentY += 7; }
-    if (data.entreprise.siret) { doc.text(`SIRET: ${data.entreprise.siret}`, 20, currentY); currentY += 7; }
-    if (data.entreprise.adresse) {
-      const splitAdresse = doc.splitTextToSize(data.entreprise.adresse, 80);
-      doc.text(splitAdresse, 20, currentY);
-    }
+    doc.text(data.entreprise.nom, 20, 73);
+    doc.text(data.entreprise.email, 20, 80);
+    if (data.entreprise.telephone) doc.text(`Tél: ${data.entreprise.telephone}`, 20, 87);
+    if (data.entreprise.adresse) doc.text(data.entreprise.adresse, 20, 94);
   } else {
     doc.text("Zolio", 20, 73);
   }

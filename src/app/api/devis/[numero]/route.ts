@@ -64,8 +64,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     const user = await currentUser();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const entrepriseName = user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise";
+    const meta = (user?.unsafeMetadata as any) || (user?.publicMetadata as any) || {};
+    const entrepriseName = meta.companyName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise");
     const entrepriseEmail = user?.emailAddresses?.[0]?.emailAddress || "";
+    const entreprisePhone = meta.companyPhone || "";
+    const entrepriseAddress = meta.companyAddress || "";
+    const entrepriseSiret = meta.companySiret || "";
 
     const { numero } = await params;
     const body = await request.json();
@@ -164,7 +168,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
         telephone: "",
         adresse: "",
       },
-      entreprise: { nom: entrepriseName, email: entrepriseEmail },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: `${tauxTVA}%`,

@@ -68,6 +68,9 @@ export default function Dashboard() {
         
         <div className="flex items-center gap-4 relative">
           <ThemeToggle />
+          <Link href="/parametres" className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
+            <Settings size={24} />
+          </Link>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 transition"
