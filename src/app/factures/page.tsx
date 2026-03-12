@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -30,6 +30,8 @@ export default function FacturesPage() {
   const factures = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   const filtered = factures.filter(
@@ -55,6 +57,26 @@ export default function FacturesPage() {
       setDeleting(null);
     }
   };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
+    setIsDeletingBulk(true);
+    let successCount = 0;
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/factures/${id}`, { method: "DELETE" });
+        if (res.ok) successCount++;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (successCount > 0) {
+      mutate(factures.filter((item: any) => !selectedIds.has(item.numero)), false);
+      setSelectedIds(new Set());
+    }
+    setIsDeletingBulk(false);
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
@@ -87,6 +109,26 @@ export default function FacturesPage() {
           <input type="text" placeholder="Rechercher par client ou n° facture..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500" />
         </div>
+
+        {/* Bulk Actions */}
+        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+              checked={filtered.length > 0 && selectedIds.size === filtered.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filtered.map((item: any) => item.numero)));
+                } else {
+                  setSelectedIds(new Set());
+                }
+              }}
+            />
+            Sélectionner tout (${filtered.length})
+          </label>
+        </div>
+
 
         {/* Liste factures */}
         {loading ? (

@@ -32,6 +32,8 @@ export default function DevisPage() {
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
 
@@ -46,6 +48,26 @@ export default function DevisPage() {
     }
     setDeleting(null);
   };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
+    setIsDeletingBulk(true);
+    let successCount = 0;
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/devis/${id}`, { method: "DELETE" });
+        if (res.ok) successCount++;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (successCount > 0) {
+      mutate(devis.filter((item: any) => !selectedIds.has(item.numero)), false);
+      setSelectedIds(new Set());
+    }
+    setIsDeletingBulk(false);
+  };
+
 
   const handleUpdateStatut = async (numero: string, newStatut: string) => {
     setUpdatingStatut(numero);
@@ -125,6 +147,26 @@ export default function DevisPage() {
           <input type="text" placeholder="Rechercher par client ou n° devis..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500" />
         </div>
+
+        {/* Bulk Actions */}
+        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+              checked={filtered.length > 0 && selectedIds.size === filtered.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filtered.map((item: any) => item.numero)));
+                } else {
+                  setSelectedIds(new Set());
+                }
+              }}
+            />
+            Sélectionner tout (${filtered.length})
+          </label>
+        </div>
+
 
         {/* Liste devis */}
         {loading ? (

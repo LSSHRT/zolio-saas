@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil, Upload } from "lucide-react";
 import Link from "next/link";
 
@@ -76,6 +76,8 @@ export default function CataloguePage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -130,6 +132,26 @@ export default function CataloguePage() {
       alert("Erreur lors de la suppression");
     }
   };
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
+    setIsDeletingBulk(true);
+    let successCount = 0;
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/prestations/${id}`, { method: "DELETE" });
+        if (res.ok) successCount++;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (successCount > 0) {
+      setPrestations(prestations.filter((item: any) => !selectedIds.has(item.id)));
+      setSelectedIds(new Set());
+    }
+    setIsDeletingBulk(false);
+  };
+
 
     
   const handleEdit = (p: Prestation) => {
@@ -283,6 +305,26 @@ export default function CataloguePage() {
           <input type="text" placeholder="Rechercher une prestation..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500" />
         </div>
+
+        {/* Bulk Actions */}
+        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+              checked={filtered.length > 0 && selectedIds.size === filtered.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filtered.map((item: any) => item.id)));
+                } else {
+                  setSelectedIds(new Set());
+                }
+              }}
+            />
+            Sélectionner tout (${filtered.length})
+          </label>
+        </div>
+
 
         {showForm && (
           <motion.form initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit}

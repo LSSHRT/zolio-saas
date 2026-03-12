@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
 
@@ -23,6 +23,8 @@ export default function ClientsPage() {
   const loading = isLoading && !data;
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [form, setForm] = useState({ nom: "", email: "", telephone: "", adresse: "" });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -81,6 +83,26 @@ export default function ClientsPage() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
+    setIsDeletingBulk(true);
+    let successCount = 0;
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/clients/${id}`, { method: "DELETE" });
+        if (res.ok) successCount++;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    if (successCount > 0) {
+      mutate(clients.filter((item: any) => !selectedIds.has(item.id)), false);
+      setSelectedIds(new Set());
+    }
+    setIsDeletingBulk(false);
+  };
+
+
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
@@ -121,6 +143,26 @@ export default function ClientsPage() {
             className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
           />
         </div>
+
+        {/* Bulk Actions */}
+        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+              checked={filtered.length > 0 && selectedIds.size === filtered.length}
+              onChange={(e) => {
+                if (e.target.checked) {
+                  setSelectedIds(new Set(filtered.map((item: any) => item.id)));
+                } else {
+                  setSelectedIds(new Set());
+                }
+              }}
+            />
+            Sélectionner tout (${filtered.length})
+          </label>
+        </div>
+
 
         {/* Add Form */}
         {showForm && (

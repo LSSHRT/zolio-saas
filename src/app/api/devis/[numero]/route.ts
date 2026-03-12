@@ -253,7 +253,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
     const allLignes = lignesRes.data.values || [];
     
     // Trouver tous les index des lignes à supprimer (de bas en haut pour ne pas décaler les index)
-    const lignesIndices = [];
+    const lignesIndices: number[] = [];
     allLignes.forEach((r, i) => {
       if (r[0] === userId && r[1] === numero) {
         lignesIndices.push(i);
