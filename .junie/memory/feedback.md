@@ -22,3 +22,11 @@
     "NEW INSTRUCTION": "WHEN user defers decision-making THEN choose and implement best option and explain briefly"
 }
 
+[2026-03-12 18:58] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should finish the pending implementation and provide the remaining details without stopping midway.",
+    "NEW INSTRUCTION": "WHEN user says continue or not finished THEN resume and complete implementation and confirm deployment"
+}
+

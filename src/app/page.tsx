@@ -191,20 +191,34 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Lien Devis Émis */}
-        <Link href="/devis">
-          <motion.div whileTap={{ scale: 0.97 }}
-            className="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-4 cursor-pointer hover:bg-slate-100 transition">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-              <FileText size={22} />
-            </div>
-            <div className="flex-1">
-              <p className="font-semibold text-slate-900 text-sm">Mes Devis Émis</p>
-              <p className="text-xs text-slate-500">Consulter, modifier et renvoyer vos devis</p>
-            </div>
-            <span className="text-slate-400 text-lg">→</span>
-          </motion.div>
-        </Link>
+        {/* Liens Devis & Factures */}
+        <div className="flex gap-4">
+          <Link href="/devis" className="flex-1">
+            <motion.div whileTap={{ scale: 0.97 }}
+              className="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 transition h-full">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+                <FileText size={20} />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900 text-sm">Devis</p>
+                <p className="text-xs text-slate-500">Voir les devis émis</p>
+              </div>
+            </motion.div>
+          </Link>
+
+          <Link href="/factures" className="flex-1">
+            <motion.div whileTap={{ scale: 0.97 }}
+              className="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 transition h-full">
+              <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                <FileCheck size={20} />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900 text-sm">Factures</p>
+                <p className="text-xs text-slate-500">Gérer les factures</p>
+              </div>
+            </motion.div>
+          </Link>
+        </div>
 
         {/* Dynamic Charts / Income Area */}
         <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-5">

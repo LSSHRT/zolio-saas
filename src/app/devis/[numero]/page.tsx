@@ -236,7 +236,31 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         {devisInfo?.statut === "Accepté" && (
           <motion.button 
             whileTap={{ scale: 0.96 }}
-            onClick={() => alert("La création de facture arrivera dans la prochaine mise à jour !")}
+            onClick={async () => {
+              if (saving) return;
+              try {
+                // On s'assure d'avoir les données
+                const res = await fetch("/api/factures", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    devisNumero: devisInfo.numero,
+                    client: { nom: devisInfo.nomClient, email: devisInfo.emailClient },
+                    lignes,
+                    tva,
+                    totalHT: totalHT.toFixed(2),
+                    totalTTC: totalTTC.toFixed(2)
+                  }),
+                });
+                if (res.ok) {
+                  window.location.href = "/factures";
+                } else {
+                  alert("Erreur lors de la création de la facture");
+                }
+              } catch (e) {
+                alert("Erreur réseau");
+              }
+            }}
             className="w-full py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm mt-1"
           >
             <Check size={16} /> Transformer en Facture
