@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil } from "lucide-react";
 import Link from "next/link";
 
 interface Prestation {
@@ -14,14 +14,35 @@ interface Prestation {
   coutMatiere: number;
 }
 
-const CATEGORIES = ["Préparation", "Peinture", "Sol", "Plafond", "Façade", "Décoration", "Autre"];
+const CATEGORIES = ["Préparation", "Peinture", "Sol", "Plafond", "Façade", "Décoration", "Plomberie", "Électricité", "Menuiserie", "Autre"];
 
 const SEED_CATALOG = [
+  // Préparation
   { categorie: "Préparation", nom: "Lessivage des murs", unite: "m²", prixUnitaireHT: 5, coutMatiere: 0.5 },
   { categorie: "Préparation", nom: "Enduit de lissage complet", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
+  { categorie: "Préparation", nom: "Dépose de papier peint", unite: "m²", prixUnitaireHT: 8, coutMatiere: 0 },
+  { categorie: "Préparation", nom: "Ponçage mécanique", unite: "m²", prixUnitaireHT: 6, coutMatiere: 0.5 },
+  { categorie: "Préparation", nom: "Impression fixante (Sous-couche)", unite: "m²", prixUnitaireHT: 7, coutMatiere: 1.5 },
+  // Peinture
   { categorie: "Peinture", nom: "Peinture acrylique mate (2 couches)", unite: "m²", prixUnitaireHT: 12, coutMatiere: 3 },
   { categorie: "Peinture", nom: "Peinture velours (2 couches)", unite: "m²", prixUnitaireHT: 14, coutMatiere: 4 },
-  { categorie: "Sol", nom: "Pose de parquet flottant", unite: "m²", prixUnitaireHT: 25, coutMatiere: 0 }
+  { categorie: "Peinture", nom: "Peinture satinée (2 couches)", unite: "m²", prixUnitaireHT: 15, coutMatiere: 4 },
+  { categorie: "Peinture", nom: "Peinture laque (boiseries)", unite: "ml", prixUnitaireHT: 18, coutMatiere: 5 },
+  { categorie: "Peinture", nom: "Peinture plafond sans traces", unite: "m²", prixUnitaireHT: 16, coutMatiere: 3.5 },
+  // Sol
+  { categorie: "Sol", nom: "Pose de parquet flottant", unite: "m²", prixUnitaireHT: 25, coutMatiere: 2 },
+  { categorie: "Sol", nom: "Pose de plinthes", unite: "ml", prixUnitaireHT: 8, coutMatiere: 1 },
+  { categorie: "Sol", nom: "Ragréage sol", unite: "m²", prixUnitaireHT: 12, coutMatiere: 4 },
+  { categorie: "Sol", nom: "Pose de carrelage standard (hors fourniture)", unite: "m²", prixUnitaireHT: 45, coutMatiere: 5 },
+  // Plomberie
+  { categorie: "Plomberie", nom: "Recherche de fuite", unite: "forfait", prixUnitaireHT: 150, coutMatiere: 0 },
+  { categorie: "Plomberie", nom: "Remplacement mitigeur", unite: "unité", prixUnitaireHT: 80, coutMatiere: 0 },
+  { categorie: "Plomberie", nom: "Pose de WC suspendu", unite: "unité", prixUnitaireHT: 350, coutMatiere: 20 },
+  // Électricité
+  { categorie: "Électricité", nom: "Création prise de courant", unite: "unité", prixUnitaireHT: 90, coutMatiere: 15 },
+  { categorie: "Électricité", nom: "Remplacement tableau électrique", unite: "forfait", prixUnitaireHT: 800, coutMatiere: 300 },
+  // Menuiserie
+  { categorie: "Menuiserie", nom: "Pose porte intérieure", unite: "unité", prixUnitaireHT: 150, coutMatiere: 10 },
 ];
 
 export default function CataloguePage() {
@@ -31,6 +52,7 @@ export default function CataloguePage() {
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" });
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -43,21 +65,28 @@ export default function CataloguePage() {
     (p) => p.nom.toLowerCase().includes(search.toLowerCase()) || p.categorie.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/prestations", {
-        method: "POST",
+      const url = editingId ? `/api/prestations/${editingId}` : "/api/prestations";
+      const method = editingId ? "PUT" : "POST";
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, prixUnitaireHT: parseFloat(form.prixUnitaireHT), coutMatiere: parseFloat(form.coutMatiere) || 0 }),
       });
-      const newP = await res.json();
-      setPrestations([...prestations, newP]);
+      const data = await res.json();
+      if (editingId) {
+        setPrestations(prestations.map(p => p.id === editingId ? { ...p, ...data.data, id: editingId } : p));
+      } else {
+        setPrestations([...prestations, data]);
+      }
       setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" });
+      setEditingId(null);
       setShowForm(false);
     } catch (err) {
-      alert("Erreur lors de l'ajout");
+      alert("Erreur lors de l'enregistrement");
     }
     setSaving(false);
   };
@@ -76,6 +105,20 @@ export default function CataloguePage() {
     }
   };
 
+    
+  const handleEdit = (p: Prestation) => {
+    setForm({
+      categorie: p.categorie,
+      nom: p.nom,
+      unite: p.unite,
+      prixUnitaireHT: p.prixUnitaireHT.toString(),
+      coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
+    });
+    setEditingId(p.id);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleDuplicate = (p: Prestation) => {
     setForm({
       categorie: p.categorie,
@@ -84,6 +127,7 @@ export default function CataloguePage() {
       prixUnitaireHT: p.prixUnitaireHT.toString(),
       coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
     });
+    setEditingId(null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -120,7 +164,7 @@ export default function CataloguePage() {
         <div className="flex-1" />
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" }); }}
           className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-purple-500/30"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}
@@ -137,7 +181,7 @@ export default function CataloguePage() {
         {showForm && (
           <motion.form initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit}
             className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200 dark:border-slate-700">
-            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Nouvelle Prestation</h2>
+            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier la Prestation" : "Nouvelle Prestation"}</h2>
             <select value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30">
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -162,7 +206,7 @@ export default function CataloguePage() {
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50">
-              {saving ? "Enregistrement..." : "Ajouter au catalogue"}
+              {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter au catalogue"}
             </motion.button>
           </motion.form>
         )}
@@ -203,7 +247,15 @@ export default function CataloguePage() {
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">HT/{p.unite}</p>
                 </div>
                 <div className="flex gap-1 shrink-0">
+                  
                   <button
+                    onClick={() => handleEdit(p)}
+                    className="p-2 text-slate-400 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-500/10 rounded-lg transition-colors"
+                    title="Modifier"
+                  >
+                    <Pencil size={16} />
+                  </button>
+<button
                     onClick={() => handleDuplicate(p)}
                     className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
                     title="Dupliquer"

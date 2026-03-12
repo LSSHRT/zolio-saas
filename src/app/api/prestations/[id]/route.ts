@@ -58,3 +58,55 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ error: "Impossible de supprimer la prestation" }, { status: 500 });
   }
 }
+
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { userId } = await auth();
+    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
+    const p = await params;
+    const prestationId = p.id;
+    const body = await request.json();
+
+    const sheets = await getGoogleSheetsClient();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Catalogue_Prestations!A:G",
+    });
+
+    const rows = response.data.values || [];
+    const rowIndex = rows.findIndex(row => row[0] === userId && row[1] === prestationId);
+
+    if (rowIndex === -1) {
+      return NextResponse.json({ error: "Prestation non trouvée ou non autorisée" }, { status: 404 });
+    }
+
+    // Prepare updated row. 
+    // Format: ID_Utilisateur, ID_Prestation, Nom, Description, PrixUnitaire, Unite, TVA
+    const updatedRow = [
+      userId,
+      prestationId,
+      body.nom || rows[rowIndex][2],
+      body.description || rows[rowIndex][3] || "",
+      body.prixUnitaire !== undefined ? body.prixUnitaire.toString() : rows[rowIndex][4],
+      body.unite || rows[rowIndex][5] || "U",
+      body.tva !== undefined ? body.tva.toString() : rows[rowIndex][6] || "20"
+    ];
+
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `Catalogue_Prestations!A${rowIndex + 1}:G${rowIndex + 1}`,
+      valueInputOption: "USER_ENTERED",
+      requestBody: {
+        values: [updatedRow],
+      },
+    });
+
+    return NextResponse.json({ success: true, data: body });
+  } catch (error) {
+    console.error("Erreur PUT prestation:", error);
+    return NextResponse.json({ error: "Impossible de modifier la prestation" }, { status: 500 });
+  }
+}

@@ -70,3 +70,35 @@
     "NEW INSTRUCTION": "WHEN user reports dark-theme button unreadable THEN request page URL, theme mode, and screenshot"
 }
 
+[2026-03-12 19:52] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "light theme contrast",
+    "EXPECTATION": "The '+' icon for 'Nouveau Devis' should be clearly visible in light theme and small design details should be handled carefully.",
+    "NEW INSTRUCTION": "WHEN styling icons or buttons THEN verify light-theme contrast and adjust colors for visibility"
+}
+
+[2026-03-12 19:58] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "dashboard layout",
+    "EXPECTATION": "The revenue table should appear below the three feature buttons rather than above.",
+    "NEW INSTRUCTION": "WHEN arranging dashboard sections THEN place revenue table below feature buttons"
+}
+
+[2026-03-12 20:44] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "PDF layout overlap",
+    "EXPECTATION": "The 'Devis professionnel' title should sit below the Zolio logo (not on the photo), and the signature text must not overlap with the banking details (IBAN/BIC).",
+    "NEW INSTRUCTION": "WHEN generating a quote PDF THEN place title below logo; separate signature box from banking details; prevent overlap"
+}
+
+[2026-03-12 20:59] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user agrees to proceed with the previously proposed implementation (e.g., Customer Portal/manage subscription).",
+    "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
+}
+
