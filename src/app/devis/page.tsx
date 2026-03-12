@@ -250,7 +250,7 @@ export default function DevisPage() {
                         
                         {pending && (
                           <div className="flex gap-2">
-                            <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition"><Check size={14} className="inline mr-1"/>Valider</button>
+                            <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"><Check size={14} className="inline mr-1"/>Valider</button>
                             <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
                           </div>
                         )}
@@ -344,7 +344,7 @@ export default function DevisPage() {
                           whileTap={{ scale: 0.96 }}
                           onClick={() => handleUpdateStatut(d.numero, "Accepté")}
                           disabled={isUpdating}
-                          className="flex-1 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-emerald-100 hover:border-emerald-400 transition disabled:opacity-50"
+                          className="flex-1 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-emerald-100 hover:border-emerald-400 transition disabled:opacity-50 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                         >
                           <Check size={16} /> {isUpdating ? "..." : "Valider"}
                         </motion.button>

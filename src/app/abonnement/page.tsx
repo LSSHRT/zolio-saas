@@ -96,7 +96,7 @@ export default function AbonnementPage() {
               "Support client prioritaire"
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                   <CheckCircle2 size={12} strokeWidth={3} />
                 </div>
                 <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>

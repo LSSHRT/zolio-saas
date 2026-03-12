@@ -409,13 +409,13 @@ export default function Dashboard() {
             </h2>
             
             {/* Gamification Objectif */}
-            <div className="mb-5 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
+            <div className="mb-5 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
               <div className="flex justify-between items-center text-xs font-medium mb-2">
                 <span>Objectif ({objectif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition"><Pencil size={12} /></button></span>
                 <span>{Math.min((CA_TTC / objectif) * 100, 100).toFixed(0)}%</span>
               </div>
               <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
-                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
+                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-slate-800 dark:border-slate-700 dark:text-white" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
               </div>
               <p className="text-[10px] text-violet-200 mt-1.5 text-right">
                 {CA_TTC >= objectif ? '🎉 Objectif atteint !' : `Encore ${(objectif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
@@ -496,7 +496,7 @@ export default function Dashboard() {
               <>
                 {/* Deux cartes côte à côte */}
                 <div className="flex gap-3 mb-4">
-                  <div className="flex-1 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                  <div className="flex-1 bg-emerald-50 rounded-xl p-3 border border-emerald-100 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
                       <span className="text-[10px] font-semibold text-emerald-700">CA Validé</span>
@@ -509,7 +509,7 @@ export default function Dashboard() {
                       TTC : {loading ? "..." : `${CA_Valide_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
                   </div>
-                  <div className="flex-1 bg-amber-50 rounded-xl p-3 border border-amber-100">
+                  <div className="flex-1 bg-amber-50 rounded-xl p-3 border border-amber-100 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-2 h-2 rounded-full bg-amber-500" />
                       <span className="text-[10px] font-semibold text-amber-700">En Attente</span>
@@ -612,7 +612,7 @@ export default function Dashboard() {
             <div className="flex flex-col gap-3">
               {devisARelancer.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
-                  <div className="flex items-center gap-4 bg-rose-50 p-4 rounded-2xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer">
+                  <div className="flex items-center gap-4 bg-rose-50 p-4 rounded-2xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
                       <Bell size={16} />
                     </div>

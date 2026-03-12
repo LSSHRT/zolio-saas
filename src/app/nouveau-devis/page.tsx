@@ -312,7 +312,7 @@ export default function NouveauDevisPage() {
               </div>
                 <button
                   onClick={() => setShowForfaits(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl mt-3 hover:bg-violet-100 transition"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl mt-3 hover:bg-violet-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 >
                   <Package size={18} /> Insérer un Ouvrage / Forfait rapide
                 </button>

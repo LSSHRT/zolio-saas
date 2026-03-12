@@ -172,7 +172,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
       <main className="flex-1 px-6 flex flex-col gap-5 overflow-y-auto">
         {/* Client info */}
-        <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-center gap-3">
+        <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <div className="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center font-bold text-sm">
             {devisInfo?.nomClient?.charAt(0)}
           </div>
@@ -314,7 +314,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                 alert("Erreur réseau");
               }
             }}
-            className="w-full py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm mt-1"
+            className="w-full py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm mt-1 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
           >
             <Check size={16} /> Transformer en Facture
           </motion.button>

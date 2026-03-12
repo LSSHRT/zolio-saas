@@ -89,7 +89,7 @@ export default function ParametresEntreprise() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
       <div className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3">
-        <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
+        <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </Link>
         <h1 className="text-xl font-bold text-slate-800 dark:text-white">Paramètres de l'entreprise</h1>
