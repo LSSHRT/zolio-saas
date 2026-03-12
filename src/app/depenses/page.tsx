@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useSWR from "swr";
 import { Plus, Trash2, Search, ArrowLeft, Receipt, Calendar, CreditCard, Tag } from "lucide-react";
 import Link from "next/link";
@@ -23,12 +23,16 @@ export default function DepensesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
+    date: "",
     description: "",
     montantTTC: "",
     tvaDeductible: "",
     categorie: "Achats Matériaux"
   });
+
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, date: new Date().toISOString().split('T')[0] }));
+  }, []);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -43,10 +47,10 @@ export default function DepensesPage() {
     "Autre"
   ];
 
-  const filteredDepenses = depenses?.filter((d) =>
+  const filteredDepenses = (Array.isArray(depenses) ? depenses : []).filter((d) =>
     d.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
     d.categorie.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  );
 
   const totalTTC = filteredDepenses.reduce((acc, d) => acc + d.montantTTC, 0);
   const totalTVA = filteredDepenses.reduce((acc, d) => acc + d.tvaDeductible, 0);

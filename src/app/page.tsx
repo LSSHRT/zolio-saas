@@ -495,7 +495,7 @@ export default function Dashboard() {
                   {loading ? (
                      <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">Chargement du graphique...</div>
                   ) : (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                       <AreaChart data={monthlyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorCA" x1="0" y1="0" x2="0" y2="1">
