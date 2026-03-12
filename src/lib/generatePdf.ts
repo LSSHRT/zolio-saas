@@ -43,10 +43,24 @@ interface DevisData {
   remise?: string;
   entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; cgv?: string; };
   signatureBase64?: string;
+  statut?: string;
   lignes: LigneDevis[];
   totalHT: string;
   tva: string;
   totalTTC: string;
+}
+
+
+function drawWatermark(doc: any, text: string, color: {r: number, g: number, b: number}) {
+  doc.saveGraphicsState();
+  doc.setGState(new (doc as any).GState({ opacity: 0.15 }));
+  doc.setTextColor(color.r, color.g, color.b);
+  doc.setFontSize(50);
+  doc.setFont("helvetica", "bold");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  doc.text(text, pageWidth / 2, pageHeight / 2, { angle: 45, align: "center", baseline: "middle" });
+  doc.restoreGraphicsState();
 }
 
 export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
@@ -282,6 +296,16 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
 
   // Retourner un Buffer
   
+  
+  // === WATERMARK ===
+  if (data.statut === "Refusé") {
+    drawWatermark(doc, "REFUSÉ", { r: 239, g: 68, b: 68 });
+  } else if (data.signatureBase64 || data.statut === "Accepté") {
+    drawWatermark(doc, "BON POUR ACCORD", { r: 34, g: 197, b: 94 });
+  } else if (data.statut === "En attente" || data.statut === "Brouillon") {
+    drawWatermark(doc, "BROUILLON", { r: 148, g: 163, b: 184 });
+  }
+
   // === CGV ANNEXE ===
   if (data.entreprise?.cgv) {
     doc.addPage();
@@ -513,6 +537,14 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
 
   // Retourner un Buffer
   
+  
+  // === WATERMARK ===
+  if (data.statut === "Payé" || data.statut === "Payée") {
+    drawWatermark(doc, "PAYÉ", { r: 34, g: 197, b: 94 });
+  } else if (data.statut === "Brouillon") {
+    drawWatermark(doc, "BROUILLON", { r: 148, g: 163, b: 184 });
+  }
+
   // === CGV ANNEXE ===
   if (data.entreprise?.cgv) {
     doc.addPage();
