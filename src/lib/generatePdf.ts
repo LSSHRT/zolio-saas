@@ -1,5 +1,21 @@
 import { jsPDF } from "jspdf";
 
+
+async function fetchImageAsBase64(url: string): Promise<string | null> {
+  if (!url) return null;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const contentType = response.headers.get('content-type') || 'image/jpeg';
+    return `data:${contentType};base64,${buffer.toString('base64')}`;
+  } catch (error) {
+    console.error("Erreur de récupération du logo:", error);
+    return null;
+  }
+}
+
 function hexToRgb(hex: string) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -28,7 +44,7 @@ interface DevisData {
   totalTTC: string;
 }
 
-export function generateDevisPDF(data: DevisData): Buffer {
+export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -37,10 +53,25 @@ export function generateDevisPDF(data: DevisData): Buffer {
   doc.setFillColor(color.r, color.g, color.b);
   doc.rect(0, 0, pageWidth, 45, "F");
 
+  let logoWidth = 0;
+  if (data.entreprise?.logo) {
+    const logoBase64 = await fetchImageAsBase64(data.entreprise.logo);
+    if (logoBase64) {
+      try {
+        // dimensions fixes (ex: 30x30, ou calculé)
+        // par defaut 30x30
+        doc.addImage(logoBase64, 15, 7, 30, 30);
+        logoWidth = 35; // décalage pour le texte
+      } catch (e) {
+        console.error("Erreur ajout logo:", e);
+      }
+    }
+  }
+
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
-  doc.text("ZOLIO", 20, 25);
+  doc.text("ZOLIO", 20 + logoWidth, 25);
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
@@ -183,7 +214,7 @@ export function generateDevisPDF(data: DevisData): Buffer {
   return Buffer.from(doc.output("arraybuffer"));
 }
 
-export function generateFacturePDF(data: DevisData): Buffer {
+export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -192,10 +223,25 @@ export function generateFacturePDF(data: DevisData): Buffer {
   doc.setFillColor(color.r, color.g, color.b);
   doc.rect(0, 0, pageWidth, 45, "F");
 
+  let logoWidth = 0;
+  if (data.entreprise?.logo) {
+    const logoBase64 = await fetchImageAsBase64(data.entreprise.logo);
+    if (logoBase64) {
+      try {
+        // dimensions fixes (ex: 30x30, ou calculé)
+        // par defaut 30x30
+        doc.addImage(logoBase64, 15, 7, 30, 30);
+        logoWidth = 35; // décalage pour le texte
+      } catch (e) {
+        console.error("Erreur ajout logo:", e);
+      }
+    }
+  }
+
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(28);
   doc.setFont("helvetica", "bold");
-  doc.text("ZOLIO", 20, 25);
+  doc.text("ZOLIO", 20 + logoWidth, 25);
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");

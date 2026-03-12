@@ -164,7 +164,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     const { generateDevisPDF } = await import("@/lib/generatePdf");
     const { sendDevisEmail } = await import("@/lib/sendEmail");
 
-    const pdfBuffer = generateDevisPDF({
+    const pdfBuffer = await generateDevisPDF({
       numeroDevis: numero,
       date,
       client: {

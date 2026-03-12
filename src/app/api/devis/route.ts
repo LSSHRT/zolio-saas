@@ -84,7 +84,7 @@ export async function POST(request: Request) {
     });
 
     // 3. Générer le PDF du devis
-    const pdfBuffer = generateDevisPDF({
+    const pdfBuffer = await generateDevisPDF({
       numeroDevis,
       date,
       client,

@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     }
 
     // 3. Générer le PDF
-    const pdfBuffer = generateFacturePDF({
+    const pdfBuffer = await generateFacturePDF({
       numeroDevis: numeroFacture, // using same interface
       date,
       client,
