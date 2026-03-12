@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import { motion } from "framer-motion";
 import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2 } from "lucide-react";
 import Link from "next/link";
@@ -22,18 +23,14 @@ const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
   "En retard": { icon: Clock, color: "text-red-500", bg: "bg-red-50" },
 };
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function FacturesPage() {
-  const [factures, setFactures] = useState<Facture[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const factures = Array.isArray(data) ? data : [];
+  const loading = isLoading && !data;
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/factures")
-      .then((r) => r.json())
-      .then((data) => { setFactures(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
 
   const filtered = factures.filter(
     (f) => f.nomClient.toLowerCase().includes(search.toLowerCase()) || f.numero.toLowerCase().includes(search.toLowerCase())
@@ -48,7 +45,7 @@ export default function FacturesPage() {
     try {
       const res = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
       if (res.ok) {
-        setFactures(factures.filter(f => f.numero !== numero));
+        mutate(factures.filter((f: Facture) => f.numero !== numero), false);
       } else {
         alert("Erreur lors de la suppression de la facture");
       }

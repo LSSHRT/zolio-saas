@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X } from "lucide-react";
 import Link from "next/link";
@@ -24,26 +25,22 @@ const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
   "Refusé": { icon: XCircle, color: "text-red-500", bg: "bg-red-50" },
 };
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function DevisPage() {
-  const [devis, setDevis] = useState<Devis[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const devis = Array.isArray(data) ? data : [];
+  const loading = isLoading && !data;
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch("/api/devis")
-      .then((r) => r.json())
-      .then((data) => { setDevis(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
 
   const handleDelete = async (numero: string) => {
     if (!confirm(`Supprimer définitivement le devis ${numero} ?`)) return;
     setDeleting(numero);
     try {
       await fetch(`/api/devis/${numero}`, { method: "DELETE" });
-      setDevis(devis.filter((d) => d.numero !== numero));
+      mutate(devis.filter((d: Devis) => d.numero !== numero), false);
     } catch {
       alert("Erreur lors de la suppression");
     }
@@ -59,7 +56,7 @@ export default function DevisPage() {
         body: JSON.stringify({ statut: newStatut }),
       });
       if (res.ok) {
-        setDevis(devis.map((d) => d.numero === numero ? { ...d, statut: newStatut } : d));
+        mutate(devis.map((d: Devis) => d.numero === numero ? { ...d, statut: newStatut } : d), false);
       } else {
         alert("Erreur lors de la mise à jour du statut");
       }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X } from "lucide-react";
 import Link from "next/link";
@@ -14,20 +15,16 @@ interface Client {
   dateAjout: string;
 }
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data, error, isLoading, mutate } = useSWR('/api/clients', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const clients = Array.isArray(data) ? data : [];
+  const loading = isLoading && !data;
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [form, setForm] = useState({ nom: "", email: "", telephone: "", adresse: "" });
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/clients")
-      .then((r) => r.json())
-      .then((data) => { setClients(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
 
   const filtered = clients.filter(
     (c) => c.nom.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
@@ -43,7 +40,7 @@ export default function ClientsPage() {
         body: JSON.stringify(form),
       });
       const newClient = await res.json();
-      setClients([...clients, newClient]);
+      mutate([...clients, newClient], false);
       setForm({ nom: "", email: "", telephone: "", adresse: "" });
       setShowForm(false);
     } catch (err) {

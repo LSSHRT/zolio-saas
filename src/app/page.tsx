@@ -4,7 +4,8 @@ import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -18,20 +19,13 @@ interface Devis {
   statut: string;
 }
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function Dashboard() {
   const { user, isLoaded } = useUser();
-  const [devis, setDevis] = useState<Devis[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/devis")
-      .then((r) => r.json())
-      .then((data) => {
-        setDevis(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+  const { data, error, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const devis = Array.isArray(data) ? data : [];
+  const loading = isLoading && !data;
 
   const [showNotifications, setShowNotifications] = useState(false);
 
