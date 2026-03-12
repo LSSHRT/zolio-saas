@@ -65,6 +65,11 @@ export default function Dashboard() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
+            {user?.publicMetadata?.isPro === true && (
+              <span className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
+                PRO
+              </span>
+            )}
           </h1>
           <p className="text-slate-500 text-sm mt-1">Gérez vos devis en quelques secondes.</p>
         </div>

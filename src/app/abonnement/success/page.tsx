@@ -12,8 +12,8 @@ export default function AbonnementSuccessPage() {
     const animationEnd = Date.now() + duration;
     const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
-    // Simuler l'activation du compte Premium en local
-    localStorage.setItem("zolio_pro_status", "active");
+    // Le statut Pro sera mis à jour via Clerk Dashboard manuellement 
+    // ou via un Webhook Stripe (à implémenter)
 
     const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 

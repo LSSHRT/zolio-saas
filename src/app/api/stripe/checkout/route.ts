@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+import { auth } from "@clerk/nextjs/server";
 
 // Initialisation de Stripe avec la clé secrète (lazy pour éviter le crash au build)
 function getStripe() {
@@ -13,6 +14,11 @@ function getStripe() {
 
 export async function POST(request: Request) {
   try {
+    const { userId } = await auth();
+    if (!userId) {
+      return new NextResponse("Non autorisé", { status: 401 });
+    }
+
     const { isAnnual } = await request.json();
     
     // Pour l'instant nous utilisons le mode paiement unique (payment) 
@@ -24,7 +30,16 @@ export async function POST(request: Request) {
 
     const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "payment", // "subscription" est mieux pour du SaaS, mais demande des Price IDs valides, on fait simple pour le test
+      mode: "subscription", 
+      client_reference_id: userId,
+      metadata: {
+        userId,
+      },
+      subscription_data: {
+        metadata: {
+          userId,
+        },
+      },
       line_items: [
         {
           price_data: {
@@ -35,6 +50,9 @@ export async function POST(request: Request) {
               images: ["https://zolio.site/logo.png"], // Le vrai logo plus tard
             },
             unit_amount: amount,
+            recurring: {
+              interval: isAnnual ? "year" : "month",
+            },
           },
           quantity: 1,
         },

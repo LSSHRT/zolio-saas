@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Plus, Search, User, Package, Send, X, Trash2, Lock, Zap } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 interface Client { id: string; nom: string; email: string; telephone: string; adresse: string; dateAjout: string; }
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; }
 
 export default function NouveauDevisPage() {
+  const { user, isLoaded } = useUser();
   const [step, setStep] = useState(1);
   const [clients, setClients] = useState<Client[]>([]);
   const [prestations, setPrestations] = useState<Prestation[]>([]);
@@ -30,16 +32,19 @@ export default function NouveauDevisPage() {
   const [newClient, setNewClient] = useState({ nom: "", email: "", telephone: "", adresse: "" });
 
   useEffect(() => {
-    // Vérifier l'abonnement
-    const status = localStorage.getItem("zolio_pro_status");
-    if (status !== "active") {
-      setIsPro(false);
+    // Vérifier l'abonnement via Clerk publicMetadata
+    if (isLoaded) {
+      if (user?.publicMetadata?.isPro === true) {
+        setIsPro(true);
+      } else {
+        setIsPro(false);
+      }
+      setCheckingPro(false);
     }
-    setCheckingPro(false);
 
     fetch("/api/clients").then((r) => r.json()).then((d) => setClients(Array.isArray(d) ? d : []));
     fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(Array.isArray(d) ? d : []));
-  }, []);
+  }, [isLoaded, user]);
 
   const totalHT = lignes.reduce((s, l) => s + l.totalLigne, 0);
   const totalTTC = totalHT * (1 + parseFloat(tva) / 100);
