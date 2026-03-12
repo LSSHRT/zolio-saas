@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Package, Search, X, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download } from "lucide-react";
 import Link from "next/link";
 
 interface Prestation {
@@ -15,6 +15,14 @@ interface Prestation {
 }
 
 const CATEGORIES = ["Préparation", "Peinture", "Sol", "Plafond", "Façade", "Décoration", "Autre"];
+
+const SEED_CATALOG = [
+  { categorie: "Préparation", nom: "Lessivage des murs", unite: "m²", prixUnitaireHT: 5, coutMatiere: 0.5 },
+  { categorie: "Préparation", nom: "Enduit de lissage complet", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
+  { categorie: "Peinture", nom: "Peinture acrylique mate (2 couches)", unite: "m²", prixUnitaireHT: 12, coutMatiere: 3 },
+  { categorie: "Peinture", nom: "Peinture velours (2 couches)", unite: "m²", prixUnitaireHT: 14, coutMatiere: 4 },
+  { categorie: "Sol", nom: "Pose de parquet flottant", unite: "m²", prixUnitaireHT: 25, coutMatiere: 0 }
+];
 
 export default function CataloguePage() {
   const [prestations, setPrestations] = useState<Prestation[]>([]);
@@ -66,6 +74,38 @@ export default function CataloguePage() {
     } catch (err) {
       alert("Erreur lors de la suppression");
     }
+  };
+
+  const handleDuplicate = (p: Prestation) => {
+    setForm({
+      categorie: p.categorie,
+      nom: p.nom + " (Copie)",
+      unite: p.unite,
+      prixUnitaireHT: p.prixUnitaireHT.toString(),
+      coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
+    });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleSeed = async () => {
+    if (!confirm("Voulez-vous importer le catalogue type avec 5 prestations de base ?")) return;
+    setLoading(true);
+    try {
+      for (const item of SEED_CATALOG) {
+        await fetch("/api/prestations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(item),
+        });
+      }
+      const res = await fetch("/api/prestations");
+      const data = await res.json();
+      setPrestations(Array.isArray(data) ? data : []);
+    } catch (err) {
+      alert("Erreur lors de l'import");
+    }
+    setLoading(false);
   };
 
   return (
@@ -135,6 +175,15 @@ export default function CataloguePage() {
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
             <Package size={48} strokeWidth={1} />
             <p className="text-sm">{search ? "Aucun résultat" : "Aucune prestation"}</p>
+            {!search && (
+              <button
+                onClick={handleSeed}
+                className="mt-4 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <Download size={16} />
+                Importer catalogue type
+              </button>
+            )}
           </div>
         ) : (
           <div className="flex flex-col gap-3">
@@ -153,12 +202,22 @@ export default function CataloguePage() {
                   <p className="font-bold text-slate-900 dark:text-white text-sm">{p.prixUnitaireHT}€</p>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">HT/{p.unite}</p>
                 </div>
-                <button
-                  onClick={() => handleDelete(p.id)}
-                  className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="flex gap-1 shrink-0">
+                  <button
+                    onClick={() => handleDuplicate(p)}
+                    className="p-2 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
+                    title="Dupliquer"
+                  >
+                    <Copy size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                    title="Supprimer"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </motion.div>
             ))}
           </div>
