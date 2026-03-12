@@ -110,7 +110,8 @@ export async function POST(request: Request) {
       numeroDevis: numeroFacture, // using same interface
       date,
       client,
-      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
+      isPro: user?.publicMetadata?.isPro === true,
+        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
       lignes,
       totalHT,
       tva,

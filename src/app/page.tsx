@@ -150,6 +150,30 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* PLG: Bannière de Parrainage */}
+        {!user?.publicMetadata?.isPro && (
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 rounded-2xl p-4 border border-blue-100 dark:border-slate-700 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm">
+                <span className="text-xl">🎁</span>
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Gagnez des devis gratuits</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Invitez un artisan et recevez 5 devis offerts.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                navigator.clipboard.writeText(`https://zolio.site/?ref=${user?.id}`);
+                alert("Lien de parrainage copié !");
+              }}
+              className="bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 text-xs font-bold py-2 px-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 hover:scale-105 transition-transform"
+            >
+              Copier le lien
+            </button>
+          </div>
+        )}
+
         {/* Action Widgets */}
         <div className="flex gap-4">
           {/* Create CTA */}

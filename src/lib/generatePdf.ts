@@ -37,6 +37,7 @@ interface DevisData {
   numeroDevis: string;
   date: string;
   client: { nom: string; email: string; telephone: string; adresse: string; };
+  isPro?: boolean;
   entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; };
   lignes: LigneDevis[];
   totalHT: string;
@@ -207,7 +208,9 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   if (data.entreprise?.legal) {
     doc.text(data.entreprise.legal, pageWidth / 2, footerY - 5, { align: "center" });
   }
-  doc.text("Devis généré automatiquement par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
+  if (!data.isPro) {
+    doc.text("Devis gratuit généré par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
+  }
   doc.text("Ce devis est valable 30 jours à compter de sa date d'émission.", pageWidth / 2, footerY + 5, { align: "center" });
 
   // Retourner un Buffer
@@ -357,7 +360,9 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   if (data.entreprise?.legal) {
     doc.text(data.entreprise.legal, pageWidth / 2, footerY - 5, { align: "center" });
   }
-  doc.text("Facture générée automatiquement par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
+  if (!data.isPro) {
+    doc.text("Facture gratuite générée par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
+  }
   doc.text("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.", pageWidth / 2, footerY + 5, { align: "center" });
 
   // Retourner un Buffer
