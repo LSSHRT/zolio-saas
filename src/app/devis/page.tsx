@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List, Mail } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -341,6 +341,18 @@ export default function DevisPage() {
                           className="flex-1 py-2.5 bg-red-50 border border-red-200 text-red-500 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-red-100 hover:border-red-400 transition disabled:opacity-50"
                         >
                           <X size={16} /> {isUpdating ? "..." : "Refuser"}
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            const subject = encodeURIComponent(`Relance : Devis #${d.numero}`);
+                            const body = encodeURIComponent(`Bonjour ${d.nomClient},\n\nSauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${d.numero} d'un montant de ${d.totalTTC}€.\n\nRestant à votre disposition pour toute question.\n\nCordialement,`);
+                            window.location.href = `mailto:${d.emailClient || ''}?subject=${subject}&body=${body}`;
+                          }}
+                          className="flex-1 py-2.5 bg-blue-50 border border-blue-200 text-blue-600 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-blue-100 hover:border-blue-400 transition"
+                        >
+                          <Mail size={16} /> Relancer
                         </motion.button>
                       </motion.div>
                     )}

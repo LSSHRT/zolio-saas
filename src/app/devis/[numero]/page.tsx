@@ -6,6 +6,30 @@ import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save } from "lucide-react
 import Link from "next/link";
 
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
+
+
+const FORFAITS = [
+  { nom: "Rénovation SDB (Complète)", lignes: [
+      { nomPrestation: "Démolition et évacuation", quantite: 1, unite: "Forfait", prixUnitaire: 500, totalLigne: 500 },
+      { nomPrestation: "Plomberie (Alimentation et évacuation)", quantite: 1, unite: "Forfait", prixUnitaire: 1200, totalLigne: 1200 },
+      { nomPrestation: "Pose carrelage mural et sol", quantite: 15, unite: "m²", prixUnitaire: 60, totalLigne: 900 },
+      { nomPrestation: "Peinture plafond (hydrofuge)", quantite: 6, unite: "m²", prixUnitaire: 35, totalLigne: 210 }
+    ]
+  },
+  { nom: "Peinture Pièce (Standard 15m²)", lignes: [
+      { nomPrestation: "Protection des sols et meubles", quantite: 1, unite: "Forfait", prixUnitaire: 150, totalLigne: 150 },
+      { nomPrestation: "Préparation des murs (enduit, ponçage)", quantite: 40, unite: "m²", prixUnitaire: 15, totalLigne: 600 },
+      { nomPrestation: "Peinture 2 couches (Murs & Plafond)", quantite: 55, unite: "m²", prixUnitaire: 25, totalLigne: 1375 }
+    ]
+  },
+  { nom: "Tableau Électrique (Mise aux normes)", lignes: [
+      { nomPrestation: "Dépose de l'ancien tableau", quantite: 1, unite: "Forfait", prixUnitaire: 200, totalLigne: 200 },
+      { nomPrestation: "Fourniture et pose tableau 3 rangées", quantite: 1, unite: "Unité", prixUnitaire: 950, totalLigne: 950 },
+      { nomPrestation: "Contrôle et test de l'installation", quantite: 1, unite: "Forfait", prixUnitaire: 150, totalLigne: 150 }
+    ]
+  }
+];
+
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
@@ -19,6 +43,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [remise, setRemise] = useState("");
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [searchPrestation, setSearchPrestation] = useState("");
+  const [showForfaits, setShowForfaits] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [result, setResult] = useState<any>(null);

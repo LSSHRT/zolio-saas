@@ -10,6 +10,30 @@ interface Client { id: string; nom: string; email: string; telephone: string; ad
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
 
+
+const FORFAITS = [
+  { nom: "Rénovation SDB (Complète)", lignes: [
+      { nomPrestation: "Démolition et évacuation", quantite: 1, unite: "Forfait", prixUnitaire: 500, totalLigne: 500 },
+      { nomPrestation: "Plomberie (Alimentation et évacuation)", quantite: 1, unite: "Forfait", prixUnitaire: 1200, totalLigne: 1200 },
+      { nomPrestation: "Pose carrelage mural et sol", quantite: 15, unite: "m²", prixUnitaire: 60, totalLigne: 900 },
+      { nomPrestation: "Peinture plafond (hydrofuge)", quantite: 6, unite: "m²", prixUnitaire: 35, totalLigne: 210 }
+    ]
+  },
+  { nom: "Peinture Pièce (Standard 15m²)", lignes: [
+      { nomPrestation: "Protection des sols et meubles", quantite: 1, unite: "Forfait", prixUnitaire: 150, totalLigne: 150 },
+      { nomPrestation: "Préparation des murs (enduit, ponçage)", quantite: 40, unite: "m²", prixUnitaire: 15, totalLigne: 600 },
+      { nomPrestation: "Peinture 2 couches (Murs & Plafond)", quantite: 55, unite: "m²", prixUnitaire: 25, totalLigne: 1375 }
+    ]
+  },
+  { nom: "Tableau Électrique (Mise aux normes)", lignes: [
+      { nomPrestation: "Dépose de l'ancien tableau", quantite: 1, unite: "Forfait", prixUnitaire: 200, totalLigne: 200 },
+      { nomPrestation: "Fourniture et pose tableau 3 rangées", quantite: 1, unite: "Unité", prixUnitaire: 950, totalLigne: 950 },
+      { nomPrestation: "Contrôle et test de l'installation", quantite: 1, unite: "Forfait", prixUnitaire: 150, totalLigne: 150 }
+    ]
+  }
+];
+
+
 export default function NouveauDevisPage() {
   const { user, isLoaded } = useUser();
   const [step, setStep] = useState(1);
@@ -22,6 +46,7 @@ export default function NouveauDevisPage() {
   const [remise, setRemise] = useState("");
   const [searchClient, setSearchClient] = useState("");
   const [searchPrestation, setSearchPrestation] = useState("");
+  const [showForfaits, setShowForfaits] = useState(false);
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [devisResult, setDevisResult] = useState<any>(null);
@@ -72,6 +97,13 @@ export default function NouveauDevisPage() {
     updated[idx].quantite = qty;
     updated[idx].totalLigne = qty * updated[idx].prixUnitaire;
     setLignes(updated);
+  };
+
+  
+  const applyForfait = (forfait: any) => {
+    const newLignes = forfait.lignes.map((l: any) => ({ ...l, tva }));
+    setLignes([...lignes, ...newLignes]);
+    setShowForfaits(false);
   };
 
   const removeLigne = (idx: number) => {
@@ -278,6 +310,13 @@ export default function NouveauDevisPage() {
                 <input type="text" placeholder="Rechercher une prestation..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
               </div>
+                <button
+                  onClick={() => setShowForfaits(true)}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold rounded-xl mt-3 hover:bg-indigo-100 transition"
+                >
+                  <Package size={18} /> Insérer un Ouvrage / Forfait rapide
+                </button>
+
 
               {/* Liste des prestations disponibles */}
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">

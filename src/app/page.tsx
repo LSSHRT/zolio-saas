@@ -453,8 +453,21 @@ export default function Dashboard() {
                       <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{d.nomClient}</p>
                       <p className="text-[10px] text-rose-600">En attente depuis plus de 7 jours</p>
                     </div>
-                    <div className="font-bold text-slate-800 dark:text-slate-200 shrink-0 text-sm">
-                      {d.totalTTC}€
+                    <div className="flex items-center gap-3">
+                      <div className="font-bold text-slate-800 dark:text-slate-200 shrink-0 text-sm">
+                        {d.totalTTC}€
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const subject = encodeURIComponent(`Relance : Devis #${d.numero}`);
+                          const body = encodeURIComponent(`Bonjour ${d.nomClient},\n\nSauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${d.numero} d'un montant de ${d.totalTTC}€.\n\nRestant à votre disposition pour toute question.\n\nCordialement,`);
+                          window.location.href = `mailto:${d.emailClient || ''}?subject=${subject}&body=${body}`;
+                        }}
+                        className="bg-rose-600 text-white text-xs px-3 py-1.5 rounded-full hover:bg-rose-700 transition"
+                      >
+                        Relancer
+                      </button>
                     </div>
                   </div>
                 </Link>

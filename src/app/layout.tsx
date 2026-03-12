@@ -11,8 +11,18 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Zolio",
+  },
   title: "Zolio - Devis Professionnel",
   description: "Créez et gérez vos devis en quelques secondes.",
+};
+
+export const viewport = {
+  themeColor: "#2563eb",
 };
 
 export default function RootLayout({
