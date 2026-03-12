@@ -81,7 +81,7 @@ export default function CalepinPage() {
         </div>
         <button
           onClick={() => openNote()}
-          className="bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 text-white p-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+          className="bg-gradient-zolio text-white p-4 rounded-2xl shadow-lg shadow-fuchsia-500/30 hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -90,17 +90,26 @@ export default function CalepinPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-48 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-2xl"></div>
+            <div key={i} className="h-48 bg-slate-100 dark:bg-slate-800/50 animate-pulse rounded-[1.5rem] border border-slate-200/50 dark:border-slate-700/50 relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 dark:before:via-white/5 before:to-transparent"></div>
           ))}
         </div>
       ) : notes?.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
-          <StickyNote className="w-16 h-16 text-slate-300 dark:text-slate-700 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Aucune note</h3>
-          <p className="text-slate-500 dark:text-slate-400 mb-6">Commencez par noter vos mesures ou vos idées de chantiers.</p>
-          <button onClick={() => openNote()} className="bg-violet-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-violet-700 transition">
-            Nouvelle note
-          </button>
+        <div className="text-center py-24 bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-[2rem] border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-fuchsia-500/10 dark:bg-fuchsia-500/20 blur-3xl rounded-full"></div>
+          <motion.div 
+            initial={{ scale: 0.8, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            className="relative z-10 flex flex-col items-center"
+          >
+            <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl shadow-xl flex items-center justify-center mb-6 -rotate-6">
+              <StickyNote className="w-10 h-10 text-fuchsia-500" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 font-mono">Calepin vide</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">Commencez à noter vos dimensions, idées et croquis de chantiers pour ne rien oublier.</p>
+            <button onClick={() => openNote()} className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-3 rounded-full font-bold hover:scale-105 transition-transform shadow-lg">
+              Créer une note
+            </button>
+          </motion.div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -111,7 +120,7 @@ export default function CalepinPage() {
               animate={{ opacity: 1, scale: 1 }}
               key={note.id}
               onClick={() => openNote(note)}
-              className="bg-yellow-50 dark:bg-yellow-900/20 p-5 rounded-2xl shadow-sm hover:shadow-md cursor-pointer transition-all border border-yellow-100 dark:border-yellow-800/30 group relative"
+              className="bg-white dark:bg-slate-800 p-6 rounded-[1.5rem] shadow-sm hover:shadow-xl cursor-pointer transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:-translate-y-1 group relative overflow-hidden"
             >
               <button
                 onClick={(e) => handleDelete(note.id, e)}
@@ -119,10 +128,12 @@ export default function CalepinPage() {
               >
                 <Trash2 className="w-4 h-4" />
               </button>
-              <h3 className="font-semibold text-slate-800 dark:text-yellow-100 mb-2 truncate pr-6">{note.titre || "Sans titre"}</h3>
-              <p className="text-sm text-slate-600 dark:text-yellow-200/70 whitespace-pre-wrap line-clamp-5">{note.contenu}</p>
-              <div className="mt-4 text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-                Modifié le {note.date}
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-zolio opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-3 truncate pr-6 font-mono">{note.titre || "Sans titre"}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap line-clamp-5 leading-relaxed">{note.contenu}</p>
+              <div className="mt-5 flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-medium bg-slate-50 dark:bg-slate-900/50 w-fit px-3 py-1.5 rounded-lg">
+                <span className="w-2 h-2 rounded-full bg-fuchsia-500/50 animate-pulse"></span>
+                {note.date}
               </div>
             </motion.div>
           ))}
@@ -139,24 +150,24 @@ export default function CalepinPage() {
               exit={{ opacity: 0, y: 20 }}
               className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-yellow-50 dark:bg-yellow-900/20">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
                 <input
                   type="text"
                   placeholder="Titre de la note..."
                   value={currentNote.titre || ""}
                   onChange={(e) => setCurrentNote({ ...currentNote, titre: e.target.value })}
-                  className="bg-transparent text-lg font-bold text-slate-800 dark:text-yellow-100 outline-none w-full placeholder:text-slate-400 dark:placeholder:text-yellow-700/50"
+                  className="bg-transparent text-2xl font-bold text-slate-900 dark:text-white outline-none w-full placeholder:text-slate-300 dark:placeholder:text-slate-600 font-mono"
                 />
                 <button onClick={() => setIsModalOpen(false)} className="p-2 text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full">
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="p-4 flex-grow overflow-y-auto bg-yellow-50/50 dark:bg-yellow-900/10">
+              <div className="p-6 flex-grow overflow-y-auto bg-slate-50/50 dark:bg-slate-800/30">
                 <textarea
                   placeholder="Écrivez vos notes de chantier, dimensions, idées..."
                   value={currentNote.contenu || ""}
                   onChange={(e) => setCurrentNote({ ...currentNote, contenu: e.target.value })}
-                  className="w-full h-64 bg-transparent outline-none resize-none text-slate-700 dark:text-yellow-50 leading-relaxed placeholder:text-slate-300 dark:placeholder:text-yellow-700/30"
+                  className="w-full h-72 bg-transparent outline-none resize-none text-slate-700 dark:text-slate-200 leading-relaxed placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   autoFocus
                 />
               </div>
@@ -164,7 +175,7 @@ export default function CalepinPage() {
                 <button
                   onClick={handleSave}
                   disabled={isSaving || (!currentNote.titre && !currentNote.contenu)}
-                  className="flex items-center gap-2 bg-violet-600 text-white px-6 py-2.5 rounded-full font-medium hover:bg-violet-700 transition disabled:opacity-50"
+                  className="flex items-center gap-2 bg-gradient-zolio text-white px-6 py-3 rounded-full font-bold hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100"
                 >
                   <Save className="w-4 h-4" />
                   {isSaving ? "Enregistrement..." : "Enregistrer"}
