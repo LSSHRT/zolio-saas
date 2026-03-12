@@ -374,6 +374,20 @@ export default function Dashboard() {
               {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(CA_TTC)}
             </h2>
             
+            {/* Gamification Objectif */}
+            <div className="mb-5 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10">
+              <div className="flex justify-between items-center text-xs font-medium mb-2">
+                <span>Objectif (5 000€)</span>
+                <span>{Math.min((CA_TTC / 5000) * 100, 100).toFixed(0)}%</span>
+              </div>
+              <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
+                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)]" style={{ width: `${Math.min((CA_TTC / 5000) * 100, 100)}%` }}></div>
+              </div>
+              <p className="text-[10px] text-violet-200 mt-1.5 text-right">
+                {CA_TTC >= 5000 ? '🎉 Objectif atteint !' : `Encore ${(5000 - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
+              </p>
+            </div>
+            
             <div className="flex gap-6 border-t border-white/20 pt-4">
               <div>
                 <p className="text-violet-100 text-xs mb-0.5">Devis total</p>

@@ -19,6 +19,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DepensesPage() {
   const { data: depenses, error, mutate } = useSWR<Depense[]>("/api/depenses", fetcher);
+  const { data: factures } = useSWR<any[]>("/api/factures", fetcher);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -50,6 +51,10 @@ export default function DepensesPage() {
   const totalTTC = filteredDepenses.reduce((acc, d) => acc + d.montantTTC, 0);
   const totalTVA = filteredDepenses.reduce((acc, d) => acc + d.tvaDeductible, 0);
   const totalHT = totalTTC - totalTVA;
+  
+  const facturesArray = Array.isArray(factures) ? factures : [];
+  const tvaCollectee = facturesArray.reduce((acc, f) => acc + ((parseFloat(f.totalTTC) || 0) - (parseFloat(f.totalHT) || 0)), 0);
+  const tvaAPayer = tvaCollectee - totalTVA;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
