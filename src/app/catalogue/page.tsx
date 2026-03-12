@@ -321,7 +321,7 @@ export default function CataloguePage() {
                 }
               }}
             />
-            Sélectionner tout (${filtered.length})
+            Sélectionner tout ({filtered.length})
           </label>
         </div>
 

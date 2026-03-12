@@ -156,7 +156,7 @@ export default function FacturesPage() {
                 }
               }}
             />
-            Sélectionner tout (${filtered.length})
+            Sélectionner tout ({filtered.length})
           </label>
         </div>
 
