@@ -160,11 +160,11 @@ export function generateDevisPDF(data: DevisData): Buffer {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
-    doc.text("Coordonnées bancaires pour le règlement :", 20, y + 25);
+    doc.text("Coordonnées bancaires pour le règlement :", 110, y + 25);
     doc.setFont("helvetica", "normal");
-    doc.text(`IBAN : ${data.entreprise.iban}`, 20, y + 32);
+    doc.text(`IBAN : ${data.entreprise.iban}`, 110, y + 32);
     if (data.entreprise.bic) {
-      doc.text(`BIC : ${data.entreprise.bic}`, 20, y + 38);
+      doc.text(`BIC : ${data.entreprise.bic}`, 110, y + 38);
     }
   }
 
