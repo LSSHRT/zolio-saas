@@ -293,7 +293,7 @@ export default function CataloguePage() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" }); }}
-          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-purple-500/30"
+          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}
         </motion.button>
@@ -311,7 +311,7 @@ export default function CataloguePage() {
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input 
               type="checkbox" 
-              className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+              className="w-4 h-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
@@ -353,7 +353,7 @@ export default function CataloguePage() {
               onChange={(e) => setForm({ ...form, coutMatiere: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
-              className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50">
+              className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter au catalogue"}
             </motion.button>
           </motion.form>
@@ -361,7 +361,7 @@ export default function CataloguePage() {
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-violet-500 rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
@@ -390,7 +390,7 @@ export default function CataloguePage() {
             {filtered.map((p, i) => (
               <motion.div key={p.id || i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center shrink-0">
                   <Package size={18} />
                 </div>
                 <div className="flex-1 min-w-0">

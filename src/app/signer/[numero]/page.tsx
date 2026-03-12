@@ -62,7 +62,7 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     );
   }
@@ -99,8 +99,8 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
       >
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center">
-              <PenTool className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center">
+              <PenTool className="w-6 h-6 text-violet-600 dark:text-violet-400" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Signature en ligne</h1>
@@ -115,14 +115,14 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500 dark:text-slate-400">Montant Total :</span>
-              <span className="font-bold text-lg text-blue-600 dark:text-blue-400">{devis.totalTTC} €</span>
+              <span className="font-bold text-lg text-violet-600 dark:text-violet-400">{devis.totalTTC} €</span>
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="font-medium text-slate-700 dark:text-slate-300">Votre signature</label>
-              <button onClick={clear} className="text-xs text-blue-600 hover:text-blue-700 font-medium">Effacer</button>
+              <button onClick={clear} className="text-xs text-violet-600 hover:text-violet-700 font-medium">Effacer</button>
             </div>
             <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
               <SignatureCanvas 
@@ -139,7 +139,7 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
           <button 
             onClick={save} 
             disabled={signing}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
           >
             {signing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
             {signing ? "Enregistrement..." : "Valider et Signer"}

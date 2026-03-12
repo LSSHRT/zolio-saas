@@ -176,7 +176,7 @@ export default function NouveauDevisPage() {
   // Paywall
   if (!checkingPro && !isPro && devisCount !== null && devisCount >= 3) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-fuchsia-200">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
           <Link href="/">
             <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
@@ -189,7 +189,7 @@ export default function NouveauDevisPage() {
         <main className="flex-1 px-6 flex flex-col items-center justify-center text-center -mt-10">
           <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mb-6 relative">
             <Lock size={32} className="text-slate-400" />
-            <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-100 rounded-full border-4 border-white flex items-center justify-center">
+            <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-violet-100 rounded-full border-4 border-white flex items-center justify-center">
               <Zap size={16} className="text-fuchsia-600" />
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function NouveauDevisPage() {
           </p>
 
           <Link href="/abonnement" className="w-full">
-            <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-gradient-zolio text-white font-bold rounded-xl shadow-xl shadow-purple-500/20">
+            <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-gradient-zolio text-white font-bold rounded-xl shadow-xl shadow-fuchsia-500/20">
               Découvrir Zolio Pro
             </motion.button>
           </Link>
@@ -227,7 +227,7 @@ export default function NouveauDevisPage() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center flex-1 gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
-                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-purple-500/30" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
+                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-fuchsia-500/30" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
                 {step > s ? <Check size={14} /> : s}
               </div>
               {s < 3 && <div className={`flex-1 h-1 rounded-full transition-all ${step > s ? "bg-gradient-zolio" : "bg-slate-100 dark:bg-slate-800"}`} />}
@@ -246,7 +246,7 @@ export default function NouveauDevisPage() {
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
               {selectedClient ? (
-                <div className="bg-fuchsia-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
+                <div className="bg-fuchsia-50 border border-violet-200 rounded-2xl p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient.nom.charAt(0)}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
@@ -312,7 +312,7 @@ export default function NouveauDevisPage() {
               </div>
                 <button
                   onClick={() => setShowForfaits(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold rounded-xl mt-3 hover:bg-indigo-100 transition"
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl mt-3 hover:bg-violet-100 transition"
                 >
                   <Package size={18} /> Insérer un Ouvrage / Forfait rapide
                 </button>
@@ -322,7 +322,7 @@ export default function NouveauDevisPage() {
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                 {filteredPrestations.map((p) => (
                   <motion.button key={p.id} whileTap={{ scale: 0.97 }} onClick={() => addLigne(p)}
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-fuchsia-50 hover:border-blue-200 transition">
+                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-fuchsia-50 hover:border-violet-200 transition">
                     <Plus size={16} className="text-fuchsia-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
@@ -446,12 +446,12 @@ export default function NouveauDevisPage() {
           <motion.button whileTap={{ scale: 0.96 }}
             onClick={() => setStep(step + 1)}
             disabled={(step === 1 && !selectedClient) || (step === 2 && lignes.length === 0)}
-            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 flex items-center gap-2 text-sm disabled:opacity-40">
+            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 flex items-center gap-2 text-sm disabled:opacity-40">
             Suivant <ArrowRight size={16} />
           </motion.button>
         ) : (
           <motion.button whileTap={{ scale: 0.96 }} onClick={handleSend} disabled={sending}
-            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 flex items-center gap-2 text-sm disabled:opacity-40">
+            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 flex items-center gap-2 text-sm disabled:opacity-40">
             {sending ? "Envoi..." : <>Créer le devis <Send size={16} /></>}
           </motion.button>
         )}

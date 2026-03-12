@@ -27,7 +27,7 @@ export default function ParametresEntreprise() {
   if (!isLoaded || !user) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
       </div>
     );
   }
@@ -96,7 +96,7 @@ export default function ParametresEntreprise() {
       </div>
 
       <div className="max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full px-4 pt-6">
-        <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 p-4 rounded-xl mb-6 text-sm">
+        <div className="bg-violet-50 dark:bg-violet-900/20 text-violet-800 dark:text-violet-300 p-4 rounded-xl mb-6 text-sm">
           Ces informations apparaîtront automatiquement sur tous les devis et factures que vous générez.
         </div>
 
@@ -112,7 +112,7 @@ export default function ParametresEntreprise() {
               value={formData.companyName}
               onChange={handleChange}
               placeholder="Ex: Maçonnerie Dupont"
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -127,7 +127,7 @@ export default function ParametresEntreprise() {
               onChange={handleChange}
               rows={3}
               placeholder="123 rue de la République&#10;75001 Paris"
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all resize-none"
             />
           </div>
 
@@ -142,7 +142,7 @@ export default function ParametresEntreprise() {
               value={formData.companyPhone}
               onChange={handleChange}
               placeholder="06 12 34 56 78"
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -157,7 +157,7 @@ export default function ParametresEntreprise() {
               value={formData.companySiret}
               onChange={handleChange}
               placeholder="123 456 789 00012"
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function ParametresEntreprise() {
               value={formData.companyLogo}
               onChange={handleChange}
               placeholder="https://mon-site.com/logo.png"
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -208,7 +208,7 @@ export default function ParametresEntreprise() {
                 value={formData.companyIban}
                 onChange={handleChange}
                 placeholder="FR76 1234..."
-                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
               />
             </div>
             <div>
@@ -222,7 +222,7 @@ export default function ParametresEntreprise() {
                 value={formData.companyBic}
                 onChange={handleChange}
                 placeholder="ABCDEF12"
-                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
               />
             </div>
           </div>
@@ -238,7 +238,7 @@ export default function ParametresEntreprise() {
               onChange={handleChange}
               rows={2}
               placeholder="TVA non applicable, art. 293 B du CGI."
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-none"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all resize-none"
             />
           </div>
 
@@ -252,7 +252,7 @@ export default function ParametresEntreprise() {
               onChange={handleChange}
               rows={6}
               placeholder="Article 1. Acceptation des conditions...&#10;Article 2. Modalités de paiement..."
-              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all resize-y"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all resize-y"
             />
           </div>
 
@@ -265,7 +265,7 @@ export default function ParametresEntreprise() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-4 rounded-xl shadow-lg shadow-blue-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
+            className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white font-semibold py-4 rounded-xl shadow-lg shadow-violet-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
           >
             {isSaving ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

@@ -124,7 +124,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   if (loading) {
     return (
       <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center">
-        <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -172,8 +172,8 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
       <main className="flex-1 px-6 flex flex-col gap-5 overflow-y-auto">
         {/* Client info */}
-        <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm">
+        <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center font-bold text-sm">
             {devisInfo?.nomClient?.charAt(0)}
           </div>
           <div>
@@ -187,7 +187,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold text-slate-700">Prestations ({lignes.length})</p>
             <motion.button whileTap={{ scale: 0.9 }} onClick={() => setShowAddPrestation(!showAddPrestation)}
-              className="text-xs text-blue-600 font-semibold flex items-center gap-1">
+              className="text-xs text-violet-600 font-semibold flex items-center gap-1">
               <Plus size={14} /> Ajouter
             </motion.button>
           </div>
@@ -198,13 +198,13 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               <div className="relative mb-2">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input type="text" placeholder="Rechercher..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
               </div>
               <div className="max-h-40 overflow-y-auto flex flex-col gap-1">
                 {filteredPrestations.map((p) => (
                   <button key={p.id} onClick={() => addLigne(p)}
-                    className="flex items-center gap-2 p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-left hover:bg-blue-50 transition text-sm">
-                    <Plus size={14} className="text-blue-500 shrink-0" />
+                    className="flex items-center gap-2 p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-left hover:bg-violet-50 transition text-sm">
+                    <Plus size={14} className="text-violet-500 shrink-0" />
                     <span className="flex-1 truncate">{p.nom}</span>
                     <span className="text-slate-500 dark:text-slate-400 text-xs">{p.prixUnitaireHT}€/{p.unite}</span>
                   </button>
@@ -259,7 +259,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         <div className="flex items-center gap-3 mt-4">
           <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Remise globale (%) :</label>
           <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
-            className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
         </div>
 
 
@@ -330,7 +330,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </motion.button>
         </Link>
         <motion.button whileTap={{ scale: 0.96 }} onClick={handleSaveAndResend} disabled={saving || lignes.length === 0}
-          className="flex-[2] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 flex items-center justify-center gap-2 text-sm disabled:opacity-40">
+          className="flex-[2] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 flex items-center justify-center gap-2 text-sm disabled:opacity-40">
           {saving ? "Envoi..." : <><Save size={16} /> Sauvegarder & Renvoyer <Send size={14} /></>}
         </motion.button>
       </div>

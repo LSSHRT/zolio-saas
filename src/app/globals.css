@@ -3,8 +3,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
-  --color-primary-blue: #0ea5e9;
-  --color-primary-purple: #8b5cf6;
+  --color-primary-violet: #6d28d9; /* violet-700 */
+  --color-primary-fuchsia: #d946ef; /* fuchsia-500 */
+  --color-primary-orange: #f97316; /* orange-500 */
   --color-bg-base: #f8fafc;
   
   --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -23,7 +24,7 @@
 
 @layer utilities {
   .bg-gradient-zolio {
-    background: linear-gradient(135deg, var(--color-primary-blue), var(--color-primary-purple));
+    background: linear-gradient(135deg, var(--color-primary-violet), var(--color-primary-fuchsia), var(--color-primary-orange));
   }
 }
 
@@ -49,7 +50,7 @@
   content: '';
   position: absolute;
   top: -2px; left: -2px; right: -2px; bottom: -2px;
-  background: linear-gradient(45deg, #3b82f6, #8b5cf6, #ec4899);
+  background: linear-gradient(45deg, var(--color-primary-violet), var(--color-primary-fuchsia), var(--color-primary-orange));
   z-index: -1;
   filter: blur(10px);
   opacity: 0;

@@ -106,13 +106,13 @@ export default function Dashboard() {
   return (
     <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/10 dark:from-violet-500/10 dark:to-fuchsia-500/5 blur-3xl -z-10 pointer-events-none"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-violet-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-fuchsia-400/10 dark:bg-fuchsia-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/10 dark:from-violet-500/10 dark:to-fuchsia-500/5 blur-3xl -z-10 pointer-events-none"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-violet-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-fuchsia-400/10 dark:bg-fuchsia-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       
       
       <Joyride
@@ -170,7 +170,7 @@ export default function Dashboard() {
               <div className="flex flex-col gap-3">
                 {/* Exemple de notification */}
                 <div className="flex gap-3 p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition cursor-pointer">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-fuchsia-500 text-xs font-bold">Z</span>
                   </div>
                   <div>
@@ -180,8 +180,8 @@ export default function Dashboard() {
                 </div>
                 
                 <div className="flex gap-3 p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition cursor-pointer">
-                  <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-purple-500 text-xs font-bold">✨</span>
+                  <div className="w-8 h-8 rounded-full bg-fuchsia-100 flex items-center justify-center flex-shrink-0">
+                    <span className="text-fuchsia-500 text-xs font-bold">✨</span>
                   </div>
                   <div>
                     <p className="text-sm text-slate-800 dark:text-slate-200"><span className="font-semibold">Nouveauté</span></p>
@@ -238,7 +238,7 @@ export default function Dashboard() {
 
         {/* PLG: Bannière de Parrainage */}
         {!user?.publicMetadata?.isPro && (
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-800/80 rounded-2xl p-4 border border-blue-100 dark:border-slate-700 flex items-center justify-between shadow-sm">
+          <div className="bg-gradient-to-r from-violet-50 to-violet-50 dark:from-slate-800 dark:to-slate-800/80 rounded-2xl p-4 border border-violet-100 dark:border-slate-700 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm">
                 <span className="text-xl">🎁</span>
@@ -253,7 +253,7 @@ export default function Dashboard() {
                 navigator.clipboard.writeText(`https://zolio.site/?ref=${user?.id}`);
                 alert("Lien de parrainage copié !");
               }}
-              className="bg-white dark:bg-slate-700 text-fuchsia-600 dark:text-blue-400 text-xs font-bold py-2 px-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 hover:scale-105 transition-transform"
+              className="bg-white dark:bg-slate-700 text-fuchsia-600 dark:text-violet-400 text-xs font-bold py-2 px-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 hover:scale-105 transition-transform"
             >
               Copier le lien
             </button>
@@ -266,7 +266,7 @@ export default function Dashboard() {
           <Link href="/nouveau-devis" className="tour-nouveau-devis flex-1 block">
             <motion.div 
               whileTap={{ scale: 0.96 }}
-              className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-purple-500/30 flex flex-col justify-between aspect-square"
+              className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-fuchsia-500/30 flex flex-col justify-between aspect-square"
             >
               <div className="w-12 h-12 bg-white dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
                 <Plus size={24} className="text-fuchsia-600 dark:text-white" />
@@ -299,7 +299,7 @@ export default function Dashboard() {
             <Link href="/catalogue" className="flex-1">
               <motion.div whileTap={{ scale: 0.96 }} className="h-full bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] p-4 flex flex-col justify-center border border-slate-100 dark:border-slate-800 shadow-sm cursor-pointer">
                 <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 mb-1">
-                  <Package size={16} className="text-purple-500" />
+                  <Package size={16} className="text-fuchsia-500" />
                   <span className="text-xs font-semibold">Catalogue</span>
                 </div>
                 <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">Voir →</p>
@@ -313,7 +313,7 @@ export default function Dashboard() {
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
               className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 text-fuchsia-600 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-violet-100 text-fuchsia-600 flex items-center justify-center">
                 <FileText size={20} />
               </div>
               <div>
@@ -338,27 +338,27 @@ export default function Dashboard() {
         </div>
 
         {/* Banner Stats Rapides */}
-        <div className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 dark:from-blue-900 dark:to-indigo-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
+        <div className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 dark:from-violet-900 dark:to-violet-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-violet-500/20 relative overflow-hidden">
           <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
           <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
           
           <div className="relative z-10">
-            <p className="text-blue-100 text-sm font-medium mb-1">Chiffre d'Affaires Global</p>
+            <p className="text-violet-100 text-sm font-medium mb-1">Chiffre d'Affaires Global</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-4">
               {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(CA_TTC)}
             </h2>
             
             <div className="flex gap-6 border-t border-white/20 pt-4">
               <div>
-                <p className="text-blue-100 text-xs mb-0.5">Devis total</p>
+                <p className="text-violet-100 text-xs mb-0.5">Devis total</p>
                 <p className="font-semibold">{devis.length}</p>
               </div>
               <div>
-                <p className="text-blue-100 text-xs mb-0.5">Devis acceptés</p>
+                <p className="text-violet-100 text-xs mb-0.5">Devis acceptés</p>
                 <p className="font-semibold">{devis.filter(d => d.statut === 'Accepté').length}</p>
               </div>
               <div>
-                <p className="text-blue-100 text-xs mb-0.5">En attente</p>
+                <p className="text-violet-100 text-xs mb-0.5">En attente</p>
                 <p className="font-semibold">{devis.filter(d => d.statut === 'En attente' || d.statut === 'En attente (Modifié)').length}</p>
               </div>
             </div>
@@ -587,7 +587,7 @@ export default function Dashboard() {
             </div>
           ) : devisRecents.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
-              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 shadow-inner">
+              <div className="w-20 h-20 bg-violet-100 dark:bg-violet-900/30 rounded-full flex items-center justify-center mb-4 shadow-inner">
                 <span className="text-4xl">📝</span>
               </div>
               <h3 className="font-bold text-slate-900 dark:text-white mb-1">Votre tableau de bord est bien calme...</h3>
@@ -603,7 +603,7 @@ export default function Dashboard() {
               {devisRecents.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
                   <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl hover:bg-slate-100 dark:bg-slate-800 transition cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 text-fuchsia-600 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-violet-100 text-fuchsia-600 flex items-center justify-center shrink-0">
                       <Clock size={16} />
                     </div>
                     <div className="flex-1 min-w-0">

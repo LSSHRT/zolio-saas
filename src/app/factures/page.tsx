@@ -146,7 +146,7 @@ export default function FacturesPage() {
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input 
               type="checkbox" 
-              className="w-4 h-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+              className="w-4 h-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
@@ -164,7 +164,7 @@ export default function FacturesPage() {
         {/* Liste factures */}
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-blue-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-violet-500 rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">

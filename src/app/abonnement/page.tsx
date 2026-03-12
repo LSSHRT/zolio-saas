@@ -30,12 +30,12 @@ export default function AbonnementPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-fuchsia-200">
       
       {/* Background Decor */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-slate-900 rounded-b-[3rem] overflow-hidden z-0">
-        <div className="absolute top-[-50%] left-[-20%] w-[140%] h-[140%] bg-gradient-to-br from-blue-500/30 via-purple-600/30 to-blue-900/40 blur-3xl opacity-60 rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute top-20 right-10 w-32 h-32 bg-purple-500/40 blur-2xl rounded-full" />
+        <div className="absolute top-[-50%] left-[-20%] w-[140%] h-[140%] bg-gradient-to-br from-violet-500/30 via-fuchsia-600/30 to-violet-900/40 blur-3xl opacity-60 rounded-full mix-blend-screen animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute top-20 right-10 w-32 h-32 bg-fuchsia-500/40 blur-2xl rounded-full" />
       </div>
 
       {/* Header */}
@@ -49,7 +49,7 @@ export default function AbonnementPage() {
 
       <main className="relative z-10 flex-1 px-6 flex flex-col mt-4">
         <div className="text-center mb-8">
-          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-[10px] font-bold tracking-wider uppercase mb-4">
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-400/30 text-violet-300 text-[10px] font-bold tracking-wider uppercase mb-4">
             <Sparkles size={12} /> Zolio Pro
           </motion.div>
           <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-3xl font-bold text-white mb-3">
@@ -61,7 +61,7 @@ export default function AbonnementPage() {
         </div>
 
         {/* Pricing Card */}
-        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl shadow-purple-900/20 border border-slate-100 dark:border-slate-800 relative">
+        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl shadow-fuchsia-900/20 border border-slate-100 dark:border-slate-800 relative">
           
           {/* Toggle */}
           <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-6 relative">
@@ -96,7 +96,7 @@ export default function AbonnementPage() {
               "Support client prioritaire"
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <div className="w-5 h-5 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
                   <CheckCircle2 size={12} strokeWidth={3} />
                 </div>
                 <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>
