@@ -11,7 +11,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Zolio - Votre SaaS Artisan",
+  title: "Zolio - Devis Professionnel",
   description: "Créez et gérez vos devis en quelques secondes.",
 };
 
