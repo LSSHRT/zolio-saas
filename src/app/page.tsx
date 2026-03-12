@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock } from "lucide-react";
+import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import { useState, useEffect, useMemo } from "react";
 import Joyride, { CallBackProps, STATUS } from "react-joyride";
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Devis {
@@ -72,6 +72,22 @@ export default function Dashboard() {
   const CA_HT = devis.reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
   const CA_TTC = devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
   const devisRecents = devis.slice(0, 3); // Les 3 derniers devis générés
+
+  
+  // Dynamic greeting
+  const currentHour = new Date().getHours();
+  let greetingText = "Bonjour";
+  let WeatherIcon = Sun;
+  if (currentHour < 12) {
+    greetingText = "Bonjour";
+    WeatherIcon = CloudSun;
+  } else if (currentHour < 18) {
+    greetingText = "Bon après-midi";
+    WeatherIcon = Sun;
+  } else {
+    greetingText = "Bonsoir";
+    WeatherIcon = Moon;
+  }
 
   const devisARelancer = devis.filter(d => {
     if (d.statut === "Accepté" || d.statut === "Refusé") return false;
@@ -440,17 +456,24 @@ export default function Dashboard() {
                      <div className="w-full h-full flex items-center justify-center text-slate-400 text-sm">Chargement du graphique...</div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={monthlyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                      <AreaChart data={monthlyData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorCA" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                         <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={10} />
                         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(val) => `${val}€`} />
                         <Tooltip 
-                          cursor={{ fill: '#f1f5f9' }}
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                          cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '3 3' }}
+                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: 'rgba(255, 255, 255, 0.9)', backdropFilter: 'blur(8px)' }}
+                          itemStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                           formatter={(value: any) => [`${value}€`, 'CA HT']}
                         />
-                        <Bar dataKey="CA" fill="#0ea5e9" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                      </BarChart>
+                        <Area type="monotone" dataKey="CA" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorCA)" />
+                      </AreaChart>
                     </ResponsiveContainer>
                   )}
                 </div>
