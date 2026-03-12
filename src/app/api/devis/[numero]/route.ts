@@ -217,55 +217,83 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const { numero } = await params;
+    const p = await params;
+    const { numero } = p;
     const sheets = await getGoogleSheetsClient();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
-    // 1. Supprimer la ligne dans Devis_Emis
+    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId });
+    const devisSheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Devis_Emis");
+    const lignesSheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Lignes_Devis");
+    
+    if (!devisSheet || devisSheet.properties?.sheetId === undefined || !lignesSheet || lignesSheet.properties?.sheetId === undefined) {
+      return NextResponse.json({ error: "Onglets introuvables" }, { status: 404 });
+    }
+
+    const devisSheetId = devisSheet.properties.sheetId;
+    const lignesSheetId = lignesSheet.properties.sheetId;
+
+    // 1. Trouver la ligne dans Devis_Emis
     const devisRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      spreadsheetId,
       range: "Devis_Emis!A:J",
     });
     const devisRows = devisRes.data.values || [];
-    
-    // Vérification Propriétaire
-    const ownerCheck = devisRows.find(r => r[0] === userId && r[1] === numero);
-    if (!ownerCheck) {
+    const devisRowIndex = devisRows.findIndex(r => r[0] === userId && r[1] === numero);
+
+    if (devisRowIndex === -1) {
       return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
     }
 
-    const otherDevis = devisRows.filter((r, i) => i === 0 || !(r[0] === userId && r[1] === numero));
-
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:J",
-    });
-    if (otherDevis.length > 0) {
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Devis_Emis!A1",
-        valueInputOption: "USER_ENTERED",
-        requestBody: { values: otherDevis },
-      });
-    }
-
-    // 2. Supprimer les lignes de détail associées
+    // 2. Trouver les lignes dans Lignes_Devis
     const lignesRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      spreadsheetId,
       range: "Lignes_Devis!A:G",
     });
     const allLignes = lignesRes.data.values || [];
-    const otherLignes = allLignes.filter((r, i) => i === 0 || !(r[0] === userId && r[1] === numero));
-
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:G",
+    
+    // Trouver tous les index des lignes à supprimer (de bas en haut pour ne pas décaler les index)
+    const lignesIndices = [];
+    allLignes.forEach((r, i) => {
+      if (r[0] === userId && r[1] === numero) {
+        lignesIndices.push(i);
+      }
     });
-    if (otherLignes.length > 0) {
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Lignes_Devis!A1",
-        valueInputOption: "USER_ENTERED",
-        requestBody: { values: otherLignes },
+    lignesIndices.sort((a, b) => b - a); // Décroissant
+
+    // 3. Préparer les requêtes de suppression
+    const requests = [];
+    
+    // Supprimer le devis principal
+    requests.push({
+      deleteDimension: {
+        range: {
+          sheetId: devisSheetId,
+          dimension: "ROWS",
+          startIndex: devisRowIndex,
+          endIndex: devisRowIndex + 1,
+        }
+      }
+    });
+
+    // Supprimer les lignes associées
+    for (const idx of lignesIndices) {
+      requests.push({
+        deleteDimension: {
+          range: {
+            sheetId: lignesSheetId,
+            dimension: "ROWS",
+            startIndex: idx,
+            endIndex: idx + 1,
+          }
+        }
+      });
+    }
+
+    if (requests.length > 0) {
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId,
+        requestBody: { requests },
       });
     }
 
