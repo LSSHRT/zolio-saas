@@ -103,18 +103,24 @@ export default function Dashboard() {
 
   
   // Dynamic greeting
-  const currentHour = new Date().getHours();
+  const [currentHour, setCurrentHour] = useState<number | null>(null);
+  useEffect(() => {
+    setCurrentHour(new Date().getHours());
+  }, []);
+
   let greetingText = "Bonjour";
   let WeatherIcon = Sun;
-  if (currentHour < 12) {
-    greetingText = "Bonjour";
-    WeatherIcon = CloudSun;
-  } else if (currentHour < 18) {
-    greetingText = "Bon après-midi";
-    WeatherIcon = Sun;
-  } else {
-    greetingText = "Bonsoir";
-    WeatherIcon = Moon;
+  if (currentHour !== null) {
+    if (currentHour < 12) {
+      greetingText = "Bonjour";
+      WeatherIcon = CloudSun;
+    } else if (currentHour < 18) {
+      greetingText = "Bon après-midi";
+      WeatherIcon = Sun;
+    } else {
+      greetingText = "Bonsoir";
+      WeatherIcon = Moon;
+    }
   }
 
   const devisARelancer = devis.filter(d => {
