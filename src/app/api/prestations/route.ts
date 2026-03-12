@@ -47,21 +47,16 @@ export async function POST(request: Request) {
 
     // Check if body is an array for bulk insertion
     if (Array.isArray(body)) {
-      const existing = await sheets.spreadsheets.values.get({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Catalogue_Prestations!B:B",
-      });
-      let baseId = existing.data.values?.length || 1;
-
       const rows = body.map((item, index) => {
-        const nextId = `PREST-${String(baseId + index).padStart(3, "0")}`;
+        const nextId = `PREST-${Date.now()}-${index}-${Math.floor(Math.random() * 1000)}`;
         return [userId, nextId, item.categorie, item.nom, item.unite, item.prixUnitaireHT, item.coutMatiere || ""];
       });
 
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
         range: "Catalogue_Prestations!A:G",
-        valueInputOption: "USER_ENTERED",
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
         requestBody: { values: rows },
       });
 
@@ -70,17 +65,13 @@ export async function POST(request: Request) {
 
     // Single insertion
     const { categorie, nom, unite, prixUnitaireHT, coutMatiere } = body;
-
-    const existing = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Catalogue_Prestations!B:B",
-    });
-    const nextId = `PREST-${String((existing.data.values?.length || 1)).padStart(3, "0")}`;
+    const nextId = `PREST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: "Catalogue_Prestations!A:G",
-      valueInputOption: "USER_ENTERED",
+      valueInputOption: "RAW",
+      insertDataOption: "INSERT_ROWS",
       requestBody: {
         values: [[userId, nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere || ""]],
       },
