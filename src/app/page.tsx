@@ -128,27 +128,106 @@ export default function Dashboard() {
 
         {/* Dynamic Charts / Income Area */}
         <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-5">
-          <div className="flex justify-between items-end mb-6">
-            <div>
-              <h3 className="text-slate-500 text-sm font-medium mb-1">Chiffre d'Affaires HT</h3>
-              <p className="text-2xl font-bold text-slate-900">
-                {loading ? "..." : `${CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
-              </p>
-              <p className="text-[10px] text-slate-400 mt-1">
-                TTC : {loading ? "..." : `${CA_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
-              </p>
-            </div>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-slate-900 text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
             <div className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
               <FileText size={12} /> {devis.length} Devis
             </div>
           </div>
-          
-          <div className="h-24 w-full relative flex items-end">
-            <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="w-full h-full text-blue-500/10 absolute bottom-0 left-0">
-               <path d="M0 40 L0 30 Q 15 20 25 25 T 50 15 T 75 10 T 100 5 L100 40 Z" fill="currentColor" />
-               <path d="M0 30 Q 15 20 25 25 T 50 15 T 75 10 T 100 5" fill="none" stroke="var(--color-primary-purple)" strokeWidth="1.5"/>
-            </svg>
-          </div>
+
+          {/* Montants par statut */}
+          {(() => {
+            const isEnAttente = (s: string) => s === "En attente" || s === "En attente (Modifié)";
+            const CA_Valide_HT = devis.filter(d => d.statut === "Accepté").reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
+            const CA_Attente_HT = devis.filter(d => isEnAttente(d.statut)).reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
+            const CA_Valide_TTC = devis.filter(d => d.statut === "Accepté").reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
+            const CA_Attente_TTC = devis.filter(d => isEnAttente(d.statut)).reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
+            const total = CA_Valide_HT + CA_Attente_HT;
+            const pctValide = total > 0 ? (CA_Valide_HT / total) * 100 : 0;
+            const pctAttente = total > 0 ? (CA_Attente_HT / total) * 100 : 0;
+            const nbValide = devis.filter(d => d.statut === "Accepté").length;
+            const nbAttente = devis.filter(d => isEnAttente(d.statut)).length;
+
+            return (
+              <>
+                {/* Deux cartes côte à côte */}
+                <div className="flex gap-3 mb-4">
+                  <div className="flex-1 bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-semibold text-emerald-700">CA Validé</span>
+                      <span className="text-[10px] text-emerald-500 ml-auto">{nbValide} devis</span>
+                    </div>
+                    <p className="text-lg font-bold text-emerald-700">
+                      {loading ? "..." : `${CA_Valide_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
+                    </p>
+                    <p className="text-[10px] text-emerald-500">
+                      TTC : {loading ? "..." : `${CA_Valide_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
+                    </p>
+                  </div>
+                  <div className="flex-1 bg-amber-50 rounded-xl p-3 border border-amber-100">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-amber-500" />
+                      <span className="text-[10px] font-semibold text-amber-700">En Attente</span>
+                      <span className="text-[10px] text-amber-500 ml-auto">{nbAttente} devis</span>
+                    </div>
+                    <p className="text-lg font-bold text-amber-700">
+                      {loading ? "..." : `${CA_Attente_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
+                    </p>
+                    <p className="text-[10px] text-amber-500">
+                      TTC : {loading ? "..." : `${CA_Attente_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Barre de progression */}
+                <div className="mb-3">
+                  <div className="flex justify-between text-[10px] text-slate-500 mb-1.5">
+                    <span>Répartition du CA HT</span>
+                    <span>{CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€ total</span>
+                  </div>
+                  <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex">
+                    {pctValide > 0 && (
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pctValide}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-l-full"
+                      />
+                    )}
+                    {pctAttente > 0 && (
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pctAttente}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+                        className="h-full bg-gradient-to-r from-amber-300 to-amber-400"
+                      />
+                    )}
+                  </div>
+                  <div className="flex justify-between text-[10px] mt-1">
+                    <span className="text-emerald-600 font-semibold">{pctValide.toFixed(0)}% validé</span>
+                    <span className="text-amber-600 font-semibold">{pctAttente.toFixed(0)}% en attente</span>
+                  </div>
+                </div>
+
+                {/* Total global */}
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] text-slate-400">CA Total HT</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {loading ? "..." : `${CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-slate-400">CA Total TTC</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {loading ? "..." : `${CA_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
+                    </p>
+                  </div>
+                </div>
+              </>
+            );
+          })()}
         </div>
 
         {/* Dynamic Recent Activity */}

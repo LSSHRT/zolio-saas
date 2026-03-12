@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X } from "lucide-react";
 import Link from "next/link";
 
 interface Devis {
@@ -29,6 +29,7 @@ export default function DevisPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/devis")
@@ -49,11 +50,35 @@ export default function DevisPage() {
     setDeleting(null);
   };
 
+  const handleUpdateStatut = async (numero: string, newStatut: string) => {
+    setUpdatingStatut(numero);
+    try {
+      const res = await fetch(`/api/devis/${numero}/statut`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ statut: newStatut }),
+      });
+      if (res.ok) {
+        setDevis(devis.map((d) => d.numero === numero ? { ...d, statut: newStatut } : d));
+      } else {
+        alert("Erreur lors de la mise à jour du statut");
+      }
+    } catch {
+      alert("Erreur réseau");
+    }
+    setUpdatingStatut(null);
+  };
+
+  const isEnAttente = (statut: string) =>
+    statut === "En attente" || statut === "En attente (Modifié)";
+
   const filtered = devis.filter(
     (d) => d.nomClient.toLowerCase().includes(search.toLowerCase()) || d.numero.toLowerCase().includes(search.toLowerCase())
   );
 
   const totalMois = devis.reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
+  const totalValide = devis.filter((d) => d.statut === "Accepté").reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
+  const totalAttente = devis.filter((d) => isEnAttente(d.statut)).reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
 
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md mx-auto bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
@@ -76,6 +101,16 @@ export default function DevisPage() {
 
       <main className="flex-1 px-6 flex flex-col gap-6">
         {/* Stats rapide */}
+        <div className="flex gap-3">
+          <div className="flex-1 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white">
+            <p className="text-white/70 text-xs font-medium">✓ CA Validé</p>
+            <p className="text-2xl font-bold mt-1">{totalValide.toFixed(0)}€</p>
+          </div>
+          <div className="flex-1 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl p-4 text-white">
+            <p className="text-white/70 text-xs font-medium">⏳ En attente</p>
+            <p className="text-2xl font-bold mt-1">{totalAttente.toFixed(0)}€</p>
+          </div>
+        </div>
         <div className="flex gap-3">
           <div className="flex-1 bg-gradient-zolio rounded-2xl p-4 text-white">
             <p className="text-white/70 text-xs font-medium">Total TTC (tous devis)</p>
@@ -115,6 +150,8 @@ export default function DevisPage() {
             {filtered.map((d, i) => {
               const config = statutConfig[d.statut] || statutConfig["En attente"];
               const Icon = config.icon;
+              const pending = isEnAttente(d.statut);
+              const isUpdating = updatingStatut === d.numero;
               return (
                 <motion.div
                   key={d.numero || i}
@@ -151,6 +188,36 @@ export default function DevisPage() {
                       <p className="text-lg font-bold text-slate-900">{d.totalTTC}€</p>
                     </div>
                   </div>
+
+                  {/* Boutons Valider / Refuser pour les devis en attente */}
+                  <AnimatePresence>
+                    {pending && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex gap-2 mt-3 pt-3 border-t border-slate-100"
+                      >
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => handleUpdateStatut(d.numero, "Accepté")}
+                          disabled={isUpdating}
+                          className="flex-1 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-emerald-100 hover:border-emerald-400 transition disabled:opacity-50"
+                        >
+                          <Check size={16} /> {isUpdating ? "..." : "Valider"}
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => handleUpdateStatut(d.numero, "Refusé")}
+                          disabled={isUpdating}
+                          className="flex-1 py-2.5 bg-red-50 border border-red-200 text-red-500 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-red-100 hover:border-red-400 transition disabled:opacity-50"
+                        >
+                          <X size={16} /> {isUpdating ? "..." : "Refuser"}
+                        </motion.button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   <div className="flex gap-2 mt-3">
                     <Link href={`/devis/${d.numero}`} className="flex-1">
                       <motion.button whileTap={{ scale: 0.96 }}
