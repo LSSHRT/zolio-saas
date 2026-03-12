@@ -30,7 +30,7 @@ export default function AbonnementPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
       
       {/* Background Decor */}
       <div className="absolute top-0 left-0 right-0 h-96 bg-slate-900 rounded-b-[3rem] overflow-hidden z-0">
@@ -41,7 +41,7 @@ export default function AbonnementPage() {
       {/* Header */}
       <header className="relative z-10 flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white">
+          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-white dark:bg-slate-900/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white">
             <ArrowLeft size={20} />
           </motion.div>
         </Link>
@@ -61,19 +61,19 @@ export default function AbonnementPage() {
         </div>
 
         {/* Pricing Card */}
-        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-white rounded-3xl p-6 shadow-2xl shadow-purple-900/20 border border-slate-100 relative">
+        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl shadow-purple-900/20 border border-slate-100 dark:border-slate-800 relative">
           
           {/* Toggle */}
-          <div className="flex bg-slate-100 rounded-xl p-1 mb-6 relative">
-            <div className={`absolute inset-y-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-sm transition-all duration-300 ${isAnnual ? 'left-[calc(50%+2px)]' : 'left-1'}`} />
-            <button onClick={() => setIsAnnual(false)} className={`flex-1 py-2 text-xs font-semibold z-10 transition-colors ${!isAnnual ? 'text-slate-900' : 'text-slate-500'}`}>Mensuel</button>
-            <button onClick={() => setIsAnnual(true)} className={`flex-1 py-2 text-xs font-semibold z-10 transition-colors flex items-center justify-center gap-1 ${isAnnual ? 'text-slate-900' : 'text-slate-500'}`}>
+          <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-6 relative">
+            <div className={`absolute inset-y-1 w-[calc(50%-4px)] bg-white dark:bg-slate-900 rounded-lg shadow-sm transition-all duration-300 ${isAnnual ? 'left-[calc(50%+2px)]' : 'left-1'}`} />
+            <button onClick={() => setIsAnnual(false)} className={`flex-1 py-2 text-xs font-semibold z-10 transition-colors ${!isAnnual ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>Mensuel</button>
+            <button onClick={() => setIsAnnual(true)} className={`flex-1 py-2 text-xs font-semibold z-10 transition-colors flex items-center justify-center gap-1 ${isAnnual ? 'text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
               Annuel <span className="text-[9px] bg-emerald-100 text-emerald-600 px-1.5 py-0.5 rounded-full font-bold">-30%</span>
             </button>
           </div>
 
           <div className="flex items-end gap-1 mb-6">
-            <span className="text-4xl font-extrabold text-slate-900">{price}€</span>
+            <span className="text-4xl font-extrabold text-slate-900 dark:text-white">{price}€</span>
             <span className="text-sm font-medium text-slate-400 mb-1">/mois {isAnnual && 'facturé annuellement'}</span>
           </div>
 
@@ -99,7 +99,7 @@ export default function AbonnementPage() {
                 <div className="w-5 h-5 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <CheckCircle2 size={12} strokeWidth={3} />
                 </div>
-                <span className="text-sm text-slate-600 font-medium">{feature}</span>
+                <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{feature}</span>
               </div>
             ))}
           </div>

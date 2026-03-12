@@ -106,15 +106,15 @@ export default function NouveauDevisPage() {
 
   if (success) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
           className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
           <Check size={48} className="text-emerald-600" />
         </motion.div>
         <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="text-2xl font-bold text-slate-900 mb-2 text-center">Devis créé ! 🎉</motion.h1>
+          className="text-2xl font-bold text-slate-900 dark:text-white mb-2 text-center">Devis créé ! 🎉</motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="text-slate-500 text-center text-sm mb-2">
+          className="text-slate-500 dark:text-slate-400 text-center text-sm mb-2">
           {devisResult?.numeroDevis} — {devisResult?.totalTTC}€ TTC
         </motion.p>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
@@ -133,14 +133,14 @@ export default function NouveauDevisPage() {
   // Paywall
   if (!checkingPro && !isPro && devisCount !== null && devisCount >= 3) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-purple-200">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
           <Link href="/">
-            <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+            <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
               <ArrowLeft size={20} />
             </motion.div>
           </Link>
-          <h1 className="text-xl font-bold text-slate-900">Nouveau Devis</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">Nouveau Devis</h1>
         </header>
         
         <main className="flex-1 px-6 flex flex-col items-center justify-center text-center -mt-10">
@@ -151,8 +151,8 @@ export default function NouveauDevisPage() {
             </div>
           </div>
           
-          <h2 className="text-2xl font-bold text-slate-900 mb-3">Fonctionnalité Premium</h2>
-          <p className="text-slate-500 text-sm mb-8 px-4 leading-relaxed">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Fonctionnalité Premium</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 px-4 leading-relaxed">
             Vous avez atteint la limite de 3 devis gratuits. Passez à la version Zolio Pro pour créer des devis illimités.
           </p>
 
@@ -167,15 +167,15 @@ export default function NouveauDevisPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
             <ArrowLeft size={20} />
           </motion.div>
         </Link>
-        <h1 className="text-xl font-bold text-slate-900">Nouveau Devis</h1>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Nouveau Devis</h1>
       </header>
 
       {/* Progress bar */}
@@ -184,14 +184,14 @@ export default function NouveauDevisPage() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center flex-1 gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
-                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-purple-500/30" : "bg-slate-100 text-slate-400"}`}>
+                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-purple-500/30" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
                 {step > s ? <Check size={14} /> : s}
               </div>
-              {s < 3 && <div className={`flex-1 h-1 rounded-full transition-all ${step > s ? "bg-gradient-zolio" : "bg-slate-100"}`} />}
+              {s < 3 && <div className={`flex-1 h-1 rounded-full transition-all ${step > s ? "bg-gradient-zolio" : "bg-slate-100 dark:bg-slate-800"}`} />}
             </div>
           ))}
         </div>
-        <p className="text-xs text-slate-500 font-medium">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
           {step === 1 ? "Sélectionner un client" : step === 2 ? "Ajouter des prestations" : "Valider et envoyer"}
         </p>
       </div>
@@ -206,8 +206,8 @@ export default function NouveauDevisPage() {
                 <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient.nom.charAt(0)}</div>
                   <div className="flex-1">
-                    <p className="font-semibold text-slate-900 text-sm">{selectedClient.nom}</p>
-                    <p className="text-xs text-slate-500">{selectedClient.email}</p>
+                    <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient.email}</p>
                   </div>
                   <button onClick={() => setSelectedClient(null)} className="text-slate-400"><X size={18} /></button>
                 </div>
@@ -216,25 +216,25 @@ export default function NouveauDevisPage() {
                   <div className="relative">
                     <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input type="text" placeholder="Rechercher un client..." value={searchClient} onChange={(e) => setSearchClient(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
                   </div>
                   <motion.button whileTap={{ scale: 0.96 }} onClick={() => setShowNewClient(true)}
-                    className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-slate-500 text-sm">
+                    className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 text-slate-500 dark:text-slate-400 text-sm">
                     <Plus size={18} /> Créer un nouveau client
                   </motion.button>
 
                   {showNewClient && (
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-50 rounded-2xl p-4 flex flex-col gap-2 border border-slate-200">
+                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col gap-2 border border-slate-200 dark:border-slate-700">
                       <input required placeholder="Nom" value={newClient.nom} onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
-                        className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
                       <input required type="email" placeholder="Email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                        className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
                       <input placeholder="Téléphone" value={newClient.telephone} onChange={(e) => setNewClient({ ...newClient, telephone: e.target.value })}
-                        className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
                       <input placeholder="Adresse" value={newClient.adresse} onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
-                        className="px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
                       <div className="flex gap-2 mt-1">
-                        <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 bg-white border border-slate-200 rounded-xl">Annuler</button>
+                        <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
                         <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient}
                           className="flex-1 py-2 text-sm text-white bg-gradient-zolio rounded-xl font-semibold">Ajouter</motion.button>
                       </div>
@@ -244,10 +244,10 @@ export default function NouveauDevisPage() {
                   <div className="flex flex-col gap-2">
                     {filteredClients.map((c) => (
                       <motion.button key={c.id} whileTap={{ scale: 0.97 }} onClick={() => setSelectedClient(c)}
-                        className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-2xl text-left hover:bg-slate-50 transition">
-                        <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs">{c.nom.charAt(0)}</div>
+                        className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
+                        <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{c.nom.charAt(0)}</div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-900 text-sm truncate">{c.nom}</p>
+                          <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{c.nom}</p>
                           <p className="text-xs text-slate-400 truncate">{c.email}</p>
                         </div>
                       </motion.button>
@@ -265,17 +265,17 @@ export default function NouveauDevisPage() {
               <div className="relative">
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input type="text" placeholder="Rechercher une prestation..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
               </div>
 
               {/* Liste des prestations disponibles */}
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                 {filteredPrestations.map((p) => (
                   <motion.button key={p.id} whileTap={{ scale: 0.97 }} onClick={() => addLigne(p)}
-                    className="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl text-left hover:bg-blue-50 hover:border-blue-200 transition">
+                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-blue-50 hover:border-blue-200 transition">
                     <Plus size={16} className="text-blue-500 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800 truncate">{p.nom}</p>
+                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
                       <p className="text-[10px] text-slate-400">{p.categorie}</p>
                     </div>
                     <span className="text-sm font-bold text-slate-700">{p.prixUnitaireHT}€/{p.unite}</span>
@@ -286,17 +286,17 @@ export default function NouveauDevisPage() {
               {/* Lignes ajoutées */}
               {lignes.length > 0 && (
                 <div className="mt-2">
-                  <p className="text-xs font-semibold text-slate-500 mb-2">Lignes du devis ({lignes.length})</p>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Lignes du devis ({lignes.length})</p>
                   <div className="flex flex-col gap-2">
                     {lignes.map((l, i) => (
-                      <div key={i} className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+                      <div key={i} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800 truncate">{l.nomPrestation}</p>
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{l.nomPrestation}</p>
                           <p className="text-[10px] text-slate-400">{l.prixUnitaire}€/{l.unite}</p>
                         </div>
                         <input type="number" min="1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
-                          className="w-16 text-center py-1 px-2 bg-white border border-slate-200 rounded-lg text-sm" />
-                        <span className="text-sm font-bold text-slate-800 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
+                          className="w-16 text-center py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
+                        <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
                         <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
                       </div>
                     ))}
@@ -310,36 +310,36 @@ export default function NouveauDevisPage() {
           {step === 3 && (
             <motion.div key="step3" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-5">
               {/* Client */}
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-500 font-medium mb-2">Client</p>
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2">Client</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient?.nom.charAt(0)}</div>
                   <div>
-                    <p className="font-semibold text-slate-900 text-sm">{selectedClient?.nom}</p>
-                    <p className="text-xs text-slate-500">{selectedClient?.email}</p>
+                    <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient?.nom}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient?.email}</p>
                   </div>
                 </div>
               </div>
 
               {/* Lignes */}
-              <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-500 font-medium mb-3">Prestations</p>
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-3">Prestations</p>
                 {lignes.map((l, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0">
+                  <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
                     <div>
-                      <p className="text-sm text-slate-800">{l.nomPrestation}</p>
+                      <p className="text-sm text-slate-800 dark:text-slate-200">{l.nomPrestation}</p>
                       <p className="text-[10px] text-slate-400">{l.quantite} {l.unite} × {l.prixUnitaire}€</p>
                     </div>
-                    <p className="font-bold text-sm text-slate-800">{l.totalLigne.toFixed(2)}€</p>
+                    <p className="font-bold text-sm text-slate-800 dark:text-slate-200">{l.totalLigne.toFixed(2)}€</p>
                   </div>
                 ))}
               </div>
 
               {/* TVA */}
               <div className="flex items-center gap-3">
-                <label className="text-sm text-slate-600 font-medium">Taux TVA :</label>
+                <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Taux TVA :</label>
                 <select value={tva} onChange={(e) => setTva(e.target.value)}
-                  className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none">
                   <option value="0">0% (Auto-entrepreneur)</option>
                   <option value="10">10% (Rénovation)</option>
                   <option value="20">20% (Normal)</option>
@@ -356,7 +356,7 @@ export default function NouveauDevisPage() {
                   <span className="text-white/70 text-sm">TVA ({tva}%)</span>
                   <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
                 </div>
-                <div className="h-px bg-white/20 my-2" />
+                <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
                 <div className="flex justify-between">
                   <span className="font-bold text-lg">Total TTC</span>
                   <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
@@ -368,10 +368,10 @@ export default function NouveauDevisPage() {
       </main>
 
       {/* Bottom Action Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 flex gap-3 sm:rounded-b-[3rem]">
+      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
         {step > 1 && (
           <motion.button whileTap={{ scale: 0.96 }} onClick={() => setStep(step - 1)}
-            className="px-6 py-3 bg-slate-100 text-slate-700 font-semibold rounded-xl flex items-center gap-2 text-sm">
+            className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 font-semibold rounded-xl flex items-center gap-2 text-sm">
             <ArrowLeft size={16} /> Retour
           </motion.button>
         )}

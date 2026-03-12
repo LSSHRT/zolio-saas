@@ -33,7 +33,7 @@ export default function AbonnementSuccessPage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8 relative">
+    <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8 relative">
       
       {/* Background Decor */}
       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-gradient-to-br from-blue-50 to-purple-50 blur-3xl opacity-60 rounded-full mix-blend-multiply pointer-events-none" />
@@ -44,20 +44,20 @@ export default function AbonnementSuccessPage() {
       </motion.div>
       
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-center relative z-10">
-        <h1 className="text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">Bienvenue sur<br />Zolio Pro ! 🎉</h1>
+        <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-3 tracking-tight">Bienvenue sur<br />Zolio Pro ! 🎉</h1>
         
-        <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-8 shadow-sm">
-          <p className="text-slate-600 text-sm mb-4 leading-relaxed">
+        <div className="bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 mb-8 shadow-sm">
+          <p className="text-slate-600 dark:text-slate-300 text-sm mb-4 leading-relaxed">
             Votre paiement a été validé avec succès. Vous avez désormais accès à toutes les fonctionnalités illimitées.
           </p>
           <div className="flex flex-col gap-2 text-left">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
               <Sparkles size={14} className="text-purple-500" /> Devis PDF illimités
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
               <Sparkles size={14} className="text-purple-500" /> Envois emails automatiques
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
               <Sparkles size={14} className="text-purple-500" /> Support prioritaire
             </div>
           </div>

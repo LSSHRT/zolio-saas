@@ -53,15 +53,15 @@ export default function ClientsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600">
+          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
             <ArrowLeft size={20} />
           </motion.div>
         </Link>
-        <h1 className="text-xl font-bold text-slate-900">Mes Clients</h1>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Clients</h1>
         <div className="flex-1" />
         <motion.button
           whileTap={{ scale: 0.9 }}
@@ -81,7 +81,7 @@ export default function ClientsPage() {
             placeholder="Rechercher un client..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
           />
         </div>
 
@@ -91,17 +91,17 @@ export default function ClientsPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             onSubmit={handleSubmit}
-            className="bg-slate-50 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200"
+            className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200 dark:border-slate-700"
           >
-            <h2 className="font-semibold text-slate-800 mb-1">Nouveau Client</h2>
+            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">Nouveau Client</h2>
             <input required placeholder="Nom complet" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
-              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <input required placeholder="Téléphone" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <input placeholder="Adresse" value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })}
-              className="px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-purple-500/20 disabled:opacity-50">
               {saving ? "Enregistrement..." : "Ajouter le client"}
@@ -121,37 +121,37 @@ export default function ClientsPage() {
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            <p className="text-xs text-slate-500 font-medium">{filtered.length} client{filtered.length > 1 ? "s" : ""}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} client{filtered.length > 1 ? "s" : ""}</p>
             {filtered.map((client, i) => (
               <motion.div
                 key={client.id || i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-slate-50 p-4 rounded-2xl border border-slate-100"
+                className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800"
               >
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm shrink-0">
                     {client.nom.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-900 text-sm truncate">{client.nom}</p>
-                    <p className="text-xs text-slate-500">Ajouté le {client.dateAjout}</p>
+                    <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{client.nom}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Ajouté le {client.dateAjout}</p>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 ml-13">
                   {client.email && (
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <Mail size={12} /> <span className="truncate">{client.email}</span>
                     </div>
                   )}
                   {client.telephone && (
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <Phone size={12} /> <span>{client.telephone}</span>
                     </div>
                   )}
                   {client.adresse && (
-                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                       <MapPin size={12} /> <span className="truncate">{client.adresse}</span>
                     </div>
                   )}

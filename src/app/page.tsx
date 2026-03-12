@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Devis {
   numero: string;
@@ -54,7 +55,7 @@ export default function Dashboard() {
   }).slice(0, 3);
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       
       {/* Header */}
       <header className="flex items-center justify-between p-6 pt-12 sm:pt-10">
@@ -62,13 +63,14 @@ export default function Dashboard() {
           <div className="w-8 h-8 relative rounded-lg overflow-hidden shadow-sm">
             <Image src="/logo.png" alt="Zolio Logo" fill className="object-cover" />
           </div>
-          <span className="text-xl font-extrabold tracking-tight text-slate-900">Zolio</span>
+          <span className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white">Zolio</span>
         </div>
         
         <div className="flex items-center gap-4 relative">
+          <ThemeToggle />
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative text-slate-400 hover:text-slate-600 transition"
+            className="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 transition"
           >
             <Bell size={24} />
             <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full" />
@@ -76,38 +78,38 @@ export default function Dashboard() {
           
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute top-12 right-0 w-80 bg-white border border-slate-100 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
+            <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-bold text-slate-900">Notifications</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
                 <span className="text-xs text-blue-500 font-medium cursor-pointer hover:underline">Tout marquer comme lu</span>
               </div>
               
               <div className="flex flex-col gap-3">
                 {/* Exemple de notification */}
-                <div className="flex gap-3 p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer">
+                <div className="flex gap-3 p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition cursor-pointer">
                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-blue-500 text-xs font-bold">Z</span>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-800"><span className="font-semibold">Bienvenue sur Zolio !</span></p>
-                    <p className="text-xs text-slate-500 mt-0.5">Créez votre premier devis dès maintenant.</p>
+                    <p className="text-sm text-slate-800 dark:text-slate-200"><span className="font-semibold">Bienvenue sur Zolio !</span></p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Créez votre premier devis dès maintenant.</p>
                   </div>
                 </div>
                 
-                <div className="flex gap-3 p-2 hover:bg-slate-50 rounded-xl transition cursor-pointer">
+                <div className="flex gap-3 p-2 hover:bg-slate-50 dark:bg-slate-800 rounded-xl transition cursor-pointer">
                   <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-purple-500 text-xs font-bold">✨</span>
                   </div>
                   <div>
-                    <p className="text-sm text-slate-800"><span className="font-semibold">Nouveauté</span></p>
-                    <p className="text-xs text-slate-500 mt-0.5">Le design s'adapte maintenant à vos écrans.</p>
+                    <p className="text-sm text-slate-800 dark:text-slate-200"><span className="font-semibold">Nouveauté</span></p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Le design s'adapte maintenant à vos écrans.</p>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-slate-500">
+          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center text-slate-500 dark:text-slate-400">
             {isLoaded ? <UserButton /> : <User size={20} />}
           </div>
         </div>
@@ -118,7 +120,7 @@ export default function Dashboard() {
         
         {/* Welcome Section */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
             {user?.publicMetadata?.isPro === true && (
               <span className="bg-gradient-to-r from-purple-500 to-blue-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
@@ -127,7 +129,7 @@ export default function Dashboard() {
             )}
           </h1>
           <div className="flex items-center gap-3 mt-1">
-            <p className="text-slate-500 text-sm">Gérez vos devis en quelques secondes.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Gérez vos devis en quelques secondes.</p>
             {user?.publicMetadata?.isPro === true && (
               <button 
                 onClick={async () => {
@@ -159,7 +161,7 @@ export default function Dashboard() {
               whileTap={{ scale: 0.96 }}
               className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-purple-500/30 flex flex-col justify-between aspect-square"
             >
-              <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-white dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
                 <Plus size={24} className="text-white" />
               </div>
               <div>
@@ -167,7 +169,7 @@ export default function Dashboard() {
                 {user?.publicMetadata?.isPro === true ? (
                   <p className="text-white/70 text-xs">Création rapide ⚡️</p>
                 ) : (
-                  <p className="text-white/90 text-[10px] font-medium bg-white/20 inline-block px-2 py-0.5 rounded-full mt-1">
+                  <p className="text-white/90 text-[10px] font-medium bg-white dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
                     {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 3)}/3 gratuits`}
                   </p>
                 )}
@@ -178,22 +180,22 @@ export default function Dashboard() {
           {/* Quick Stats Grid */}
           <div className="flex-1 flex flex-col gap-4">
             <Link href="/clients" className="flex-1">
-              <motion.div whileTap={{ scale: 0.96 }} className="h-full bg-slate-50 rounded-[1.5rem] p-4 flex flex-col justify-center border border-slate-100 shadow-sm cursor-pointer">
-                <div className="flex items-center gap-2 text-slate-600 mb-1">
+              <motion.div whileTap={{ scale: 0.96 }} className="h-full bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] p-4 flex flex-col justify-center border border-slate-100 dark:border-slate-800 shadow-sm cursor-pointer">
+                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 mb-1">
                   <Users size={16} className="text-blue-500" />
                   <span className="text-xs font-semibold">Clients</span>
                 </div>
-                <p className="text-2xl font-bold text-slate-800">Voir →</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">Voir →</p>
               </motion.div>
             </Link>
             
             <Link href="/catalogue" className="flex-1">
-              <motion.div whileTap={{ scale: 0.96 }} className="h-full bg-slate-50 rounded-[1.5rem] p-4 flex flex-col justify-center border border-slate-100 shadow-sm cursor-pointer">
-                <div className="flex items-center gap-2 text-slate-600 mb-1">
+              <motion.div whileTap={{ scale: 0.96 }} className="h-full bg-slate-50 dark:bg-slate-800 rounded-[1.5rem] p-4 flex flex-col justify-center border border-slate-100 dark:border-slate-800 shadow-sm cursor-pointer">
+                <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 mb-1">
                   <Package size={16} className="text-purple-500" />
                   <span className="text-xs font-semibold">Catalogue</span>
                 </div>
-                <p className="text-2xl font-bold text-slate-800">Voir →</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">Voir →</p>
               </motion.div>
             </Link>
           </div>
@@ -203,35 +205,35 @@ export default function Dashboard() {
         <div className="flex gap-4">
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
-              className="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 transition h-full">
+              className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 dark:bg-slate-800 transition h-full">
               <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
                 <FileText size={20} />
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">Devis</p>
-                <p className="text-xs text-slate-500">Voir les devis émis</p>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">Devis</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Voir les devis émis</p>
               </div>
             </motion.div>
           </Link>
 
           <Link href="/factures" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
-              className="bg-slate-50 rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 transition h-full">
+              className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 dark:bg-slate-800 transition h-full">
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
                 <FileCheck size={20} />
               </div>
               <div>
-                <p className="font-semibold text-slate-900 text-sm">Factures</p>
-                <p className="text-xs text-slate-500">Gérer les factures</p>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">Factures</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Gérer les factures</p>
               </div>
             </motion.div>
           </Link>
         </div>
 
         {/* Dynamic Charts / Income Area */}
-        <div className="bg-white rounded-[1.5rem] border border-slate-100 shadow-sm p-5">
+        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-sm p-5">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-slate-900 text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
+            <h3 className="text-slate-900 dark:text-white text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
             <div className="bg-blue-50 text-blue-600 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
               <FileText size={12} /> {devis.length} Devis
             </div>
@@ -336,11 +338,11 @@ export default function Dashboard() {
 
                 {/* Barre de progression (Répartition Validé / Attente) */}
                 <div className="mb-3">
-                  <div className="flex justify-between text-[10px] text-slate-500 mb-1.5">
+                  <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
                     <span>Répartition du CA HT (Global)</span>
                     <span>{CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€ total</span>
                   </div>
-                  <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden flex">
+                  <div className="w-full h-4 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
                     {pctValide > 0 && (
                       <motion.div
                         initial={{ width: 0 }}
@@ -365,16 +367,16 @@ export default function Dashboard() {
                 </div>
 
                 {/* Total global */}
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 flex justify-between items-center">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-800 flex justify-between items-center">
                   <div>
                     <p className="text-[10px] text-slate-400">CA Total HT</p>
-                    <p className="text-lg font-bold text-slate-900">
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">
                       {loading ? "..." : `${CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-[10px] text-slate-400">CA Total TTC</p>
-                    <p className="text-lg font-bold text-slate-900">
+                    <p className="text-lg font-bold text-slate-900 dark:text-white">
                       {loading ? "..." : `${CA_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
                   </div>
@@ -387,7 +389,7 @@ export default function Dashboard() {
         {/* Relances Clients */}
         {devisARelancer.length > 0 && (
           <div className="mb-4">
-            <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               À relancer
             </h3>
@@ -395,14 +397,14 @@ export default function Dashboard() {
               {devisARelancer.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
                   <div className="flex items-center gap-4 bg-rose-50 p-4 rounded-2xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer">
-                    <div className="w-10 h-10 rounded-full bg-white text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
                       <Bell size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{d.nomClient}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{d.nomClient}</p>
                       <p className="text-[10px] text-rose-600">En attente depuis plus de 7 jours</p>
                     </div>
-                    <div className="font-bold text-slate-800 shrink-0 text-sm">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 shrink-0 text-sm">
                       {d.totalTTC}€
                     </div>
                   </div>
@@ -414,27 +416,27 @@ export default function Dashboard() {
 
         {/* Dynamic Recent Activity */}
         <div className="mb-4">
-          <h3 className="text-lg font-bold text-slate-900 mb-4">Activité Récente</h3>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Activité Récente</h3>
           
           {loading ? (
             <div className="text-center py-4 text-slate-400 text-sm animate-pulse">Chargement de l'activité...</div>
           ) : devisRecents.length === 0 ? (
-            <div className="text-center py-4 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-slate-400 text-sm">
+            <div className="text-center py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 text-slate-400 text-sm">
               Aucun devis créé pour le moment.
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {devisRecents.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
-                  <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl hover:bg-slate-100 transition cursor-pointer">
+                  <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl hover:bg-slate-100 dark:bg-slate-800 transition cursor-pointer">
                     <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
                       <Clock size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-900 truncate">{d.nomClient}</p>
-                      <p className="text-[10px] text-slate-500">{d.numero} • {d.date}</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{d.nomClient}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{d.numero} • {d.date}</p>
                     </div>
-                    <div className="font-bold text-slate-800 shrink-0 text-sm">
+                    <div className="font-bold text-slate-800 dark:text-slate-200 shrink-0 text-sm">
                       {d.totalTTC}€
                     </div>
                   </div>
@@ -446,28 +448,28 @@ export default function Dashboard() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
+      <nav className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
         <Link href="/" className="flex flex-col items-center gap-1 text-blue-600">
           <Home size={24} strokeWidth={2.5} />
           <span className="text-[10px] font-bold">Accueil</span>
         </Link>
         
-        <Link href="/devis" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+        <Link href="/devis" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
           <FileText size={24} />
           <span className="text-[10px] font-medium">Devis</span>
         </Link>
         
-        <Link href="/clients" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+        <Link href="/clients" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
           <Users size={24} />
           <span className="text-[10px] font-medium">Clients</span>
         </Link>
         
-        <Link href="/catalogue" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+        <Link href="/catalogue" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
           <Briefcase size={24} />
           <span className="text-[10px] font-medium">Catalogue</span>
         </Link>
         
-        <Link href="/abonnement" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition">
+        <Link href="/abonnement" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
           <Settings size={24} />
           <span className="text-[10px] font-medium">Pro</span>
         </Link>
