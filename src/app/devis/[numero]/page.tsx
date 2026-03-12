@@ -301,7 +301,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   }),
                 });
                 if (res.ok) {
-                  window.location.href = "/factures";
+                  import('canvas-confetti').then((confetti) => {
+                    confetti.default({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+                    setTimeout(() => {
+                      window.location.href = "/factures";
+                    }, 1500);
+                  });
                 } else {
                   alert("Erreur lors de la création de la facture");
                 }

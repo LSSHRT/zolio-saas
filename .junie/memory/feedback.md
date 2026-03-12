@@ -158,3 +158,11 @@
     "NEW INSTRUCTION": "WHEN user asks if everything implemented or says continue THEN summarize status, complete remaining tasks, and confirm deployment"
 }
 
+[2026-03-12 22:33] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user agrees to proceed with implementing the Stripe Customer Portal to manage subscriptions (cancel/change) and expects deployment confirmation.",
+    "NEW INSTRUCTION": "WHEN user expresses agreement with a proposed solution THEN proceed to implement and confirm deployment"
+}
+

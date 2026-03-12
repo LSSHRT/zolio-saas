@@ -50,9 +50,17 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-blue-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-blue-500/5 to-purple-500/10 dark:from-blue-500/10 dark:to-purple-500/5 blur-3xl -z-10 pointer-events-none"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-blue-400/10 dark:bg-blue-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-purple-400/10 dark:bg-purple-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
       
       {/* Header */}
-      <header className="flex items-center justify-between p-6 pt-12 sm:pt-10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between p-6 pt-12 sm:pt-10 transition-all">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 relative rounded-lg overflow-hidden shadow-sm">
             <Image src="/logo.png" alt="Zolio Logo" fill className="object-cover" />
@@ -226,7 +234,7 @@ export default function Dashboard() {
         <div className="flex gap-4">
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
-              className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 dark:bg-slate-800 transition h-full">
+              className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
               <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
                 <FileText size={20} />
               </div>
@@ -239,7 +247,7 @@ export default function Dashboard() {
 
           <Link href="/factures" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
-              className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-slate-100 dark:bg-slate-800 transition h-full">
+              className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
               <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
                 <FileCheck size={20} />
               </div>
@@ -481,10 +489,29 @@ export default function Dashboard() {
           <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Activité Récente</h3>
           
           {loading ? (
-            <div className="text-center py-4 text-slate-400 text-sm animate-pulse">Chargement de l'activité...</div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex items-center p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm animate-pulse">
+                  <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex-shrink-0"></div>
+                  <div className="ml-3 flex-1">
+                    <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-slate-100 dark:bg-slate-800 rounded w-1/3"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : devisRecents.length === 0 ? (
-            <div className="text-center py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 text-slate-400 text-sm">
-              Aucun devis créé pour le moment.
+            <div className="flex flex-col items-center justify-center py-10 px-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 shadow-inner">
+                <span className="text-4xl">📝</span>
+              </div>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-1">Votre tableau de bord est bien calme...</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 max-w-[250px]">Et si on créait votre premier devis pour impressionner votre client ?</p>
+              <Link href="/nouveau-devis">
+                <button className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-transform hover:scale-105">
+                  Créer mon premier devis
+                </button>
+              </Link>
             </div>
           ) : (
             <div className="flex flex-col gap-3">

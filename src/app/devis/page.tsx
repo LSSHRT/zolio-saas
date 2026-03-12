@@ -100,6 +100,11 @@ export default function DevisPage() {
       });
       if (res.ok) {
         mutate(devis.map((d: Devis) => d.numero === numero ? { ...d, statut: newStatut } : d), false);
+        if (newStatut === "Accepté") {
+          import('canvas-confetti').then((confetti) => {
+            confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+          });
+        }
       } else {
         alert("Erreur lors de la mise à jour du statut");
       }
