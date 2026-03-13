@@ -446,3 +446,11 @@
     "NEW INSTRUCTION": "WHEN signature link fails after quote edit THEN request devis ID, old/new links, edit time, and console/network screenshots"
 }
 
+[2026-03-13 16:25] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "duplicate revenue tables",
+    "EXPECTATION": "The dashboard should show a single clear revenue table, not four.",
+    "NEW INSTRUCTION": "WHEN multiple revenue tables are visible THEN keep the best one, remove others, place below feature buttons"
+}
+
