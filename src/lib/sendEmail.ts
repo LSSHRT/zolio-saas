@@ -66,3 +66,63 @@ export async function sendDevisEmail(
 
   await transporter.sendMail(mailOptions);
 }
+
+/**
+ * Envoie un email au client avec le devis signé en pièce jointe.
+ */
+export async function sendDevisSignedEmail(
+  toEmail: string,
+  toName: string,
+  numeroDevis: string,
+  totalTTC: string,
+  pdfBuffer: Buffer
+) {
+  // Configuration du transporteur SMTP
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+  });
+
+  const mailOptions = {
+    from: `"Zolio" <${process.env.SMTP_USER || "noreply@zolio.site"}>`,
+    to: toEmail,
+    subject: `Votre devis signé ${numeroDevis} — ${totalTTC}€ TTC`,
+    html: `
+      <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:30px;border-radius:16px 16px 0 0;">
+          <h1 style="color:white;margin:0;font-size:24px;">Zolio</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Devis validé et signé</p>
+        </div>
+        <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${toName}</strong>,</p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Nous vous confirmons la bonne réception de votre signature pour le devis <strong>${numeroDevis}</strong>.
+          </p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Vous trouverez ci-joint un exemplaire PDF de votre devis portant la mention "Bon pour accord" ainsi que votre signature.
+          </p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;margin-top:20px;">
+            Merci pour votre confiance.
+          </p>
+          <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:20px;">
+            Document généré automatiquement par Zolio · zolio.site
+          </p>
+        </div>
+      </div>
+    `,
+    attachments: [
+      {
+        filename: `${numeroDevis}_signe.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  };
+
+  await transporter.sendMail(mailOptions);
+}
