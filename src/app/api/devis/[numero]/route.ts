@@ -123,18 +123,19 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
-          userId,
-          numero,
-          date,
-          devisRows[rowIndex][3], // nom client
-          devisRows[rowIndex][4], // email client
-          totalHT.toFixed(2),
-          tvaLabel,
-          totalTTC.toFixed(2),
-          "En attente (Modifié)",
-          "",
-          acompte ? acompte.toString() : "",
-          remise ? remise.toString() : "",
+          userId, // A
+          numero, // B
+          date, // C
+          devisRows[rowIndex][3], // D: nom client
+          devisRows[rowIndex][4], // E: email client
+          totalHT.toFixed(2), // F
+          tvaLabel, // G
+          totalTTC.toFixed(2), // H
+          "En attente (Modifié)", // I: Statut
+          devisRows[rowIndex][9] || "", // J: public id / autre
+          acompte ? acompte.toString() : (devisRows[rowIndex][10] || ""), // K: acompte
+          remise ? remise.toString() : (devisRows[rowIndex][11] || ""), // L: remise
+          "" // M: Signature (on reset)
         ]],
       },
     });

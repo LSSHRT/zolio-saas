@@ -438,3 +438,11 @@
     "NEW INSTRUCTION": "WHEN client signs via signature link THEN set devis status to Accepté and persist immediately"
 }
 
+[2026-03-13 15:59] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature link regression",
+    "EXPECTATION": "After modifying and resending a quote, the new signature link should work and the signature flow should complete correctly.",
+    "NEW INSTRUCTION": "WHEN signature link fails after quote edit THEN request devis ID, old/new links, edit time, and console/network screenshots"
+}
+
