@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req);
@@ -11,9 +9,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    if (!process.env.GEMINI_API_KEY) {
+    let geminiApiKey = process.env.GEMINI_API_KEY || "";
+
+    // Tentative de récupération de la clé API personnalisée de l'Admin
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+      if (adminEmail) {
+        const client = await clerkClient();
+        const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
+        if (adminUsers.data.length > 0) {
+          const customKey = adminUsers.data[0].publicMetadata?.customGeminiKey as string;
+          if (customKey && customKey.trim() !== "") {
+            geminiApiKey = customKey;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Impossible de récupérer la clé personnalisée de l'admin:", e);
+    }
+
+    if (!geminiApiKey) {
       return NextResponse.json({ error: "Clé API Gemini non configurée" }, { status: 500 });
     }
+
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
 
     const { description } = await req.json();
     if (!description) {

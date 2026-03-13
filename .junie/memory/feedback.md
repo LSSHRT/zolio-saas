@@ -518,3 +518,11 @@
     "NEW INSTRUCTION": "WHEN generating a signed quote PDF THEN place signature image inside signature box and scale to fit"
 }
 
+[2026-03-13 22:20] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "referral code missing",
+    "EXPECTATION": "Signup should capture a referral (code or link) and reward should trigger when the referred user upgrades to Pro.",
+    "NEW INSTRUCTION": "WHEN user signs up with Clerk THEN show referral field or parse ?ref= and persist"
+}
+
