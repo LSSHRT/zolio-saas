@@ -25,6 +25,7 @@ export default function ParametresEntreprise() {
     companyCgv: (user?.unsafeMetadata?.companyCgv as string) || (user?.publicMetadata?.companyCgv as string) || "",
     companyColor: (user?.unsafeMetadata?.companyColor as string) || (user?.publicMetadata?.companyColor as string) || "#0ea5e9",
     companyGoogleReview: (user?.unsafeMetadata?.companyGoogleReview as string) || (user?.publicMetadata?.companyGoogleReview as string) || "",
+    referredBy: (user?.unsafeMetadata?.referredBy as string) || (user?.publicMetadata?.referredBy as string) || "",
   });
 
   if (!isLoaded || !user) {
@@ -54,6 +55,7 @@ export default function ParametresEntreprise() {
         companyCgv: (meta.companyCgv as string) || (pubMeta.companyCgv as string) || "",
         companyColor: (meta.companyColor as string) || (pubMeta.companyColor as string) || "#0ea5e9",
         companyGoogleReview: (meta.companyGoogleReview as string) || (pubMeta.companyGoogleReview as string) || "",
+        referredBy: (meta.referredBy as string) || (pubMeta.referredBy as string) || "",
       });
     }
   }
@@ -84,6 +86,7 @@ export default function ParametresEntreprise() {
           companyCgv: formData.companyCgv,
           companyColor: formData.companyColor,
           companyGoogleReview: formData.companyGoogleReview,
+          referredBy: formData.referredBy,
         }
       });
       setMessage({ type: "success", text: "Paramètres enregistrés avec succès !" });
@@ -344,10 +347,10 @@ export default function ParametresEntreprise() {
               <h2 className="text-xl font-bold">Parrainez un confrère</h2>
             </div>
             <p className="text-violet-100 mb-6 max-w-md text-sm leading-relaxed">
-              Pour chaque artisan qui s'inscrit avec votre code, vous gagnez tous les deux <strong>1 mois d'abonnement gratuit</strong> à Zolio Pro. C'est le meilleur moyen de faire grandir notre communauté !
+              Invitez un confrère à utiliser Zolio. S'il s'abonne à la <strong>version PRO</strong>, vous gagnez tous les deux <strong>1 mois d'abonnement gratuit</strong> ! C'est le meilleur moyen de faire grandir notre communauté.
             </p>
             
-            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20">
+            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20 mb-6">
               <p className="text-xs text-violet-200 mb-2 font-medium uppercase tracking-wider">Votre code de parrainage unique</p>
               <div className="flex items-center gap-3">
                 <code className="flex-1 font-mono text-xl font-bold bg-white/20 px-4 py-2 rounded-lg text-center tracking-widest">
@@ -356,7 +359,7 @@ export default function ParametresEntreprise() {
                 <button
                   onClick={() => {
                     const code = user.id.slice(-8).toUpperCase();
-                    navigator.clipboard.writeText(`Rejoignez Zolio avec mon code de parrainage ${code} pour gagner 1 mois gratuit ! https://zolio.site/sign-up?ref=${code}`);
+                    navigator.clipboard.writeText(`Rejoignez Zolio avec mon code de parrainage ${code} pour gagner 1 mois gratuit sur l'abonnement PRO ! https://zolio.site/sign-up?ref=${code}`);
                     setMessage({ type: "success", text: "Message de parrainage copié !" });
                   }}
                   className="bg-white text-violet-600 p-3 rounded-lg hover:bg-violet-50 transition-colors flex items-center justify-center shadow-sm"
@@ -366,6 +369,42 @@ export default function ParametresEntreprise() {
                 </button>
               </div>
             </div>
+
+            {/* Saisir un code de parrain */}
+            {!(user?.unsafeMetadata?.referredBy as string || user?.publicMetadata?.referredBy as string) && (
+              <div className="bg-black/20 p-4 rounded-xl border border-white/10 mt-4">
+                <p className="text-sm font-medium text-white mb-2">Vous avez été parrainé ?</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    name="referredBy"
+                    value={formData.referredBy}
+                    onChange={handleChange}
+                    placeholder="Entrez le code de votre parrain"
+                    className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white placeholder:text-violet-300 focus:outline-none focus:ring-2 focus:ring-white/50 uppercase"
+                  />
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isSaving || !formData.referredBy}
+                    className="bg-white text-violet-600 px-4 py-2 rounded-lg font-medium hover:bg-violet-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Valider
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {(user?.unsafeMetadata?.referredBy as string || user?.publicMetadata?.referredBy as string) && (
+              <div className="bg-black/20 p-4 rounded-xl border border-white/10 mt-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                </div>
+                <div>
+                  <p className="text-sm text-green-300 font-medium">Vous avez été parrainé !</p>
+                  <p className="text-xs text-white/70 font-mono">Code : {(user.unsafeMetadata.referredBy as string) || (user.publicMetadata.referredBy as string)}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
