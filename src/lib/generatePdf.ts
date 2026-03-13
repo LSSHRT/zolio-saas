@@ -178,6 +178,29 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(10);
 
   for (const ligne of data.lignes) {
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+      
+      // Redraw table header
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, y - 5, pageWidth - 30, 10, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Prestation", 20, y);
+      doc.text("Qté", 100, y);
+      doc.text("Unité", 115, y);
+      doc.text("TVA", 130, y);
+      doc.text("P.U. HT", 150, y, { align: "right" });
+      doc.text("Total HT", pageWidth - 20, y, { align: "right" });
+      y += 8;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, y - 3, pageWidth - 15, y - 3);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+    }
+
     if (ligne.isOptional) {
       doc.setTextColor(148, 163, 184); // slate-400
     } else {
@@ -197,7 +220,12 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   }
 
   // === TOTAUX ===
-  y += 10;
+  if (y > 190) {
+    doc.addPage();
+    y = 20;
+  } else {
+    y += 10;
+  }
   doc.setDrawColor(226, 232, 240);
   doc.line(120, y - 5, pageWidth - 15, y - 5);
 
@@ -286,6 +314,10 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   }
 
   // === SIGNATURE ===
+  if (y > 220) {
+    doc.addPage();
+    y = 20;
+  }
   doc.setFontSize(10);
   doc.setTextColor(15, 23, 42);
   doc.text("Date et signature précédées de la mention", 20, y + 23);
@@ -492,6 +524,29 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(10);
 
   for (const ligne of data.lignes) {
+    if (y > 250) {
+      doc.addPage();
+      y = 20;
+      
+      // Redraw table header
+      doc.setFillColor(248, 250, 252);
+      doc.rect(15, y - 5, pageWidth - 30, 10, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.setTextColor(100, 116, 139);
+      doc.text("Prestation", 20, y);
+      doc.text("Qté", 100, y);
+      doc.text("Unité", 115, y);
+      doc.text("TVA", 130, y);
+      doc.text("P.U. HT", 150, y, { align: "right" });
+      doc.text("Total HT", pageWidth - 20, y, { align: "right" });
+      y += 8;
+      doc.setDrawColor(226, 232, 240);
+      doc.line(15, y - 3, pageWidth - 15, y - 3);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+    }
+
     if (ligne.isOptional) {
       doc.setTextColor(148, 163, 184); // slate-400
     } else {
@@ -511,7 +566,12 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   }
 
   // === TOTAUX ===
-  y += 10;
+  if (y > 190) {
+    doc.addPage();
+    y = 20;
+  } else {
+    y += 10;
+  }
   doc.setDrawColor(226, 232, 240);
   doc.line(120, y - 5, pageWidth - 15, y - 5);
 

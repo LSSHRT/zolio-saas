@@ -502,3 +502,11 @@
     "NEW INSTRUCTION": "WHEN user reports new quote missing or client not notified THEN request steps, page URL, devis ID/fields, timestamp, and console/network screenshots"
 }
 
+[2026-03-13 21:27] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "PDF layout overlap",
+    "EXPECTATION": "The validity notice ('Ce devis est valable 30 jours...') must never overlap with line items when there are many prestations.",
+    "NEW INSTRUCTION": "WHEN generating quote PDF with long item list THEN keep validity text in footer and add page break to avoid overlap"
+}
+
