@@ -398,3 +398,11 @@
     "NEW INSTRUCTION": "WHEN client signs via signature link THEN set devis status to Accepté and persist immediately"
 }
 
+[2026-03-13 15:28] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After the client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+

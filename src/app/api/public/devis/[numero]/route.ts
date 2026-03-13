@@ -63,21 +63,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
 
     const currentRow = devisRows[rowIndex];
 
-    // Ensure array has enough elements up to index 12 (M)
-    while (currentRow.length <= 12) {
-      currentRow.push("");
-    }
-
-    // Update statut (index 8) and signature (index 12)
-    currentRow[8] = "Accepté";
-    currentRow[12] = signatureBase64;
-
+    // Update statut (col I = index 8)
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!A${rowIndex + 1}:M${rowIndex + 1}`,
+      range: `Devis_Emis!I${rowIndex + 1}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [currentRow],
+        values: [["Accepté"]],
+      },
+    });
+
+    // Update signature (col M = index 12)
+    await sheets.spreadsheets.values.update({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: `Devis_Emis!M${rowIndex + 1}`,
+      valueInputOption: "RAW",
+      requestBody: {
+        values: [[signatureBase64]],
       },
     });
 
