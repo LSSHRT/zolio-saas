@@ -147,7 +147,7 @@ export async function GET() {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:M", // A est mnt userId
+      range: "Devis_Emis!A:N", // A est mnt userId, N = lu_le
     });
 
     const rows = response.data.values;
@@ -170,6 +170,7 @@ export async function GET() {
       lienPdf: row[9] || "",
       acompte: row[10] || "",
       remise: row[11] || "",
+      lu_le: row[13] || "",
     }));
 
     return NextResponse.json(devis, {

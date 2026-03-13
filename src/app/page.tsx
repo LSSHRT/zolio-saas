@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote, Receipt , Pencil } from "lucide-react";
+import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote, Receipt , Pencil, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -333,7 +333,7 @@ export default function Dashboard() {
         </div>
 
         {/* Liens Rapides */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
               className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
@@ -382,6 +382,19 @@ export default function Dashboard() {
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white text-sm">Dépenses</p>
                 <p className="text-[10px] text-slate-500 dark:text-slate-400">Achats & Frais</p>
+              </div>
+            </motion.div>
+          </Link>
+
+          <Link href="/planning" className="col-span-1">
+            <motion.div whileTap={{ scale: 0.97 }}
+              className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                <Calendar size={20} />
+              </div>
+              <div>
+                <p className="font-semibold text-slate-900 dark:text-white text-sm">Planning</p>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">Chantiers prévus</p>
               </div>
             </motion.div>
           </Link>

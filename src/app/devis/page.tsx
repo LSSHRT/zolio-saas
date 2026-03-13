@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List, Mail, PenTool } from "lucide-react";
+import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List, Mail, PenTool, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -19,6 +19,7 @@ interface Devis {
   totalTTC: string;
   statut: string;
   lienPdf: string;
+  lu_le?: string;
 }
 
 const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
@@ -245,7 +246,10 @@ export default function DevisPage() {
                       >
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-semibold text-slate-900 dark:text-white text-sm truncate max-w-[150px]">{d.nomClient}</p>
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-slate-900 dark:text-white text-sm truncate max-w-[150px]">{d.nomClient}</p>
+                              {d.lu_le && <span title={`Vu le ${new Date(d.lu_le).toLocaleDateString()}`}><Eye className="w-3 h-3 text-blue-500" /></span>}
+                            </div>
                             <p className="text-xs text-slate-400">{d.numero}</p>
                           </div>
                           <p className="text-sm font-bold text-slate-900 dark:text-white">{d.totalTTC}€</p>
@@ -321,7 +325,10 @@ export default function DevisPage() {
                         {d.nomClient.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <p className="font-semibold text-slate-900 dark:text-white text-sm">{d.nomClient}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-slate-900 dark:text-white text-sm">{d.nomClient}</p>
+                          {d.lu_le && <span className="text-[10px] bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded-full flex items-center gap-1" title={`Vu le ${new Date(d.lu_le).toLocaleDateString()}`}><Eye className="w-3 h-3"/> Vu</span>}
+                        </div>
                         <p className="text-xs text-slate-400">{d.numero} · {d.date}</p>
                       </div>
                     </div>

@@ -104,11 +104,15 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
       >
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-violet-100 dark:bg-violet-900/30 rounded-2xl flex items-center justify-center">
-              <PenTool className="w-6 h-6 text-violet-600 dark:text-violet-400" />
-            </div>
+            {devis.entreprise?.logo ? (
+              <img src={devis.entreprise.logo} alt="Logo" className="w-12 h-12 object-contain rounded-xl" />
+            ) : (
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: devis.entreprise?.color ? `${devis.entreprise.color}20` : '#ede9fe' }}>
+                <PenTool className="w-6 h-6" style={{ color: devis.entreprise?.color || '#7c3aed' }} />
+              </div>
+            )}
             <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Signature en ligne</h1>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">{devis.entreprise?.nom || "Signature en ligne"}</h1>
               <p className="text-slate-500 text-sm">Devis n°{numero}</p>
             </div>
           </div>
@@ -118,16 +122,16 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
               <span className="text-slate-500 dark:text-slate-400">Client :</span>
               <span className="font-semibold text-slate-900 dark:text-white">{devis.nomClient}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-slate-500 dark:text-slate-400">Montant Total :</span>
-              <span className="font-bold text-lg text-violet-600 dark:text-violet-400">{devis.totalTTC} €</span>
+              <span className="font-bold text-lg" style={{ color: devis.entreprise?.color || '#7c3aed' }}>{devis.totalTTC} €</span>
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="font-medium text-slate-700 dark:text-slate-300">Votre signature</label>
-              <button onClick={clear} className="text-xs text-violet-600 hover:text-violet-700 font-medium">Effacer</button>
+              <button onClick={clear} className="text-xs font-medium hover:opacity-80" style={{ color: devis.entreprise?.color || '#7c3aed' }}>Effacer</button>
             </div>
             <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
               <SignaturePad 
@@ -144,7 +148,8 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
           <button 
             onClick={save} 
             disabled={signing}
-            className="w-full flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 text-white py-4 rounded-2xl font-bold transition-all disabled:opacity-50 hover:opacity-90"
+            style={{ backgroundColor: devis.entreprise?.color || '#7c3aed' }}
           >
             {signing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
             {signing ? "Enregistrement..." : "Valider et Signer"}
