@@ -117,6 +117,33 @@ export default function Dashboard() {
   const CA_TTC = devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
   const devisRecents = devis.slice(0, 3); // Les 3 derniers devis générés
 
+  // Données pour le graphique (Exemple simplifié ou calculé depuis devis)
+  const monthlyData = useMemo(() => {
+    const dataMap: Record<string, number> = {};
+    devis.forEach(d => {
+      if (d.statut === "Accepté" || d.statut === "En attente" || d.statut === "En attente (Modifié)") {
+        const parts = d.date.split('/');
+        if (parts.length === 3) {
+          const month = `${parts[1]}/${parts[2]}`; // MM/YYYY
+          if (!dataMap[month]) dataMap[month] = 0;
+          dataMap[month] += parseFloat(d.totalHT) || 0;
+        }
+      }
+    });
+    // Si pas de données, montrer un exemple
+    if (Object.keys(dataMap).length === 0) {
+      return [
+        { name: "Jan", CA: 1200 },
+        { name: "Fév", CA: 2100 },
+        { name: "Mar", CA: 1800 },
+        { name: "Avr", CA: 3200 },
+        { name: "Mai", CA: 2800 },
+        { name: "Juin", CA: 3900 }
+      ];
+    }
+    return Object.entries(dataMap).map(([name, CA]) => ({ name, CA })).slice(-6); // 6 derniers mois
+  }, [devis]);
+
   
   // Dynamic greeting
   const [currentHour, setCurrentHour] = useState<number | null>(null);
@@ -252,63 +279,78 @@ export default function Dashboard() {
       <main className="flex-1 px-6 flex flex-col gap-8">
         
         {/* Welcome Section */}
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
-            {user?.publicMetadata?.isPro === true && (
-              <span className="bg-gradient-to-r from-fuchsia-500 to-orange-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
-                PRO
-              </span>
-            )}
-          </h1>
-          <div className="flex items-center gap-3 mt-1">
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Gérez vos devis en quelques secondes.</p>
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
+                {user?.publicMetadata?.isPro === true && (
+                  <span className="bg-gradient-to-r from-fuchsia-500 to-orange-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
+                    PRO
+                  </span>
+                )}
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Voici un résumé de votre activité.</p>
+            </div>
             {user?.publicMetadata?.isPro === true && (
               <button 
                 onClick={async () => {
                   try {
                     const res = await fetch("/api/stripe/portal", { method: "POST" });
                     const data = await res.json();
-                    if (data.url) {
-                      window.location.href = data.url;
-                    } else {
-                      alert(data.error || "Impossible d'ouvrir le portail d'abonnement.");
-                    }
-                  } catch (err) {
-                    alert("Une erreur est survenue.");
-                  }
+                    if (data.url) window.location.href = data.url;
+                  } catch (err) { }
                 }}
-                className="text-xs text-fuchsia-600 font-medium hover:underline bg-fuchsia-50 px-2 py-1 rounded-md"
+                className="text-xs text-fuchsia-600 font-medium hover:underline bg-fuchsia-50 dark:bg-fuchsia-500/10 px-3 py-2 rounded-xl"
               >
                 Gérer l'abonnement
               </button>
             )}
           </div>
-        </div>
 
-        {/* PLG: Bannière de Parrainage */}
-        {!user?.publicMetadata?.isPro && (
-          <div className="bg-gradient-to-r from-violet-50 to-violet-50 dark:from-slate-800 dark:to-slate-800/80 rounded-2xl p-4 border border-violet-100 dark:border-slate-700 flex items-center justify-between shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white dark:bg-slate-700 rounded-full flex items-center justify-center shadow-sm">
-                <span className="text-xl">🎁</span>
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 dark:text-white text-sm">Gagnez des devis gratuits</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Invitez un artisan et recevez 5 devis offerts.</p>
+          {/* Bannière Dashboard & Stats Rapides */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-fuchsia-500 to-violet-600 dark:from-fuchsia-900 dark:to-violet-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-fuchsia-500/20 relative overflow-hidden flex flex-col justify-between">
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+              
+              <div className="relative z-10">
+                <p className="text-fuchsia-100 text-sm font-medium mb-1 flex justify-between items-center">
+                  <span>Chiffre d'Affaires Global (TTC)</span>
+                  <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">Total</span>
+                </p>
+                <h2 className="text-3xl font-extrabold tracking-tight mb-4">
+                  {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(CA_TTC)}
+                </h2>
+                
+                <div className="flex gap-6 border-t border-white/20 pt-4 mt-2">
+                  <div>
+                    <p className="text-fuchsia-100 text-xs mb-0.5">Devis total</p>
+                    <p className="font-semibold text-lg">{devis.length}</p>
+                  </div>
+                  <div>
+                    <p className="text-fuchsia-100 text-xs mb-0.5">Acceptés</p>
+                    <p className="font-semibold text-lg">{devis.filter(d => d.statut === 'Accepté').length}</p>
+                  </div>
+                  <div>
+                    <p className="text-fuchsia-100 text-xs mb-0.5">En attente</p>
+                    <p className="font-semibold text-lg">{devis.filter(d => d.statut === 'En attente' || d.statut === 'En attente (Modifié)').length}</p>
+                  </div>
+                </div>
               </div>
             </div>
-            <button 
-              onClick={() => {
-                navigator.clipboard.writeText(`https://zolio.site/?ref=${user?.id}`);
-                alert("Lien de parrainage copié !");
-              }}
-              className="bg-white dark:bg-slate-700 text-fuchsia-600 dark:text-violet-400 text-xs font-bold py-2 px-3 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 hover:scale-105 transition-transform"
-            >
-              Copier le lien
-            </button>
+
+            <div className="bg-white dark:bg-slate-800 rounded-[1.5rem] p-5 shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col h-full min-h-[200px]">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-slate-800 dark:text-slate-200 text-sm">Évolution du CA</h3>
+                <span className="text-xs text-slate-500">6 derniers mois</span>
+              </div>
+              <div className="flex-1 w-full relative">
+                <DashboardChart monthlyData={monthlyData} />
+              </div>
+            </div>
           </div>
-        )}
+        </div>
 
         {/* Action Widgets */}
         <div className="flex gap-4">

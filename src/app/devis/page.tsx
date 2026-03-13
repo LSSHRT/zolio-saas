@@ -255,6 +255,14 @@ export default function DevisPage() {
                           <div className="flex gap-2">
                             <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"><Check size={14} className="inline mr-1"/>Valider</button>
                             <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
+                            <button onClick={(e) => {
+                              e.preventDefault();
+                              const subject = encodeURIComponent(`Relance : Devis #${d.numero}`);
+                              const body = encodeURIComponent(`Bonjour ${d.nomClient},\n\nSauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${d.numero} d'un montant de ${d.totalTTC}€.\n\nRestant à votre disposition pour toute question.\n\nCordialement,`);
+                              window.location.href = `mailto:${d.emailClient || ''}?subject=${subject}&body=${body}`;
+                            }} className="py-1.5 px-2 bg-fuchsia-50 text-fuchsia-600 text-xs font-semibold rounded-lg hover:bg-fuchsia-100 transition" title="Relancer par email">
+                              <Mail size={14}/>
+                            </button>
                           </div>
                         )}
                         <div className="flex gap-2">

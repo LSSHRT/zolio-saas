@@ -411,6 +411,13 @@ export default function NouveauDevisPage() {
                   className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
               </div>
 
+              {/* Acompte */}
+              <div className="flex items-center gap-3 mt-4 mb-4">
+                <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Acompte à la signature (%) :</label>
+                <input type="number" placeholder="0" value={acompte} onChange={(e) => setAcompte(e.target.value)}
+                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+              </div>
+
 
               {/* Totaux */}
               <div className="bg-gradient-zolio rounded-2xl p-5 text-white">

@@ -125,6 +125,12 @@ export default function FacturesPage() {
     setIsDeletingBulk(false);
   };
 
+  const handleRelance = (f: Facture) => {
+    const sujet = encodeURIComponent(`Relance de paiement : Facture ${f.numero}`);
+    const corps = encodeURIComponent(`Bonjour ${f.nomClient},\n\nSauf erreur de notre part, nous n'avons pas encore reçu le règlement de la facture ${f.numero} émise le ${f.date}, d'un montant de ${f.totalTTC}€.\n\nVous trouverez les coordonnées bancaires sur la facture pour effectuer le virement.\n\nNous vous remercions de bien vouloir faire le nécessaire dans les meilleurs délais.\n\nCordialement.`);
+    window.location.href = `mailto:${f.emailClient}?subject=${sujet}&body=${corps}`;
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
@@ -203,7 +209,20 @@ export default function FacturesPage() {
           <div className="flex flex-col gap-3">
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} factures</p>
             {filtered.map((f, i) => {
-              const config = statutConfig[f.statut] || statutConfig["Émise"];
+              const isLate = () => {
+                if (f.statut === "Payée") return false;
+                if (!f.date) return false;
+                const parts = f.date.split('/');
+                if (parts.length !== 3) return false;
+                const dateEmission = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+                const diffTime = Date.now() - dateEmission.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return diffDays > 30;
+              };
+              
+              const late = isLate();
+              const displayStatut = late ? "En retard" : f.statut;
+              const config = statutConfig[displayStatut] || statutConfig["Émise"];
               const Icon = config.icon;
               return (
                 <motion.div
@@ -233,6 +252,13 @@ export default function FacturesPage() {
                       <p className="text-sm font-semibold text-slate-700">{f.devisRef || "-"}</p>
                     </div>
                     <div className="flex items-center gap-4 text-right">
+                      <button
+                        onClick={() => handleRelance(f)}
+                        className="text-amber-500 hover:text-amber-600 p-2 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors flex items-center justify-center"
+                        title="Relancer le client"
+                      >
+                        <Clock size={16} />
+                      </button>
                       <div>
                         <p className="text-[10px] text-slate-400">Total TTC</p>
                         <p className="text-lg font-bold text-slate-900 dark:text-white">{f.totalTTC}€</p>
