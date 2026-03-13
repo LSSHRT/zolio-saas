@@ -88,11 +88,13 @@ export default function AbonnementPage() {
 
           <div className="flex flex-col gap-3">
             {[
-              "Devis PDF illimités & pros",
-              "Envoi automatique par email",
-              "Catalogue de prestations personnalisé",
-              "Gestion de la base clients",
-              "Tableau de bord financier",
+              "Devis & Factures avec acomptes et options",
+              "Signature électronique (en ligne & sur place)",
+              "Assistant IA pour rédiger vos devis",
+              "Planning chantiers & Suivi des dépenses",
+              "Tracking de lecture, Relances & Avis Google",
+              "Personnalisation (Logo) & Export comptable",
+              "Catalogue de prestations avec gestion de stocks",
               "Support client prioritaire"
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
