@@ -69,74 +69,90 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
 
   // === HEADER ===
   const color = hexToRgb(data.entreprise?.color || "#0ea5e9");
+  
+  // Ligne de couleur en haut
   doc.setFillColor(color.r, color.g, color.b);
-  doc.rect(0, 0, pageWidth, 45, "F");
+  doc.rect(0, 0, pageWidth, 8, "F");
 
   let logoWidth = 0;
   if (data.entreprise?.logo) {
     const logoBase64 = await fetchImageAsBase64(data.entreprise.logo);
     if (logoBase64) {
       try {
-        // dimensions fixes (ex: 30x30, ou calculé)
-        // par defaut 30x30
-        doc.addImage(logoBase64, 15, 7, 30, 30);
-        logoWidth = 35; // décalage pour le texte
+        doc.addImage(logoBase64, 15, 15, 25, 25);
+        logoWidth = 30; // décalage pour le texte
       } catch (e) {
         console.error("Erreur ajout logo:", e);
       }
     }
   }
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(28);
+  doc.setTextColor(15, 23, 42); // Dark slate
+  doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
-  doc.text("ZOLIO", 20 + logoWidth, 25);
+  doc.text((data.entreprise?.nom || "MON ENTREPRISE").toUpperCase(), 20 + logoWidth, 28);
 
+  doc.setTextColor(100, 116, 139); // Slate gray
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Devis professionnel", 20 + logoWidth, 35);
+  doc.text("Devis", 20 + logoWidth, 36);
 
   // Numéro et date à droite
-  doc.setFontSize(11);
-  doc.text(data.numeroDevis, pageWidth - 20, 25, { align: "right" });
-  doc.text(`Date : ${data.date}`, pageWidth - 20, 35, { align: "right" });
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.numeroDevis, pageWidth - 20, 28, { align: "right" });
+  
+  doc.setTextColor(100, 116, 139);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date d'émission : ${data.date}`, pageWidth - 20, 36, { align: "right" });
 
   // === INFORMATIONS ===
-  doc.setTextColor(15, 23, 42);
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Émetteur", 20, 65);
-  doc.text("Client", 120, 65);
+  doc.setFillColor(248, 250, 252); // très léger gris
+  doc.roundedRect(15, 48, 85, 45, 3, 3, "F");
+  doc.roundedRect(110, 48, 85, 45, 3, 3, "F");
 
+  doc.setTextColor(100, 116, 139);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("ÉMETTEUR", 20, 56);
+  doc.text("CLIENT", 115, 56);
+
+  doc.setTextColor(15, 23, 42);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   
   // Émetteur
   if (data.entreprise) {
-    let currentY = 73;
-    doc.text(data.entreprise.nom, 20, currentY); currentY += 7;
-    doc.text(data.entreprise.email, 20, currentY); currentY += 7;
-    if (data.entreprise.telephone) { doc.text(`Tél: ${data.entreprise.telephone}`, 20, currentY); currentY += 7; }
-    if (data.entreprise.siret) { doc.text(`SIRET: ${data.entreprise.siret}`, 20, currentY); currentY += 7; }
+    let currentY = 65;
+    doc.setFont("helvetica", "bold");
+    doc.text(data.entreprise.nom, 20, currentY); currentY += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text(data.entreprise.email, 20, currentY); currentY += 5;
+    if (data.entreprise.telephone) { doc.text(`Tél: ${data.entreprise.telephone}`, 20, currentY); currentY += 5; }
+    if (data.entreprise.siret) { doc.text(`SIRET: ${data.entreprise.siret}`, 20, currentY); currentY += 5; }
     if (data.entreprise.adresse) {
-      const splitAdresse = doc.splitTextToSize(data.entreprise.adresse, 80);
+      const splitAdresse = doc.splitTextToSize(data.entreprise.adresse, 75);
       doc.text(splitAdresse, 20, currentY);
     }
   } else {
-    doc.text("Zolio", 20, 73);
+    doc.text("Mon Entreprise", 20, 65);
   }
 
   // Client
-  doc.text(data.client.nom, 120, 73);
-  doc.text(data.client.email, 120, 80);
-  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 120, 87);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.client.nom, 115, 65);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.client.email, 115, 71);
+  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 115, 76);
   if (data.client.adresse) {
-    const splitAdresse = doc.splitTextToSize(data.client.adresse, 70);
-    doc.text(splitAdresse, 120, 94);
+    const splitAdresse = doc.splitTextToSize(data.client.adresse, 75);
+    doc.text(splitAdresse, 115, 81);
   }
 
   // === TABLE HEADER ===
-  let y = 110;
+  let y = 105;
   doc.setFillColor(248, 250, 252);
   doc.rect(15, y - 5, pageWidth - 30, 10, "F");
 
@@ -287,7 +303,7 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   if (data.entreprise?.assurance) footerLinesDevis.push(data.entreprise.assurance);
   if (data.entreprise?.legal) footerLinesDevis.push(data.entreprise.legal);
   if (data.tva === "0" || data.tva === "0%") footerLinesDevis.push("TVA non applicable, art. 293 B du CGI.");
-  if (!data.isPro) footerLinesDevis.push("Devis gratuit généré par Zolio · zolio.site");
+  if (!data.isPro) footerLinesDevis.push("Document gratuit généré par Zolio · zolio.site");
   footerLinesDevis.push("Ce devis est valable 30 jours à compter de sa date d'émission.");
 
   doc.setTextColor(148, 163, 184);
@@ -338,74 +354,90 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
 
   // === HEADER ===
   const color = hexToRgb(data.entreprise?.color || "#0ea5e9");
+  
+  // Ligne de couleur en haut
   doc.setFillColor(color.r, color.g, color.b);
-  doc.rect(0, 0, pageWidth, 45, "F");
+  doc.rect(0, 0, pageWidth, 8, "F");
 
   let logoWidth = 0;
   if (data.entreprise?.logo) {
     const logoBase64 = await fetchImageAsBase64(data.entreprise.logo);
     if (logoBase64) {
       try {
-        // dimensions fixes (ex: 30x30, ou calculé)
-        // par defaut 30x30
-        doc.addImage(logoBase64, 15, 7, 30, 30);
-        logoWidth = 35; // décalage pour le texte
+        doc.addImage(logoBase64, 15, 15, 25, 25);
+        logoWidth = 30; // décalage pour le texte
       } catch (e) {
         console.error("Erreur ajout logo:", e);
       }
     }
   }
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(28);
+  doc.setTextColor(15, 23, 42); // Dark slate
+  doc.setFontSize(22);
   doc.setFont("helvetica", "bold");
-  doc.text("ZOLIO", 20 + logoWidth, 25);
+  doc.text((data.entreprise?.nom || "MON ENTREPRISE").toUpperCase(), 20 + logoWidth, 28);
 
+  doc.setTextColor(100, 116, 139); // Slate gray
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text("Facture", 20 + logoWidth, 35);
+  doc.text("Facture", 20 + logoWidth, 36);
 
   // Numéro et date à droite
-  doc.setFontSize(11);
-  doc.text(data.numeroDevis, pageWidth - 20, 25, { align: "right" });
-  doc.text(`Date : ${data.date}`, pageWidth - 20, 35, { align: "right" });
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.numeroDevis, pageWidth - 20, 28, { align: "right" });
+  
+  doc.setTextColor(100, 116, 139);
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Date d'émission : ${data.date}`, pageWidth - 20, 36, { align: "right" });
 
   // === INFORMATIONS ===
-  doc.setTextColor(15, 23, 42);
-  doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text("Émetteur", 20, 65);
-  doc.text("Client", 120, 65);
+  doc.setFillColor(248, 250, 252); // très léger gris
+  doc.roundedRect(15, 48, 85, 45, 3, 3, "F");
+  doc.roundedRect(110, 48, 85, 45, 3, 3, "F");
 
+  doc.setTextColor(100, 116, 139);
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.text("ÉMETTEUR", 20, 56);
+  doc.text("CLIENT", 115, 56);
+
+  doc.setTextColor(15, 23, 42);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   
   // Émetteur
   if (data.entreprise) {
-    let currentY = 73;
-    doc.text(data.entreprise.nom, 20, currentY); currentY += 7;
-    doc.text(data.entreprise.email, 20, currentY); currentY += 7;
-    if (data.entreprise.telephone) { doc.text(`Tél: ${data.entreprise.telephone}`, 20, currentY); currentY += 7; }
-    if (data.entreprise.siret) { doc.text(`SIRET: ${data.entreprise.siret}`, 20, currentY); currentY += 7; }
+    let currentY = 65;
+    doc.setFont("helvetica", "bold");
+    doc.text(data.entreprise.nom, 20, currentY); currentY += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text(data.entreprise.email, 20, currentY); currentY += 5;
+    if (data.entreprise.telephone) { doc.text(`Tél: ${data.entreprise.telephone}`, 20, currentY); currentY += 5; }
+    if (data.entreprise.siret) { doc.text(`SIRET: ${data.entreprise.siret}`, 20, currentY); currentY += 5; }
     if (data.entreprise.adresse) {
-      const splitAdresse = doc.splitTextToSize(data.entreprise.adresse, 80);
+      const splitAdresse = doc.splitTextToSize(data.entreprise.adresse, 75);
       doc.text(splitAdresse, 20, currentY);
     }
   } else {
-    doc.text("Zolio", 20, 73);
+    doc.text("Mon Entreprise", 20, 65);
   }
 
   // Client
-  doc.text(data.client.nom, 120, 73);
-  doc.text(data.client.email, 120, 80);
-  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 120, 87);
+  doc.setFont("helvetica", "bold");
+  doc.text(data.client.nom, 115, 65);
+  doc.setFont("helvetica", "normal");
+  doc.text(data.client.email, 115, 71);
+  if (data.client.telephone) doc.text(`Tél: ${data.client.telephone}`, 115, 76);
   if (data.client.adresse) {
-    const splitAdresse = doc.splitTextToSize(data.client.adresse, 70);
-    doc.text(splitAdresse, 120, 94);
+    const splitAdresse = doc.splitTextToSize(data.client.adresse, 75);
+    doc.text(splitAdresse, 115, 81);
   }
 
   // === TABLE HEADER ===
-  let y = 110;
+  let y = 105;
   doc.setFillColor(248, 250, 252);
   doc.rect(15, y - 5, pageWidth - 30, 10, "F");
 
@@ -535,7 +567,7 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   if (data.entreprise?.assurance) footerLinesFacture.push(data.entreprise.assurance);
   if (data.entreprise?.legal) footerLinesFacture.push(data.entreprise.legal);
   if (data.tva === "0" || data.tva === "0%") footerLinesFacture.push("TVA non applicable, art. 293 B du CGI.");
-  if (!data.isPro) footerLinesFacture.push("Facture gratuite générée par Zolio · zolio.site");
+  if (!data.isPro) footerLinesFacture.push("Document gratuit généré par Zolio · zolio.site");
   footerLinesFacture.push("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.");
 
   doc.setTextColor(148, 163, 184);

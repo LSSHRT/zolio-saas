@@ -406,3 +406,27 @@
     "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
 }
 
+[2026-03-13 15:36] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+
+[2026-03-13 15:38] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+
+[2026-03-13 15:39] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+

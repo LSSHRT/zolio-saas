@@ -63,23 +63,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
 
     const currentRow = devisRows[rowIndex];
 
-    // Update statut (col I = index 8)
-    await sheets.spreadsheets.values.update({
+    // Update statut et signature en une seule requête (BatchUpdate)
+    await sheets.spreadsheets.values.batchUpdate({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!I${rowIndex + 1}`,
-      valueInputOption: "USER_ENTERED",
       requestBody: {
-        values: [["Accepté"]],
-      },
-    });
-
-    // Update signature (col M = index 12)
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!M${rowIndex + 1}`,
-      valueInputOption: "RAW",
-      requestBody: {
-        values: [[signatureBase64]],
+        valueInputOption: "USER_ENTERED",
+        data: [
+          {
+            range: `Devis_Emis!I${rowIndex + 1}`,
+            values: [["Accepté"]],
+          },
+          {
+            range: `Devis_Emis!M${rowIndex + 1}`,
+            values: [[signatureBase64]],
+          },
+        ],
       },
     });
 

@@ -2,6 +2,9 @@ import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // Récupérer les lignes de détail d'un devis spécifique
 export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
@@ -54,6 +57,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       remise: devisRow[11] || "",
       signatureBase64: devisRow[12] || "",
       lignes,
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     });
   } catch (error) {
     console.error("Erreur GET devis detail:", error);
