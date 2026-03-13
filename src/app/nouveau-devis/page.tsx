@@ -58,6 +58,8 @@ export default function NouveauDevisPage() {
   const [isPro, setIsPro] = useState(true); // Défaut true pour éviter le flash
   const [checkingPro, setCheckingPro] = useState(true);
   const [devisCount, setDevisCount] = useState<number | null>(null);
+  const [isLoadingClients, setIsLoadingClients] = useState(true);
+  const [isAddingClient, setIsAddingClient] = useState(false);
 
   // Formulaire nouveau client rapide
   const [showNewClient, setShowNewClient] = useState(false);
@@ -74,7 +76,10 @@ export default function NouveauDevisPage() {
       setCheckingPro(false);
     }
 
-    fetch("/api/clients").then((r) => r.json()).then((d) => setClients(Array.isArray(d) ? d : []));
+    fetch("/api/clients").then((r) => r.json()).then((d) => {
+      setClients(Array.isArray(d) ? d : []);
+      setIsLoadingClients(false);
+    }).catch(() => setIsLoadingClients(false));
     fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(Array.isArray(d) ? d : []));
     fetch("/api/devis").then((r) => r.json()).then((d) => setDevisCount(Array.isArray(d) ? d.length : 0));
   }, [isLoaded, user]);
@@ -183,12 +188,19 @@ export default function NouveauDevisPage() {
   };
 
   const handleNewClient = async () => {
-    const res = await fetch("/api/clients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newClient) });
-    const c = await res.json();
-    setClients([...clients, c]);
-    setSelectedClient(c);
-    setShowNewClient(false);
-    setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
+    setIsAddingClient(true);
+    try {
+      const res = await fetch("/api/clients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newClient) });
+      const c = await res.json();
+      setClients([...clients, c]);
+      setSelectedClient(c);
+      setShowNewClient(false);
+      setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
+    } catch (error) {
+      alert("Erreur lors de la création du client");
+    } finally {
+      setIsAddingClient(false);
+    }
   };
 
   const handleSend = async () => {
@@ -375,24 +387,44 @@ export default function NouveauDevisPage() {
                         className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <div className="flex gap-2 mt-1">
                         <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
-                        <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient}
-                          className="flex-1 py-2 text-sm text-white bg-gradient-zolio rounded-xl font-semibold">Ajouter</motion.button>
+                        <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient} disabled={isAddingClient}
+                          className="flex-1 py-2 text-sm text-white bg-gradient-zolio rounded-xl font-semibold disabled:opacity-70 flex justify-center items-center">
+                          {isAddingClient ? (
+                            <span className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Ajout...
+                            </span>
+                          ) : "Ajouter"}
+                        </motion.button>
                       </div>
                     </motion.div>
                   )}
 
-                  <div className="flex flex-col gap-2">
-                    {filteredClients.map((c) => (
-                      <motion.button key={c.id} whileTap={{ scale: 0.97 }} onClick={() => setSelectedClient(c)}
-                        className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
-                        <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{c.nom.charAt(0)}</div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{c.nom}</p>
-                          <p className="text-xs text-slate-400 truncate">{c.email}</p>
-                        </div>
-                      </motion.button>
-                    ))}
-                  </div>
+                  {isLoadingClients ? (
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <div className="w-8 h-8 border-4 border-fuchsia-200 border-t-fuchsia-500 rounded-full animate-spin"></div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">Chargement de vos clients...</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      {filteredClients.length === 0 && searchClient === "" && !showNewClient && (
+                        <p className="text-center text-sm text-slate-400 py-4">Aucun client. Commencez par en créer un !</p>
+                      )}
+                      {filteredClients.length === 0 && searchClient !== "" && (
+                        <p className="text-center text-sm text-slate-400 py-4">Aucun client trouvé pour "{searchClient}".</p>
+                      )}
+                      {filteredClients.map((c) => (
+                        <motion.button key={c.id} whileTap={{ scale: 0.97 }} onClick={() => setSelectedClient(c)}
+                          className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
+                          <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{c.nom.charAt(0)}</div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{c.nom}</p>
+                            <p className="text-xs text-slate-400 truncate">{c.email}</p>
+                          </div>
+                        </motion.button>
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
             </motion.div>
