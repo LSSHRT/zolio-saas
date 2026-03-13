@@ -10,7 +10,7 @@ export async function GET() {
     const sheets = await getGoogleSheetsClient();
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Catalogue_Prestations!A:G", // A est mnt userId
+      range: "Catalogue_Prestations!A:H", // A est mnt userId
     });
 
     const rows = response.data.values;
@@ -28,6 +28,7 @@ export async function GET() {
       unite: row[4] || "",
       prixUnitaireHT: parseFloat(row[5]) || 0,
       coutMatiere: parseFloat(row[6]) || 0,
+      stock: parseFloat(row[7]) || 0,
     }));
 
     return NextResponse.json(prestations);
@@ -49,12 +50,12 @@ export async function POST(request: Request) {
     if (Array.isArray(body)) {
       const rows = body.map((item, index) => {
         const nextId = `PREST-${Date.now()}-${index}-${Math.floor(Math.random() * 1000)}`;
-        return [userId, nextId, item.categorie, item.nom, item.unite, item.prixUnitaireHT, item.coutMatiere || ""];
+        return [userId, nextId, item.categorie, item.nom, item.unite, item.prixUnitaireHT, item.coutMatiere || "", item.stock || 0];
       });
 
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Catalogue_Prestations!A:G",
+        range: "Catalogue_Prestations!A:H",
         valueInputOption: "RAW",
         insertDataOption: "INSERT_ROWS",
         requestBody: { values: rows },
@@ -64,20 +65,20 @@ export async function POST(request: Request) {
     }
 
     // Single insertion
-    const { categorie, nom, unite, prixUnitaireHT, coutMatiere } = body;
+    const { categorie, nom, unite, prixUnitaireHT, coutMatiere, stock } = body;
     const nextId = `PREST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Catalogue_Prestations!A:G",
+      range: "Catalogue_Prestations!A:H",
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
-        values: [[userId, nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere || ""]],
+        values: [[userId, nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere || "", stock || 0]],
       },
     });
 
-    return NextResponse.json({ id: nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere });
+    return NextResponse.json({ id: nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere, stock });
   } catch (error) {
     console.error("Erreur POST prestation:", error);
     return NextResponse.json({ error: "Impossible d'ajouter la prestation" }, { status: 500 });

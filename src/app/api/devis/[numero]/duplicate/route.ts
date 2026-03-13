@@ -41,7 +41,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
     // 2. Récupérer les lignes
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:H",
+      range: "Lignes_Devis!A:I",
     });
     const allLignes = lignesRes.data.values || [];
     const oldLignes = allLignes.filter((r) => r[0] === userId && r[1] === numero);
@@ -85,12 +85,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
       l[4], // unite
       l[5], // prixUnitaire
       l[6], // totalLigne
+      l[7] || "20", // tva
+      l[8] || "Non", // isOptional
     ]);
 
     if (newLignesValues.length > 0) {
       await sheets.spreadsheets.values.append({
         spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Lignes_Devis!A:H",
+        range: "Lignes_Devis!A:I",
         valueInputOption: "USER_ENTERED",
         requestBody: {
           values: newLignesValues,

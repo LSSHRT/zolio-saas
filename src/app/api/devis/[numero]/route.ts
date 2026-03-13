@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     // Récupérer les lignes de détail
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:H",
+      range: "Lignes_Devis!A:I",
     });
     const allLignes = lignesRes.data.values || [];
     const lignes = allLignes
@@ -42,6 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
         prixUnitaire: parseFloat(r[5]) || 0,
         totalLigne: parseFloat(r[6]) || 0,
         tva: r[7] || "20",
+        isOptional: r[8] === "Oui",
       }));
 
     let photos = [];
@@ -104,8 +105,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     const sheets = await getGoogleSheetsClient();
 
     // Recalculer les totaux
-    const totalHT = lignes.reduce((s: number, l: any) => s + l.totalLigne, 0);
-    const totalTTC = lignes.reduce((s: number, l: any) => s + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
+    const totalHT = lignes.filter((l: any) => !l.isOptional).reduce((s: number, l: any) => s + l.totalLigne, 0);
+    const totalTTC = lignes.filter((l: any) => !l.isOptional).reduce((s: number, l: any) => s + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
     const tvaRates = [...new Set(lignes.map((l: any) => l.tva || "0"))];
     const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
     const date = new Date().toLocaleDateString("fr-FR");
@@ -153,7 +154,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 2. Supprimer les anciennes lignes de détail et réécrire
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:H",
+      range: "Lignes_Devis!A:I",
     });
     const allLignes = lignesRes.data.values || [];
 
@@ -171,6 +172,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       l.prixUnitaire,
       l.totalLigne.toFixed(2),
       l.tva || "20",
+      l.isOptional ? "Oui" : "Non",
     ]);
 
     const updatedLignes = [...otherLignes, ...newLignes];
@@ -178,7 +180,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // Effacer tout puis réécrire
     await sheets.spreadsheets.values.clear({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:H",
+      range: "Lignes_Devis!A:I",
     });
 
     if (updatedLignes.length > 0) {
@@ -283,7 +285,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
     // 2. Trouver les lignes dans Lignes_Devis
     const lignesRes = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Lignes_Devis!A:H",
+      range: "Lignes_Devis!A:I",
     });
     const allLignes = lignesRes.data.values || [];
     

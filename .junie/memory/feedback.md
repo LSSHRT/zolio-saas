@@ -478,3 +478,11 @@
     "NEW INSTRUCTION": "WHEN implementing TVA button in signature flow THEN match Remise/Accompte styles (size, color, radius)"
 }
 
+[2026-03-13 19:01] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "solution approval",
+    "EXPECTATION": "The user wants the assistant to proceed with all previously discussed changes and fixes and confirm deployment.",
+    "NEW INSTRUCTION": "WHEN user expresses agreement to proceed THEN implement agreed changes and confirm deployment"
+}
+

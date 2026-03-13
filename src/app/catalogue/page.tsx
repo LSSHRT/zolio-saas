@@ -12,6 +12,7 @@ interface Prestation {
   unite: string;
   prixUnitaireHT: number;
   coutMatiere: number;
+  stock?: number;
 }
 
 const CATEGORIES = ["Préparation", "Peinture", "Sol", "Plafond", "Façade", "Décoration", "Plomberie", "Électricité", "Menuiserie", "Autre"];
@@ -93,7 +94,7 @@ export default function CataloguePage() {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
-  const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" });
+  const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "", stock: "" });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -117,7 +118,7 @@ export default function CataloguePage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, prixUnitaireHT: parseFloat(form.prixUnitaireHT), coutMatiere: parseFloat(form.coutMatiere) || 0 }),
+        body: JSON.stringify({ ...form, prixUnitaireHT: parseFloat(form.prixUnitaireHT), coutMatiere: parseFloat(form.coutMatiere) || 0, stock: parseFloat(form.stock) || 0 }),
       });
       const data = await res.json();
       if (editingId) {
@@ -125,7 +126,7 @@ export default function CataloguePage() {
       } else {
         setPrestations([...prestations, data]);
       }
-      setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" });
+      setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "", stock: "" });
       setEditingId(null);
       setShowForm(false);
     } catch (err) {
@@ -176,6 +177,7 @@ export default function CataloguePage() {
       unite: p.unite,
       prixUnitaireHT: p.prixUnitaireHT.toString(),
       coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
+      stock: p.stock !== undefined ? p.stock.toString() : ""
     });
     setEditingId(p.id);
     setShowForm(true);
@@ -367,6 +369,9 @@ export default function CataloguePage() {
             <input type="number" step="0.01" placeholder="Coût matière estimé (optionnel)" value={form.coutMatiere}
               onChange={(e) => setForm({ ...form, coutMatiere: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+            <input type="number" step="0.01" placeholder="Stock initial (optionnel)" value={form.stock}
+              onChange={(e) => setForm({ ...form, stock: e.target.value })}
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter au catalogue"}
@@ -410,7 +415,10 @@ export default function CataloguePage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{p.nom}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{p.categorie} · {p.unite}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {p.categorie} · {p.unite}
+                    {p.stock !== undefined && p.stock > 0 && <span className="ml-2 text-fuchsia-600 bg-fuchsia-100 dark:bg-fuchsia-900/30 px-1.5 py-0.5 rounded-md">Stock: {p.stock}</span>}
+                  </p>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="font-bold text-slate-900 dark:text-white text-sm">{p.prixUnitaireHT}€</p>

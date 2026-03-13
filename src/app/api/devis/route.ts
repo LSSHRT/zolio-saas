@@ -43,9 +43,9 @@ export async function POST(request: Request) {
     const date = new Date().toLocaleDateString("fr-FR");
 
     // Calculer les totaux
-    const totalHT = lignes.reduce((sum: number, l: any) => sum + l.totalLigne, 0);
+    const totalHT = lignes.filter((l: any) => !l.isOptional).reduce((sum: number, l: any) => sum + l.totalLigne, 0);
     // Multi-TVA: on calcule le TTC ligne par ligne
-    const totalTTC = lignes.reduce((sum: number, l: any) => sum + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
+    const totalTTC = lignes.filter((l: any) => !l.isOptional).reduce((sum: number, l: any) => sum + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
     // Pour la rétrocompatibilité ou l'affichage global de l'en-tête (on peut mettre "Multi" si plusieurs TVA)
     const tvaRates = [...new Set(lignes.map((l: any) => l.tva || "0"))];
     const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
@@ -87,11 +87,12 @@ export async function POST(request: Request) {
       l.prixUnitaire,
       l.totalLigne.toFixed(2),
       l.tva || "20", // Colonne H
+      l.isOptional ? "Oui" : "Non", // Colonne I
     ]);
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:H", // On passe de A:F à A:G
+      range: "Lignes_Devis!A:I", // On passe de A:G à A:I
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: lignesValues,

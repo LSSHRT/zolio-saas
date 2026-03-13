@@ -22,7 +22,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Catalogue_Prestations!A:G",
+      range: "Catalogue_Prestations!A:H",
     });
 
     const rows = response.data.values || [];
@@ -73,7 +73,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: "Catalogue_Prestations!A:G",
+      range: "Catalogue_Prestations!A:H",
     });
 
     const rows = response.data.values || [];
@@ -84,7 +84,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // Prepare updated row. 
-    // Format: ID_Utilisateur, ID_Prestation, Nom, Description, PrixUnitaire, Unite, TVA
+    // Format: ID_Utilisateur, ID_Prestation, Nom, Description, PrixUnitaire, Unite, TVA, Stock
     const updatedRow = [
       userId,
       prestationId,
@@ -92,12 +92,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       body.description || rows[rowIndex][3] || "",
       body.prixUnitaire !== undefined ? body.prixUnitaire.toString() : rows[rowIndex][4],
       body.unite || rows[rowIndex][5] || "U",
-      body.tva !== undefined ? body.tva.toString() : rows[rowIndex][6] || "20"
+      body.tva !== undefined ? body.tva.toString() : rows[rowIndex][6] || "20",
+      body.stock !== undefined ? body.stock.toString() : rows[rowIndex][7] || "0"
     ];
 
     await sheets.spreadsheets.values.update({
       spreadsheetId,
-      range: `Catalogue_Prestations!A${rowIndex + 1}:G${rowIndex + 1}`,
+      range: `Catalogue_Prestations!A${rowIndex + 1}:H${rowIndex + 1}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [updatedRow],

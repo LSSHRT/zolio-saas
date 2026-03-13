@@ -8,7 +8,7 @@ import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 
-interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
+interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; isOptional?: boolean; }
 
 
 const FORFAITS = [
@@ -75,20 +75,20 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     }).catch(() => setLoading(false));
   }, [numero]);
 
-  const totalHTBase = lignes.reduce((s, l) => s + l.totalLigne, 0);
+  const totalHTBase = lignes.filter(l => !l.isOptional).reduce((s, l) => s + l.totalLigne, 0);
   const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
   const totalHT = totalHTBase - montantRemise;
   // TTC calculé avec TVA par ligne
-  const totalTTC = lignes.reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
+  const totalTTC = lignes.filter(l => !l.isOptional).reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
 
-  const margeEstimee = lignes.reduce((sum, l) => {
+  const margeEstimee = lignes.filter(l => !l.isOptional).reduce((sum, l) => {
     const p = prestations.find(prest => prest.nom === l.nomPrestation);
     const coutUnitaire = p ? (p.coutMatiere || 0) : 0;
     return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
   }, 0) - montantRemise;
 
   const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva }]);
+    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva, isOptional: false }]);
     setShowAddPrestation(false);
     setSearchPrestation("");
   };
@@ -114,6 +114,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   };
 
   const removeLigne = (idx: number) => setLignes(lignes.filter((_, i) => i !== idx));
+
+  const toggleOptional = (idx: number) => {
+    const newLignes = [...lignes];
+    newLignes[idx].isOptional = !newLignes[idx].isOptional;
+    setLignes(newLignes);
+  };
 
   const handleSaveAndResend = async () => {
     setSaving(true);
@@ -311,7 +317,9 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             {lignes.map((l, i) => (
               <div key={i} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 flex-1 truncate">{l.nomPrestation}</p>
+                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 flex-1 truncate">
+                    {l.nomPrestation} {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-1">Optionnel</span>}
+                  </p>
                   <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600 ml-2"><Trash2 size={14} /></button>
                 </div>
                 <div className="flex items-center gap-2">
@@ -324,6 +332,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                     <label className="text-[10px] text-slate-400">Prix/{l.unite}</label>
                     <input type="number" min="0" step="0.01" value={l.prixUnitaire} onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
                       className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                  </div>
+                  <div className="flex-none flex items-end mb-1 px-1">
+                    <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
+                      <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500" />
+                      Option
+                    </label>
                   </div>
                   <div className="w-20 text-right">
                     <label className="text-[10px] text-slate-400">Total</label>

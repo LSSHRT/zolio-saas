@@ -32,6 +32,7 @@ interface LigneDevis {
   prixUnitaire: number;
   totalLigne: number;
   tva?: string;
+  isOptional?: boolean;
 }
 
 interface DevisData {
@@ -177,7 +178,13 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(10);
 
   for (const ligne of data.lignes) {
-    doc.text(ligne.nomPrestation.substring(0, 40), 20, y + 2);
+    if (ligne.isOptional) {
+      doc.setTextColor(148, 163, 184); // slate-400
+    } else {
+      doc.setTextColor(15, 23, 42); // slate-900
+    }
+    const nomText = ligne.nomPrestation + (ligne.isOptional ? " (Optionnel)" : "");
+    doc.text(nomText.substring(0, 40), 20, y + 2);
     doc.text(String(ligne.quantite), 102, y + 2);
     doc.text(ligne.unite, 115, y + 2);
     doc.text(ligne.tva ? `${ligne.tva}%` : (data.tva !== "Multi" ? data.tva : "20%"), 130, y + 2);
@@ -227,6 +234,7 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
     // Calculate TVAs per rate
     const tvaMap: Record<string, number> = {};
     for (const l of data.lignes) {
+      if (l.isOptional) continue;
       const rate = l.tva || "20";
       if (!tvaMap[rate]) tvaMap[rate] = 0;
       tvaMap[rate] += l.totalLigne * (parseFloat(rate)/100);
@@ -484,7 +492,13 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   doc.setFontSize(10);
 
   for (const ligne of data.lignes) {
-    doc.text(ligne.nomPrestation.substring(0, 40), 20, y + 2);
+    if (ligne.isOptional) {
+      doc.setTextColor(148, 163, 184); // slate-400
+    } else {
+      doc.setTextColor(15, 23, 42); // slate-900
+    }
+    const nomText = ligne.nomPrestation + (ligne.isOptional ? " (Optionnel)" : "");
+    doc.text(nomText.substring(0, 40), 20, y + 2);
     doc.text(String(ligne.quantite), 102, y + 2);
     doc.text(ligne.unite, 115, y + 2);
     doc.text(ligne.tva ? `${ligne.tva}%` : (data.tva !== "Multi" ? data.tva : "20%"), 130, y + 2);
@@ -534,6 +548,7 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
     // Calculate TVAs per rate
     const tvaMap: Record<string, number> = {};
     for (const l of data.lignes) {
+      if (l.isOptional) continue;
       const rate = l.tva || "20";
       if (!tvaMap[rate]) tvaMap[rate] = 0;
       tvaMap[rate] += l.totalLigne * (parseFloat(rate)/100);

@@ -8,7 +8,7 @@ import { useUser } from "@clerk/nextjs";
 
 interface Client { id: string; nom: string; email: string; telephone: string; adresse: string; dateAjout: string; }
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
-interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
+interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; isOptional?: boolean; }
 
 
 const FORFAITS = [
@@ -76,20 +76,20 @@ export default function NouveauDevisPage() {
     fetch("/api/devis").then((r) => r.json()).then((d) => setDevisCount(Array.isArray(d) ? d.length : 0));
   }, [isLoaded, user]);
 
-  const totalHTBase = lignes.reduce((s, l) => s + l.totalLigne, 0);
+  const totalHTBase = lignes.filter(l => !l.isOptional).reduce((s, l) => s + l.totalLigne, 0);
   const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
   const totalHT = totalHTBase - montantRemise;
   // TTC est calculé en fonction de la TVA de chaque ligne ou de la TVA globale
-  const totalTTC = lignes.reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
+  const totalTTC = lignes.filter(l => !l.isOptional).reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
 
-  const margeEstimee = lignes.reduce((sum, l) => {
+  const margeEstimee = lignes.filter(l => !l.isOptional).reduce((sum, l) => {
     const p = prestations.find(prest => prest.nom === l.nomPrestation);
     const coutUnitaire = p ? (p.coutMatiere || 0) : 0;
     return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
   }, 0) - montantRemise;
 
   const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva }]);
+    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva, isOptional: false }]);
     setSearchPrestation("");
   };
 
@@ -111,6 +111,12 @@ export default function NouveauDevisPage() {
     const newLignes = forfait.lignes.map((l: any) => ({ ...l, tva }));
     setLignes([...lignes, ...newLignes]);
     setShowForfaits(false);
+  };
+
+  const toggleOptional = (idx: number) => {
+    const newLignes = [...lignes];
+    newLignes[idx].isOptional = !newLignes[idx].isOptional;
+    setLignes(newLignes);
   };
 
   const removeLigne = (idx: number) => {
@@ -384,6 +390,10 @@ export default function NouveauDevisPage() {
                             <option value="10">10%</option>
                             <option value="20">20%</option>
                           </select>
+                          <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
+                            <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500" />
+                            Option
+                          </label>
                           <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
                         <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
                       </div>
@@ -415,7 +425,9 @@ export default function NouveauDevisPage() {
                 {lignes.map((l, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
                     <div>
-                      <p className="text-sm text-slate-800 dark:text-slate-200">{l.nomPrestation}</p>
+                      <p className="text-sm text-slate-800 dark:text-slate-200">
+                        {l.nomPrestation} {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-1">Optionnel</span>}
+                      </p>
                       <p className="text-[10px] text-slate-400">{l.quantite} {l.unite} × {l.prixUnitaire}€</p>
                     </div>
                     <p className="font-bold text-sm text-slate-800 dark:text-slate-200">{l.totalLigne.toFixed(2)}€</p>
