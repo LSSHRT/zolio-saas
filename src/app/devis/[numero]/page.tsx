@@ -113,6 +113,22 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     setLignes(updated);
   };
 
+  const updateNom = (idx: number, nom: string) => {
+    const updated = [...lignes];
+    updated[idx].nomPrestation = nom;
+    const found = prestations.find(p => p.nom === nom);
+    if (found) {
+      updated[idx].prixUnitaire = found.prixUnitaireHT;
+      updated[idx].unite = found.unite;
+      updated[idx].totalLigne = updated[idx].quantite * found.prixUnitaireHT;
+    }
+    setLignes(updated);
+  };
+
+  const addLigneLibre = () => {
+    setLignes([...lignes, { nomPrestation: "", quantite: 1, unite: "U", prixUnitaire: 0, totalLigne: 0, tva, isOptional: false }]);
+  };
+
   const removeLigne = (idx: number) => setLignes(lignes.filter((_, i) => i !== idx));
 
   const toggleOptional = (idx: number) => {
@@ -314,13 +330,25 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
           {/* Liste lignes */}
           <div className="flex flex-col gap-2">
+            <datalist id="prestations-list-edit">
+              {prestations.map(p => <option key={p.id} value={p.nom} />)}
+            </datalist>
+
             {lignes.map((l, i) => (
               <div key={i} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 flex-1 truncate">
-                    {l.nomPrestation} {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-1">Optionnel</span>}
-                  </p>
-                  <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600 ml-2"><Trash2 size={14} /></button>
+                  <div className="flex-1 flex items-center mr-2">
+                    <input 
+                      type="text" 
+                      list="prestations-list-edit"
+                      value={l.nomPrestation}
+                      onChange={(e) => updateNom(i, e.target.value)}
+                      placeholder="Nom de la prestation..."
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                    />
+                    {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-2 shrink-0">Optionnel</span>}
+                  </div>
+                  <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex-1">
@@ -335,7 +363,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   </div>
                   <div className="flex-none flex items-end mb-1 px-1">
                     <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
-                      <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500" />
+                      <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-violet-600 focus:ring-violet-500" />
                       Option
                     </label>
                   </div>
@@ -346,6 +374,13 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                 </div>
               </div>
             ))}
+            
+            <button
+              onClick={addLigneLibre}
+              className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-slate-300 text-slate-500 font-medium rounded-xl hover:bg-slate-50 transition dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 mt-2"
+            >
+              <Plus size={16} /> Ajouter une ligne libre
+            </button>
           </div>
         </div>
 

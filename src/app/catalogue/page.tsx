@@ -191,6 +191,7 @@ export default function CataloguePage() {
       unite: p.unite,
       prixUnitaireHT: p.prixUnitaireHT.toString(),
       coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
+      stock: p.stock !== undefined ? p.stock.toString() : ""
     });
     setEditingId(null);
     setShowForm(true);
@@ -309,7 +310,7 @@ export default function CataloguePage() {
         </label>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "" }); }}
+          onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "", stock: "" }); }}
           className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}

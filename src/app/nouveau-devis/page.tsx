@@ -106,6 +106,30 @@ export default function NouveauDevisPage() {
     setLignes(updated);
   };
 
+  const updateNom = (idx: number, nom: string) => {
+    const updated = [...lignes];
+    updated[idx].nomPrestation = nom;
+    // Auto-complétion du prix si trouvé dans le catalogue
+    const found = prestations.find(p => p.nom === nom);
+    if (found) {
+      updated[idx].prixUnitaire = found.prixUnitaireHT;
+      updated[idx].unite = found.unite;
+      updated[idx].totalLigne = updated[idx].quantite * found.prixUnitaireHT;
+    }
+    setLignes(updated);
+  };
+
+  const updatePrix = (idx: number, prix: number) => {
+    const updated = [...lignes];
+    updated[idx].prixUnitaire = prix;
+    updated[idx].totalLigne = updated[idx].quantite * prix;
+    setLignes(updated);
+  };
+
+  const addLigneLibre = () => {
+    setLignes([...lignes, { nomPrestation: "", quantite: 1, unite: "U", prixUnitaire: 0, totalLigne: 0, tva, isOptional: false }]);
+  };
+
   
   const applyForfait = (forfait: any) => {
     const newLignes = forfait.lignes.map((l: any) => ({ ...l, tva }));
@@ -373,18 +397,38 @@ export default function NouveauDevisPage() {
 
               {/* Lignes ajoutées */}
               {lignes.length > 0 && (
-                <div className="mt-2">
+                <div className="mt-4">
                   <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Lignes du devis ({lignes.length})</p>
+                  
+                  <datalist id="prestations-list">
+                    {prestations.map(p => <option key={p.id} value={p.nom} />)}
+                  </datalist>
+
                   <div className="flex flex-col gap-2">
                     {lignes.map((l, i) => (
-                      <div key={i} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{l.nomPrestation}</p>
-                          <p className="text-[10px] text-slate-400">{l.prixUnitaire}€/{l.unite}</p>
+                      <div key={i} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-3">
+                        <div className="flex-1 min-w-[200px] flex flex-col">
+                          <input 
+                            type="text" 
+                            list="prestations-list"
+                            value={l.nomPrestation}
+                            onChange={(e) => updateNom(i, e.target.value)}
+                            placeholder="Nom de la prestation..."
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                          />
+                          <div className="flex items-center gap-2 mt-1">
+                            <input 
+                              type="number" 
+                              value={l.prixUnitaire} 
+                              onChange={(e) => updatePrix(i, parseFloat(e.target.value) || 0)}
+                              className="w-20 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-1 text-slate-600 dark:text-slate-400"
+                            />
+                            <span className="text-[10px] text-slate-400">€ / {l.unite}</span>
+                          </div>
                         </div>
                         <input type="number" min="1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
                           className="w-16 text-center py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
-                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs">
+                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-fuchsia-500">
                             <option value="0">0%</option>
                             <option value="5.5">5.5%</option>
                             <option value="10">10%</option>
@@ -395,12 +439,19 @@ export default function NouveauDevisPage() {
                             Option
                           </label>
                           <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
-                        <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={16} /></button>
+                        <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600 p-1"><Trash2 size={16} /></button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+              
+              <button
+                onClick={addLigneLibre}
+                className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-slate-300 text-slate-500 font-medium rounded-xl hover:bg-slate-50 transition dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+              >
+                <Plus size={18} /> Ajouter une ligne libre
+              </button>
             </motion.div>
           )}
 

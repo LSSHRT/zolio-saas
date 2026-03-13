@@ -2,16 +2,101 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { ArrowLeft, Calendar as CalendarIcon, Clock, CheckCircle, FileText } from "lucide-react";
+import { ArrowLeft, Calendar as CalendarIcon, Clock, CheckCircle, FileText, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+function PlanningItem({ devis, mutate }: { devis: any; mutate: any }) {
+  const [dateDebut, setDateDebut] = useState(devis.dateDebut || "");
+  const [dateFin, setDateFin] = useState(devis.dateFin || "");
+  const [saving, setSaving] = useState(false);
+
+  const isPlanned = devis.dateDebut || devis.dateFin;
+  const hasChanged = dateDebut !== (devis.dateDebut || "") || dateFin !== (devis.dateFin || "");
+
+  const handleSave = async () => {
+    setSaving(true);
+    await fetch(`/api/devis/${devis.numero}/planning`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ dateDebut, dateFin }),
+    });
+    setSaving(false);
+    mutate();
+  };
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4"
+    >
+      <div className="flex-1">
+        <h3 className="font-bold text-slate-900 dark:text-white text-lg">{devis.nomClient}</h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+          <FileText className="w-4 h-4" /> {devis.numero} — {devis.totalTTC}€
+        </p>
+      </div>
+
+      <div className="flex flex-col sm:flex-row items-center gap-3">
+        <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+          <div className="flex flex-col">
+            <label className="text-[10px] text-slate-400 uppercase font-semibold">Début</label>
+            <input 
+              type="date" 
+              value={dateDebut} 
+              onChange={(e) => setDateDebut(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+          </div>
+          <span className="mt-4">-</span>
+          <div className="flex flex-col">
+            <label className="text-[10px] text-slate-400 uppercase font-semibold">Fin</label>
+            <input 
+              type="date" 
+              value={dateFin} 
+              onChange={(e) => setDateFin(e.target.value)}
+              className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
+        {hasChanged ? (
+          <button 
+            onClick={handleSave} 
+            disabled={saving}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            Enregistrer
+          </button>
+        ) : (
+          <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium whitespace-nowrap
+            ${isPlanned ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400" : "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400"}`}
+          >
+            {isPlanned ? <CheckCircle className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+            {isPlanned ? "Planifié" : "À planifier"}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function PlanningPage() {
-  const { data: devis, error, isLoading } = useSWR('/api/devis', fetcher);
+  const { data: devis, mutate, isLoading } = useSWR('/api/devis', fetcher);
   
   const devisAccepte = Array.isArray(devis) ? devis.filter((d) => d.statut === "Accepté") : [];
+
+  // Trier: les non-planifiés en premier, puis tri par date de début
+  const sortedDevis = [...devisAccepte].sort((a, b) => {
+    if (!a.dateDebut && b.dateDebut) return -1;
+    if (a.dateDebut && !b.dateDebut) return 1;
+    if (a.dateDebut && b.dateDebut) return a.dateDebut.localeCompare(b.dateDebut);
+    return 0;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
@@ -26,7 +111,7 @@ export default function PlanningPage() {
         <div className="bg-indigo-50 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300 p-4 rounded-xl mb-6 text-sm flex items-start gap-3">
           <CalendarIcon className="w-5 h-5 shrink-0 mt-0.5" />
           <p>
-            Retrouvez ici la liste de vos chantiers validés (devis acceptés). Vous pourrez bientôt assigner des dates précises pour chacun d'entre eux !
+            Retrouvez ici la liste de vos chantiers validés (devis acceptés). Vous pouvez leur assigner des dates pour mieux vous organiser !
           </p>
         </div>
 
@@ -37,32 +122,15 @@ export default function PlanningPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {devisAccepte.length === 0 ? (
+            {sortedDevis.length === 0 ? (
               <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                 <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                 <p className="text-slate-500 font-medium">Aucun chantier prévu pour le moment.</p>
                 <p className="text-sm text-slate-400 mt-1">Acceptez des devis pour les voir apparaître ici.</p>
               </div>
             ) : (
-              devisAccepte.map((d, i) => (
-                <motion.div 
-                  key={d.numero}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                >
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-lg">{d.nomClient}</h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
-                      <FileText className="w-4 h-4" /> {d.numero} — {d.totalTTC}€
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-700 px-3 py-2 rounded-lg text-sm text-slate-600 dark:text-slate-300 font-medium whitespace-nowrap">
-                    <Clock className="w-4 h-4 text-indigo-500" />
-                    À planifier
-                  </div>
-                </motion.div>
+              sortedDevis.map((d) => (
+                <PlanningItem key={d.numero} devis={d} mutate={mutate} />
               ))
             )}
           </div>
