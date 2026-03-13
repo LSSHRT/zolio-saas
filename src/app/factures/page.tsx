@@ -63,20 +63,34 @@ export default function FacturesPage() {
   };
 
   
+  const formatCSVField = (field: any) => {
+    const stringField = String(field || "");
+    if (stringField.includes(";") || stringField.includes("\"") || stringField.includes("\n")) {
+      return `"${stringField.replace(/"/g, '""')}"`;
+    }
+    return stringField;
+  };
+
+  const formatNumberForExcel = (numStr: string | number) => {
+    if (!numStr) return "0,00";
+    return Number(numStr).toFixed(2).replace(".", ",");
+  };
+
   const handleExportCSV = () => {
     const headers = ["Numéro", "Date", "Client", "Email", "Total HT", "TVA", "Total TTC", "Statut"];
     const rows = factures.map((f: Facture) => [
-      f.numero,
-      f.date,
-      f.nomClient,
-      f.emailClient,
-      f.totalHT,
-      f.tva,
-      f.totalTTC,
-      f.statut
+      formatCSVField(f.numero),
+      formatCSVField(f.date),
+      formatCSVField(f.nomClient),
+      formatCSVField(f.emailClient),
+      formatNumberForExcel(f.totalHT),
+      formatNumberForExcel(f.tva),
+      formatNumberForExcel(f.totalTTC),
+      formatCSVField(f.statut)
     ]);
-    const csvContent = [headers, ...rows].map(e => e.join(";")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
+    // Add BOM for Excel UTF-8 compatibility
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -89,18 +103,19 @@ export default function FacturesPage() {
   const handleExportURSSAF = () => {
     // Livre des recettes URSSAF format
     const headers = ["Date d'encaissement", "Référence de la pièce justificative", "Nom du client", "Nature de la prestation", "Montant encaissé", "Mode de règlement"];
-    const facturesEncaissees = factures.filter((f: Facture) => f.statut === "Payée" || f.statut === "Émise" || parseFloat(f.totalTTC) > 0); // Assuming all factures here are completed
+    const facturesEncaissees = factures.filter((f: Facture) => f.statut === "Payée" || f.statut === "Émise" || parseFloat(f.totalTTC) > 0); 
     
     const rows = facturesEncaissees.map((f: Facture) => [
-      f.date,
-      f.numero,
-      f.nomClient,
+      formatCSVField(f.date),
+      formatCSVField(f.numero),
+      formatCSVField(f.nomClient),
       "Vente / Prestation de service",
-      f.totalTTC,
-      "Virement / CB" // Mode par défaut
+      formatNumberForExcel(f.totalTTC),
+      "Virement / Chèque / Espèces"
     ]);
-    const csvContent = [headers, ...rows].map(e => e.join(";")).join("\n");
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
+    // Add BOM for Excel UTF-8 compatibility
+    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
