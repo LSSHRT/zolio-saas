@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     // Récupérer l'en-tête du devis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:M",
+      range: "Devis_Emis!A:O",
     });
     const devisRows = devisRes.data.values || [];
     // Vérifier que le devis appartient bien au user connecté
@@ -44,6 +44,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
         tva: r[7] || "20",
       }));
 
+    let photos = [];
+    try {
+      if (devisRow[14]) photos = JSON.parse(devisRow[14]);
+    } catch(e) {}
+
     return NextResponse.json({
       numero: devisRow[1],
       date: devisRow[2],
@@ -56,6 +61,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       acompte: devisRow[10] || "",
       remise: devisRow[11] || "",
       signatureBase64: devisRow[12] || "",
+      photos,
       lignes,
     }, {
       headers: {
@@ -93,7 +99,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
 
     const { numero } = await params;
     const body = await request.json();
-    const { lignes, tva, acompte, remise } = body;
+    const { lignes, tva, acompte, remise, photos } = body;
 
     const sheets = await getGoogleSheetsClient();
 
@@ -107,7 +113,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     // 1. Trouver et mettre à jour la ligne dans Devis_Emis
     const devisRes = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:M",
+      range: "Devis_Emis!A:O",
     });
     const devisRows = devisRes.data.values || [];
     const rowIndex = devisRows.findIndex((r) => r[0] === userId && r[1] === numero);
@@ -116,10 +122,12 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
     }
 
+    const currentPhotos = photos ? JSON.stringify(photos) : (devisRows[rowIndex][14] || "");
+
     // Mettre à jour la ligne d'en-tête du devis
     await sheets.spreadsheets.values.update({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!A${rowIndex + 1}:M${rowIndex + 1}`,
+      range: `Devis_Emis!A${rowIndex + 1}:O${rowIndex + 1}`,
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -135,7 +143,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
           devisRows[rowIndex][9] || "", // J: public id / autre
           acompte ? acompte.toString() : (devisRows[rowIndex][10] || ""), // K: acompte
           remise ? remise.toString() : (devisRows[rowIndex][11] || ""), // L: remise
-          "" // M: Signature (on reset)
+          "", // M: Signature (on reset)
+          devisRows[rowIndex][13] || "", // N: lu_le
+          currentPhotos // O: photos
         ]],
       },
     });
@@ -201,6 +211,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
       remise: remise ? remise.toString() : "",
+      photos: photos || [],
     });
 
     let emailSent = false;

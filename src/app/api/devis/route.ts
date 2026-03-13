@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const entrepriseAssurance = meta.companyAssurance || "";
 
     const body = await request.json();
-    const { client, lignes, tva, acompte, remise } = body;
+    const { client, lignes, tva, acompte, remise, photos } = body;
 
     const sheets = await getGoogleSheetsClient();
 
@@ -51,9 +51,10 @@ export async function POST(request: Request) {
     const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
 
     // 1. Écrire l'en-tête du devis (On ajoute le userId en 1er)
+    // Colonnes : A=userId, B=numero, C=date, D=client.nom, E=client.email, F=HT, G=TVA, H=TTC, I=statut, J=lien, K=acompte, L=remise, M=signature, N=lu_le, O=photos
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:L", // On passe de A:I à A:J
+      range: "Devis_Emis!A:O",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [[
@@ -68,7 +69,10 @@ export async function POST(request: Request) {
           "En attente",
           "", // Lien PDF
           acompte ? acompte.toString() : "", // Acompte (%)
-          remise ? remise.toString() : "" // Remise globale (%)
+          remise ? remise.toString() : "", // Remise globale (%)
+          "", // Signature
+          "", // Lu le
+          photos ? JSON.stringify(photos) : "" // Photos (base64)
         ]],
       },
     });
@@ -107,6 +111,7 @@ export async function POST(request: Request) {
       totalTTC: totalTTC.toFixed(2),
       acompte: acompte ? acompte.toString() : "",
       remise: remise ? remise.toString() : "",
+      photos: photos || [],
     });
 
     // 4. Envoyer le devis par email (si SMTP configuré)

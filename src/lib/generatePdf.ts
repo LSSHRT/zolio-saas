@@ -48,6 +48,7 @@ interface DevisData {
   totalHT: string;
   tva: string;
   totalTTC: string;
+  photos?: string[];
 }
 
 
@@ -344,8 +345,30 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
     doc.text(splitCgv, 20, 35);
   }
 
-  return Buffer.from(doc.output("arraybuffer"));
+  // === PHOTOS ANNEXE ===
+  if (data.photos && data.photos.length > 0) {
+    doc.addPage();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Annexe : Photos du chantier", 20, 20);
 
+    let imgY = 30;
+    for (const photo of data.photos) {
+      if (imgY > 200) {
+        doc.addPage();
+        imgY = 20;
+      }
+      try {
+        doc.addImage(photo, "JPEG", 20, imgY, 170, 100);
+        imgY += 110;
+      } catch (e) {
+        console.error("Erreur d'ajout de photo:", e);
+      }
+    }
+  }
+
+  return Buffer.from(doc.output("arraybuffer"));
 }
 
 export async function generateFacturePDF(data: DevisData): Promise<Buffer> {

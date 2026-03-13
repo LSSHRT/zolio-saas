@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Plus, Search, User, Package, Send, X, Trash2, Lock, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Plus, Search, User, Package, Send, X, Trash2, Lock, Zap, Camera, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 
@@ -44,6 +44,7 @@ export default function NouveauDevisPage() {
   const [tva, setTva] = useState("10");
   const [acompte, setAcompte] = useState("");
   const [remise, setRemise] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [searchClient, setSearchClient] = useState("");
   const [searchPrestation, setSearchPrestation] = useState("");
   const [showForfaits, setShowForfaits] = useState(false);
@@ -80,6 +81,12 @@ export default function NouveauDevisPage() {
   const totalHT = totalHTBase - montantRemise;
   // TTC est calculé en fonction de la TVA de chaque ligne ou de la TVA globale
   const totalTTC = lignes.reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
+
+  const margeEstimee = lignes.reduce((sum, l) => {
+    const p = prestations.find(prest => prest.nom === l.nomPrestation);
+    const coutUnitaire = p ? (p.coutMatiere || 0) : 0;
+    return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
+  }, 0) - montantRemise;
 
   const addLigne = (p: Prestation) => {
     setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva }]);
@@ -126,7 +133,7 @@ export default function NouveauDevisPage() {
       const res = await fetch("/api/devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client: selectedClient, lignes, tva, acompte, remise }),
+        body: JSON.stringify({ client: selectedClient, lignes, tva, acompte, remise, photos }),
       });
       const result = await res.json();
       setDevisResult(result);
@@ -135,6 +142,31 @@ export default function NouveauDevisPage() {
       alert("Erreur lors de la création du devis");
     }
     setSending(false);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const base64 = canvas.toDataURL("image/jpeg", 0.6); // forte compression
+          setPhotos(prev => [...prev, base64]);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const filteredClients = clients.filter((c) => c.nom.toLowerCase().includes(searchClient.toLowerCase()));
@@ -419,6 +451,31 @@ export default function NouveauDevisPage() {
               </div>
 
 
+              {/* Photos */}
+              <div className="mt-6 mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+                    <Camera size={16} /> Photos du chantier (Annexe)
+                  </label>
+                  <label className="text-xs bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 px-3 py-1.5 rounded-lg cursor-pointer font-medium hover:bg-violet-200 transition-colors">
+                    + Ajouter
+                    <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} />
+                  </label>
+                </div>
+                {photos.length > 0 && (
+                  <div className="flex gap-3 overflow-x-auto pb-2">
+                    {photos.map((p, i) => (
+                      <div key={i} className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                        <img src={p} alt={`Photo ${i}`} className="w-full h-full object-cover" />
+                        <button onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow">
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Totaux */}
               <div className="bg-gradient-zolio rounded-2xl p-5 text-white">
                 <div className="flex justify-between mb-2">
@@ -430,9 +487,14 @@ export default function NouveauDevisPage() {
                   <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
                 </div>
                 <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <span className="font-bold text-lg">Total TTC</span>
-                  <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs bg-emerald-500/20 text-emerald-100 px-2 py-1 rounded-md" title="Estimation de votre marge nette">
+                      Marge est. : {margeEstimee.toFixed(2)}€
+                    </span>
+                    <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
+                  </div>
                 </div>
               </div>
             </motion.div>

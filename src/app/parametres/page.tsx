@@ -24,6 +24,7 @@ export default function ParametresEntreprise() {
     companyLegal: (user?.unsafeMetadata?.companyLegal as string) || (user?.publicMetadata?.companyLegal as string) || "",
     companyCgv: (user?.unsafeMetadata?.companyCgv as string) || (user?.publicMetadata?.companyCgv as string) || "",
     companyColor: (user?.unsafeMetadata?.companyColor as string) || (user?.publicMetadata?.companyColor as string) || "#0ea5e9",
+    companyGoogleReview: (user?.unsafeMetadata?.companyGoogleReview as string) || (user?.publicMetadata?.companyGoogleReview as string) || "",
   });
 
   if (!isLoaded || !user) {
@@ -52,6 +53,7 @@ export default function ParametresEntreprise() {
         companyLegal: (meta.companyLegal as string) || (pubMeta.companyLegal as string) || "",
         companyCgv: (meta.companyCgv as string) || (pubMeta.companyCgv as string) || "",
         companyColor: (meta.companyColor as string) || (pubMeta.companyColor as string) || "#0ea5e9",
+        companyGoogleReview: (meta.companyGoogleReview as string) || (pubMeta.companyGoogleReview as string) || "",
       });
     }
   }
@@ -81,6 +83,7 @@ export default function ParametresEntreprise() {
           companyLegal: formData.companyLegal,
           companyCgv: formData.companyCgv,
           companyColor: formData.companyColor,
+          companyGoogleReview: formData.companyGoogleReview,
         }
       });
       setMessage({ type: "success", text: "Paramètres enregistrés avec succès !" });
@@ -230,6 +233,22 @@ export default function ParametresEntreprise() {
                 Couleur de l'en-tête (Défaut: Bleu)
               </span>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
+              <span className="text-xl">⭐</span>
+              Lien de la page Avis Google
+            </label>
+            <input
+              type="url"
+              name="companyGoogleReview"
+              value={formData.companyGoogleReview}
+              onChange={handleChange}
+              placeholder="https://g.page/r/.../review"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+            />
+            <p className="text-xs text-slate-400 mt-2">Ce lien sera utilisé pour proposer au client de laisser un avis lorsque sa facture sera payée.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

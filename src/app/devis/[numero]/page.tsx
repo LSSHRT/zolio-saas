@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
+import dynamic from "next/dynamic";
+const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { motion } from "framer-motion";
-import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@clerk/nextjs";
 
@@ -43,6 +45,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [tva, setTva] = useState("10");
   const [acompte, setAcompte] = useState("");
   const [remise, setRemise] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [searchPrestation, setSearchPrestation] = useState("");
   const [showForfaits, setShowForfaits] = useState(false);
@@ -50,6 +53,9 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [success, setSuccess] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [showAddPrestation, setShowAddPrestation] = useState(false);
+  const [showSignModal, setShowSignModal] = useState(false);
+  const [signLoading, setSignLoading] = useState(false);
+  const sigCanvas = useRef<any>(null);
 
   useEffect(() => {
     Promise.all([
@@ -63,6 +69,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       setTva(tauxStr);
       setAcompte(devisData.acompte || "");
       setRemise(devisData.remise || "");
+      setPhotos(devisData.photos || []);
       setPrestations(Array.isArray(prestData) ? prestData : []);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -73,6 +80,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const totalHT = totalHTBase - montantRemise;
   // TTC calculé avec TVA par ligne
   const totalTTC = lignes.reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
+
+  const margeEstimee = lignes.reduce((sum, l) => {
+    const p = prestations.find(prest => prest.nom === l.nomPrestation);
+    const coutUnitaire = p ? (p.coutMatiere || 0) : 0;
+    return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
+  }, 0) - montantRemise;
 
   const addLigne = (p: Prestation) => {
     setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva }]);
@@ -108,7 +121,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       const res = await fetch(`/api/devis/${numero}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lignes, tva, acompte, remise }),
+        body: JSON.stringify({ lignes, tva, acompte, remise, photos }),
       });
       const data = await res.json();
       setResult(data);
@@ -119,10 +132,62 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     setSaving(false);
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 800;
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const base64 = canvas.toDataURL("image/jpeg", 0.6);
+          setPhotos(prev => [...prev, base64]);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleCopySignLink = () => {
     const link = `${window.location.origin}/signer/${numero}${userId ? `?u=${userId}` : ''}`;
     navigator.clipboard.writeText(link);
     alert("Lien de signature copié ! Envoyez-le à votre client.");
+  };
+
+  const handleSignSurPlace = async () => {
+    if (sigCanvas.current?.isEmpty()) {
+      alert("Veuillez demander au client de dessiner sa signature.");
+      return;
+    }
+    setSignLoading(true);
+    try {
+      const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
+      const res = await fetch(`/api/public/devis/${numero}${userId ? `?u=${userId}` : ''}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signatureBase64 }),
+      });
+      if (res.ok) {
+        setShowSignModal(false);
+        alert("Devis signé avec succès !");
+        window.location.href = "/devis";
+      } else {
+        alert("Erreur lors de l'enregistrement de la signature");
+      }
+    } catch (e) {
+      alert("Erreur réseau");
+    } finally {
+      setSignLoading(false);
+    }
   };
 
   const filteredPrestations = prestations.filter((p) =>
@@ -177,14 +242,24 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{numero} · {devisInfo?.nomClient}</p>
         </div>
         {devisInfo?.statut === "En attente" && (
-          <motion.button 
-            whileTap={{ scale: 0.9 }}
-            onClick={handleCopySignLink}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
-          >
-            <PenTool size={14} />
-            <span className="hidden sm:inline">Lien signature</span>
-          </motion.button>
+          <div className="flex items-center gap-2">
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setShowSignModal(true)}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 dark:bg-emerald-900/50 dark:border-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 transition shrink-0"
+            >
+              <PenTool size={14} />
+              <span className="hidden sm:inline">Signer sur place</span>
+            </motion.button>
+            <motion.button 
+              whileTap={{ scale: 0.9 }}
+              onClick={handleCopySignLink}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
+            >
+              <PenTool size={14} />
+              <span className="hidden sm:inline">Lien signature</span>
+            </motion.button>
+          </div>
         )}
       </header>
 
@@ -287,6 +362,30 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
         </div>
 
+        {/* Photos */}
+        <div className="mt-2 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
+              <Camera size={16} /> Photos du chantier (Annexe)
+            </label>
+            <label className="text-xs bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 px-3 py-1.5 rounded-lg cursor-pointer font-medium hover:bg-violet-200 transition-colors">
+              + Ajouter
+              <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} />
+            </label>
+          </div>
+          {photos.length > 0 && (
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {photos.map((p, i) => (
+                <div key={i} className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                  <img src={p} alt={`Photo ${i}`} className="w-full h-full object-cover" />
+                  <button onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow">
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Totaux */}
         <div className="bg-gradient-zolio rounded-2xl p-5 text-white">
@@ -299,9 +398,14 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
           </div>
           <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
-          <div className="flex justify-between">
+          <div className="flex justify-between items-center">
             <span className="font-bold text-lg">Total TTC</span>
-            <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs bg-emerald-500/20 text-emerald-100 px-2 py-1 rounded-md" title="Estimation de votre marge nette">
+                Marge est. : {margeEstimee.toFixed(2)}€
+              </span>
+              <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
+            </div>
           </div>
         </div>
 
@@ -359,6 +463,43 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           {saving ? "Envoi..." : <><Save size={16} /> Sauvegarder & Renvoyer <Send size={14} /></>}
         </motion.button>
       </div>
+
+      {/* Modal Signature sur place */}
+      {showSignModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Faire signer le client</h2>
+                <button onClick={() => setShowSignModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <X size={24} />
+                </button>
+              </div>
+              <p className="text-sm text-slate-500 mb-6">Demandez à {devisInfo?.nomClient} de signer ci-dessous pour valider le devis de {totalTTC.toFixed(2)}€ TTC.</p>
+              
+              <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900 mb-4 relative">
+                <SignaturePad 
+                  ref={sigCanvas} 
+                  penColor="black"
+                  canvasProps={{ className: "w-full h-48 cursor-crosshair" }} 
+                />
+                <button onClick={() => sigCanvas.current?.clear()} className="absolute top-2 right-2 text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">
+                  Effacer
+                </button>
+              </div>
+
+              <button 
+                onClick={handleSignSurPlace} 
+                disabled={signLoading}
+                className="w-full flex items-center justify-center gap-2 text-white py-4 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 transition-all disabled:opacity-50"
+              >
+                {signLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check size={20} />}
+                {signLoading ? "Enregistrement..." : "Valider la signature"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

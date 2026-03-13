@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2, Download } from "lucide-react";
+import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2, Download, MessageSquareQuote } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
 
 interface Facture {
   numero: string;
@@ -26,6 +27,7 @@ const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function FacturesPage() {
+  const { user } = useUser();
   const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
   const factures = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
@@ -33,6 +35,8 @@ export default function FacturesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+
+  const googleReviewLink = (user?.unsafeMetadata?.companyGoogleReview as string) || (user?.publicMetadata?.companyGoogleReview as string);
 
   const filtered = factures.filter(
     (f) => f.nomClient.toLowerCase().includes(search.toLowerCase()) || f.numero.toLowerCase().includes(search.toLowerCase())
@@ -128,6 +132,16 @@ export default function FacturesPage() {
   const handleRelance = (f: Facture) => {
     const sujet = encodeURIComponent(`Relance de paiement : Facture ${f.numero}`);
     const corps = encodeURIComponent(`Bonjour ${f.nomClient},\n\nSauf erreur de notre part, nous n'avons pas encore reçu le règlement de la facture ${f.numero} émise le ${f.date}, d'un montant de ${f.totalTTC}€.\n\nVous trouverez les coordonnées bancaires sur la facture pour effectuer le virement.\n\nNous vous remercions de bien vouloir faire le nécessaire dans les meilleurs délais.\n\nCordialement.`);
+    window.location.href = `mailto:${f.emailClient}?subject=${sujet}&body=${corps}`;
+  };
+
+  const handleReviewRequest = (f: Facture) => {
+    if (!googleReviewLink) {
+      alert("Veuillez d'abord configurer votre lien Google My Business dans les Paramètres.");
+      return;
+    }
+    const sujet = encodeURIComponent(`Votre avis compte pour nous !`);
+    const corps = encodeURIComponent(`Bonjour ${f.nomClient},\n\nNous vous remercions pour votre confiance et espérons que vous êtes satisfait de notre intervention.\n\nPourriez-vous prendre 1 minute pour nous laisser un avis sur Google ? Cela nous aide énormément : \n${googleReviewLink}\n\nMerci d'avance et à bientôt !\n\nCordialement.`);
     window.location.href = `mailto:${f.emailClient}?subject=${sujet}&body=${corps}`;
   };
 
@@ -252,13 +266,23 @@ export default function FacturesPage() {
                       <p className="text-sm font-semibold text-slate-700">{f.devisRef || "-"}</p>
                     </div>
                     <div className="flex items-center gap-4 text-right">
-                      <button
-                        onClick={() => handleRelance(f)}
-                        className="text-amber-500 hover:text-amber-600 p-2 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors flex items-center justify-center"
-                        title="Relancer le client"
-                      >
-                        <Clock size={16} />
-                      </button>
+                      {f.statut === "Payée" ? (
+                        <button
+                          onClick={() => handleReviewRequest(f)}
+                          className="text-blue-500 hover:text-blue-600 p-2 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center justify-center"
+                          title="Demander un avis Google"
+                        >
+                          <MessageSquareQuote size={16} />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleRelance(f)}
+                          className="text-amber-500 hover:text-amber-600 p-2 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors flex items-center justify-center"
+                          title="Relancer le client"
+                        >
+                          <Clock size={16} />
+                        </button>
+                      )}
                       <div>
                         <p className="text-[10px] text-slate-400">Total TTC</p>
                         <p className="text-lg font-bold text-slate-900 dark:text-white">{f.totalTTC}€</p>
