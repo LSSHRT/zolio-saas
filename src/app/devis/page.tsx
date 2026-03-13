@@ -259,7 +259,9 @@ export default function DevisPage() {
                              <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
                            </Link>
                            {pending && (
-                             <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-fuchsia-50 dark:bg-violet-900/30 text-fuchsia-600 dark:text-violet-400 text-xs font-semibold rounded-lg hover:bg-violet-100 dark:hover:bg-violet-900/50 transition">Faire signer</button>
+                             <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-xs font-bold rounded-lg hover:bg-violet-200 dark:hover:bg-violet-800 transition flex items-center justify-center gap-1 border border-violet-200 dark:border-violet-700">
+                               <PenTool size={12}/> Lien signature
+                             </button>
                            )}
                         </div>
                       </motion.div>
@@ -375,10 +377,17 @@ export default function DevisPage() {
                   <div className="flex gap-2 mt-3">
                     <Link href={`/devis/${d.numero}`} className="flex-1">
                       <motion.button whileTap={{ scale: 0.96 }}
-                        className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-fuchsia-50 hover:border-violet-300 hover:text-fuchsia-600 transition">
+                        className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-fuchsia-50 hover:border-violet-300 hover:text-fuchsia-600 transition">
                         <Pencil size={14} /> Modifier
                       </motion.button>
                     </Link>
+                    {pending && (
+                      <motion.button whileTap={{ scale: 0.96 }}
+                        onClick={() => handleCopySignLink(d.numero)}
+                        className="flex-1 py-2.5 bg-violet-100 dark:bg-violet-900/50 border border-violet-200 dark:border-violet-700 text-violet-700 dark:text-violet-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-violet-200 dark:hover:bg-violet-800 transition">
+                        <PenTool size={14} /> Lien signature
+                      </motion.button>
+                    )}
                     <motion.button whileTap={{ scale: 0.96 }}
                       onClick={() => handleDelete(d.numero)}
                       disabled={deleting === d.numero}

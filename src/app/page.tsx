@@ -6,7 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { CallBackProps, STATUS } from "react-joyride";
+import { CallBackProps, STATUS, Step } from "react-joyride";
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
 import useSWR from "swr";
@@ -77,23 +77,37 @@ export default function Dashboard() {
     }
   };
 
-  const steps = [
+  const steps: Step[] = [
     {
       target: '.tour-dashboard',
-      content: 'Bienvenue sur votre tableau de bord Zolio ! Ici vous trouverez un résumé de votre activité.',
+      title: 'Bienvenue sur Zolio ! 👋',
+      content: 'Voici votre tableau de bord. Il vous permet de suivre votre chiffre d\'affaires et vos derniers devis d\'un seul coup d\'œil.',
       disableBeacon: true,
+      placement: 'bottom',
+    },
+    {
+      target: '.tour-parametres',
+      title: 'Personnalisez vos documents ⚙️',
+      content: 'N\'oubliez pas de remplir les informations de votre entreprise (logo, SIRET, couleurs) pour que vos devis soient à votre image.',
+      placement: 'left',
     },
     {
       target: '.tour-nouveau-devis',
-      content: 'Créez votre premier devis rapidement en cliquant ici.',
+      title: 'Votre premier devis 📝',
+      content: 'C\'est ici que la magie opère ! Cliquez ici pour créer un devis professionnel en quelques secondes.',
+      placement: 'bottom',
     },
     {
       target: '.tour-clients',
-      content: 'Gérez votre base de clients et consultez leur historique.',
+      title: 'Gérez vos clients 👥',
+      content: 'Retrouvez tout l\'historique de vos clients et ajoutez-en de nouveaux pour aller plus vite la prochaine fois.',
+      placement: 'top',
     },
     {
       target: '.tour-catalogue',
-      content: 'Personnalisez vos prestations pour gagner du temps lors de la création de devis.',
+      title: 'Votre catalogue 📚',
+      content: 'Enregistrez vos prestations et matériaux habituels ici. Vous n\'aurez plus qu\'à les sélectionner lors de la création d\'un devis !',
+      placement: 'top',
     }
   ];
 
@@ -184,7 +198,7 @@ export default function Dashboard() {
         
         <div className="flex items-center gap-4 relative">
           <ThemeToggle />
-          <Link href="/parametres" className="text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
+          <Link href="/parametres" className="tour-parametres text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
             <Settings size={24} />
           </Link>
           <button 
@@ -690,12 +704,12 @@ export default function Dashboard() {
           <span className="text-[10px] font-medium">Devis</span>
         </Link>
         
-        <Link href="/clients" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
+        <Link href="/clients" className="tour-clients flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
           <Users size={24} />
           <span className="text-[10px] font-medium">Clients</span>
         </Link>
         
-        <Link href="/catalogue" className="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
+        <Link href="/catalogue" className="tour-catalogue flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
           <Briefcase size={24} />
           <span className="text-[10px] font-medium">Catalogue</span>
         </Link>

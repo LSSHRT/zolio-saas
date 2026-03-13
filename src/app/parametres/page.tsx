@@ -277,6 +277,31 @@ export default function ParametresEntreprise() {
             )}
           </button>
         </form>
+
+        <div className="mt-8 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <Scale className="w-5 h-5 text-violet-600" />
+            Documents Légaux de Zolio
+          </h2>
+          <div className="flex flex-col gap-3">
+            <Link href="/cgv" className="text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 font-medium flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <span>Conditions Générales de Vente (CGV)</span>
+              <span className="text-slate-400">→</span>
+            </Link>
+            <Link href="/cgu" className="text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 font-medium flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <span>Conditions Générales d'Utilisation (CGU)</span>
+              <span className="text-slate-400">→</span>
+            </Link>
+            <Link href="/mentions-legales" className="text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 font-medium flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <span>Mentions Légales</span>
+              <span className="text-slate-400">→</span>
+            </Link>
+            <Link href="/politique-confidentialite" className="text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 font-medium flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+              <span>Politique de Confidentialité</span>
+              <span className="text-slate-400">→</span>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

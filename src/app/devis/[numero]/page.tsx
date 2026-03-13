@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool } from "lucide-react";
 import Link from "next/link";
 
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
@@ -117,6 +117,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     setSaving(false);
   };
 
+  const handleCopySignLink = () => {
+    const link = `${window.location.origin}/signer/${numero}`;
+    navigator.clipboard.writeText(link);
+    alert("Lien de signature copié ! Envoyez-le à votre client.");
+  };
+
   const filteredPrestations = prestations.filter((p) =>
     p.nom.toLowerCase().includes(searchPrestation.toLowerCase()) || p.categorie.toLowerCase().includes(searchPrestation.toLowerCase())
   );
@@ -164,10 +170,20 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             <ArrowLeft size={20} />
           </motion.div>
         </Link>
-        <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">Modifier le devis</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400">{numero} · {devisInfo?.nomClient}</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">Modifier le devis</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{numero} · {devisInfo?.nomClient}</p>
         </div>
+        {devisInfo?.statut === "En attente" && (
+          <motion.button 
+            whileTap={{ scale: 0.9 }}
+            onClick={handleCopySignLink}
+            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
+          >
+            <PenTool size={14} />
+            <span className="hidden sm:inline">Lien signature</span>
+          </motion.button>
+        )}
       </header>
 
       <main className="flex-1 px-6 flex flex-col gap-5 overflow-y-auto">

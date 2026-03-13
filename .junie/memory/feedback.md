@@ -310,3 +310,51 @@
     "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
 }
 
+[2026-03-13 00:14] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "dark mode contrast",
+    "EXPECTATION": "In the Devis client selector, text must remain readable in dark theme (no white text on white background).",
+    "NEW INSTRUCTION": "WHEN implementing selects in dark theme THEN use dark backgrounds and light text for options and selected state"
+}
+
+[2026-03-13 14:49] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "missing CTA & onboarding",
+    "EXPECTATION": "The user wants a clearly visible 'Signer le devis' button and a more explicit onboarding that guides new users to the signature flow.",
+    "NEW INSTRUCTION": "WHEN implementing quote detail page THEN place primary 'Signer le devis' button top-right and add Joyride step highlighting it"
+}
+
+[2026-03-13 14:56] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "unclear UI location",
+    "EXPECTATION": "The user wants a clear, explicit indication of where the signature button appears on the Dashboard/Devis.",
+    "NEW INSTRUCTION": "WHEN user asks where a UI control is THEN state exact click path, label text, and on-screen position"
+}
+
+[2026-03-13 14:58] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "unclear UI location",
+    "EXPECTATION": "The user wants to know exactly where to find or receive the signature link in the app.",
+    "NEW INSTRUCTION": "WHEN user asks where to get signature link THEN state exact click path, label text, and on-screen position"
+}
+
+[2026-03-13 14:59] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "missing UI button",
+    "EXPECTATION": "The user expects a clearly visible signature button and precise instructions on where to find it.",
+    "NEW INSTRUCTION": "WHEN user reports missing button THEN give exact click path and on-screen position"
+}
+
+[2026-03-13 15:03] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "deployment status confirmation",
+    "EXPECTATION": "The user wants confirmation that changes were pushed to GitHub and redeployed on Vercel.",
+    "NEW INSTRUCTION": "WHEN user asks if code pushed or redeployed THEN summarize GitHub push and Vercel deployment status"
+}
+
