@@ -325,6 +325,14 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   doc.setDrawColor(203, 213, 225);
   doc.rect(20, y + 32, 80, 25);
 
+  if (data.signatureBase64 && data.signatureBase64.startsWith("data:image")) {
+    try {
+      doc.addImage(data.signatureBase64, "PNG", 22, y + 34, 76, 21);
+    } catch (e) {
+      console.error("Erreur lors de l'ajout de la signature au PDF:", e);
+    }
+  }
+
   // === COORDONNÉES BANCAIRES ===
   if (data.entreprise?.iban) {
     doc.setFont("helvetica", "bold");
