@@ -36,12 +36,14 @@ export default async function AdminDashboard() {
   // Fetch Stats
   const client = await clerkClient();
   const totalUsers = await client.users.getCount();
+  let usersList: any[] = [];
   
   // Calculate total AI Devis
   let totalAiDevis = 0;
   try {
-    const usersList = await client.users.getUserList({ limit: 500 });
-    totalAiDevis = usersList.data.reduce((sum, u) => {
+    const res = await client.users.getUserList({ limit: 500, orderBy: "-created_at" });
+    usersList = res.data;
+    totalAiDevis = res.data.reduce((sum, u) => {
       const count = (u.publicMetadata?.aiDevisCount as number) || 0;
       return sum + count;
     }, 0);
@@ -105,6 +107,69 @@ export default async function AdminDashboard() {
               <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Abonnements Pro</p>
               <p className="text-3xl font-bold text-slate-900 dark:text-white">{activeSubscriptions}</p>
             </div>
+          </div>
+        </div>
+
+        {/* Liste des utilisateurs */}
+        <div className="mt-10 bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="p-6 border-b border-slate-200 dark:border-slate-800">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Users size={20} className="text-blue-500" />
+              Derniers Inscrits
+            </h2>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 dark:bg-slate-950/50 text-sm font-medium text-slate-500 dark:text-slate-400">
+                  <th className="p-4">Artisan / Email</th>
+                  <th className="p-4">Inscription</th>
+                  <th className="p-4 text-center">Devis IA</th>
+                  <th className="p-4">Statut</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                {usersList.map((u) => {
+                  const email = u.emailAddresses[0]?.emailAddress || "Aucun email";
+                  const date = new Date(u.createdAt).toLocaleDateString("fr-FR", { day: '2-digit', month: 'short', year: 'numeric' });
+                  const aiCount = (u.publicMetadata?.aiDevisCount as number) || 0;
+                  const isPro = u.publicMetadata?.stripeSubscriptionId ? true : false;
+                  
+                  return (
+                    <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
+                      <td className="p-4">
+                        <div className="font-medium text-slate-900 dark:text-white">{u.firstName} {u.lastName}</div>
+                        <div className="text-sm text-slate-500 dark:text-slate-400">{email}</div>
+                      </td>
+                      <td className="p-4 text-sm text-slate-600 dark:text-slate-300">{date}</td>
+                      <td className="p-4 text-center">
+                        <span className="inline-flex items-center justify-center min-w-[2rem] h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-bold text-sm">
+                          {aiCount}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        {isPro ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                            <CreditCard size={14} /> PRO
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            Gratuit
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {usersList.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                      Aucun artisan inscrit pour le moment.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
