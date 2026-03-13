@@ -37,12 +37,18 @@ Exemple:
 
     let result;
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
       result = await model.generateContent(prompt);
     } catch (e: any) {
-      console.warn("Modèle gemini-2.5-flash introuvable ou erreur, tentative avec gemini-2.0-flash...", e.message);
-      const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      result = await fallbackModel.generateContent(prompt);
+      console.warn("Modèle gemini-3-flash-preview introuvable ou erreur, tentative avec gemini-2.5-flash...", e.message);
+      try {
+        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        result = await fallbackModel.generateContent(prompt);
+      } catch (e2: any) {
+        console.warn("Modèle gemini-2.5-flash introuvable, tentative avec gemini-2.0-flash...", e2.message);
+        const fallbackModel2 = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        result = await fallbackModel2.generateContent(prompt);
+      }
     }
     const responseText = result.response.text();
     
