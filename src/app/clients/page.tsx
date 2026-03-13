@@ -3,8 +3,9 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil, Clock, FileText, CheckCircle, Clock as ClockIcon } from "lucide-react";
+import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil, Clock, FileText, CheckCircle, Clock as ClockIcon, Upload } from "lucide-react";
 import Link from "next/link";
+import { useRef } from "react";
 
 interface Client {
   id: string;
@@ -29,6 +30,8 @@ export default function ClientsPage() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [historyClient, setHistoryClient] = useState<Client | null>(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = clients.filter(
     (c) => c.nom.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
@@ -103,6 +106,61 @@ export default function ClientsPage() {
     setIsDeletingBulk(false);
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split('\n').filter(l => l.trim().length > 0);
+      if (lines.length < 2) {
+        alert("Le fichier est vide ou ne contient que les en-têtes.");
+        return;
+      }
+      const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+      const parsedData = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        // Split par virgule mais gère très basiquement (les vrais CSV peuvent avoir des quotes)
+        // On fait simple ici : split par virgule
+        const values = lines[i].split(',').map(v => v.trim());
+        const item: any = {};
+        headers.forEach((h, index) => {
+          if (h.includes('nom')) item.nom = values[index] || "";
+          else if (h.includes('email')) item.email = values[index] || "";
+          else if (h.includes('tel') || h.includes('tél')) item.telephone = values[index] || "";
+          else if (h.includes('adresse')) item.adresse = values[index] || "";
+        });
+        if (item.nom) parsedData.push(item);
+      }
+
+      if (parsedData.length === 0) {
+        alert("Aucune donnée valide trouvée. Vérifiez que la colonne 'nom' existe.");
+        return;
+      }
+
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsedData),
+      });
+
+      if (res.ok) {
+        mutate();
+        alert(`${parsedData.length} client(s) importé(s) avec succès !`);
+      } else {
+        alert("Erreur lors de l'importation.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erreur lors de la lecture du fichier.");
+    } finally {
+      setIsImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
@@ -115,6 +173,22 @@ export default function ClientsPage() {
         </Link>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Clients</h1>
         <div className="flex-1" />
+        <input 
+          type="file" 
+          accept=".csv" 
+          ref={fileInputRef} 
+          onChange={handleFileUpload} 
+          className="hidden" 
+        />
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isImporting}
+          className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 disabled:opacity-50"
+          title="Importer un fichier CSV"
+        >
+          {isImporting ? <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" /> : <Upload size={18} />}
+        </motion.button>
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => {

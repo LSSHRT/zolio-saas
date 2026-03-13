@@ -43,17 +43,33 @@ export async function POST(request: Request) {
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
     const body = await request.json();
-    const { nom, email, telephone, adresse } = body;
-
     const sheets = await getGoogleSheetsClient();
 
-    // Générer un ID unique (on regarde la colonne B car A = userId)
     const existing = await sheets.spreadsheets.values.get({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
       range: "Clients!B:B",
     });
-    const nextId = `CLI-${String((existing.data.values?.length || 1)).padStart(3, "0")}`;
+    const baseId = existing.data.values?.length || 1;
     const dateAjout = new Date().toLocaleDateString("fr-FR");
+
+    if (Array.isArray(body)) {
+      const rows = body.map((item, index) => {
+        const nextId = `CLI-${String(baseId + index).padStart(3, "0")}`;
+        return [userId, nextId, item.nom, item.email || "", item.telephone || "", item.adresse || "", dateAjout];
+      });
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId: process.env.GOOGLE_SHEET_ID,
+        range: "Clients!A:G",
+        valueInputOption: "USER_ENTERED",
+        requestBody: { values: rows },
+      });
+
+      return NextResponse.json({ success: true, count: rows.length });
+    }
+
+    const { nom, email, telephone, adresse } = body;
+    const nextId = `CLI-${String(baseId).padStart(3, "0")}`;
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
