@@ -2,6 +2,9 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // Définir les routes publiques qui ne nécessitent pas d'être connecté
 const isPublicRoute = createRouteMatcher([
+  '/',
+  '/manifest.json',
+  '/icon.png',
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/stripe/checkout(.*)' // Le webhook Stripe le cas échéant
