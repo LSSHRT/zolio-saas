@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Description manquante" }, { status: 400 });
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     const prompt = `Tu es un assistant expert pour les artisans du bâtiment.
 Génère une liste de prestations pour un devis basé sur la description suivante : "${description}".
 Réponds UNIQUEMENT au format JSON avec un tableau d'objets, sans aucun texte autour, sans bloc markdown.
@@ -37,7 +35,15 @@ Exemple:
   { "designation": "Fourniture et pose de carrelage mural", "quantite": 15, "unite": "m2", "prixUnitaire": 65 }
 ]`;
 
-    const result = await model.generateContent(prompt);
+    let result;
+    try {
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      result = await model.generateContent(prompt);
+    } catch (e: any) {
+      console.warn("Modèle gemini-2.5-flash introuvable ou erreur, tentative avec gemini-2.0-flash...", e.message);
+      const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      result = await fallbackModel.generateContent(prompt);
+    }
     const responseText = result.response.text();
     
     // Nettoyer la réponse au cas où il y aurait du markdown
