@@ -137,7 +137,7 @@ export default function DepensesPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="bg-white dark:bg-slate-800 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700"
+            className="bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700"
           >
             <h2 className="text-lg font-bold mb-4 text-slate-800 dark:text-white">Ajouter une dépense</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -220,15 +220,15 @@ export default function DepensesPage() {
           >
             {/* Statistiques rapides */}
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+              <div className="bg-white dark:bg-gray-800 dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                 <p className="text-xs text-slate-500 dark:text-slate-400">Total TTC</p>
                 <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{totalTTC.toFixed(2)} €</p>
               </div>
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+              <div className="bg-white dark:bg-gray-800 dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                 <p className="text-xs text-slate-500 dark:text-slate-400">Total HT</p>
                 <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{totalHT.toFixed(2)} €</p>
               </div>
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+              <div className="bg-white dark:bg-gray-800 dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                 <p className="text-xs text-slate-500 dark:text-slate-400">TVA Récupérable</p>
                 <p className="text-lg font-bold text-emerald-600 font-mono">{totalTVA.toFixed(2)} €</p>
               </div>
@@ -240,7 +240,7 @@ export default function DepensesPage() {
               <input
                 type="text"
                 placeholder="Rechercher une dépense..."
-                className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-fuchsia-500 outline-none dark:text-white"
+                className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-gray-800 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-fuchsia-500 outline-none dark:text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -254,14 +254,14 @@ export default function DepensesPage() {
                 ))}
               </div>
             ) : filteredDepenses.length === 0 ? (
-              <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+              <div className="text-center py-10 bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
                 <Receipt className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
                 <p className="text-slate-500 dark:text-slate-400">Aucune dépense trouvée.</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {filteredDepenses.map((depense) => (
-                  <div key={depense.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center hover:shadow-md transition-shadow group">
+                  <div key={depense.id} className="bg-white dark:bg-gray-800 dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center hover:shadow-md transition-shadow group">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">

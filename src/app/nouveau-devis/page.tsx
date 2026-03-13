@@ -258,7 +258,7 @@ export default function NouveauDevisPage() {
 
   if (success) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
           className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
           <Check size={48} className="text-emerald-600" />
@@ -285,7 +285,7 @@ export default function NouveauDevisPage() {
   // Paywall
   if (!checkingPro && !isPro && devisCount !== null && devisCount >= 3) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-fuchsia-200">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-fuchsia-200">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
           <Link href="/">
             <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
@@ -319,7 +319,7 @@ export default function NouveauDevisPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
@@ -378,15 +378,15 @@ export default function NouveauDevisPage() {
                   {showNewClient && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col gap-2 border border-slate-200 dark:border-slate-700">
                       <input required placeholder="Nom" value={newClient.nom} onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <input required type="email" placeholder="Email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <input placeholder="Téléphone" value={newClient.telephone} onChange={(e) => setNewClient({ ...newClient, telephone: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <input placeholder="Adresse" value={newClient.adresse} onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
                       <div className="flex gap-2 mt-1">
-                        <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
+                        <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
                         <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient} disabled={isAddingClient}
                           className="flex-1 py-2 text-sm text-white bg-gradient-zolio rounded-xl font-semibold disabled:opacity-70 flex justify-center items-center">
                           {isAddingClient ? (
@@ -415,7 +415,7 @@ export default function NouveauDevisPage() {
                       )}
                       {filteredClients.map((c) => (
                         <motion.button key={c.id} whileTap={{ scale: 0.97 }} onClick={() => setSelectedClient(c)}
-                          className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
+                          className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
                           <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{c.nom.charAt(0)}</div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{c.nom}</p>
@@ -459,7 +459,7 @@ export default function NouveauDevisPage() {
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                 {filteredPrestations.map((p) => (
                   <motion.button key={p.id} whileTap={{ scale: 0.97 }} onClick={() => addLigne(p)}
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-fuchsia-50 hover:border-violet-200 transition">
+                    className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-fuchsia-50 hover:border-violet-200 transition">
                     <Plus size={16} className="text-fuchsia-500 shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
@@ -489,21 +489,21 @@ export default function NouveauDevisPage() {
                             value={l.nomPrestation}
                             onChange={(e) => updateNom(i, e.target.value)}
                             placeholder="Nom de la prestation..."
-                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                            className="w-full bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
                           />
                           <div className="flex items-center gap-2 mt-1">
                             <input 
                               type="number" 
                               value={l.prixUnitaire} 
                               onChange={(e) => updatePrix(i, parseFloat(e.target.value) || 0)}
-                              className="w-20 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-1 text-slate-600 dark:text-slate-400"
+                              className="w-20 text-xs bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-1 text-slate-600 dark:text-slate-400"
                             />
                             <span className="text-[10px] text-slate-400">€ / {l.unite}</span>
                           </div>
                         </div>
                         <input type="number" min="1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
-                          className="w-16 text-center py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
-                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-fuchsia-500">
+                          className="w-16 text-center py-1 px-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
+                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-fuchsia-500">
                             <option value="0">0%</option>
                             <option value="5.5">5.5%</option>
                             <option value="10">10%</option>
@@ -624,7 +624,7 @@ export default function NouveauDevisPage() {
                   <span className="text-white/70 text-sm">TVA ({tva}%)</span>
                   <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
                 </div>
-                <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
+                <div className="h-px bg-white dark:bg-gray-800 dark:bg-slate-900/20 my-2" />
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-lg">Total TTC</span>
                   <div className="flex items-center gap-3">
@@ -641,7 +641,7 @@ export default function NouveauDevisPage() {
       </main>
 
       {/* Bottom Action Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
+      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
         {step > 1 && (
           <motion.button whileTap={{ scale: 0.96 }} onClick={() => setStep(step - 1)}
             className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 font-semibold rounded-xl flex items-center gap-2 text-sm">
@@ -668,7 +668,7 @@ export default function NouveauDevisPage() {
         {showAIModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
+              className="bg-white dark:bg-gray-800 dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-fuchsia-500" size={20} /> Rédiger avec l'IA</h3>
                 <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>

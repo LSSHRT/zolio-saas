@@ -510,3 +510,11 @@
     "NEW INSTRUCTION": "WHEN generating quote PDF with long item list THEN keep validity text in footer and add page break to avoid overlap"
 }
 
+[2026-03-13 21:42] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "PDF signature placement",
+    "EXPECTATION": "In the signed quote PDF, the drawn signature must appear inside the signature box, correctly scaled and positioned.",
+    "NEW INSTRUCTION": "WHEN generating a signed quote PDF THEN place signature image inside signature box and scale to fit"
+}
+

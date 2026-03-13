@@ -295,7 +295,7 @@ export default function CataloguePage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
@@ -349,14 +349,14 @@ export default function CataloguePage() {
             className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200 dark:border-slate-700">
             <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier la Prestation" : "Nouvelle Prestation"}</h2>
             <select value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30">
+              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30">
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <input required placeholder="Nom de la prestation" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <div className="flex gap-3">
               <select value={form.unite} onChange={(e) => setForm({ ...form, unite: e.target.value })}
-                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30">
+                className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30">
                 <option value="m²">m²</option>
                 <option value="ml">ml</option>
                 <option value="heure">Heure</option>
@@ -365,14 +365,14 @@ export default function CataloguePage() {
               </select>
               <input required type="number" step="0.01" placeholder="Prix HT €" value={form.prixUnitaireHT}
                 onChange={(e) => setForm({ ...form, prixUnitaireHT: e.target.value })}
-                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             </div>
             <input type="number" step="0.01" placeholder="Coût matière estimé (optionnel)" value={form.coutMatiere}
               onChange={(e) => setForm({ ...form, coutMatiere: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <input type="number" step="0.01" placeholder="Stock initial (optionnel)" value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter au catalogue"}

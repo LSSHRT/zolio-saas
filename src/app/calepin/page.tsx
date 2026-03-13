@@ -101,7 +101,7 @@ export default function CalepinPage() {
             animate={{ scale: 1, opacity: 1 }} 
             className="relative z-10 flex flex-col items-center"
           >
-            <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl shadow-xl flex items-center justify-center mb-6 -rotate-6">
+            <div className="w-20 h-20 bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-3xl shadow-xl flex items-center justify-center mb-6 -rotate-6">
               <StickyNote className="w-10 h-10 text-fuchsia-500" />
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 font-mono">Calepin vide</h3>
@@ -120,7 +120,7 @@ export default function CalepinPage() {
               animate={{ opacity: 1, scale: 1 }}
               key={note.id}
               onClick={() => openNote(note)}
-              className="bg-white dark:bg-slate-800 p-6 rounded-[1.5rem] shadow-sm hover:shadow-xl cursor-pointer transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:-translate-y-1 group relative overflow-hidden"
+              className="bg-white dark:bg-gray-800 dark:bg-slate-800 p-6 rounded-[1.5rem] shadow-sm hover:shadow-xl cursor-pointer transition-all duration-300 border border-slate-100 dark:border-slate-700 hover:-translate-y-1 group relative overflow-hidden"
             >
               <button
                 onClick={(e) => handleDelete(note.id, e)}
@@ -148,9 +148,9 @@ export default function CalepinPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+              className="bg-white dark:bg-gray-800 dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-gray-800 dark:bg-slate-900">
                 <input
                   type="text"
                   placeholder="Titre de la note..."
@@ -171,7 +171,7 @@ export default function CalepinPage() {
                   autoFocus
                 />
               </div>
-              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end">
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-gray-800 dark:bg-slate-900 flex justify-end">
                 <button
                   onClick={handleSave}
                   disabled={isSaving || (!currentNote.titre && !currentNote.contenu)}

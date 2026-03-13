@@ -155,7 +155,7 @@ export default function Dashboard() {
   }).slice(0, 3);
 
   return (
-    <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
+    <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/10 dark:from-violet-500/10 dark:to-fuchsia-500/5 blur-3xl -z-10 pointer-events-none"></div>
       <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-violet-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
@@ -189,7 +189,7 @@ export default function Dashboard() {
       />
       {/* Header */}
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/70 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between p-6 pt-12 sm:pt-10 transition-all">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white dark:bg-gray-800/70 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between p-6 pt-12 sm:pt-10 transition-all">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 relative rounded-lg overflow-hidden shadow-sm">
             <Image src="/logo.png" alt="Zolio Logo" fill className="object-cover" />
@@ -212,7 +212,7 @@ export default function Dashboard() {
           
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
+            <div className="absolute top-12 right-0 w-80 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
                 <span className="text-xs text-fuchsia-500 font-medium cursor-pointer hover:underline">Tout marquer comme lu</span>
@@ -292,7 +292,7 @@ export default function Dashboard() {
               whileTap={{ scale: 0.96 }}
               className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-fuchsia-500/30 flex flex-col justify-between aspect-square"
             >
-              <div className="w-12 h-12 bg-white dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-white dark:bg-gray-800 dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
                 <Plus size={24} className="text-fuchsia-600 dark:text-white" />
               </div>
               <div>
@@ -300,7 +300,7 @@ export default function Dashboard() {
                 {user?.publicMetadata?.isPro === true ? (
                   <p className="text-white/70 text-xs">Création rapide ⚡️</p>
                 ) : (
-                  <p className="text-white/90 text-[10px] font-medium bg-white/20 dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
+                  <p className="text-white/90 text-[10px] font-medium bg-white dark:bg-gray-800/20 dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
                     {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 3)}/3 gratuits`}
                   </p>
                 )}
@@ -402,8 +402,8 @@ export default function Dashboard() {
 
         {/* Banner Stats Rapides */}
         <div className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 dark:from-violet-900 dark:to-violet-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-violet-500/20 relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white dark:bg-gray-800/10 rounded-full blur-2xl"></div>
+          <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white dark:bg-gray-800/10 rounded-full blur-xl"></div>
           
           <div className="relative z-10">
             <p className="text-violet-100 text-sm font-medium mb-1">Chiffre d'Affaires Global</p>
@@ -412,13 +412,13 @@ export default function Dashboard() {
             </h2>
             
             {/* Gamification Objectif */}
-            <div className="mb-5 bg-white/10 rounded-xl p-3 backdrop-blur-sm border border-white/10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+            <div className="mb-5 bg-white dark:bg-gray-800/10 rounded-xl p-3 backdrop-blur-sm border border-white/10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
               <div className="flex justify-between items-center text-xs font-medium mb-2">
                 <span>Objectif ({objectif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition"><Pencil size={12} /></button></span>
                 <span>{Math.min((CA_TTC / objectif) * 100, 100).toFixed(0)}%</span>
               </div>
               <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
-                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-fuchsia-500 dark:shadow-[0_0_10px_rgba(217,70,239,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
+                <div className="bg-white dark:bg-gray-800 rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-fuchsia-500 dark:shadow-[0_0_10px_rgba(217,70,239,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
               </div>
               <p className="text-[10px] text-violet-200 mt-1.5 text-right">
                 {CA_TTC >= objectif ? '🎉 Objectif atteint !' : `Encore ${(objectif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
@@ -443,7 +443,7 @@ export default function Dashboard() {
         </div>
 
         {/* Dynamic Charts / Income Area */}
-        <div className="bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-sm p-5">
+        <div className="bg-white dark:bg-gray-800 dark:bg-slate-900 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-sm p-5">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-slate-900 dark:text-white text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
             <div className="bg-fuchsia-50 text-fuchsia-600 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
@@ -597,7 +597,7 @@ export default function Dashboard() {
               {devisARelancer.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
                   <div className="flex items-center gap-4 bg-rose-50 p-4 rounded-2xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 dark:bg-slate-900 text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
                       <Bell size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -634,7 +634,7 @@ export default function Dashboard() {
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm animate-pulse">
+                <div key={i} className="flex items-center p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-gray-800 dark:bg-slate-900 shadow-sm animate-pulse">
                   <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex-shrink-0"></div>
                   <div className="ml-3 flex-1">
                     <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2 mb-2"></div>
@@ -680,7 +680,7 @@ export default function Dashboard() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
+      <nav className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
         <Link href="/" className="flex flex-col items-center gap-1 text-fuchsia-600">
           <Home size={24} strokeWidth={2.5} />
           <span className="text-[10px] font-bold">Accueil</span>

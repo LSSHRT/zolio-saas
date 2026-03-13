@@ -35,7 +35,7 @@ export default function AbonnementSuccessPage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8 relative">
+    <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8 relative">
       
       {/* Background Decor */}
       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-gradient-to-br from-violet-50 to-fuchsia-50 blur-3xl opacity-60 rounded-full mix-blend-multiply pointer-events-none" />

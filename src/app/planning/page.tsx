@@ -31,7 +31,7 @@ function PlanningItem({ devis, mutate }: { devis: any; mutate: any }) {
     <motion.div 
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4"
+      className="bg-white dark:bg-gray-800 dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-4"
     >
       <div className="flex-1">
         <h3 className="font-bold text-slate-900 dark:text-white text-lg">{devis.nomClient}</h3>
@@ -100,7 +100,7 @@ export default function PlanningPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
-      <div className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3">
+      <div className="bg-white dark:bg-gray-800 dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3">
         <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </Link>
@@ -123,7 +123,7 @@ export default function PlanningPage() {
         ) : (
           <div className="space-y-4">
             {sortedDevis.length === 0 ? (
-              <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <div className="text-center py-10 bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                 <CalendarIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                 <p className="text-slate-500 font-medium">Aucun chantier prévu pour le moment.</p>
                 <p className="text-sm text-slate-400 mt-1">Acceptez des devis pour les voir apparaître ici.</p>

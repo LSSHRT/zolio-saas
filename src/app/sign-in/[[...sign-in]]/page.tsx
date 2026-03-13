@@ -18,7 +18,7 @@ export default function Page() {
           </div>
         </div>
       </div>
-      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 dark:bg-slate-900 p-8">
+      <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 dark:bg-gray-900 dark:bg-slate-900 p-8">
         <SignIn />
       </div>
     </div>
