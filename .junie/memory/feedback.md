@@ -470,3 +470,11 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement to proceed THEN implement agreed changes and confirm deployment"
 }
 
+[2026-03-13 18:56] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "button style inconsistency",
+    "EXPECTATION": "The TVA button should visually match the Remise and Acompte buttons in the signature flow.",
+    "NEW INSTRUCTION": "WHEN implementing TVA button in signature flow THEN match Remise/Accompte styles (size, color, radius)"
+}
+
