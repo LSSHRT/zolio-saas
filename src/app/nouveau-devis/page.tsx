@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Plus, Search, User, Package, Send, X, Trash2, Lock, Zap, Camera, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Plus, Search, User, Package, Send, X, Trash2, Lock, Zap, Camera, Image as ImageIcon, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 
@@ -48,6 +48,9 @@ export default function NouveauDevisPage() {
   const [searchClient, setSearchClient] = useState("");
   const [searchPrestation, setSearchPrestation] = useState("");
   const [showForfaits, setShowForfaits] = useState(false);
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [devisResult, setDevisResult] = useState<any>(null);
@@ -135,6 +138,38 @@ export default function NouveauDevisPage() {
     const newLignes = forfait.lignes.map((l: any) => ({ ...l, tva }));
     setLignes([...lignes, ...newLignes]);
     setShowForfaits(false);
+  };
+
+  const generateWithAI = async () => {
+    if (!aiPrompt.trim()) return;
+    setIsGeneratingAI(true);
+    try {
+      const res = await fetch("/api/ai/generate-devis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description: aiPrompt })
+      });
+      const data = await res.json();
+      if (data.lignes && Array.isArray(data.lignes)) {
+        const newLignes = data.lignes.map((l: any) => ({
+          nomPrestation: l.designation,
+          quantite: l.quantite,
+          unite: l.unite,
+          prixUnitaire: l.prixUnitaire,
+          totalLigne: l.quantite * l.prixUnitaire,
+          tva: tva,
+          isOptional: false
+        }));
+        setLignes([...lignes, ...newLignes]);
+        setShowAIModal(false);
+        setAiPrompt("");
+      }
+    } catch (error) {
+      console.error("Erreur IA", error);
+      alert("Erreur lors de la génération avec l'IA");
+    } finally {
+      setIsGeneratingAI(false);
+    }
   };
 
   const toggleOptional = (idx: number) => {
@@ -372,12 +407,20 @@ export default function NouveauDevisPage() {
                 <input type="text" placeholder="Rechercher une prestation..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
               </div>
+              <div className="flex gap-2 w-full mt-2">
                 <button
                   onClick={() => setShowForfaits(true)}
-                  className="w-full flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl mt-3 hover:bg-violet-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"
                 >
-                  <Package size={18} /> Insérer un Ouvrage / Forfait rapide
+                  <Package size={18} /> Forfait rapide
                 </button>
+                <button
+                  onClick={() => setShowAIModal(true)}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700 font-semibold rounded-xl hover:bg-fuchsia-100 transition dark:bg-fuchsia-900/30 dark:border-fuchsia-800 dark:text-fuchsia-300"
+                >
+                  <Sparkles size={18} /> Rédiger avec l'IA
+                </button>
+              </div>
 
 
               {/* Liste des prestations disponibles */}
@@ -588,6 +631,38 @@ export default function NouveauDevisPage() {
           </motion.button>
         )}
       </div>
+      {/* Modale IA */}
+      <AnimatePresence>
+        {showAIModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-fuchsia-500" size={20} /> Rédiger avec l'IA</h3>
+                <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>
+              </div>
+              <p className="text-sm text-slate-500 mb-4">
+                Décrivez les travaux à réaliser (ex: "Refaire une salle de bain de 10m2 avec douche italienne et peinture") et l'IA générera les lignes de devis pour vous.
+              </p>
+              <textarea
+                value={aiPrompt}
+                onChange={(e) => setAiPrompt(e.target.value)}
+                placeholder="Décrivez votre chantier..."
+                className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500 mb-4 resize-none"
+              />
+              <button
+                onClick={generateWithAI}
+                disabled={isGeneratingAI || !aiPrompt.trim()}
+                className="w-full py-3 bg-gradient-zolio text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition"
+              >
+                {isGeneratingAI ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles size={18} />}
+                {isGeneratingAI ? "Génération..." : "Générer les lignes"}
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
