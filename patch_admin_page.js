@@ -1,4 +1,9 @@
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
+const fs = require('fs');
+const path = require('path');
+
+const pagePath = path.join(__dirname, 'src', 'app', 'admin', 'page.tsx');
+
+const content = `import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { ShieldAlert } from "lucide-react";
 import AdminClient from "./AdminClient";
@@ -128,3 +133,7 @@ export default async function AdminDashboard() {
     />
   );
 }
+`;
+
+fs.writeFileSync(pagePath, content, 'utf8');
+console.log("page.tsx updated");

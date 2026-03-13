@@ -526,3 +526,11 @@
     "NEW INSTRUCTION": "WHEN user signs up with Clerk THEN show referral field or parse ?ref= and persist"
 }
 
+[2026-03-13 22:38] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "implement all items",
+    "EXPECTATION": "The user wants all previously proposed changes/fixes to be fully integrated, not partially.",
+    "NEW INSTRUCTION": "WHEN user says integrate all THEN implement all pending items and confirm deployment"
+}
+

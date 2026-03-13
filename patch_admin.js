@@ -1,55 +1,10 @@
-"use server";
+const fs = require('fs');
+const path = require('path');
 
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
-import { revalidatePath } from "next/cache";
+const actionsPath = path.join(__dirname, 'src', 'app', 'admin', 'actions.ts');
+const actionsContent = fs.readFileSync(actionsPath, 'utf8');
 
-export async function updateAdminSettings(formData: FormData) {
-  const user = await currentUser();
-  const userEmail = user?.emailAddresses[0]?.emailAddress;
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  
-  if (!user || userEmail !== adminEmail) {
-    throw new Error("Non autorisé");
-  }
-
-  const geminiKey = formData.get("geminiKey")?.toString();
-  
-  const client = await clerkClient();
-  await client.users.updateUserMetadata(user.id, {
-    publicMetadata: {
-      ...user.publicMetadata,
-      customGeminiKey: geminiKey || null
-    }
-  });
-
-  return { success: true };
-}
-
-export async function toggleUserProStatus(userId: string, isPro: boolean) {
-  const user = await currentUser();
-  const userEmail = user?.emailAddresses[0]?.emailAddress;
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  
-  if (!user || userEmail !== adminEmail) {
-    throw new Error("Non autorisé");
-  }
-
-  const client = await clerkClient();
-  const targetUser = await client.users.getUser(userId);
-  
-  await client.users.updateUserMetadata(userId, {
-    publicMetadata: {
-      ...targetUser.publicMetadata,
-      isPro: isPro,
-      // Optional: Clear stripeSubscriptionId if we revoke to be clean, or keep it.
-      // We'll just manage the `isPro` boolean for manual grants
-    }
-  });
-
-  revalidatePath('/admin');
-  return { success: true };
-}
-
+const newActions = `
 export async function banUser(userId: string, isBanned: boolean) {
   const user = await currentUser();
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
@@ -104,3 +59,8 @@ export async function grantAdminRole(userId: string, isAdmin: boolean) {
   revalidatePath('/admin');
   return { success: true };
 }
+`;
+
+fs.writeFileSync(actionsPath, actionsContent + newActions, 'utf8');
+
+console.log("actions.ts updated");
