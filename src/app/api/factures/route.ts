@@ -21,6 +21,8 @@ export async function POST(request: Request) {
     const entrepriseIban = meta.companyIban || "";
     const entrepriseBic = meta.companyBic || "";
     const entrepriseLegal = meta.companyLegal || "";
+    const entrepriseStatut = meta.companyStatut || "";
+    const entrepriseAssurance = meta.companyAssurance || "";
 
     const body = await request.json();
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
@@ -111,7 +113,7 @@ export async function POST(request: Request) {
       date,
       client,
       isPro: user?.publicMetadata?.isPro === true,
-        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
+        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
       lignes,
       totalHT,
       tva,

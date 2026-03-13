@@ -79,6 +79,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
     const entrepriseIban = meta.companyIban || "";
     const entrepriseBic = meta.companyBic || "";
     const entrepriseLegal = meta.companyLegal || "";
+    const entrepriseStatut = meta.companyStatut || "";
+    const entrepriseAssurance = meta.companyAssurance || "";
 
     const { numero } = await params;
     const body = await request.json();
@@ -182,7 +184,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
         adresse: "",
       },
       isPro: user?.publicMetadata?.isPro === true,
-        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
+        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: tvaLabel,

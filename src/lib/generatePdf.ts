@@ -41,7 +41,7 @@ interface DevisData {
   isPro?: boolean;
   acompte?: string;
   remise?: string;
-  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; cgv?: string; };
+  entreprise?: { nom: string; email: string; telephone?: string; adresse?: string; siret?: string; color?: string; logo?: string; iban?: string; bic?: string; legal?: string; cgv?: string; statut?: string; assurance?: string; };
   signatureBase64?: string;
   statut?: string;
   lignes: LigneDevis[];
@@ -282,17 +282,24 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   }
 
   // === FOOTER ===
-  const footerY = doc.internal.pageSize.getHeight() - 20;
+  const footerLinesDevis = [];
+  if (data.entreprise?.statut) footerLinesDevis.push(data.entreprise.statut);
+  if (data.entreprise?.assurance) footerLinesDevis.push(data.entreprise.assurance);
+  if (data.entreprise?.legal) footerLinesDevis.push(data.entreprise.legal);
+  if (data.tva === "0" || data.tva === "0%") footerLinesDevis.push("TVA non applicable, art. 293 B du CGI.");
+  if (!data.isPro) footerLinesDevis.push("Devis gratuit généré par Zolio · zolio.site");
+  footerLinesDevis.push("Ce devis est valable 30 jours à compter de sa date d'émission.");
+
   doc.setTextColor(148, 163, 184);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  if (data.entreprise?.legal) {
-    doc.text(data.entreprise.legal, pageWidth / 2, footerY - 5, { align: "center" });
+  
+  let currentFooterYDevis = doc.internal.pageSize.getHeight() - 8 - (footerLinesDevis.length * 4);
+  for (const line of footerLinesDevis) {
+    const splitLine = doc.splitTextToSize(line, pageWidth - 40);
+    doc.text(splitLine, pageWidth / 2, currentFooterYDevis, { align: "center" });
+    currentFooterYDevis += splitLine.length * 4;
   }
-  if (!data.isPro) {
-    doc.text("Devis gratuit généré par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
-  }
-  doc.text("Ce devis est valable 30 jours à compter de sa date d'émission.", pageWidth / 2, footerY + 5, { align: "center" });
 
   // Retourner un Buffer
   
@@ -523,17 +530,24 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   }
 
   // === FOOTER ===
-  const footerY = doc.internal.pageSize.getHeight() - 20;
+  const footerLinesFacture = [];
+  if (data.entreprise?.statut) footerLinesFacture.push(data.entreprise.statut);
+  if (data.entreprise?.assurance) footerLinesFacture.push(data.entreprise.assurance);
+  if (data.entreprise?.legal) footerLinesFacture.push(data.entreprise.legal);
+  if (data.tva === "0" || data.tva === "0%") footerLinesFacture.push("TVA non applicable, art. 293 B du CGI.");
+  if (!data.isPro) footerLinesFacture.push("Facture gratuite générée par Zolio · zolio.site");
+  footerLinesFacture.push("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.");
+
   doc.setTextColor(148, 163, 184);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  if (data.entreprise?.legal) {
-    doc.text(data.entreprise.legal, pageWidth / 2, footerY - 5, { align: "center" });
+  
+  let currentFooterYFacture = doc.internal.pageSize.getHeight() - 8 - (footerLinesFacture.length * 4);
+  for (const line of footerLinesFacture) {
+    const splitLine = doc.splitTextToSize(line, pageWidth - 40);
+    doc.text(splitLine, pageWidth / 2, currentFooterYFacture, { align: "center" });
+    currentFooterYFacture += splitLine.length * 4;
   }
-  if (!data.isPro) {
-    doc.text("Facture gratuite générée par Zolio · zolio.site", pageWidth / 2, footerY, { align: "center" });
-  }
-  doc.text("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.", pageWidth / 2, footerY + 5, { align: "center" });
 
   // Retourner un Buffer
   

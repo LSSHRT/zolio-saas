@@ -358,3 +358,43 @@
     "NEW INSTRUCTION": "WHEN user asks if code pushed or redeployed THEN summarize GitHub push and Vercel deployment status"
 }
 
+[2026-03-13 15:11] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+
+[2026-03-13 15:12] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+
+[2026-03-13 15:15] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "PDF missing legal info",
+    "EXPECTATION": "The quote and invoice PDFs should include all mandatory company legal details and standard required fields.",
+    "NEW INSTRUCTION": "WHEN generating quote or invoice PDF THEN include company legal info and required mentions"
+}
+
+[2026-03-13 15:19] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé'.",
+    "NEW INSTRUCTION": "WHEN user reports signed but status unchanged THEN request devis number, signature URL, sign time, and console/network screenshots"
+}
+
+[2026-03-13 15:23] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "signature status mismatch",
+    "EXPECTATION": "After a client signs via the signature link, the quote should automatically switch to 'Accepté/Validé' and PDFs should include all required legal company details.",
+    "NEW INSTRUCTION": "WHEN client signs via signature link THEN set devis status to Accepté and persist immediately"
+}
+

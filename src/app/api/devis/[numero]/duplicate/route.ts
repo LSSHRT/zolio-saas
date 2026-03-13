@@ -20,6 +20,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
     const entrepriseIban = meta.companyIban || "";
     const entrepriseBic = meta.companyBic || "";
     const entrepriseLegal = meta.companyLegal || "";
+    const entrepriseStatut = meta.companyStatut || "";
+    const entrepriseAssurance = meta.companyAssurance || "";
 
     const { numero } = await params;
     const sheets = await getGoogleSheetsClient();
@@ -116,7 +118,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
         adresse: "",
       },
       isPro: user?.publicMetadata?.isPro === true,
-      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
       lignes: lignesData,
       totalHT: devisRow[5],
       tva: devisRow[6],

@@ -4,6 +4,8 @@ import { sendDevisEmail } from "@/lib/sendEmail";
 import { NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const { userId } = await auth();
@@ -21,6 +23,8 @@ export async function POST(request: Request) {
     const entrepriseIban = meta.companyIban || "";
     const entrepriseBic = meta.companyBic || "";
     const entrepriseLegal = meta.companyLegal || "";
+    const entrepriseStatut = meta.companyStatut || "";
+    const entrepriseAssurance = meta.companyAssurance || "";
 
     const body = await request.json();
     const { client, lignes, tva, acompte, remise } = body;
@@ -95,7 +99,7 @@ export async function POST(request: Request) {
       date,
       client,
       isPro: user?.publicMetadata?.isPro === true,
-        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal },
+        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
       lignes,
       totalHT: totalHT.toFixed(2),
       tva: tvaLabel,

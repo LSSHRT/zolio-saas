@@ -19,6 +19,8 @@ export default function ParametresEntreprise() {
     companyLogo: (user?.unsafeMetadata?.companyLogo as string) || (user?.publicMetadata?.companyLogo as string) || "",
     companyIban: (user?.unsafeMetadata?.companyIban as string) || (user?.publicMetadata?.companyIban as string) || "",
     companyBic: (user?.unsafeMetadata?.companyBic as string) || (user?.publicMetadata?.companyBic as string) || "",
+    companyStatut: (user?.unsafeMetadata?.companyStatut as string) || (user?.publicMetadata?.companyStatut as string) || "",
+    companyAssurance: (user?.unsafeMetadata?.companyAssurance as string) || (user?.publicMetadata?.companyAssurance as string) || "",
     companyLegal: (user?.unsafeMetadata?.companyLegal as string) || (user?.publicMetadata?.companyLegal as string) || "",
     companyCgv: (user?.unsafeMetadata?.companyCgv as string) || (user?.publicMetadata?.companyCgv as string) || "",
     companyColor: (user?.unsafeMetadata?.companyColor as string) || (user?.publicMetadata?.companyColor as string) || "#0ea5e9",
@@ -45,6 +47,8 @@ export default function ParametresEntreprise() {
         companyLogo: (meta.companyLogo as string) || (pubMeta.companyLogo as string) || "",
         companyIban: (meta.companyIban as string) || (pubMeta.companyIban as string) || "",
         companyBic: (meta.companyBic as string) || (pubMeta.companyBic as string) || "",
+        companyStatut: (meta.companyStatut as string) || (pubMeta.companyStatut as string) || "",
+        companyAssurance: (meta.companyAssurance as string) || (pubMeta.companyAssurance as string) || "",
         companyLegal: (meta.companyLegal as string) || (pubMeta.companyLegal as string) || "",
         companyCgv: (meta.companyCgv as string) || (pubMeta.companyCgv as string) || "",
         companyColor: (meta.companyColor as string) || (pubMeta.companyColor as string) || "#0ea5e9",
@@ -72,6 +76,8 @@ export default function ParametresEntreprise() {
           companyLogo: formData.companyLogo,
           companyIban: formData.companyIban,
           companyBic: formData.companyBic,
+          companyStatut: formData.companyStatut,
+          companyAssurance: formData.companyAssurance,
           companyLegal: formData.companyLegal,
           companyCgv: formData.companyCgv,
           companyColor: formData.companyColor,
@@ -161,6 +167,36 @@ export default function ParametresEntreprise() {
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-slate-400" />
+              Statut juridique et Capital
+            </label>
+            <input
+              type="text"
+              name="companyStatut"
+              value={formData.companyStatut}
+              onChange={handleChange}
+              placeholder="Ex: SARL au capital de 5 000€ - RCS Paris"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
+              <Scale className="w-4 h-4 text-slate-400" />
+              Assurance professionnelle (ex: Décennale)
+            </label>
+            <input
+              type="text"
+              name="companyAssurance"
+              value={formData.companyAssurance}
+              onChange={handleChange}
+              placeholder="Ex: Assurance décennale MMA N°12345678"
+              className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+            />
+          </div>
+
           
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
@@ -230,14 +266,14 @@ export default function ParametresEntreprise() {
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
               <Scale className="w-4 h-4 text-slate-400" />
-              Mentions légales (Bas de page)
+              Pénalités de retard et autres mentions légales
             </label>
             <textarea
               name="companyLegal"
               value={formData.companyLegal}
               onChange={handleChange}
               rows={2}
-              placeholder="TVA non applicable, art. 293 B du CGI."
+              placeholder="Ex: En cas de retard de paiement, pénalité de 10%."
               className="w-full border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-xl p-3 focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all resize-none"
             />
           </div>

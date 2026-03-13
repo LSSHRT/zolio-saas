@@ -1,6 +1,8 @@
 import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // GET public devis info for signing
 export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
