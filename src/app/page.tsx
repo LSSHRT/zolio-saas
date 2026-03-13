@@ -11,6 +11,7 @@ const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
+import LandingPage from "@/components/LandingPage";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Devis {
@@ -24,7 +25,7 @@ interface Devis {
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function Dashboard() {
+function DashboardContent() {
   const { user, isLoaded } = useUser();
   const { data, error, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
   const devis = Array.isArray(data) ? data : [];
@@ -709,4 +710,22 @@ export default function Dashboard() {
 
     </div>
   );
+}
+
+export default function Page() {
+  const { user, isLoaded } = useUser();
+  
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-600"></div>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <DashboardContent />;
+  }
+
+  return <LandingPage />;
 }

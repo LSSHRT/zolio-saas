@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
-import { Save, Building2, MapPin, Phone, FileDigit, Image as ImageIcon, CreditCard, Scale, Palette } from "lucide-react";
+import { Save, Building2, MapPin, Phone, FileDigit, Image as ImageIcon, CreditCard, Scale, Palette, Gift, Copy } from "lucide-react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -332,6 +332,42 @@ export default function ParametresEntreprise() {
             )}
           </button>
         </form>
+
+        {/* Section Parrainage */}
+        <div className="mt-8 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl shadow-lg p-6 sm:p-8 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 opacity-20">
+            <Gift size={100} />
+          </div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-3 mb-3">
+              <Gift className="w-6 h-6 text-violet-200" />
+              <h2 className="text-xl font-bold">Parrainez un confrère</h2>
+            </div>
+            <p className="text-violet-100 mb-6 max-w-md text-sm leading-relaxed">
+              Pour chaque artisan qui s'inscrit avec votre code, vous gagnez tous les deux <strong>1 mois d'abonnement gratuit</strong> à Zolio Pro. C'est le meilleur moyen de faire grandir notre communauté !
+            </p>
+            
+            <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20">
+              <p className="text-xs text-violet-200 mb-2 font-medium uppercase tracking-wider">Votre code de parrainage unique</p>
+              <div className="flex items-center gap-3">
+                <code className="flex-1 font-mono text-xl font-bold bg-white/20 px-4 py-2 rounded-lg text-center tracking-widest">
+                  {user.id.slice(-8).toUpperCase()}
+                </code>
+                <button
+                  onClick={() => {
+                    const code = user.id.slice(-8).toUpperCase();
+                    navigator.clipboard.writeText(`Rejoignez Zolio avec mon code de parrainage ${code} pour gagner 1 mois gratuit ! https://zolio.site/sign-up?ref=${code}`);
+                    setMessage({ type: "success", text: "Message de parrainage copié !" });
+                  }}
+                  className="bg-white text-violet-600 p-3 rounded-lg hover:bg-violet-50 transition-colors flex items-center justify-center shadow-sm"
+                  title="Copier le code"
+                >
+                  <Copy size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="mt-8 bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5">
           <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">

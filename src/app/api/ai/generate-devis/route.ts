@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
+import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -56,6 +56,20 @@ Exemple:
     const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
     
     const lignes = JSON.parse(cleanedText);
+
+    // Incrémenter le compteur IA pour l'utilisateur
+    try {
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      const currentCount = (user.publicMetadata?.aiDevisCount as number) || 0;
+      await client.users.updateUserMetadata(userId, {
+        publicMetadata: {
+          aiDevisCount: currentCount + 1
+        }
+      });
+    } catch (e) {
+      console.error("Erreur incrementation compteur IA:", e);
+    }
 
     return NextResponse.json({ lignes });
   } catch (error) {
