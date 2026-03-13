@@ -4,6 +4,7 @@ import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; }
 
@@ -34,6 +35,7 @@ interface Prestation { id: string; categorie: string; nom: string; unite: string
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
   const { numero } = use(params);
+  const { userId } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [devisInfo, setDevisInfo] = useState<any>(null);
@@ -118,7 +120,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   };
 
   const handleCopySignLink = () => {
-    const link = `${window.location.origin}/signer/${numero}`;
+    const link = `${window.location.origin}/signer/${numero}${userId ? `?u=${userId}` : ''}`;
     navigator.clipboard.writeText(link);
     alert("Lien de signature copié ! Envoyez-le à votre client.");
   };

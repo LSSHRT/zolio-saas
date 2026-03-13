@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState, useRef, use } from "react";
+import { useEffect, useState, useRef, use, Suspense } from "react";
 import dynamic from "next/dynamic";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { motion } from "framer-motion";
 import { CheckCircle, AlertCircle, PenTool, Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
-export default function SignerDevis({ params }: { params: Promise<{ numero: string }> }) {
+function SignerDevisContent({ params }: { params: Promise<{ numero: string }> }) {
   const unwrappedParams = use(params);
   const numero = unwrappedParams.numero;
+  const searchParams = useSearchParams();
+  const userId = searchParams.get("u");
   
   const [devis, setDevis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -19,7 +22,7 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
   const sigCanvas = useRef<any>(null);
 
   useEffect(() => {
-    fetch(`/api/public/devis/${numero}`)
+    fetch(`/api/public/devis/${numero}${userId ? `?u=${userId}` : ''}`)
       .then(res => res.json())
       .then(data => {
         if (data.error) setError(data.error);
@@ -41,7 +44,7 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
     setSigning(true);
     try {
       const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
-      const res = await fetch(`/api/public/devis/${numero}`, {
+      const res = await fetch(`/api/public/devis/${numero}${userId ? `?u=${userId}` : ''}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signatureBase64 }),
@@ -149,5 +152,17 @@ export default function SignerDevis({ params }: { params: Promise<{ numero: stri
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function SignerDevis({ params }: { params: Promise<{ numero: string }> }) {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+      </div>
+    }>
+      <SignerDevisContent params={params} />
+    </Suspense>
   );
 }

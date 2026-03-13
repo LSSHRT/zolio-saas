@@ -7,6 +7,8 @@ import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil,
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useAuth } from "@clerk/nextjs";
+
 interface Devis {
   numero: string;
   date: string;
@@ -30,6 +32,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DevisPage() {
   const router = useRouter();
+  const { userId } = useAuth();
   const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
@@ -91,7 +94,7 @@ export default function DevisPage() {
 
 
     const handleCopySignLink = (numero: string) => {
-    const link = `${window.location.origin}/signer/${numero}`;
+    const link = `${window.location.origin}/signer/${numero}${userId ? `?u=${userId}` : ''}`;
     navigator.clipboard.writeText(link);
     alert("Lien de signature copié ! Envoyez-le à votre client.");
   };

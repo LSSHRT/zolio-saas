@@ -7,6 +7,8 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
     const { numero } = await params;
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("u");
     const sheets = await getGoogleSheetsClient();
 
     const devisRes = await sheets.spreadsheets.values.get({
@@ -15,8 +17,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
     });
     
     const devisRows = devisRes.data.values || [];
-    // Trouver le premier devis avec ce numéro
-    const devisRow = devisRows.find((r) => r[1] === numero);
+    // Trouver le premier devis avec ce numéro (et ce userId si fourni)
+    const devisRow = devisRows.find((r) => r[1] === numero && (!userId || r[0] === userId));
 
     if (!devisRow) {
       return NextResponse.json({ error: "Devis introuvable" }, { status: 404 });
@@ -40,6 +42,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
 export async function POST(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
     const { numero } = await params;
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("u");
     const body = await request.json();
     const { signatureBase64 } = body;
 
@@ -55,7 +59,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ num
     });
     
     const devisRows = devisRes.data.values || [];
-    const rowIndex = devisRows.findIndex((r) => r[1] === numero);
+    const rowIndex = devisRows.findIndex((r) => r[1] === numero && (!userId || r[0] === userId));
 
     if (rowIndex === -1) {
       return NextResponse.json({ error: "Devis introuvable" }, { status: 404 });
