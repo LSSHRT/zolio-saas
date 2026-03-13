@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Users, FileText, CreditCard, ShieldAlert, Settings, Download, Save, Loader2, Info } from "lucide-react";
-import { updateAdminSettings } from "./actions";
+import { useState, useTransition } from "react";
+import { Users, FileText, CreditCard, ShieldAlert, Settings, Download, Save, Loader2, Info, Star, StarOff } from "lucide-react";
+import { updateAdminSettings, toggleUserProStatus } from "./actions";
 
 export default function AdminClient({ 
   totalUsers, 
@@ -14,6 +14,17 @@ export default function AdminClient({
   const [activeTab, setActiveTab] = useState("overview");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [isPending, startTransition] = useTransition();
+
+  const handleTogglePro = (userId: string, currentStatus: boolean) => {
+    startTransition(async () => {
+      try {
+        await toggleUserProStatus(userId, !currentStatus);
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  };
 
   const exportCSV = () => {
     const headers = ["Nom", "Email", "Date d'inscription", "Devis IA", "Statut"];
@@ -21,7 +32,7 @@ export default function AdminClient({
       const email = u.emailAddresses[0]?.emailAddress || "Aucun email";
       const date = new Date(u.createdAt).toLocaleDateString("fr-FR");
       const aiCount = u.publicMetadata?.aiDevisCount || 0;
-      const isPro = u.publicMetadata?.stripeSubscriptionId ? "PRO" : "Gratuit";
+      const isPro = (u.publicMetadata?.stripeSubscriptionId || u.publicMetadata?.isPro) ? "PRO" : "Gratuit";
       return `"${u.firstName} ${u.lastName}","${email}","${date}","${aiCount}","${isPro}"`;
     });
 
@@ -143,6 +154,7 @@ export default function AdminClient({
                     <th className="p-4">Inscription</th>
                     <th className="p-4 text-center">Devis IA</th>
                     <th className="p-4">Statut</th>
+                    <th className="p-4 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -150,7 +162,7 @@ export default function AdminClient({
                     const email = u.emailAddresses[0]?.emailAddress || "Aucun email";
                     const date = new Date(u.createdAt).toLocaleDateString("fr-FR", { day: '2-digit', month: 'short', year: 'numeric' });
                     const aiCount = (u.publicMetadata?.aiDevisCount as number) || 0;
-                    const isPro = u.publicMetadata?.stripeSubscriptionId ? true : false;
+                    const isPro = (u.publicMetadata?.stripeSubscriptionId || u.publicMetadata?.isPro) ? true : false;
                     
                     return (
                       <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors">
@@ -175,12 +187,26 @@ export default function AdminClient({
                             </span>
                           )}
                         </td>
+                        <td className="p-4 text-right">
+                          <button
+                            onClick={() => handleTogglePro(u.id, isPro)}
+                            disabled={isPending}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                              isPro 
+                                ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40" 
+                                : "bg-purple-50 text-purple-600 hover:bg-purple-100 dark:bg-purple-900/20 dark:text-purple-400 dark:hover:bg-purple-900/40"
+                            } disabled:opacity-50`}
+                          >
+                            {isPending ? <Loader2 size={14} className="animate-spin" /> : (isPro ? <StarOff size={14} /> : <Star size={14} />)}
+                            {isPro ? "Révoquer PRO" : "Donner PRO"}
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
                   {usersList.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="p-8 text-center text-slate-500 dark:text-slate-400">
+                      <td colSpan={5} className="p-8 text-center text-slate-500 dark:text-slate-400">
                         Aucun artisan inscrit pour le moment.
                       </td>
                     </tr>

@@ -75,7 +75,8 @@ export default async function AdminDashboard() {
     createdAt: u.createdAt,
     publicMetadata: {
       aiDevisCount: u.publicMetadata?.aiDevisCount,
-      stripeSubscriptionId: u.publicMetadata?.stripeSubscriptionId
+      stripeSubscriptionId: u.publicMetadata?.stripeSubscriptionId,
+      isPro: u.publicMetadata?.isPro
     }
   }));
 
