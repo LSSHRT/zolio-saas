@@ -27,7 +27,7 @@ export async function DELETE(
     const resolvedParams = await params;
     const { id } = resolvedParams;
     const sheets = getGoogleSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
     // Récupérer le sheetId de l'onglet Dépenses
     const meta = await sheets.spreadsheets.get({ spreadsheetId });

@@ -22,7 +22,7 @@ export async function GET() {
     }
 
     const sheets = getGoogleSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
     // Vérifier si l'onglet Dépenses existe
     const meta = await sheets.spreadsheets.get({ spreadsheetId });
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
 
     const data = await req.json();
     const sheets = getGoogleSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
 
     const id = "DEP-" + Date.now();
     
