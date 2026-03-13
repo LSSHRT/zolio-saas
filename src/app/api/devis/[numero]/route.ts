@@ -123,7 +123,11 @@ export async function PUT(request: Request, { params }: { params: Promise<{ nume
       return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
     }
 
-    const currentPhotos = photos ? JSON.stringify(photos) : (devisRows[rowIndex][14] || "");
+    let currentPhotos = photos && photos.length > 0 ? JSON.stringify(photos) : (devisRows[rowIndex][14] || "");
+    if (currentPhotos.length > 45000) {
+      console.warn("Photos trop volumineuses, on tronque pour éviter l'erreur Google Sheets", currentPhotos.length);
+      currentPhotos = "";
+    }
 
     // Mettre à jour la ligne d'en-tête du devis
     await sheets.spreadsheets.values.update({

@@ -486,3 +486,19 @@
     "NEW INSTRUCTION": "WHEN user expresses agreement to proceed THEN implement agreed changes and confirm deployment"
 }
 
+[2026-03-13 20:19] - Updated by Junie
+{
+    "TYPE": "positive",
+    "CATEGORY": "working confirmation",
+    "EXPECTATION": "The previous fix works and the user now wants to try using gemini-3-flash-preview.",
+    "NEW INSTRUCTION": "WHEN user asks to try a specific model THEN use that model and confirm switch"
+}
+
+[2026-03-13 20:45] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "quote creation failure",
+    "EXPECTATION": "Creating a quote should save, appear in the list, and notify the client.",
+    "NEW INSTRUCTION": "WHEN user reports new quote missing or client not notified THEN request steps, page URL, devis ID/fields, timestamp, and console/network screenshots"
+}
+

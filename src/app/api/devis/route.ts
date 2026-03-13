@@ -50,6 +50,12 @@ export async function POST(request: Request) {
     const tvaRates = [...new Set(lignes.map((l: any) => l.tva || "0"))];
     const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
 
+    let photosString = photos && photos.length > 0 ? JSON.stringify(photos) : "";
+    if (photosString.length > 45000) {
+      console.warn("Photos trop volumineuses, on tronque pour éviter l'erreur API Google Sheets", photosString.length);
+      photosString = "";
+    }
+
     // 1. Écrire l'en-tête du devis (On ajoute le userId en 1er)
     // Colonnes : A=userId, B=numero, C=date, D=client.nom, E=client.email, F=HT, G=TVA, H=TTC, I=statut, J=lien, K=acompte, L=remise, M=signature, N=lu_le, O=photos
     await sheets.spreadsheets.values.append({
@@ -72,7 +78,7 @@ export async function POST(request: Request) {
           remise ? remise.toString() : "", // Remise globale (%)
           "", // Signature
           "", // Lu le
-          photos ? JSON.stringify(photos) : "" // Photos (base64)
+          photosString // Photos (base64)
         ]],
       },
     });

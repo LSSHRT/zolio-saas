@@ -219,13 +219,13 @@ export default function NouveauDevisPage() {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 800;
+          const MAX_WIDTH = 500;
           const scaleSize = MAX_WIDTH / img.width;
           canvas.width = MAX_WIDTH;
           canvas.height = img.height * scaleSize;
           const ctx = canvas.getContext("2d");
           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const base64 = canvas.toDataURL("image/jpeg", 0.6); // forte compression
+          const base64 = canvas.toDataURL("image/jpeg", 0.4); // forte compression
           setPhotos(prev => [...prev, base64]);
         };
         img.src = event.target?.result as string;
