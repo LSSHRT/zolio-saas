@@ -534,3 +534,11 @@
     "NEW INSTRUCTION": "WHEN user says integrate all THEN implement all pending items and confirm deployment"
 }
 
+[2026-03-13 22:49] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "implement all items",
+    "EXPECTATION": "The user wants all previously proposed changes and fixes to be fully integrated, not partially.",
+    "NEW INSTRUCTION": "WHEN user says integrate all THEN implement all pending items and confirm deployment"
+}
+
