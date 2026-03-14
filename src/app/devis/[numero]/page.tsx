@@ -33,7 +33,7 @@ const FORFAITS = [
   }
 ];
 
-interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
+interface Prestation { id: string; categorie: string; nom: string; unite: string; prix: number; cout: number; }
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
   const { numero } = use(params);
@@ -86,12 +86,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
   const margeEstimee = lignes.filter(l => !l.isOptional).reduce((sum, l) => {
     const p = prestations.find(prest => prest.nom === l.nomPrestation);
-    const coutUnitaire = p ? (p.coutMatiere || 0) : 0;
+    const coutUnitaire = p ? (p.cout || 0) : 0;
     return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
   }, 0) - montantRemise;
 
   const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva, isOptional: false }]);
+    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prix, totalLigne: p.prix, tva, isOptional: false }]);
     setShowAddPrestation(false);
     setSearchPrestation("");
   };
@@ -121,9 +121,9 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     updated[idx].nomPrestation = nom;
     const found = prestations.find(p => p.nom === nom);
     if (found) {
-      updated[idx].prixUnitaire = found.prixUnitaireHT;
+      updated[idx].prixUnitaire = found.prix;
       updated[idx].unite = found.unite;
-      updated[idx].totalLigne = updated[idx].quantite * found.prixUnitaireHT;
+      updated[idx].totalLigne = updated[idx].quantite * found.prix;
     }
     setLignes(updated);
   };
@@ -356,7 +356,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                     className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-left hover:bg-violet-50 transition text-sm">
                     <Plus size={14} className="text-violet-500 shrink-0" />
                     <span className="flex-1 truncate">{p.nom}</span>
-                    <span className="text-slate-500 dark:text-slate-400 text-xs">{p.prixUnitaireHT}€/{p.unite}</span>
+                    <span className="text-slate-500 dark:text-slate-400 text-xs">{p.prix}€/{p.unite}</span>
                   </button>
                 ))}
               </div>

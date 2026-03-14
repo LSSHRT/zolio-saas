@@ -10,8 +10,8 @@ interface Prestation {
   categorie: string;
   nom: string;
   unite: string;
-  prixUnitaireHT: number;
-  coutMatiere: number;
+  prix: number;
+  cout: number;
   stock?: number;
 }
 
@@ -94,7 +94,7 @@ export default function CataloguePage() {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
-  const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "", stock: "" });
+  const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -118,7 +118,7 @@ export default function CataloguePage() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, prixUnitaireHT: parseFloat(form.prixUnitaireHT), coutMatiere: parseFloat(form.coutMatiere) || 0, stock: parseFloat(form.stock) || 0 }),
+        body: JSON.stringify({ ...form, prix: parseFloat(form.prix), cout: parseFloat(form.cout) || 0, stock: parseFloat(form.stock) || 0 }),
       });
       const data = await res.json();
       if (editingId) {
@@ -126,7 +126,7 @@ export default function CataloguePage() {
       } else {
         setPrestations([...prestations, data]);
       }
-      setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "", stock: "" });
+      setForm({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" });
       setEditingId(null);
       setShowForm(false);
     } catch (err) {
@@ -175,8 +175,8 @@ export default function CataloguePage() {
       categorie: p.categorie,
       nom: p.nom,
       unite: p.unite,
-      prixUnitaireHT: p.prixUnitaireHT.toString(),
-      coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
+      prix: p.prix.toString(),
+      cout: p.cout ? p.cout.toString() : "",
       stock: p.stock !== undefined ? p.stock.toString() : ""
     });
     setEditingId(p.id);
@@ -189,8 +189,8 @@ export default function CataloguePage() {
       categorie: p.categorie,
       nom: p.nom + " (Copie)",
       unite: p.unite,
-      prixUnitaireHT: p.prixUnitaireHT.toString(),
-      coutMatiere: p.coutMatiere ? p.coutMatiere.toString() : "",
+      prix: p.prix.toString(),
+      cout: p.cout ? p.cout.toString() : "",
       stock: p.stock !== undefined ? p.stock.toString() : ""
     });
     setEditingId(null);
@@ -229,21 +229,21 @@ export default function CataloguePage() {
           let categorie = "Autre";
           let nom = "Prestation sans nom";
           let unite = "forfait";
-          let prixUnitaireHT = 0;
-          let coutMatiere = 0;
+          let prix = 0;
+          let cout = 0;
           
           if (columns.length >= 4) {
             categorie = columns[0] || "Autre";
             nom = columns[1] || "Prestation sans nom";
             unite = columns[2] || "forfait";
-            prixUnitaireHT = parseFloat(columns[3].replace(',', '.')) || 0;
-            if (columns[4]) coutMatiere = parseFloat(columns[4].replace(',', '.')) || 0;
+            prix = parseFloat(columns[3].replace(',', '.')) || 0;
+            if (columns[4]) cout = parseFloat(columns[4].replace(',', '.')) || 0;
           } else if (columns.length >= 2) {
             nom = columns[0] || "Prestation sans nom";
-            prixUnitaireHT = parseFloat(columns[1].replace(',', '.')) || 0;
+            prix = parseFloat(columns[1].replace(',', '.')) || 0;
           }
 
-          newItems.push({ categorie, nom, unite, prixUnitaireHT, coutMatiere });
+          newItems.push({ categorie, nom, unite, prix, cout });
         }
         
         await fetch("/api/prestations", {
@@ -310,7 +310,7 @@ export default function CataloguePage() {
         </label>
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prixUnitaireHT: "", coutMatiere: "", stock: "" }); }}
+          onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" }); }}
           className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}
@@ -363,12 +363,12 @@ export default function CataloguePage() {
                 <option value="forfait">Forfait</option>
                 <option value="unité">Unité</option>
               </select>
-              <input required type="number" step="0.01" placeholder="Prix HT €" value={form.prixUnitaireHT}
-                onChange={(e) => setForm({ ...form, prixUnitaireHT: e.target.value })}
+              <input required type="number" step="0.01" placeholder="Prix HT €" value={form.prix}
+                onChange={(e) => setForm({ ...form, prix: e.target.value })}
                 className="flex-1 px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             </div>
-            <input type="number" step="0.01" placeholder="Coût matière estimé (optionnel)" value={form.coutMatiere}
-              onChange={(e) => setForm({ ...form, coutMatiere: e.target.value })}
+            <input type="number" step="0.01" placeholder="Coût matière estimé (optionnel)" value={form.cout}
+              onChange={(e) => setForm({ ...form, cout: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <input type="number" step="0.01" placeholder="Stock initial (optionnel)" value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
@@ -422,7 +422,7 @@ export default function CataloguePage() {
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="font-bold text-slate-900 dark:text-white text-sm">{p.prixUnitaireHT}€</p>
+                  <p className="font-bold text-slate-900 dark:text-white text-sm">{p.prix}€</p>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400">HT/{p.unite}</p>
                 </div>
                 <div className="flex gap-1 shrink-0">

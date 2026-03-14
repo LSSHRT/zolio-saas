@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 
 interface Client { id: string; nom: string; email: string; telephone: string; adresse: string; dateAjout: string; }
-interface Prestation { id: string; categorie: string; nom: string; unite: string; prixUnitaireHT: number; coutMatiere: number; }
+interface Prestation { id: string; categorie: string; nom: string; unite: string; prix: number; cout: number; }
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; isOptional?: boolean; }
 
 
@@ -92,12 +92,12 @@ export default function NouveauDevisPage() {
 
   const margeEstimee = lignes.filter(l => !l.isOptional).reduce((sum, l) => {
     const p = prestations.find(prest => prest.nom === l.nomPrestation);
-    const coutUnitaire = p ? (p.coutMatiere || 0) : 0;
+    const coutUnitaire = p ? (p.cout || 0) : 0;
     return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
   }, 0) - montantRemise;
 
   const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prixUnitaireHT, totalLigne: p.prixUnitaireHT, tva, isOptional: false }]);
+    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prix, totalLigne: p.prix, tva, isOptional: false }]);
     setSearchPrestation("");
   };
 
@@ -120,9 +120,9 @@ export default function NouveauDevisPage() {
     // Auto-complétion du prix si trouvé dans le catalogue
     const found = prestations.find(p => p.nom === nom);
     if (found) {
-      updated[idx].prixUnitaire = found.prixUnitaireHT;
+      updated[idx].prixUnitaire = found.prix;
       updated[idx].unite = found.unite;
-      updated[idx].totalLigne = updated[idx].quantite * found.prixUnitaireHT;
+      updated[idx].totalLigne = updated[idx].quantite * found.prix;
     }
     setLignes(updated);
   };
@@ -469,7 +469,7 @@ export default function NouveauDevisPage() {
                       <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
                       <p className="text-[10px] text-slate-400">{p.categorie}</p>
                     </div>
-                    <span className="text-sm font-bold text-slate-700">{p.prixUnitaireHT}€/{p.unite}</span>
+                    <span className="text-sm font-bold text-slate-700">{p.prix}€/{p.unite}</span>
                   </motion.button>
                 ))}
               </div>
