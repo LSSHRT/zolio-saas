@@ -598,3 +598,11 @@
     "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
 }
 
+[2026-03-14 21:36] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "Finish adding missing legal info to PDFs and fix signature flow so a signed devis auto-switches to Accepté, then provide the remaining details and confirm deployment.",
+    "NEW INSTRUCTION": "WHEN user says continue or not finished THEN complete pending work and confirm deployment status"
+}
+

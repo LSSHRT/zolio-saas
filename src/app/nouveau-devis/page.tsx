@@ -271,11 +271,11 @@ export default function NouveauDevisPage() {
           className="text-2xl font-bold text-slate-900 dark:text-white mb-2 text-center">Devis créé ! 🎉</motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
           className="text-slate-500 dark:text-slate-400 text-center text-sm mb-2">
-          {devisResult?.numeroDevis} — {devisResult?.totalTTC}€ TTC
+          {devisResult?.numero} — {devisResult?.totalTTC}€ TTC
         </motion.p>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
           className="text-slate-400 text-center text-xs mb-8">
-          Enregistré dans votre Google Sheets
+          Enregistré avec succès
         </motion.p>
         <Link href="/">
           <motion.button whileTap={{ scale: 0.96 }} className="px-8 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg">
