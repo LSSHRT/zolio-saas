@@ -116,15 +116,17 @@ export default async function AdminDashboard() {
 
   return (
     <AdminClient 
-      totalUsers={totalUsersCount}
-      totalAiDevis={totalAiDevis}
-      activeSubscriptions={activeSubscriptions}
-      proUsersCount={proUsersCount}
-      recentUsersCount={recentUsersCount}
-      mrr={Math.round(mrr)}
-      usersList={serializedUsers}
+      initialUsers={serializedUsers}
+      stats={{
+        totalUsers: totalUsersCount,
+        totalAiDevis: totalAiDevis,
+        activeSubscriptions: activeSubscriptions,
+        proUsersCount: proUsersCount,
+        recentUsersCount: recentUsersCount,
+        mrr: Math.round(mrr)
+      }}
+      systemBanner={currentSystemBanner}
       currentGeminiKey={currentGeminiKey}
-      currentSystemBanner={currentSystemBanner}
     />
   );
 }

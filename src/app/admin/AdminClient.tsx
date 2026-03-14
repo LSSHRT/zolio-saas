@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock } from "lucide-react";
 
-export default function AdminClient({ initialUsers, stats, logs = [], systemBanner }: any) {
+export default function AdminClient({ initialUsers = [], stats = {}, logs = [], systemBanner, currentGeminiKey }: any) {
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
