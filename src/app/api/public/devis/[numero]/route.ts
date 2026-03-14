@@ -78,7 +78,7 @@ export async function POST(request: Request, context: { params: Promise<{ numero
     if (!userId) return new NextResponse("User ID manquant", { status: 400 });
 
     const body = await request.json();
-    const { signature } = body;
+    const signature = body.signatureBase64 || body.signature;
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
