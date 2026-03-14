@@ -360,7 +360,7 @@ export default function NouveauDevisPage() {
             <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
               {selectedClient ? (
                 <div className="bg-fuchsia-50 border border-violet-200 rounded-2xl p-4 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient.nom.charAt(0)}</div>
+                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{(selectedClient.nom || '').charAt(0)}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient.email}</p>
@@ -420,7 +420,7 @@ export default function NouveauDevisPage() {
                       {filteredClients.map((c) => (
                         <motion.button key={c.id} whileTap={{ scale: 0.97 }} onClick={() => setSelectedClient(c)}
                           className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
-                          <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{c.nom.charAt(0)}</div>
+                          <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{(c.nom || '').charAt(0)}</div>
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{c.nom}</p>
                             <p className="text-xs text-slate-400 truncate">{c.email}</p>
@@ -541,7 +541,7 @@ export default function NouveauDevisPage() {
               <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2">Client</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{selectedClient?.nom.charAt(0)}</div>
+                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{(selectedClient?.nom || '').charAt(0)}</div>
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient?.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient?.email}</p>

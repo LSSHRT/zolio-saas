@@ -324,7 +324,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         {/* Client info */}
         <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <div className="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center font-bold text-sm">
-            {devisInfo?.nomClient?.charAt(0)}
+            {(devisInfo?.nomClient || '').charAt(0)}
           </div>
           <div>
             <p className="font-semibold text-slate-900 dark:text-white text-sm">{devisInfo?.nomClient}</p>

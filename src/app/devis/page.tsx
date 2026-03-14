@@ -322,7 +322,7 @@ export default function DevisPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-violet-100 text-fuchsia-600 flex items-center justify-center font-bold text-sm shrink-0">
-                        {d.nomClient.charAt(0).toUpperCase()}
+                        {(d.nomClient || '').charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">

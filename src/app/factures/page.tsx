@@ -264,7 +264,7 @@ export default function FacturesPage() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
-                        {f.nomClient.charAt(0).toUpperCase()}
+                        {(f.nomClient || '').charAt(0).toUpperCase()}
                       </div>
                       <div>
                         <p className="font-semibold text-slate-900 dark:text-white text-sm">{f.nomClient}</p>
