@@ -24,15 +24,26 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
     const clientData = await clerkClient();
     const user = await clientData.users.getUser(userId);
 
+    const lignes = typeof devis.lignes === 'string' ? JSON.parse(devis.lignes) : (devis.lignes || []);
+    const remiseGlobale = devis.remise || 0;
+    const tvaGlobale = devis.tva || 0;
+    const totalTTC = lignes.filter((l: any) => !l.isOptional).reduce((sum: number, l: any) => {
+      const ligneTva = parseFloat(l.tva || tvaGlobale.toString()) || 0;
+      const ligneTotal = l.totalLigne || (l.quantite * l.prixUnitaire) || 0;
+      return sum + (ligneTotal * (1 + ligneTva / 100));
+    }, 0) * (1 - remiseGlobale / 100);
+
     const devisData = {
       numero: devis.numero,
       client: devis.client ? devis.client.nom : "",
+      nomClient: devis.client ? devis.client.nom : "",
       date: devis.date.toLocaleDateString("fr-FR"),
       statut: devis.statut,
-      lignes: typeof devis.lignes === 'string' ? JSON.parse(devis.lignes) : devis.lignes,
-      remise: devis.remise,
+      lignes,
+      remise: remiseGlobale,
       acompte: devis.acompte,
-      tva: devis.tva,
+      tva: tvaGlobale,
+      totalTTC: totalTTC.toFixed(2),
       signature: devis.signature || "",
       photos: typeof devis.photos === 'string' ? JSON.parse(devis.photos) : (devis.photos || []),
       entrepriseInfo: {

@@ -15,21 +15,42 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     });
 
-    const mapped = devis.map((d: any) => ({
-      numero: d.numero,
-      client: d.client ? d.client.nom : "Inconnu",
-      clientId: d.clientId,
-      date: d.date.toLocaleDateString("fr-FR"),
-      statut: d.statut,
-      lignes: typeof d.lignes === 'string' ? JSON.parse(d.lignes) : d.lignes,
-      remise: d.remise || 0,
-      acompte: d.acompte || 0,
-      tva: d.tva || 0,
-      signature: d.signature || "",
-      photos: typeof d.photos === 'string' ? JSON.parse(d.photos) : (d.photos || []),
-      dateDebut: d.dateDebut ? d.dateDebut.toISOString().split('T')[0] : "",
-      dateFin: d.dateFin ? d.dateFin.toISOString().split('T')[0] : ""
-    }));
+    const mapped = devis.map((d: any) => {
+      const parsedLignes = typeof d.lignes === 'string' ? JSON.parse(d.lignes) : (d.lignes || []);
+      const remiseGlobale = d.remise || 0;
+      const tvaGlobale = d.tva || 0;
+
+      const totalHTBase = parsedLignes.filter((l: any) => !l.isOptional).reduce((s: number, l: any) => {
+        return s + (l.totalLigne || (l.quantite * l.prixUnitaire) || 0);
+      }, 0);
+      const totalHT = totalHTBase * (1 - remiseGlobale / 100);
+
+      const totalTTC = parsedLignes.filter((l: any) => !l.isOptional).reduce((sum: number, l: any) => {
+        const ligneTva = parseFloat(l.tva || tvaGlobale.toString()) || 0;
+        const ligneTotal = l.totalLigne || (l.quantite * l.prixUnitaire) || 0;
+        return sum + (ligneTotal * (1 + ligneTva / 100));
+      }, 0) * (1 - remiseGlobale / 100);
+
+      return {
+        numero: d.numero,
+        client: d.client ? d.client.nom : "Inconnu",
+        nomClient: d.client ? d.client.nom : "Inconnu",
+        emailClient: d.client ? d.client.email : "",
+        clientId: d.clientId,
+        date: d.date.toLocaleDateString("fr-FR"),
+        statut: d.statut,
+        lignes: parsedLignes,
+        remise: remiseGlobale,
+        acompte: d.acompte || 0,
+        tva: `${tvaGlobale}%`,
+        totalHT: totalHT.toFixed(2),
+        totalTTC: totalTTC.toFixed(2),
+        signature: d.signature || "",
+        photos: typeof d.photos === 'string' ? JSON.parse(d.photos) : (d.photos || []),
+        dateDebut: d.dateDebut ? d.dateDebut.toISOString().split('T')[0] : "",
+        dateFin: d.dateFin ? d.dateFin.toISOString().split('T')[0] : ""
+      };
+    });
 
     return NextResponse.json(mapped);
   } catch (error) {
