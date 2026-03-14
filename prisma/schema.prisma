@@ -62,3 +62,29 @@ model Depense {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model Facture {
+  id          String   @id @default(cuid())
+  userId      String
+  numero      String
+  devisRef    String?
+  nomClient   String
+  emailClient String?
+  totalHT     Float
+  tva         Float
+  totalTTC    Float
+  statut      String   @default("Émise") // Émise, Payée, En retard
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  titre     String
+  contenu   String
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

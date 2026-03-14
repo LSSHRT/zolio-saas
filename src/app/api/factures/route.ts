@@ -1,4 +1,4 @@
-import { getGoogleSheetsClient } from "@/lib/googleSheets";
+import { prisma } from "@/lib/prisma";
 import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { NextResponse } from "next/server";
@@ -27,113 +27,58 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
 
-    const sheets = await getGoogleSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-
-    // 1. Vérifier si l'onglet "Factures_Emises" existe, sinon le créer
-    let sheetExists = false;
-    try {
-      const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId });
-      sheetExists = spreadsheet.data.sheets?.some(s => s.properties?.title === "Factures_Emises") || false;
-    } catch(e) {
-      console.error("Erreur vérification onglets:", e);
-    }
-
-    if (!sheetExists) {
-      try {
-        // Créer l'onglet
-        await sheets.spreadsheets.batchUpdate({
-          spreadsheetId,
-          requestBody: {
-            requests: [{
-              addSheet: { properties: { title: "Factures_Emises" } }
-            }]
-          }
-        });
-        
-        // Ajouter la ligne d'en-tête
-        await sheets.spreadsheets.values.append({
-          spreadsheetId,
-          range: "Factures_Emises!A1:J1",
-          valueInputOption: "USER_ENTERED",
-          requestBody: {
-            values: [["ID_Utilisateur", "Numéro", "Date", "Nom_Client", "Email_Client", "Total_HT", "TVA", "Total_TTC", "Statut", "Ref_Devis"]],
-          },
-        });
-        console.log("Onglet Factures_Emises créé avec succès.");
-      } catch (e) {
-        console.error("Erreur création onglet Factures_Emises:", e);
-      }
-    }
-
-    // 2. Générer le numéro de facture
-    let count = 1;
-    try {
-      const existing = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: "Factures_Emises!B:B",
-      });
-      count = existing.data.values?.length || 1;
-    } catch (e) {
-      console.error("Erreur lecture Factures_Emises:", e);
-    }
-    
+    // Generate numero
     const year = new Date().getFullYear();
-    const numeroFacture = `FAC-${year}-${String(count).padStart(3, "0")}`;
-    const date = new Date().toLocaleDateString("fr-FR");
+    const count = await prisma.facture.count({
+      where: { userId, numero: { startsWith: `FAC-${year}` } }
+    });
+    
+    const numeroFacture = `FAC-${year}-${String(count + 1).padStart(3, "0")}`;
+    const date = new Date();
 
-    // 3. Écrire l'en-tête de la facture dans Sheets
-    try {
-      await sheets.spreadsheets.values.append({
-        spreadsheetId,
-        range: "Factures_Emises!A:J",
-        valueInputOption: "USER_ENTERED",
-        requestBody: {
-          values: [[
-            userId,
-            numeroFacture,
-            date,
-            client.nom,
-            client.email,
-            totalHT,
-            tva,
-            totalTTC,
-            "Émise",
-            devisNumero || "" // Référence au devis
-          ]],
-        },
-      });
-    } catch (e) {
-      console.error("Erreur écriture Factures_Emises:", e);
-    }
+    await prisma.facture.create({
+      data: {
+        userId,
+        numero: numeroFacture,
+        nomClient: client.nom,
+        emailClient: client.email || null,
+        totalHT: Number(totalHT),
+        tva: Number(tva),
+        totalTTC: Number(totalTTC),
+        statut: "Émise",
+        devisRef: devisNumero || null,
+        date,
+      }
+    });
 
-    // 3. Générer le PDF
+    const formattedDate = date.toLocaleDateString("fr-FR");
+
+    // Generate PDF
     const pdfBuffer = await generateFacturePDF({
-      numeroDevis: numeroFacture, // using same interface
-      date,
+      numeroDevis: numeroFacture,
+      date: formattedDate,
       client,
       isPro: user?.publicMetadata?.isPro === true,
-        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
+      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
       lignes,
       totalHT,
       tva,
       totalTTC,
     });
 
-    // 4. Envoyer l'email de la facture
     let emailSent = false;
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       try {
         await sendDevisEmail(client.email, client.nom, numeroFacture, totalTTC, pdfBuffer);
         emailSent = true;
       } catch (emailErr) {
-        console.error("Email non envoyé (SMTP non configuré ou erreur):", emailErr);
+        console.error("Email non envoyé:", emailErr);
       }
     }
 
     return NextResponse.json({
       numeroFacture,
-      date,
+      date: formattedDate,
       client,
       totalHT,
       tva,
@@ -153,34 +98,21 @@ export async function GET() {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const sheets = await getGoogleSheetsClient();
-    
-    let response;
-    try {
-      response = await sheets.spreadsheets.values.get({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Factures_Emises!A:J",
-      });
-    } catch (e) {
-      return NextResponse.json([]); // Return empty if sheet doesn't exist
-    }
+    const facturesDb = await prisma.facture.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
+    });
 
-    const rows = response.data.values;
-    if (!rows || rows.length <= 1) return NextResponse.json([]);
-
-    const dataRows = rows.slice(1); // skip header
-    const myFactures = dataRows.filter((row) => row[0] === userId);
-
-    const factures = myFactures.map((row) => ({
-      numero: row[1] || "",
-      date: row[2] || "",
-      nomClient: row[3] || "",
-      emailClient: row[4] || "",
-      totalHT: row[5] || "",
-      tva: row[6] || "",
-      totalTTC: row[7] || "",
-      statut: row[8] || "",
-      devisRef: row[9] || "",
+    const factures = facturesDb.map(f => ({
+      numero: f.numero,
+      date: f.date.toLocaleDateString("fr-FR"),
+      nomClient: f.nomClient,
+      emailClient: f.emailClient || "",
+      totalHT: f.totalHT,
+      tva: f.tva,
+      totalTTC: f.totalTTC,
+      statut: f.statut,
+      devisRef: f.devisRef || "",
     }));
 
     return NextResponse.json(factures);
