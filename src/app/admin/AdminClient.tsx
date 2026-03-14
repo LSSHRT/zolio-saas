@@ -104,7 +104,7 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">MRR Estimé</p>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.proUsers * 29} €</h3>
+                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.mrr || (stats.proUsers * 29) || 0} €</h3>
                     <p className="text-xs text-slate-400 mt-1">Revenu Mensuel</p>
                   </div>
                   <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg"><Activity className="w-6 h-6" /></div>

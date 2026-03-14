@@ -98,13 +98,14 @@ export default async function AdminDashboard() {
   // Ne passer que les données nécessaires au Client Component
   const serializedUsers = usersList.map(u => ({
     id: u.id,
-    firstName: u.firstName,
-    lastName: u.lastName,
-    emailAddresses: [{ emailAddress: u.emailAddresses[0]?.emailAddress }],
+    name: `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Sans nom',
+    email: u.emailAddresses[0]?.emailAddress || 'Aucun email',
     createdAt: u.createdAt,
     lastSignInAt: u.lastSignInAt,
     imageUrl: u.imageUrl,
     banned: u.banned,
+    isPro: u.publicMetadata?.isPro || u.publicMetadata?.stripeSubscriptionId ? true : false,
+    aiGenerations: u.publicMetadata?.aiDevisCount || 0,
     publicMetadata: {
       aiDevisCount: u.publicMetadata?.aiDevisCount,
       stripeSubscriptionId: u.publicMetadata?.stripeSubscriptionId,
@@ -119,9 +120,9 @@ export default async function AdminDashboard() {
       initialUsers={serializedUsers}
       stats={{
         totalUsers: totalUsersCount,
-        totalAiDevis: totalAiDevis,
+        totalAIGenerations: totalAiDevis,
         activeSubscriptions: activeSubscriptions,
-        proUsersCount: proUsersCount,
+        proUsers: proUsersCount,
         recentUsersCount: recentUsersCount,
         mrr: Math.round(mrr)
       }}
