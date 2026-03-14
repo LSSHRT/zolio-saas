@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { generateDevisPDF } from "@/lib/generatePdf";
+import { sendDevisEmail } from "@/lib/sendEmail";
 
 export async function GET() {
   try {
@@ -83,6 +85,66 @@ export async function POST(request: Request) {
       },
       include: { client: true }
     });
+
+    // Envoyer l'email
+    try {
+      const user = await currentUser();
+      if (user && devis.client && devis.client.email && process.env.SMTP_USER && process.env.SMTP_PASS) {
+        const meta = user.unsafeMetadata || {};
+        const entrepriseInfo = {
+          nom: user.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise",
+          email: user.emailAddresses[0]?.emailAddress || "",
+          telephone: meta.telephone as string || "",
+          adresse: meta.adresse as string || "",
+          siret: meta.siret as string || "",
+          rib: meta.rib as string || "",
+          color: meta.color as string || "#6b21a8",
+          logoUrl: meta.logoUrl as string || "",
+          statutJuridique: meta.statutJuridique as string || "",
+          assurance: meta.assurance as string || "",
+          mentions: meta.mentions as string || ""
+        };
+
+        const parsedLignes = typeof lignes === 'string' ? JSON.parse(lignes) : lignes;
+        const tvaGlobale = devis.tva?.toString() || "0";
+        const remiseGlobale = devis.remise || 0;
+        
+        const totalHTBase = (parsedLignes as any[]).filter(l => !l.isOptional).reduce((s, l) => s + (l.totalLigne || (l.quantite * l.prixUnitaire)), 0);
+        const montantRemise = totalHTBase * remiseGlobale / 100;
+        const totalHT = totalHTBase - montantRemise;
+        
+        const totalTTC = (parsedLignes as any[]).filter(l => !l.isOptional).reduce((sum, l) => {
+          const ligneTva = parseFloat(l.tva || tvaGlobale) || 0;
+          const ligneTotal = l.totalLigne || (l.quantite * l.prixUnitaire);
+          return sum + (ligneTotal * (1 + ligneTva / 100));
+        }, 0) * (1 - remiseGlobale / 100);
+
+        const pdfBuffer = await generateDevisPDF({
+          numeroDevis: devis.numero,
+          date: devis.date.toLocaleDateString("fr-FR"),
+          client: {
+            nom: devis.client.nom,
+            email: devis.client.email,
+            telephone: devis.client.telephone || "",
+            adresse: devis.client.adresse || "",
+          },
+          entreprise: entrepriseInfo,
+          lignes: parsedLignes,
+          totalHT: totalHT.toFixed(2),
+          tva: tvaGlobale,
+          totalTTC: totalTTC.toFixed(2),
+          acompte: devis.acompte?.toString() || "",
+          remise: remiseGlobale.toString() || "",
+          statut: "En attente",
+          signatureBase64: "",
+          photos: typeof devis.photos === 'string' ? JSON.parse(devis.photos) : (devis.photos || []),
+        });
+
+        await sendDevisEmail(devis.client.email, devis.client.nom, devis.numero, totalTTC.toFixed(2), pdfBuffer);
+      }
+    } catch (emailErr) {
+      console.error("Email non envoyé (erreur):", emailErr);
+    }
 
     return NextResponse.json({
       numero: devis.numero,
