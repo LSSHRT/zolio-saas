@@ -517,7 +517,7 @@ export default function NouveauDevisPage() {
                             <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500" />
                             Option
                           </label>
-                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{l.totalLigne.toFixed(0)}€</span>
+                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{(l.totalLigne || 0).toFixed(0)}€</span>
                         <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600 p-1"><Trash2 size={16} /></button>
                       </div>
                     ))}
@@ -560,7 +560,7 @@ export default function NouveauDevisPage() {
                       </p>
                       <p className="text-[10px] text-slate-400">{l.quantite} {l.unite} × {l.prixUnitaire}€</p>
                     </div>
-                    <p className="font-bold text-sm text-slate-800 dark:text-slate-200">{l.totalLigne.toFixed(2)}€</p>
+                    <p className="font-bold text-sm text-slate-800 dark:text-slate-200">{(l.totalLigne || 0).toFixed(2)}€</p>
                   </div>
                 ))}
               </div>

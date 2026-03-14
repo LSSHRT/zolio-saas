@@ -211,8 +211,8 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
     doc.text(String(ligne.quantite), 102, y + 2);
     doc.text(ligne.unite, 115, y + 2);
     doc.text(ligne.tva ? `${ligne.tva}%` : (data.tva !== "Multi" ? data.tva : "20%"), 130, y + 2);
-    doc.text(`${ligne.prixUnitaire.toFixed(2)}€`, 150, y + 2, { align: "right" });
-    doc.text(`${ligne.totalLigne.toFixed(2)}€`, pageWidth - 20, y + 2, { align: "right" });
+    doc.text(`${(ligne.prixUnitaire || 0).toFixed(2)}€`, 150, y + 2, { align: "right" });
+    doc.text(`${(ligne.totalLigne || 0).toFixed(2)}€`, pageWidth - 20, y + 2, { align: "right" });
     y += 10;
 
     doc.setDrawColor(241, 245, 249);
@@ -565,8 +565,8 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
     doc.text(String(ligne.quantite), 102, y + 2);
     doc.text(ligne.unite, 115, y + 2);
     doc.text(ligne.tva ? `${ligne.tva}%` : (data.tva !== "Multi" ? data.tva : "20%"), 130, y + 2);
-    doc.text(`${ligne.prixUnitaire.toFixed(2)}€`, 150, y + 2, { align: "right" });
-    doc.text(`${ligne.totalLigne.toFixed(2)}€`, pageWidth - 20, y + 2, { align: "right" });
+    doc.text(`${(ligne.prixUnitaire || 0).toFixed(2)}€`, 150, y + 2, { align: "right" });
+    doc.text(`${(ligne.totalLigne || 0).toFixed(2)}€`, pageWidth - 20, y + 2, { align: "right" });
     y += 10;
 
     doc.setDrawColor(241, 245, 249);

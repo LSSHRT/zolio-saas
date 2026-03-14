@@ -404,7 +404,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   </div>
                   <div className="w-20 text-right">
                     <label className="text-[10px] text-slate-400">Total</label>
-                    <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">{l.totalLigne.toFixed(2)}€</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">{(l.totalLigne || 0).toFixed(2)}€</p>
                   </div>
                 </div>
               </div>
