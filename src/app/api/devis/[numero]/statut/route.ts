@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 
-export async function PUT(request: Request, context: { params: Promise<{ numero: string }> }) {
+export async function PATCH(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
