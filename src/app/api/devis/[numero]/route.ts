@@ -1,346 +1,105 @@
-import { getGoogleSheetsClient } from "@/lib/googleSheets";
+export const dynamic = 'force-dynamic';
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-
-// Récupérer les lignes de détail d'un devis spécifique
-export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    
+    const resolvedParams = await context.params;
+    const { numero } = resolvedParams;
 
-    const { numero } = await params;
-    const sheets = await getGoogleSheetsClient();
-
-    // Récupérer l'en-tête du devis
-    const devisRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:O",
+    const devis = await prisma.devis.findFirst({
+      where: { numero, userId },
+      include: { client: true }
     });
-    const devisRows = devisRes.data.values || [];
-    // Vérifier que le devis appartient bien au user connecté
-    const devisRow = devisRows.find((r) => r[0] === userId && r[1] === numero);
 
-    if (!devisRow) {
-      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
-    }
-
-    // Récupérer les lignes de détail
-    const lignesRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:I",
-    });
-    const allLignes = lignesRes.data.values || [];
-    const lignes = allLignes
-      .filter((r) => r[0] === userId && r[1] === numero) // Match userId ET numero
-      .map((r) => ({
-        nomPrestation: r[2] || "",
-        quantite: parseFloat(r[3]) || 0,
-        unite: r[4] || "",
-        prixUnitaire: parseFloat(r[5]) || 0,
-        totalLigne: parseFloat(r[6]) || 0,
-        tva: r[7] || "20",
-        isOptional: r[8] === "Oui",
-      }));
-
-    let photos = [];
-    try {
-      if (devisRow[14]) photos = JSON.parse(devisRow[14]);
-    } catch(e) {}
+    if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
 
     return NextResponse.json({
-      numero: devisRow[1],
-      date: devisRow[2],
-      nomClient: devisRow[3],
-      emailClient: devisRow[4],
-      totalHT: devisRow[5],
-      tva: devisRow[6],
-      totalTTC: devisRow[7],
-      statut: devisRow[8],
-      acompte: devisRow[10] || "",
-      remise: devisRow[11] || "",
-      signatureBase64: devisRow[12] || "",
-      photos,
-      lignes,
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
+      numero: devis.numero,
+      client: devis.client ? devis.client.nom : "",
+      clientId: devis.clientId,
+      date: devis.date.toLocaleDateString("fr-FR"),
+      statut: devis.statut,
+      lignes: typeof devis.lignes === 'string' ? JSON.parse(devis.lignes) : devis.lignes,
+      remise: devis.remise,
+      acompte: devis.acompte,
+      tva: devis.tva,
+      signature: devis.signature || "",
+      photos: typeof devis.photos === 'string' ? JSON.parse(devis.photos) : (devis.photos || []),
+      dateDebut: devis.dateDebut ? devis.dateDebut.toISOString().split('T')[0] : "",
+      dateFin: devis.dateFin ? devis.dateFin.toISOString().split('T')[0] : ""
     });
   } catch (error) {
-    console.error("Erreur GET devis detail:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur GET devis detaillé:", error);
+    return NextResponse.json({ error: "Impossible de récupérer le devis" }, { status: 500 });
   }
 }
 
-// Mettre à jour un devis existant (modifier les lignes et renvoyer)
-export async function PUT(request: Request, { params }: { params: Promise<{ numero: string }> }) {
+export async function PUT(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
-    const user = await currentUser();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
-
-    const meta = (user?.unsafeMetadata as any) || (user?.publicMetadata as any) || {};
-    const entrepriseName = meta.companyName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise");
-    const entrepriseEmail = user?.emailAddresses?.[0]?.emailAddress || "";
-    const entreprisePhone = meta.companyPhone || "";
-    const entrepriseAddress = meta.companyAddress || "";
-    const entrepriseSiret = meta.companySiret || "";
-    const entrepriseColor = meta.companyColor || "";
-    const entrepriseLogo = meta.companyLogo || "";
-    const entrepriseIban = meta.companyIban || "";
-    const entrepriseBic = meta.companyBic || "";
-    const entrepriseLegal = meta.companyLegal || "";
-    const entrepriseStatut = meta.companyStatut || "";
-    const entrepriseAssurance = meta.companyAssurance || "";
-
-    const { numero } = await params;
+    
+    const resolvedParams = await context.params;
+    const { numero } = resolvedParams;
     const body = await request.json();
-    const { lignes, tva, acompte, remise, photos } = body;
+    const { client, clientId, lignes, remise, acompte, tva, statut, photos } = body;
 
-    const sheets = await getGoogleSheetsClient();
-
-    // Recalculer les totaux
-    const totalHT = lignes.filter((l: any) => !l.isOptional).reduce((s: number, l: any) => s + l.totalLigne, 0);
-    const totalTTC = lignes.filter((l: any) => !l.isOptional).reduce((s: number, l: any) => s + (l.totalLigne * (1 + (parseFloat(l.tva) || 0) / 100)), 0);
-    const tvaRates = [...new Set(lignes.map((l: any) => l.tva || "0"))];
-    const tvaLabel = tvaRates.length > 1 ? "Multi" : (tvaRates[0] || tva) + "%";
-    const date = new Date().toLocaleDateString("fr-FR");
-
-    // 1. Trouver et mettre à jour la ligne dans Devis_Emis
-    const devisRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:O",
-    });
-    const devisRows = devisRes.data.values || [];
-    const rowIndex = devisRows.findIndex((r) => r[0] === userId && r[1] === numero);
-
-    if (rowIndex === -1) {
-      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
-    }
-
-    let currentPhotos = photos && photos.length > 0 ? JSON.stringify(photos) : (devisRows[rowIndex][14] || "");
-    if (currentPhotos.length > 45000) {
-      console.warn("Photos trop volumineuses, on tronque pour éviter l'erreur Google Sheets", currentPhotos.length);
-      currentPhotos = "";
-    }
-
-    // Mettre à jour la ligne d'en-tête du devis
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!A${rowIndex + 1}:O${rowIndex + 1}`,
-      valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [[
-          userId, // A
-          numero, // B
-          date, // C
-          devisRows[rowIndex][3], // D: nom client
-          devisRows[rowIndex][4], // E: email client
-          totalHT.toFixed(2), // F
-          tvaLabel, // G
-          totalTTC.toFixed(2), // H
-          "En attente (Modifié)", // I: Statut
-          devisRows[rowIndex][9] || "", // J: public id / autre
-          acompte ? acompte.toString() : (devisRows[rowIndex][10] || ""), // K: acompte
-          remise ? remise.toString() : (devisRows[rowIndex][11] || ""), // L: remise
-          "", // M: Signature (on reset)
-          devisRows[rowIndex][13] || "", // N: lu_le
-          currentPhotos // O: photos
-        ]],
-      },
-    });
-
-    // 2. Supprimer les anciennes lignes de détail et réécrire
-    const lignesRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:I",
-    });
-    const allLignes = lignesRes.data.values || [];
-
-    // Garder les lignes qui ne sont PAS liées à ce devis (ou qui n'appartiennent pas à ce user)
-    // C'est à dire on supprime seulement les lignes de CE user ET de CE numero
-    const otherLignes = allLignes.filter((r, i) => i === 0 || !(r[0] === userId && r[1] === numero));
-
-    // Ajouter les nouvelles lignes
-    const newLignes = lignes.map((l: any) => [
-      userId,
-      numero,
-      l.nomPrestation,
-      l.quantite,
-      l.unite,
-      l.prixUnitaire,
-      l.totalLigne.toFixed(2),
-      l.tva || "20",
-      l.isOptional ? "Oui" : "Non",
-    ]);
-
-    const updatedLignes = [...otherLignes, ...newLignes];
-
-    // Effacer tout puis réécrire
-    await sheets.spreadsheets.values.clear({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Lignes_Devis!A:I",
-    });
-
-    if (updatedLignes.length > 0) {
-      await sheets.spreadsheets.values.update({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Lignes_Devis!A1",
-        valueInputOption: "USER_ENTERED",
-        requestBody: { values: updatedLignes },
+    let finalClientId = clientId;
+    if (!finalClientId && client) {
+      const existingClient = await prisma.client.findFirst({
+        where: { userId, nom: client }
       });
-    }
-
-    // 3. Générer nouveau PDF et renvoyer email si SMTP configuré
-    const { generateDevisPDF } = await import("@/lib/generatePdf");
-    const { sendDevisEmail } = await import("@/lib/sendEmail");
-
-    const pdfBuffer = await generateDevisPDF({
-      numeroDevis: numero,
-      date,
-      client: {
-        nom: devisRows[rowIndex][3],
-        email: devisRows[rowIndex][4],
-        telephone: "",
-        adresse: "",
-      },
-      isPro: user?.publicMetadata?.isPro === true,
-        entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
-      lignes,
-      totalHT: totalHT.toFixed(2),
-      tva: tvaLabel,
-      totalTTC: totalTTC.toFixed(2),
-      acompte: acompte ? acompte.toString() : "",
-      remise: remise ? remise.toString() : "",
-      photos: photos || [],
-    });
-
-    let emailSent = false;
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      try {
-        await sendDevisEmail(
-          devisRows[rowIndex][4], // email client
-          devisRows[rowIndex][3], // nom client
-          numero,
-          totalTTC.toFixed(2),
-          pdfBuffer
-        );
-        emailSent = true;
-      } catch (e) {
-        console.error("Email non envoyé:", e);
+      if (existingClient) {
+        finalClientId = existingClient.id;
+      } else {
+        const newClient = await prisma.client.create({
+          data: { userId, nom: client }
+        });
+        finalClientId = newClient.id;
       }
     }
 
-    return NextResponse.json({
-      numero,
-      date,
-      totalHT: totalHT.toFixed(2),
-      tva: tvaLabel,
-      totalTTC: totalTTC.toFixed(2),
-      acompte: acompte ? acompte.toString() : "",
-      remise: remise ? remise.toString() : "",
-      emailSent,
+    await prisma.devis.updateMany({
+      where: { numero, userId },
+      data: {
+        clientId: finalClientId,
+        lignes: typeof lignes === 'string' ? JSON.parse(lignes) : lignes,
+        remise: parseFloat(remise || 0),
+        acompte: parseFloat(acompte || 0),
+        tva: parseFloat(tva || 0),
+        statut: statut || "En attente",
+        signature: "", // reset signature on edit
+        photos: typeof photos === 'string' ? JSON.parse(photos) : (photos || [])
+      }
     });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur PUT devis:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de mettre à jour le devis" }, { status: 500 });
   }
 }
 
-// Supprimer un devis
-export async function DELETE(request: Request, { params }: { params: Promise<{ numero: string }> }) {
+export async function DELETE(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
-
-    const p = await params;
-    const { numero } = p;
-    const sheets = await getGoogleSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-
-    const spreadsheet = await sheets.spreadsheets.get({ spreadsheetId });
-    const devisSheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Devis_Emis");
-    const lignesSheet = spreadsheet.data.sheets?.find(s => s.properties?.title === "Lignes_Devis");
     
-    if (!devisSheet || devisSheet.properties?.sheetId === undefined || !lignesSheet || lignesSheet.properties?.sheetId === undefined) {
-      return NextResponse.json({ error: "Onglets introuvables" }, { status: 404 });
-    }
+    const resolvedParams = await context.params;
+    const { numero } = resolvedParams;
 
-    const devisSheetId = devisSheet.properties.sheetId;
-    const lignesSheetId = lignesSheet.properties.sheetId;
-
-    // 1. Trouver la ligne dans Devis_Emis
-    const devisRes = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: "Devis_Emis!A:J",
+    await prisma.devis.deleteMany({
+      where: { numero, userId }
     });
-    const devisRows = devisRes.data.values || [];
-    const devisRowIndex = devisRows.findIndex(r => r[0] === userId && r[1] === numero);
-
-    if (devisRowIndex === -1) {
-      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
-    }
-
-    // 2. Trouver les lignes dans Lignes_Devis
-    const lignesRes = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: "Lignes_Devis!A:I",
-    });
-    const allLignes = lignesRes.data.values || [];
-    
-    // Trouver tous les index des lignes à supprimer (de bas en haut pour ne pas décaler les index)
-    const lignesIndices: number[] = [];
-    allLignes.forEach((r, i) => {
-      if (r[0] === userId && r[1] === numero) {
-        lignesIndices.push(i);
-      }
-    });
-    lignesIndices.sort((a, b) => b - a); // Décroissant
-
-    // 3. Préparer les requêtes de suppression
-    const requests = [];
-    
-    // Supprimer le devis principal
-    requests.push({
-      deleteDimension: {
-        range: {
-          sheetId: devisSheetId,
-          dimension: "ROWS",
-          startIndex: devisRowIndex,
-          endIndex: devisRowIndex + 1,
-        }
-      }
-    });
-
-    // Supprimer les lignes associées
-    for (const idx of lignesIndices) {
-      requests.push({
-        deleteDimension: {
-          range: {
-            sheetId: lignesSheetId,
-            dimension: "ROWS",
-            startIndex: idx,
-            endIndex: idx + 1,
-          }
-        }
-      });
-    }
-
-    if (requests.length > 0) {
-      await sheets.spreadsheets.batchUpdate({
-        spreadsheetId,
-        requestBody: { requests },
-      });
-    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur DELETE devis:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de supprimer le devis" }, { status: 500 });
   }
 }

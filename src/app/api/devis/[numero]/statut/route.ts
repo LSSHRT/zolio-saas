@@ -1,50 +1,69 @@
-import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 
-// Mettre à jour le statut d'un devis (Accepté, Refusé, En attente)
-export async function PATCH(request: Request, { params }: { params: Promise<{ numero: string }> }) {
+export async function PUT(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const { numero } = await params;
-    const body = await request.json();
-    const { statut } = body;
+    const resolvedParams = await context.params;
+    const { numero } = resolvedParams;
+    const { statut } = await request.json();
 
-    // Validation du statut
-    const statutsValides = ["Accepté", "En attente", "Refusé"];
-    if (!statutsValides.includes(statut)) {
-      return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
-    }
+    if (!statut) return new NextResponse("Statut manquant", { status: 400 });
 
-    const sheets = await getGoogleSheetsClient();
-
-    // Trouver la ligne du devis
-    const devisRes = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Devis_Emis!A:J",
-    });
-    const devisRows = devisRes.data.values || [];
-    const rowIndex = devisRows.findIndex((r) => r[0] === userId && r[1] === numero);
-
-    if (rowIndex === -1) {
-      return NextResponse.json({ error: "Devis introuvable ou non autorisé" }, { status: 404 });
-    }
-
-    // Mettre à jour uniquement la colonne I (statut = colonne 9, index 8)
-    await sheets.spreadsheets.values.update({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: `Devis_Emis!I${rowIndex + 1}`,
-      valueInputOption: "USER_ENTERED",
-      requestBody: {
-        values: [[statut]],
-      },
+    const devis = await prisma.devis.findFirst({
+      where: { numero, userId }
     });
 
-    return NextResponse.json({ success: true, numero, statut });
+    if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
+
+    // Handle stock updates if moving to Facturé/Payé from another status
+    const previousStatut = devis.statut;
+    const isNewSale = (statut === "Facturé" || statut === "Payé") && previousStatut !== "Facturé" && previousStatut !== "Payé";
+    const isCancelSale = (previousStatut === "Facturé" || previousStatut === "Payé") && (statut !== "Facturé" && statut !== "Payé");
+
+    const lignes = typeof devis.lignes === 'string' ? JSON.parse(devis.lignes) : (devis.lignes || []);
+
+    if (isNewSale) {
+      for (const ligne of lignes) {
+        if (!ligne.optionnel && ligne.nom) {
+          const prestation = await prisma.prestation.findFirst({
+            where: { userId, nom: ligne.nom }
+          });
+          if (prestation && prestation.stock !== null && prestation.stock !== undefined) {
+             await prisma.prestation.update({
+               where: { id: prestation.id },
+               data: { stock: prestation.stock - parseInt(ligne.quantite || "1") }
+             });
+          }
+        }
+      }
+    } else if (isCancelSale) {
+      for (const ligne of lignes) {
+        if (!ligne.optionnel && ligne.nom) {
+          const prestation = await prisma.prestation.findFirst({
+            where: { userId, nom: ligne.nom }
+          });
+          if (prestation && prestation.stock !== null && prestation.stock !== undefined) {
+             await prisma.prestation.update({
+               where: { id: prestation.id },
+               data: { stock: prestation.stock + parseInt(ligne.quantite || "1") }
+             });
+          }
+        }
+      }
+    }
+
+    await prisma.devis.updateMany({
+      where: { numero, userId },
+      data: { statut }
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur PATCH statut devis:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur PUT statut devis:", error);
+    return NextResponse.json({ error: "Impossible de modifier le statut" }, { status: 500 });
   }
 }

@@ -1,0 +1,64 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  userId    String
+  nom       String
+  email     String?
+  telephone String?
+  adresse   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  devis     Devis[]
+}
+
+model Prestation {
+  id          String   @id @default(cuid())
+  userId      String
+  nom         String
+  description String?
+  unite       String?
+  prix        Float
+  cout        Float?   @default(0) // Cost price for margin
+  stock       Int?     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Devis {
+  id          String   @id @default(cuid())
+  userId      String
+  numero      String
+  clientId    String
+  client      Client   @relation(fields: [clientId], references: [id])
+  date        DateTime @default(now())
+  statut      String   @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
+  remise      Float?   @default(0)
+  acompte     Float?   @default(0)
+  tva         Float?   @default(0)
+  signature   String?  // Base64 signature image
+  lignes      Json     // Array of items
+  photos      Json?    // Array of photo base64 strings
+  dateDebut   DateTime?
+  dateFin     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Depense {
+  id          String   @id @default(cuid())
+  userId      String
+  description String
+  montant     Float
+  date        DateTime @default(now())
+  categorie   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

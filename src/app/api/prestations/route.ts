@@ -1,40 +1,31 @@
-import { getGoogleSheetsClient } from "@/lib/googleSheets";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const sheets = await getGoogleSheetsClient();
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Catalogue_Prestations!A:H", // A est mnt userId
+    const prestations = await prisma.prestation.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' }
     });
 
-    const rows = response.data.values;
-    if (!rows || rows.length <= 1) return NextResponse.json([]);
-
-    const dataRows = rows.slice(1);
-    
-    // On ne garde que les prestations du user connecté
-    const myPrestations = dataRows.filter((row) => row[0] === userId);
-
-    const prestations = myPrestations.map((row) => ({
-      id: row[1] || "",
-      categorie: row[2] || "",
-      nom: row[3] || "",
-      unite: row[4] || "",
-      prixUnitaireHT: parseFloat(row[5]) || 0,
-      coutMatiere: parseFloat(row[6]) || 0,
-      stock: parseFloat(row[7]) || 0,
+    const mapped = prestations.map((p: any) => ({
+      id: p.id,
+      nom: p.nom,
+      description: p.description || "",
+      unite: p.unite || "",
+      prix: p.prix,
+      cout: p.cout || 0,
+      stock: p.stock || 0
     }));
 
-    return NextResponse.json(prestations);
+    return NextResponse.json(mapped);
   } catch (error) {
     console.error("Erreur GET prestations:", error);
-    return NextResponse.json({ error: "Impossible de récupérer le catalogue" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer les prestations" }, { status: 500 });
   }
 }
 
@@ -44,41 +35,43 @@ export async function POST(request: Request) {
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
     const body = await request.json();
-    const sheets = await getGoogleSheetsClient();
 
-    // Check if body is an array for bulk insertion
     if (Array.isArray(body)) {
-      const rows = body.map((item, index) => {
-        const nextId = `PREST-${Date.now()}-${index}-${Math.floor(Math.random() * 1000)}`;
-        return [userId, nextId, item.categorie, item.nom, item.unite, item.prixUnitaireHT, item.coutMatiere || "", item.stock || 0];
-      });
-
-      await sheets.spreadsheets.values.append({
-        spreadsheetId: process.env.GOOGLE_SHEET_ID,
-        range: "Catalogue_Prestations!A:H",
-        valueInputOption: "RAW",
-        insertDataOption: "INSERT_ROWS",
-        requestBody: { values: rows },
-      });
-
-      return NextResponse.json({ success: true, count: rows.length });
+      const data = body.map(item => ({
+        userId,
+        nom: item.nom,
+        description: item.description || "",
+        unite: item.unite || "",
+        prix: parseFloat(item.prix),
+        cout: parseFloat(item.cout || 0),
+        stock: parseInt(item.stock || 0)
+      }));
+      await prisma.prestation.createMany({ data });
+      return NextResponse.json({ success: true, count: data.length });
     }
 
-    // Single insertion
-    const { categorie, nom, unite, prixUnitaireHT, coutMatiere, stock } = body;
-    const nextId = `PREST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-
-    await sheets.spreadsheets.values.append({
-      spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Catalogue_Prestations!A:H",
-      valueInputOption: "RAW",
-      insertDataOption: "INSERT_ROWS",
-      requestBody: {
-        values: [[userId, nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere || "", stock || 0]],
-      },
+    const { nom, description, unite, prix, cout, stock } = body;
+    const prestation = await prisma.prestation.create({
+      data: {
+        userId,
+        nom,
+        description: description || "",
+        unite: unite || "",
+        prix: parseFloat(prix),
+        cout: parseFloat(cout || 0),
+        stock: parseInt(stock || 0)
+      }
     });
 
-    return NextResponse.json({ id: nextId, categorie, nom, unite, prixUnitaireHT, coutMatiere, stock });
+    return NextResponse.json({
+      id: prestation.id,
+      nom: prestation.nom,
+      description: prestation.description || "",
+      unite: prestation.unite || "",
+      prix: prestation.prix,
+      cout: prestation.cout || 0,
+      stock: prestation.stock || 0
+    });
   } catch (error) {
     console.error("Erreur POST prestation:", error);
     return NextResponse.json({ error: "Impossible d'ajouter la prestation" }, { status: 500 });

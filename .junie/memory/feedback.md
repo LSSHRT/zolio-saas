@@ -542,3 +542,59 @@
     "NEW INSTRUCTION": "WHEN user says integrate all THEN implement all pending items and confirm deployment"
 }
 
+[2026-03-13 23:23] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should fully finish the requested fixes and the explanation instead of stopping mid-message.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-13 23:25] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should resume and finish the pending implementation when the user says 'continue'.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-14 14:28] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "Finish adding the missing legal info to PDFs and fix the signature status bug, then provide the remaining details and confirm deployment.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-14 15:30] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should finish adding the missing legal info and fully fix the status update so a signed quote switches from En attente to Accepté, then confirm deployment/tests.",
+    "NEW INSTRUCTION": "WHEN user says continue after partial fix THEN complete changes and confirm deployment and test results"
+}
+
+[2026-03-14 16:22] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should finish adding the legal information and fixing the post-signature status update, then confirm deployment.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume, finish changes, and confirm deployment"
+}
+
+[2026-03-14 18:52] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should finish the pending implementation details and provide full confirmation, not stop mid-message.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
+[2026-03-14 19:00] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "incomplete response",
+    "EXPECTATION": "The assistant should finish the pending fixes (signature status update and legal info) and clearly confirm deployment.",
+    "NEW INSTRUCTION": "WHEN user says continue THEN resume and complete implementation and confirm deployment"
+}
+
