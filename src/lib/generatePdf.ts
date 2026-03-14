@@ -55,13 +55,14 @@ interface DevisData {
 
 function drawWatermark(doc: any, text: string, color: {r: number, g: number, b: number}) {
   doc.saveGraphicsState();
-  doc.setGState(new (doc as any).GState({ opacity: 0.15 }));
+  doc.setGState(new (doc as any).GState({ opacity: 0.07 }));
   doc.setTextColor(color.r, color.g, color.b);
-  doc.setFontSize(50);
+  doc.setFontSize(38);
   doc.setFont("helvetica", "bold");
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  doc.text(text, pageWidth / 2, pageHeight / 2, { angle: 45, align: "center", baseline: "middle" });
+  // Positionné dans la zone de contenu (légèrement sous le centre)
+  doc.text(text, pageWidth / 2, pageHeight * 0.58, { angle: 40, align: "center", baseline: "middle" });
   doc.restoreGraphicsState();
 }
 
