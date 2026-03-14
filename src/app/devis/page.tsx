@@ -128,7 +128,7 @@ export default function DevisPage() {
     statut === "En attente" || statut === "En attente (Modifié)";
 
   const filtered = devis.filter(
-    (d) => d.nomClient.toLowerCase().includes(search.toLowerCase()) || d.numero.toLowerCase().includes(search.toLowerCase())
+    (d) => (d.nomClient || '').toLowerCase().includes((search || '').toLowerCase()) || (d.numero || '').toLowerCase().includes((search || '').toLowerCase())
   );
 
   const totalMois = devis.reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);

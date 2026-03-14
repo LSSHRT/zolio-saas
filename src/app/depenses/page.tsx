@@ -48,8 +48,8 @@ export default function DepensesPage() {
   ];
 
   const filteredDepenses = (Array.isArray(depenses) ? depenses : []).filter((d) =>
-    d.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.categorie.toLowerCase().includes(searchTerm.toLowerCase())
+    (d.description || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+    (d.categorie || '').toLowerCase().includes((searchTerm || '').toLowerCase())
   );
 
   const totalTTC = filteredDepenses.reduce((acc, d) => acc + d.montantTTC, 0);

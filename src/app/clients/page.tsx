@@ -34,7 +34,7 @@ export default function ClientsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const filtered = clients.filter(
-    (c) => c.nom.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase())
+    (c) => (c.nom || '').toLowerCase().includes((search || '').toLowerCase()) || (c.email || '').toLowerCase().includes((search || '').toLowerCase())
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -248,7 +248,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   };
 
   const filteredPrestations = prestations.filter((p) =>
-    p.nom.toLowerCase().includes(searchPrestation.toLowerCase()) || p.categorie.toLowerCase().includes(searchPrestation.toLowerCase())
+    (p.nom || '').toLowerCase().includes((searchPrestation || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((searchPrestation || '').toLowerCase())
   );
 
   if (loading) {

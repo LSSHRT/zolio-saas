@@ -39,7 +39,7 @@ export default function FacturesPage() {
   const googleReviewLink = (user?.unsafeMetadata?.companyGoogleReview as string) || (user?.publicMetadata?.companyGoogleReview as string);
 
   const filtered = factures.filter(
-    (f) => f.nomClient.toLowerCase().includes(search.toLowerCase()) || f.numero.toLowerCase().includes(search.toLowerCase())
+    (f) => (f.nomClient || '').toLowerCase().includes((search || '').toLowerCase()) || (f.numero || '').toLowerCase().includes((search || '').toLowerCase())
   );
 
   const totalEncaisse = factures.reduce((s, f) => s + (parseFloat(f.totalTTC) || 0), 0);

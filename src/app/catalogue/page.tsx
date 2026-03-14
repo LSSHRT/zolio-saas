@@ -106,7 +106,7 @@ export default function CataloguePage() {
   }, []);
 
   const filtered = prestations.filter(
-    (p) => p.nom.toLowerCase().includes(search.toLowerCase()) || p.categorie.toLowerCase().includes(search.toLowerCase())
+    (p) => (p.nom || '').toLowerCase().includes((search || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((search || '').toLowerCase())
   );
 
     const handleSubmit = async (e: React.FormEvent) => {

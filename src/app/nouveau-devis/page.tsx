@@ -246,8 +246,8 @@ export default function NouveauDevisPage() {
     });
   };
 
-  const filteredClients = clients.filter((c) => c.nom.toLowerCase().includes(searchClient.toLowerCase()));
-  const filteredPrestations = prestations.filter((p) => p.nom.toLowerCase().includes(searchPrestation.toLowerCase()) || p.categorie.toLowerCase().includes(searchPrestation.toLowerCase()));
+  const filteredClients = clients.filter((c) => (c.nom || '').toLowerCase().includes((searchClient || '').toLowerCase()));
+  const filteredPrestations = prestations.filter((p) => (p.nom || '').toLowerCase().includes((searchPrestation || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((searchPrestation || '').toLowerCase()));
 
   // Animation variants
   const slideVariants = {
