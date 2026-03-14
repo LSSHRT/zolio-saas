@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Erreur POST facture:", error);
-    return NextResponse.json({ error: "Impossible de créer la facture" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de créer la facture", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -118,6 +118,6 @@ export async function GET() {
     return NextResponse.json(factures);
   } catch (error) {
     console.error("Erreur GET factures:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les factures" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer les factures", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

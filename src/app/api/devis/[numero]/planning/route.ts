@@ -22,6 +22,6 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur PUT planning devis:", error);
-    return NextResponse.json({ error: "Impossible de sauvegarder le planning" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de sauvegarder le planning", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

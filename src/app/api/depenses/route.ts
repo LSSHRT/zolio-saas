@@ -23,7 +23,7 @@ export async function GET() {
     return NextResponse.json(mapped);
   } catch (error) {
     console.error("Erreur GET depenses:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les dépenses" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer les dépenses", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -54,6 +54,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Erreur POST depense:", error);
-    return NextResponse.json({ error: "Impossible d'ajouter la dépense" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible d'ajouter la dépense", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

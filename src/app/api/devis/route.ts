@@ -32,7 +32,7 @@ export async function GET() {
     return NextResponse.json(mapped);
   } catch (error) {
     console.error("Erreur GET devis:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les devis" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer les devis", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -92,6 +92,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Erreur POST devis:", error);
-    return NextResponse.json({ error: "Impossible de créer le devis" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de créer le devis", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

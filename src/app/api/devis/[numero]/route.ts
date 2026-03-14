@@ -35,7 +35,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
     });
   } catch (error) {
     console.error("Erreur GET devis detaillé:", error);
-    return NextResponse.json({ error: "Impossible de récupérer le devis" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer le devis", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -81,7 +81,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur PUT devis:", error);
-    return NextResponse.json({ error: "Impossible de mettre à jour le devis" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de mettre à jour le devis", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -100,6 +100,6 @@ export async function DELETE(request: Request, context: { params: Promise<{ nume
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur DELETE devis:", error);
-    return NextResponse.json({ error: "Impossible de supprimer le devis" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de supprimer le devis", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

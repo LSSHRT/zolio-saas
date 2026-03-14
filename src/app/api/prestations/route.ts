@@ -25,7 +25,7 @@ export async function GET() {
     return NextResponse.json(mapped);
   } catch (error) {
     console.error("Erreur GET prestations:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les prestations" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer les prestations", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -74,6 +74,6 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Erreur POST prestation:", error);
-    return NextResponse.json({ error: "Impossible d'ajouter la prestation" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible d'ajouter la prestation", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

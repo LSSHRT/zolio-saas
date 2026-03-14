@@ -40,6 +40,6 @@ export async function POST(request: Request, context: { params: Promise<{ numero
     return NextResponse.json({ success: true, newNumero: newDevis.numero });
   } catch (error) {
     console.error("Erreur POST duplicate devis:", error);
-    return NextResponse.json({ error: "Impossible de dupliquer le devis" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de dupliquer le devis", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

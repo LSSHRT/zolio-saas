@@ -24,7 +24,7 @@ export async function GET() {
     return NextResponse.json(mappedClients);
   } catch (error) {
     console.error("Erreur GET clients:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les clients" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de récupérer les clients", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 

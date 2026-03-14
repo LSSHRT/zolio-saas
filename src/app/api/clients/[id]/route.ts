@@ -26,7 +26,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur DELETE client:", error);
-    return NextResponse.json({ error: "Impossible de supprimer le client" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de supprimer le client", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 
@@ -68,6 +68,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     });
   } catch (error) {
     console.error("Erreur PUT client:", error);
-    return NextResponse.json({ error: "Impossible de modifier le client" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de modifier le client", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }

@@ -64,6 +64,6 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Erreur PUT statut devis:", error);
-    return NextResponse.json({ error: "Impossible de modifier le statut" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible de modifier le statut", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
