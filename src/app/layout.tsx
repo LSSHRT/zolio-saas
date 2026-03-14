@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SWRProvider } from "@/components/SWRProvider";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -55,7 +56,9 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
           >
-            {children}
+            <SWRProvider>
+              {children}
+            </SWRProvider>
           </ThemeProvider>
         </body>
       </html>

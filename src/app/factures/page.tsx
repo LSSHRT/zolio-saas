@@ -28,7 +28,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function FacturesPage() {
   const { user } = useUser();
-  const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher);
   const factures = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
@@ -225,18 +225,37 @@ export default function FacturesPage() {
 
 
         {/* Liste factures */}
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-violet-500 rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
-            <FileText size={48} strokeWidth={1} />
-            <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
-          </div>
-        ) : (
+        {loading && (
           <div className="flex flex-col gap-3">
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} factures</p>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 animate-pulse">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                    <div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32 mb-1.5" />
+                      <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                    </div>
+                  </div>
+                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="h-6 bg-slate-100 dark:bg-slate-700 rounded w-20" />
+                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {!loading && (
+          filtered.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
+              <FileText size={48} strokeWidth={1} />
+              <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} factures</p>
             {filtered.map((f, i) => {
               const isLate = () => {
                 if (f.statut === "Payée") return false;
@@ -258,7 +277,7 @@ export default function FacturesPage() {
                   key={f.numero || i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ delay: Math.min(i * 0.03, 0.15) }}
                   className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800"
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -316,6 +335,7 @@ export default function FacturesPage() {
               );
             })}
           </div>
+          )
         )}
       </main>
     </div>

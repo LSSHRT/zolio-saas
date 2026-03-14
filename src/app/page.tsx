@@ -27,7 +27,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 function DashboardContent() {
   const { user, isLoaded } = useUser();
-  const { data, error, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const { data, error, isLoading } = useSWR('/api/devis', fetcher);
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
 

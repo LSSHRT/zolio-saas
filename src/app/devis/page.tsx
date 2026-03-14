@@ -34,7 +34,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function DevisPage() {
   const router = useRouter();
   const { userId } = useAuth();
-  const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher);
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
@@ -212,8 +212,33 @@ export default function DevisPage() {
         </div>
 
 
+        {/* Skeleton loading */}
+        {loading && (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 animate-pulse">
+                <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                    <div>
+                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32 mb-1.5" />
+                      <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                    </div>
+                  </div>
+                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-20" />
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-16" />
+                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-12" />
+                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-20" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Liste devis */}
-        
+
         {/* Vue Kanban */}
         {viewMode === "kanban" && !loading && filtered.length > 0 && (
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
@@ -289,22 +314,19 @@ export default function DevisPage() {
         )}
 
         {/* Liste devis */}
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-violet-500 rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
-            <FileText size={48} strokeWidth={1} />
-            <p className="text-sm">{search ? "Aucun résultat" : "Aucun devis encore"}</p>
-            <Link href="/nouveau-devis">
-              <motion.button whileTap={{ scale: 0.96 }} className="mt-4 px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg text-sm">
-                Créer mon premier devis
-              </motion.button>
-            </Link>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
+        {!loading && (
+          filtered.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
+              <FileText size={48} strokeWidth={1} />
+              <p className="text-sm">{search ? "Aucun résultat" : "Aucun devis encore"}</p>
+              <Link href="/nouveau-devis">
+                <motion.button whileTap={{ scale: 0.96 }} className="mt-4 px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg text-sm">
+                  Créer mon premier devis
+                </motion.button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} devis</p>
             {filtered.map((d, i) => {
               const config = statutConfig[d.statut] || statutConfig["En attente"];
@@ -316,7 +338,7 @@ export default function DevisPage() {
                   key={d.numero || i}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05 }}
+          transition={{ delay: Math.min(i * 0.03, 0.15) }}
                   className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800"
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -417,6 +439,7 @@ export default function DevisPage() {
               );
             })}
           </div>
+          )
         )}
       </main>
     </div>

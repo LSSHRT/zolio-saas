@@ -19,7 +19,7 @@ interface Client {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ClientsPage() {
-  const { data, error, isLoading, mutate } = useSWR('/api/clients', fetcher, { revalidateOnFocus: true, keepPreviousData: true });
+  const { data, error, isLoading, mutate } = useSWR('/api/clients', fetcher);
   const clients = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [showForm, setShowForm] = useState(false);
@@ -272,24 +272,40 @@ export default function ClientsPage() {
         )}
 
         {/* Client List */}
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-violet-500 rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
-            <User size={48} strokeWidth={1} />
-            <p className="text-sm">{search ? "Aucun résultat" : "Aucun client pour l'instant"}</p>
-          </div>
-        ) : (
+        {loading && (
           <div className="flex flex-col gap-3">
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} client{filtered.length > 1 ? "s" : ""}</p>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 animate-pulse">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                  <div className="flex-1">
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-36 mb-1.5" />
+                    <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-1.5 mt-2">
+                  <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-48" />
+                  <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-32" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {!loading && (
+          filtered.length === 0 ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
+              <User size={48} strokeWidth={1} />
+              <p className="text-sm">{search ? "Aucun résultat" : "Aucun client pour l'instant"}</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} client{filtered.length > 1 ? "s" : ""}</p>
             {filtered.map((client, i) => (
               <motion.div
                 key={client.id || i}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
+              transition={{ delay: Math.min(i * 0.03, 0.15) }}
                 className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800"
               >
                 <div className="flex items-center gap-3 mb-2">
@@ -335,6 +351,7 @@ export default function ClientsPage() {
               </motion.div>
             ))}
           </div>
+          )
         )}
       </main>
     </div>
