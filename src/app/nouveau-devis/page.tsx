@@ -214,13 +214,14 @@ export default function NouveauDevisPage() {
       const res = await fetch("/api/devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client: selectedClient, lignes, tva, acompte, remise, photos }),
+        body: JSON.stringify({ clientId: selectedClient.id, client: selectedClient.nom, lignes, tva, acompte, remise, photos }),
       });
       const result = await res.json();
+      if (!res.ok) throw new Error(result.error || "Erreur serveur");
       setDevisResult(result);
       setSuccess(true);
-    } catch {
-      alert("Erreur lors de la création du devis");
+    } catch (error: any) {
+      alert("Erreur lors de la création du devis: " + (error?.message || ""));
     }
     setSending(false);
   };

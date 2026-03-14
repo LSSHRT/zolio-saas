@@ -47,16 +47,18 @@ export async function POST(request: Request) {
     const { client, clientId, lignes, remise, acompte, tva, photos } = body;
 
     let finalClientId = clientId;
-    if (!finalClientId && client) {
+    let clientName = typeof client === 'string' ? client : (client?.nom || "");
+
+    if (!finalClientId && clientName) {
       // Find or create client
       const existingClient = await prisma.client.findFirst({
-        where: { userId, nom: client }
+        where: { userId, nom: clientName }
       });
       if (existingClient) {
         finalClientId = existingClient.id;
       } else {
         const newClient = await prisma.client.create({
-          data: { userId, nom: client }
+          data: { userId, nom: clientName }
         });
         finalClientId = newClient.id;
       }
