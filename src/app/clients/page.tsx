@@ -47,6 +47,10 @@ export default function ClientsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Erreur serveur");
+        }
         const updatedClient = await res.json();
         mutate(clients.map((c: Client) => c.id === editingId ? updatedClient : c), false);
       } else {
@@ -55,14 +59,18 @@ export default function ClientsPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
         });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || "Erreur serveur");
+        }
         const newClient = await res.json();
         mutate([...clients, newClient], false);
       }
       setForm({ nom: "", email: "", telephone: "", adresse: "" });
       setShowForm(false);
       setEditingId(null);
-    } catch (err) {
-      alert("Erreur lors de l'enregistrement");
+    } catch (err: any) {
+      alert(err.message || "Erreur lors de l'enregistrement");
     }
     setSaving(false);
   };

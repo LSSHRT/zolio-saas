@@ -191,13 +191,17 @@ export default function NouveauDevisPage() {
     setIsAddingClient(true);
     try {
       const res = await fetch("/api/clients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newClient) });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Erreur serveur");
+      }
       const c = await res.json();
       setClients([...clients, c]);
       setSelectedClient(c);
       setShowNewClient(false);
       setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
-    } catch (error) {
-      alert("Erreur lors de la création du client");
+    } catch (error: any) {
+      alert(error.message || "Erreur lors de la création du client");
     } finally {
       setIsAddingClient(false);
     }

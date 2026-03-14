@@ -60,8 +60,8 @@ export async function POST(request: Request) {
       adresse: client.adresse || "",
       dateAjout: client.createdAt.toLocaleDateString("fr-FR")
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erreur POST client:", error);
-    return NextResponse.json({ error: "Impossible d'ajouter le client" }, { status: 500 });
+    return NextResponse.json({ error: "Impossible d'ajouter le client", details: error.message || String(error) }, { status: 500 });
   }
 }
