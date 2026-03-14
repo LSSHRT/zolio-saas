@@ -17,8 +17,22 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Zolio",
   },
-  title: "Zolio - Devis Professionnel",
-  description: "Créez et gérez vos devis en quelques secondes.",
+  title: "Zolio - Logiciel de Devis et Factures pour Artisans du Bâtiment",
+  description: "Zolio est l'application tout-en-un pour les professionnels du bâtiment : créez des devis et factures en quelques secondes, faites signer vos clients électroniquement, et suivez vos chantiers avec intelligence artificielle.",
+  keywords: ["devis", "factures", "artisan", "bâtiment", "logiciel", "signature électronique", "btp", "auto-entrepreneur"],
+  openGraph: {
+    title: "Zolio - Logiciel de Devis et Factures pour Artisans",
+    description: "L'application tout-en-un pour les pros du bâtiment. Créez vos devis avec l'IA et faites-les signer instantanément.",
+    url: "https://www.zolio.site",
+    siteName: "Zolio",
+    locale: "fr_FR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Zolio - Devis et Factures pour Artisans",
+    description: "L'application tout-en-un pour les pros du bâtiment. Créez vos devis avec l'IA et faites-les signer instantanément.",
+  }
 };
 
 export const viewport = {
