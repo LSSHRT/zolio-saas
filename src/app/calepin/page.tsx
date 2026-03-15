@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import useSWR from "swr";
-import { Plus, StickyNote, Trash2, X, Save } from "lucide-react";
+import { Plus, StickyNote, Trash2, X, Save, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 
@@ -67,27 +67,32 @@ export default function CalepinPage() {
   if (error) return <div className="p-4 text-red-500">Erreur lors du chargement des notes.</div>;
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm p-4 md:p-6">
+    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <Link href="/" className="text-sm text-violet-600 dark:text-violet-400 mb-1 inline-block hover:underline">
-            &larr; Retour au tableau de bord
-          </Link>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <StickyNote className="w-6 h-6 text-violet-600" />
-            Mon Calepin
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Prenez vos cotes et notes de chantier ici.</p>
-        </div>
-        <button
+      
+      {/* Header */}
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-[#0c0a1d]/80 border-b border-violet-100/50 dark:border-violet-500/10 transition-all flex items-center gap-4 p-6 pt-12 sm:pt-10">
+        <Link href="/">
+          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
+            <ArrowLeft size={20} />
+          </motion.div>
+        </Link>
+        <h1 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <StickyNote className="w-5 h-5 text-violet-600" />
+          Mon Calepin
+        </h1>
+        <div className="flex-1" />
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={() => openNote()}
-          className="bg-gradient-zolio text-white p-4 rounded-2xl shadow-brand hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center"
+          className="w-10 h-10 bg-gradient-zolio text-white rounded-full flex items-center justify-center shadow-brand"
         >
-          <Plus className="w-6 h-6" />
-        </button>
-      </div>
+          <Plus size={20} />
+        </motion.button>
+      </header>
+
+      <main className="flex-1 px-6 flex flex-col gap-6 pt-6">
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -141,6 +146,8 @@ export default function CalepinPage() {
           ))}
         </div>
       )}
+
+      </main>
 
       {/* Modal d'édition */}
       <AnimatePresence>
