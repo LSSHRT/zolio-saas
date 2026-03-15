@@ -253,7 +253,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center">
         <div className="w-8 h-8 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
       </div>
     );
@@ -261,7 +261,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
   if (success) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden items-center justify-center p-8">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
           className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
           <Check size={48} className="text-emerald-600" />
@@ -286,7 +286,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/devis">
@@ -353,7 +353,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               <div className="max-h-40 overflow-y-auto flex flex-col gap-1">
                 {filteredPrestations.map((p) => (
                   <button key={p.id} onClick={() => addLigne(p)}
-                    className="flex items-center gap-2 p-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-left hover:bg-violet-50 transition text-sm">
+                    className="flex items-center gap-2 p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-left hover:bg-violet-50 transition text-sm">
                     <Plus size={14} className="text-violet-500 shrink-0" />
                     <span className="flex-1 truncate">{p.nom}</span>
                     <span className="text-slate-500 dark:text-slate-400 text-xs">{p.prix}€/{p.unite}</span>
@@ -379,7 +379,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                       value={l.nomPrestation}
                       onChange={(e) => updateNom(i, e.target.value)}
                       placeholder="Nom de la prestation..."
-                      className="w-full bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
                     />
                     {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-2 shrink-0">Optionnel</span>}
                   </div>
@@ -389,12 +389,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   <div className="flex-1">
                     <label className="text-[10px] text-slate-400">Quantité</label>
                     <input type="number" min="0.1" step="0.1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
-                      className="w-full py-1 px-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                      className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
                   </div>
                   <div className="flex-1">
                     <label className="text-[10px] text-slate-400">Prix/{l.unite}</label>
                     <input type="number" min="0" step="0.01" value={l.prixUnitaire} onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
-                      className="w-full py-1 px-2 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                      className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
                   </div>
                   <div className="flex-none flex items-end mb-1 px-1">
                     <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
@@ -489,7 +489,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             <span className="text-white/70 text-sm">TVA ({tva}%)</span>
             <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
           </div>
-          <div className="h-px bg-white dark:bg-gray-800 dark:bg-slate-900/20 my-2" />
+          <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
           <div className="flex justify-between items-center">
             <span className="font-bold text-lg">Total TTC</span>
             <div className="flex items-center gap-3">
@@ -543,7 +543,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       </main>
 
       {/* Bottom action */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
+      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
         <Link href="/devis" className="flex-1">
           <motion.button whileTap={{ scale: 0.96 }}
             className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm">
@@ -559,7 +559,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       {/* Modal Signature sur place */}
       {showSignModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">Faire signer le client</h2>
@@ -596,7 +596,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       {/* Modale IA */}
       {showAIModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-gray-800 dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-fuchsia-500" size={20} /> Rédiger avec l'IA</h3>
               <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>

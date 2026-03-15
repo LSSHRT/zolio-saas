@@ -100,7 +100,7 @@ export default function ParametresEntreprise() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 pb-20">
-      <div className="bg-white dark:bg-gray-800 dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3">
+      <div className="bg-white dark:bg-slate-800 border-b dark:border-slate-700 px-4 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3">
         <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </Link>
@@ -112,7 +112,7 @@ export default function ParametresEntreprise() {
           Ces informations apparaîtront automatiquement sur tous les devis et factures que vous générez.
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5 space-y-5">
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
               <Building2 className="w-4 h-4 text-slate-400" />
@@ -408,7 +408,7 @@ export default function ParametresEntreprise() {
           </div>
         </div>
 
-        <div className="mt-8 bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5">
+        <div className="mt-8 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5">
           <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
             <Scale className="w-5 h-5 text-violet-600" />
             Documents Légaux de Zolio

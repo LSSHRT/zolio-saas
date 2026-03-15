@@ -606,3 +606,11 @@
     "NEW INSTRUCTION": "WHEN user says continue or not finished THEN complete pending work and confirm deployment status"
 }
 
+[2026-03-14 22:32] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "step-by-step workflow",
+    "EXPECTATION": "The user wants all pending items handled sequentially, one by one, with confirmations.",
+    "NEW INSTRUCTION": "WHEN user says \"Fait tout 1 par 1\" THEN break tasks into checklist and implement sequentially with confirmations"
+}
+

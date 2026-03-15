@@ -189,15 +189,18 @@ function DashboardContent() {
         
         <div className="flex items-center gap-4 relative">
           <ThemeToggle />
-          <Link href="/parametres" className="tour-parametres text-slate-400 hover:text-slate-600 dark:text-slate-300 transition">
+          <Link href="/parametres" className="tour-parametres text-slate-400 hover:text-slate-600 dark:text-slate-300 transition" aria-label="Paramètres">
             <Settings size={24} />
           </Link>
           <button 
             onClick={() => setShowNotifications(!showNotifications)}
             className="relative text-slate-400 hover:text-slate-600 dark:text-slate-300 transition"
+            aria-label="Notifications"
           >
             <Bell size={24} />
-            <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full" />
+            {devisARelancer.length > 0 && (
+              <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" />
+            )}
           </button>
           
           {/* Notifications Dropdown */}
@@ -243,11 +246,17 @@ function DashboardContent() {
       <main className="flex-1 px-6 flex flex-col gap-8">
         
         {/* Welcome Section */}
-        <div className="flex flex-col gap-6">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex flex-col gap-6"
+        >
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                Bonjour{user?.firstName ? `, ${user.firstName}` : ''} 👋
+                <WeatherIcon size={22} className="text-fuchsia-500" />
+                {greetingText}{user?.firstName ? `, ${user.firstName}` : ''} 👋
                 {user?.publicMetadata?.isPro === true && (
                   <span className="bg-gradient-to-r from-fuchsia-500 to-orange-400 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ml-1">
                     PRO
@@ -272,17 +281,22 @@ function DashboardContent() {
             )}
           </div>
 
-        </div>
+        </motion.div>
 
         {/* Action Widgets */}
-        <div className="flex gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="flex gap-4"
+        >
           {/* Create CTA */}
           <Link href="/nouveau-devis" className="tour-nouveau-devis flex-1 block">
             <motion.div 
               whileTap={{ scale: 0.96 }}
               className="rounded-[1.5rem] p-5 cursor-pointer bg-gradient-zolio text-white shadow-lg shadow-fuchsia-500/30 flex flex-col justify-between aspect-square"
             >
-              <div className="w-12 h-12 bg-white dark:bg-gray-800 dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-white dark:bg-slate-900/20 backdrop-blur-md rounded-full flex items-center justify-center mb-4">
                 <Plus size={24} className="text-fuchsia-600 dark:text-white" />
               </div>
               <div>
@@ -290,7 +304,7 @@ function DashboardContent() {
                 {user?.publicMetadata?.isPro === true ? (
                   <p className="text-white/70 text-xs">Création rapide ⚡️</p>
                 ) : (
-                  <p className="text-white/90 text-[10px] font-medium bg-white dark:bg-gray-800/20 dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
+                  <p className="text-white/90 text-[10px] font-medium bg-white dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
                     {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 3)}/3 gratuits`}
                   </p>
                 )}
@@ -320,10 +334,15 @@ function DashboardContent() {
               </motion.div>
             </Link>
           </div>
-        </div>
+        </motion.div>
 
         {/* Liens Rapides */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="grid grid-cols-2 md:grid-cols-5 gap-4"
+        >
           <Link href="/devis" className="flex-1">
             <motion.div whileTap={{ scale: 0.97 }}
               className="bg-slate-50/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col gap-2 cursor-pointer hover:bg-white dark:hover:bg-slate-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md h-full">
@@ -358,7 +377,7 @@ function DashboardContent() {
               </div>
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white text-sm">Calepin</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">Notes chantier</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Notes chantier</p>
               </div>
             </motion.div>
           </Link>
@@ -371,7 +390,7 @@ function DashboardContent() {
               </div>
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white text-sm">Dépenses</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">Achats & Frais</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Achats & Frais</p>
               </div>
             </motion.div>
           </Link>
@@ -384,16 +403,21 @@ function DashboardContent() {
               </div>
               <div>
                 <p className="font-semibold text-slate-900 dark:text-white text-sm">Planning</p>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400">Chantiers prévus</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Chantiers prévus</p>
               </div>
             </motion.div>
           </Link>
-        </div>
+        </motion.div>
 
         {/* Banner Stats Rapides */}
-        <div className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 dark:from-violet-900 dark:to-violet-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-violet-500/20 relative overflow-hidden">
-          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white dark:bg-gray-800/10 rounded-full blur-2xl"></div>
-          <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white dark:bg-gray-800/10 rounded-full blur-xl"></div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          className="bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-500 dark:from-violet-900 dark:to-violet-900 rounded-[1.5rem] p-6 text-white shadow-lg shadow-violet-500/20 relative overflow-hidden"
+        >
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-white rounded-full blur-2xl"></div>
+          <div className="absolute right-12 -bottom-10 w-24 h-24 bg-white rounded-full blur-xl"></div>
           
           <div className="relative z-10">
             <p className="text-violet-100 text-sm font-medium mb-1">Chiffre d'Affaires Global</p>
@@ -402,13 +426,13 @@ function DashboardContent() {
             </h2>
             
             {/* Gamification Objectif */}
-            <div className="mb-5 bg-white dark:bg-gray-800/10 rounded-xl p-3 backdrop-blur-sm border border-white/10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+            <div className="mb-5 bg-white rounded-xl p-3 backdrop-blur-sm border border-white/10 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
               <div className="flex justify-between items-center text-xs font-medium mb-2">
-                <span>Objectif ({objectif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition"><Pencil size={12} /></button></span>
+                <span>Objectif ({objectif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition" aria-label="Modifier l'objectif"><Pencil size={12} /></button></span>
                 <span>{Math.min((CA_TTC / objectif) * 100, 100).toFixed(0)}%</span>
               </div>
               <div className="w-full bg-black/20 rounded-full h-2 overflow-hidden">
-                <div className="bg-white dark:bg-gray-800 rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-fuchsia-500 dark:shadow-[0_0_10px_rgba(217,70,239,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
+                <div className="bg-white rounded-full h-2 transition-all duration-1000 shadow-[0_0_10px_rgba(255,255,255,0.8)] dark:bg-fuchsia-500 dark:shadow-[0_0_10px_rgba(217,70,239,0.8)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
               </div>
               <p className="text-[10px] text-violet-200 mt-1.5 text-right">
                 {CA_TTC >= objectif ? '🎉 Objectif atteint !' : `Encore ${(objectif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
@@ -430,10 +454,15 @@ function DashboardContent() {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Dynamic Charts / Income Area */}
-        <div className="bg-white dark:bg-gray-800 dark:bg-slate-900 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-sm p-5">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+          className="bg-white dark:bg-slate-900 rounded-[1.5rem] border border-slate-100 dark:border-slate-800 shadow-sm p-5"
+        >
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-slate-900 dark:text-white text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
             <div className="bg-fuchsia-50 text-fuchsia-600 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
@@ -486,26 +515,26 @@ function DashboardContent() {
                   <div className="flex-1 bg-emerald-50 rounded-xl p-3 border border-emerald-100 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] font-semibold text-emerald-700">CA Validé</span>
-                      <span className="text-[10px] text-emerald-500 ml-auto">{nbValide} devis</span>
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">CA Validé</span>
+                      <span className="text-xs text-emerald-500 dark:text-emerald-400 ml-auto">{nbValide} devis</span>
                     </div>
-                    <p className="text-lg font-bold text-emerald-700">
+                    <p className="text-lg font-bold text-emerald-700 dark:text-emerald-400">
                       {loading ? "..." : `${CA_Valide_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
-                    <p className="text-[10px] text-emerald-500">
+                    <p className="text-xs text-emerald-500 dark:text-emerald-400">
                       TTC : {loading ? "..." : `${CA_Valide_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
                   </div>
                   <div className="flex-1 bg-amber-50 rounded-xl p-3 border border-amber-100 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
                     <div className="flex items-center gap-1.5 mb-1">
                       <div className="w-2 h-2 rounded-full bg-amber-500" />
-                      <span className="text-[10px] font-semibold text-amber-700">En Attente</span>
-                      <span className="text-[10px] text-amber-500 ml-auto">{nbAttente} devis</span>
+                      <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">En Attente</span>
+                      <span className="text-xs text-amber-500 dark:text-amber-400 ml-auto">{nbAttente} devis</span>
                     </div>
-                    <p className="text-lg font-bold text-amber-700">
+                    <p className="text-lg font-bold text-amber-700 dark:text-amber-400">
                       {loading ? "..." : `${CA_Attente_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
-                    <p className="text-[10px] text-amber-500">
+                    <p className="text-xs text-amber-500 dark:text-amber-400">
                       TTC : {loading ? "..." : `${CA_Attente_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
                   </div>
@@ -522,7 +551,7 @@ function DashboardContent() {
 
                 {/* Barre de progression (Répartition Validé / Attente) */}
                 <div className="mb-3">
-                  <div className="flex justify-between text-[10px] text-slate-500 dark:text-slate-400 mb-1.5">
+                  <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
                     <span>Répartition du CA HT (Global)</span>
                     <span>{CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€ total</span>
                   </div>
@@ -544,22 +573,22 @@ function DashboardContent() {
                       />
                     )}
                   </div>
-                  <div className="flex justify-between text-[10px] mt-1">
-                    <span className="text-emerald-600 font-semibold">{pctValide.toFixed(0)}% validé</span>
-                    <span className="text-amber-600 font-semibold">{pctAttente.toFixed(0)}% en attente</span>
+                  <div className="flex justify-between text-xs mt-1">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{pctValide.toFixed(0)}% validé</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-semibold">{pctAttente.toFixed(0)}% en attente</span>
                   </div>
                 </div>
 
                 {/* Total global */}
                 <div className="bg-slate-50 dark:bg-slate-800 rounded-xl p-3 border border-slate-100 dark:border-slate-800 flex justify-between items-center">
                   <div>
-                    <p className="text-[10px] text-slate-400">CA Total HT</p>
+                    <p className="text-xs text-slate-400">CA Total HT</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">
                       {loading ? "..." : `${CA_HT.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-[10px] text-slate-400">CA Total TTC</p>
+                    <p className="text-xs text-slate-400">CA Total TTC</p>
                     <p className="text-lg font-bold text-slate-900 dark:text-white">
                       {loading ? "..." : `${CA_TTC.toLocaleString('fr-FR', { minimumFractionDigits: 2 })}€`}
                     </p>
@@ -568,7 +597,7 @@ function DashboardContent() {
               </>
             );
           })()}
-        </div>
+        </motion.div>
 
         {/* Relances Clients */}
         {devisARelancer.length > 0 && (
@@ -581,12 +610,12 @@ function DashboardContent() {
               {devisARelancer.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
                   <div className="flex items-center gap-4 bg-rose-50 p-4 rounded-2xl border border-rose-100 hover:bg-rose-100 transition cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                    <div className="w-10 h-10 rounded-full bg-white dark:bg-gray-800 dark:bg-slate-900 text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 text-rose-600 flex items-center justify-center shrink-0 shadow-sm">
                       <Bell size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{d.nomClient}</p>
-                      <p className="text-[10px] text-rose-600">En attente depuis plus de 7 jours</p>
+                      <p className="text-xs text-rose-600">En attente depuis plus de 7 jours</p>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="font-bold text-slate-800 dark:text-slate-200 shrink-0 text-sm">
@@ -618,7 +647,7 @@ function DashboardContent() {
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-gray-800 dark:bg-slate-900 shadow-sm animate-pulse">
+                <div key={i} className="flex items-center p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm animate-pulse">
                   <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex-shrink-0"></div>
                   <div className="ml-3 flex-1">
                     <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-1/2 mb-2"></div>
@@ -644,13 +673,13 @@ function DashboardContent() {
             <div className="flex flex-col gap-3">
               {devisRecents.map((d, i) => (
                 <Link href={`/devis/${d.numero}`} key={i}>
-                  <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl hover:bg-slate-100 dark:bg-slate-800 transition cursor-pointer">
+                  <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer">
                     <div className="w-10 h-10 rounded-full bg-violet-100 text-fuchsia-600 flex items-center justify-center shrink-0">
                       <Clock size={16} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{d.nomClient}</p>
-                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{d.numero} • {d.date}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{d.numero} • {d.date}</p>
                     </div>
                     <div className="font-bold text-slate-800 dark:text-slate-200 shrink-0 text-sm">
                       {d.totalTTC}€
@@ -664,7 +693,7 @@ function DashboardContent() {
       </main>
 
       {/* Bottom Navigation */}
-      <nav className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
+      <nav className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 px-6 py-4 flex justify-between items-center z-10 sm:rounded-b-[3rem]">
         <Link href="/" className="flex flex-col items-center gap-1 text-fuchsia-600">
           <Home size={24} strokeWidth={2.5} />
           <span className="text-[10px] font-bold">Accueil</span>

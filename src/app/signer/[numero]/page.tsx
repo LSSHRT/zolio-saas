@@ -100,7 +100,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg bg-white dark:bg-gray-800 dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden"
+        className="w-full max-w-lg bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden"
       >
         <div className="p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-6">
@@ -133,7 +133,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
               <label className="font-medium text-slate-700 dark:text-slate-300">Votre signature</label>
               <button onClick={clear} className="text-xs font-medium hover:opacity-80" style={{ color: devis.entreprise?.color || '#7c3aed' }}>Effacer</button>
             </div>
-            <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 dark:bg-slate-900">
+            <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
               <SignaturePad 
                 ref={sigCanvas} 
                 penColor="black"
