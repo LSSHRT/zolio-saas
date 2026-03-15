@@ -202,7 +202,7 @@ export default function FacturesPage() {
             <FileText size={16} />
             <span className="hidden sm:inline">Livre Recettes URSSAF</span>
           </button>
-          <button onClick={handleExportCSV} className="flex items-center gap-2 bg-fuchsia-600 hover:bg-fuchsia-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+          <button onClick={handleExportCSV} className="flex items-center gap-2 bg-gradient-zolio hover:opacity-90 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
             <Download size={16} />
             <span className="hidden sm:inline">Export Comptable</span>
           </button>
@@ -226,7 +226,7 @@ export default function FacturesPage() {
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" placeholder="Rechercher par client ou n° facture..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500" />
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500" />
         </div>
 
         {/* Bulk Actions */}
@@ -234,7 +234,7 @@ export default function FacturesPage() {
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input 
               type="checkbox" 
-              className="w-4 h-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"
+              className="w-4 h-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {

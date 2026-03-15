@@ -41,7 +41,7 @@ export default function AbonnementSuccessPage() {
       <div className="absolute top-[-20%] left-[-20%] w-[140%] h-[140%] bg-gradient-to-br from-violet-50 to-fuchsia-50 blur-3xl opacity-60 rounded-full mix-blend-multiply pointer-events-none" />
 
       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
-        className="w-24 h-24 bg-gradient-zolio rounded-full flex items-center justify-center mb-6 shadow-lg shadow-fuchsia-500/30 text-white relative z-10">
+        className="w-24 h-24 bg-gradient-zolio rounded-full flex items-center justify-center mb-6 shadow-lg shadow-brand text-white relative z-10">
         <CheckCircle size={48} />
       </motion.div>
       
@@ -54,13 +54,13 @@ export default function AbonnementSuccessPage() {
           </p>
           <div className="flex flex-col gap-2 text-left">
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
-              <Sparkles size={14} className="text-fuchsia-500" /> Devis PDF illimités
+              <Sparkles size={14} className="text-brand-fuchsia" /> Devis PDF illimités
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
-              <Sparkles size={14} className="text-fuchsia-500" /> Envois emails automatiques
+              <Sparkles size={14} className="text-brand-fuchsia" /> Envois emails automatiques
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold text-slate-800 dark:text-slate-200">
-              <Sparkles size={14} className="text-fuchsia-500" /> Support prioritaire
+              <Sparkles size={14} className="text-brand-fuchsia" /> Support prioritaire
             </div>
           </div>
         </div>

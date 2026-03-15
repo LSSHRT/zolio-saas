@@ -81,7 +81,7 @@ export default function CalepinPage() {
         </div>
         <button
           onClick={() => openNote()}
-          className="bg-gradient-zolio text-white p-4 rounded-2xl shadow-lg shadow-fuchsia-500/30 hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center"
+          className="bg-gradient-zolio text-white p-4 rounded-2xl shadow-brand hover:shadow-xl hover:-translate-y-1 transition-all flex items-center justify-center"
         >
           <Plus className="w-6 h-6" />
         </button>
@@ -95,14 +95,14 @@ export default function CalepinPage() {
         </div>
       ) : notes?.length === 0 ? (
         <div className="text-center py-24 bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-[2rem] border border-slate-100 dark:border-slate-700/50 relative overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-fuchsia-500/10 dark:bg-fuchsia-500/20 blur-3xl rounded-full"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-violet-50 dark:bg-violet-500/100/10 dark:bg-violet-50 dark:bg-violet-500/100/20 blur-3xl rounded-full"></div>
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }} 
             animate={{ scale: 1, opacity: 1 }} 
             className="relative z-10 flex flex-col items-center"
           >
             <div className="w-20 h-20 bg-white dark:bg-slate-800 rounded-3xl shadow-xl flex items-center justify-center mb-6 -rotate-6">
-              <StickyNote className="w-10 h-10 text-fuchsia-500" />
+              <StickyNote className="w-10 h-10 text-brand-fuchsia" />
             </div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 font-mono">Calepin vide</h3>
             <p className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm mx-auto">Commencez à noter vos dimensions, idées et croquis de chantiers pour ne rien oublier.</p>
@@ -132,7 +132,7 @@ export default function CalepinPage() {
               <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-3 truncate pr-6 font-mono">{note.titre || "Sans titre"}</h3>
               <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap line-clamp-5 leading-relaxed">{note.contenu}</p>
               <div className="mt-5 flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-medium bg-slate-50 dark:bg-slate-900/50 w-fit px-3 py-1.5 rounded-lg">
-                <span className="w-2 h-2 rounded-full bg-fuchsia-500/50 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-violet-50 dark:bg-violet-500/100/50 animate-pulse"></span>
                 {note.date}
               </div>
             </motion.div>

@@ -7,7 +7,7 @@ export default function Page() {
         <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
         <div className="relative z-10">
           <h1 className="text-5xl font-bold mb-6 tracking-tight">Créez votre compte Zolio</h1>
-          <p className="text-xl text-fuchsia-100 mb-8 max-w-lg">Commencez dès maintenant. Vos 3 premiers devis sont offerts.</p>
+          <p className="text-xl text-violet-100 mb-8 max-w-lg">Commencez dès maintenant. Vos 3 premiers devis sont offerts.</p>
           <ul className="space-y-3 font-medium">
             <li className="flex items-center"><span className="text-orange-400 mr-2">✓</span> Devis illimités en pro</li>
             <li className="flex items-center"><span className="text-orange-400 mr-2">✓</span> Transformation en factures</li>

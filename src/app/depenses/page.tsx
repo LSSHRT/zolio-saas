@@ -119,12 +119,12 @@ export default function DepensesPage() {
             <ArrowLeft size={20} className="text-slate-600 dark:text-slate-300" />
           </Link>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <Receipt className="text-fuchsia-500" /> Dépenses & Achats
+            <Receipt className="text-brand-fuchsia" /> Dépenses & Achats
           </h1>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-fuchsia-600 hover:bg-fuchsia-700 text-white p-2 md:px-4 md:py-2 rounded-full md:rounded-xl shadow-sm flex items-center gap-2 transition-all"
+          className="bg-gradient-zolio hover:opacity-90 text-white p-2 md:px-4 md:py-2 rounded-full md:rounded-xl shadow-sm flex items-center gap-2 transition-all"
         >
           {showForm ? <ArrowLeft size={20} /> : <Plus size={20} />}
           <span className="hidden md:block">{showForm ? "Retour" : "Nouvelle Dépense"}</span>
@@ -205,7 +205,7 @@ export default function DepensesPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-bold py-3 rounded-xl mt-4 disabled:opacity-50"
+                className="w-full bg-gradient-zolio hover:opacity-90 text-white font-bold py-3 rounded-xl mt-4 disabled:opacity-50"
               >
                 {isSubmitting ? "Enregistrement..." : "Enregistrer la dépense"}
               </button>
@@ -240,7 +240,7 @@ export default function DepensesPage() {
               <input
                 type="text"
                 placeholder="Rechercher une dépense..."
-                className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-fuchsia-500 outline-none dark:text-white"
+                className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-violet-500 outline-none dark:text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />

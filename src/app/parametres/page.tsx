@@ -323,7 +323,7 @@ export default function ParametresEntreprise() {
           <button
             type="submit"
             disabled={isSaving}
-            className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white font-semibold py-4 rounded-xl shadow-lg shadow-violet-200 dark:shadow-none transition-all flex items-center justify-center gap-2"
+            className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-violet-400 text-white font-semibold py-4 rounded-xl shadow-brand transition-all flex items-center justify-center gap-2"
           >
             {isSaving ? (
               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>

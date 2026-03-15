@@ -419,7 +419,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               </button>
               <button
                 onClick={() => setShowAIModal(true)}
-                className="flex-1 flex items-center justify-center gap-2 py-3 bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700 font-semibold rounded-xl hover:bg-fuchsia-100 transition dark:bg-fuchsia-900/30 dark:border-fuchsia-800 dark:text-fuchsia-300"
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 transition dark:bg-violet-900/30 dark:border-violet-800 dark:text-violet-300"
               >
                 <Sparkles size={16} /> Avec l'IA
               </button>
@@ -551,7 +551,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </motion.button>
         </Link>
         <motion.button whileTap={{ scale: 0.96 }} onClick={handleSaveAndResend} disabled={saving || lignes.length === 0}
-          className="flex-[2] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 flex items-center justify-center gap-2 text-sm disabled:opacity-40">
+          className="flex-[2] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-brand flex items-center justify-center gap-2 text-sm disabled:opacity-40">
           {saving ? "Envoi..." : <><Save size={16} /> Sauvegarder & Renvoyer <Send size={14} /></>}
         </motion.button>
       </div>
@@ -598,7 +598,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-fuchsia-500" size={20} /> Rédiger avec l'IA</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-brand-fuchsia" size={20} /> Rédiger avec l'IA</h3>
               <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>
             </div>
             <p className="text-sm text-slate-500 mb-4">
@@ -608,7 +608,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               value={aiPrompt}
               onChange={(e) => setAiPrompt(e.target.value)}
               placeholder="Décrivez votre chantier..."
-              className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500 mb-4 resize-none"
+              className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4 resize-none"
             />
             <button
               onClick={generateWithAI}

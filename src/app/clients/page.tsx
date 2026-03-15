@@ -208,7 +208,7 @@ export default function ClientsPage() {
               setShowForm(true);
             }
           }}
-          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30"
+          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-brand"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}
         </motion.button>
@@ -223,7 +223,7 @@ export default function ClientsPage() {
             placeholder="Rechercher un client..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500"
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500"
           />
         </div>
 
@@ -232,7 +232,7 @@ export default function ClientsPage() {
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input 
               type="checkbox" 
-              className="w-4 h-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"
+              className="w-4 h-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
@@ -257,15 +257,15 @@ export default function ClientsPage() {
           >
             <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier le client" : "Nouveau Client"}</h2>
             <input required placeholder="Nom complet" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <input required placeholder="Téléphone" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <input placeholder="Adresse" value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
-              className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
+              className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter le client"}
             </motion.button>
           </motion.form>
@@ -309,7 +309,7 @@ export default function ClientsPage() {
                 className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800"
               >
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 rounded-full bg-violet-100 text-fuchsia-600 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-violet-100 text-brand-violet flex items-center justify-center font-bold text-sm shrink-0">
                     {(client.nom || '').charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -326,7 +326,7 @@ export default function ClientsPage() {
                     </button>
                     <button
                       onClick={() => handleEdit(client)}
-                      className="p-2 text-slate-400 hover:text-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10 rounded-lg transition-colors"
+                      className="p-2 text-slate-400 hover:text-brand-violet hover:bg-violet-50 dark:bg-violet-500/10 dark:hover:bg-violet-50 dark:bg-violet-500/100/10 rounded-lg transition-colors"
                     >
                       <Pencil size={16} />
                     </button>
@@ -429,11 +429,11 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
             <div className="relative border-l-2 border-slate-200 dark:border-slate-700 ml-3 space-y-8">
               {history.map((item, idx) => (
                 <div key={idx} className="relative pl-6">
-                  <div className={`absolute -left-[11px] bg-white dark:bg-slate-800 p-0.5 rounded-full border-2 ${item.type === 'facture' ? 'border-green-500' : 'border-fuchsia-500'}`}>
+                  <div className={`absolute -left-[11px] bg-white dark:bg-slate-800 p-0.5 rounded-full border-2 ${item.type === 'facture' ? 'border-green-500' : 'border-violet-500'}`}>
                     {item.type === 'facture' ? (
                       <CheckCircle className="w-4 h-4 text-green-500" />
                     ) : (
-                      <FileText className="w-4 h-4 text-fuchsia-500" />
+                      <FileText className="w-4 h-4 text-brand-fuchsia" />
                     )}
                   </div>
                   <div className="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl">

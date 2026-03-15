@@ -311,7 +311,7 @@ export default function CataloguePage() {
         <motion.button
           whileTap={{ scale: 0.9 }}
           onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" }); }}
-          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-lg shadow-fuchsia-500/30"
+          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-brand"
         >
           {showForm ? <X size={20} /> : <Plus size={20} />}
         </motion.button>
@@ -321,7 +321,7 @@ export default function CataloguePage() {
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" placeholder="Rechercher une prestation..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30 focus:border-fuchsia-500" />
+            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500" />
         </div>
 
         {/* Bulk Actions */}
@@ -329,7 +329,7 @@ export default function CataloguePage() {
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input 
               type="checkbox" 
-              className="w-4 h-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"
+              className="w-4 h-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
@@ -349,14 +349,14 @@ export default function CataloguePage() {
             className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200 dark:border-slate-700">
             <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier la Prestation" : "Nouvelle Prestation"}</h2>
             <select value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30">
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30">
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <input required placeholder="Nom de la prestation" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <div className="flex gap-3">
               <select value={form.unite} onChange={(e) => setForm({ ...form, unite: e.target.value })}
-                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30">
+                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30">
                 <option value="m²">m²</option>
                 <option value="ml">ml</option>
                 <option value="heure">Heure</option>
@@ -365,16 +365,16 @@ export default function CataloguePage() {
               </select>
               <input required type="number" step="0.01" placeholder="Prix HT €" value={form.prix}
                 onChange={(e) => setForm({ ...form, prix: e.target.value })}
-                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             </div>
             <input type="number" step="0.01" placeholder="Coût matière estimé (optionnel)" value={form.cout}
               onChange={(e) => setForm({ ...form, cout: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <input type="number" step="0.01" placeholder="Stock initial (optionnel)" value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
-              className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
+              className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter au catalogue"}
             </motion.button>
           </motion.form>
@@ -382,7 +382,7 @@ export default function CataloguePage() {
 
         {loading ? (
           <div className="flex-1 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-fuchsia-500/30 border-t-violet-500 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
@@ -411,14 +411,14 @@ export default function CataloguePage() {
             {filtered.map((p, i) => (
               <motion.div key={p.id || i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-violet-100 dark:bg-violet-900/30 text-brand-violet flex items-center justify-center shrink-0">
                   <Package size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{p.nom}</p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     {p.categorie} · {p.unite}
-                    {p.stock !== undefined && p.stock > 0 && <span className="ml-2 text-fuchsia-600 bg-fuchsia-100 dark:bg-fuchsia-900/30 px-1.5 py-0.5 rounded-md">Stock: {p.stock}</span>}
+                    {p.stock !== undefined && p.stock > 0 && <span className="ml-2 text-brand-violet bg-violet-100 dark:bg-violet-900/30 dark:bg-violet-900/30 px-1.5 py-0.5 rounded-md">Stock: {p.stock}</span>}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
@@ -436,7 +436,7 @@ export default function CataloguePage() {
                   </button>
 <button
                     onClick={() => handleDuplicate(p)}
-                    className="p-2 text-slate-400 hover:text-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10 rounded-lg transition-colors"
+                    className="p-2 text-slate-400 hover:text-brand-violet hover:bg-violet-50 dark:bg-violet-500/10 dark:hover:bg-violet-50 dark:bg-violet-500/100/10 rounded-lg transition-colors"
                     title="Dupliquer"
                   >
                     <Copy size={16} />

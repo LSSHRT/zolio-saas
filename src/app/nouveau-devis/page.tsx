@@ -290,7 +290,7 @@ export default function NouveauDevisPage() {
   // Paywall
   if (!checkingPro && !isPro && devisCount !== null && devisCount >= 3) {
     return (
-      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-fuchsia-200">
+      <div className="flex flex-col min-h-screen font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative selection:bg-violet-200">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
           <Link href="/">
             <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
@@ -304,7 +304,7 @@ export default function NouveauDevisPage() {
           <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mb-6 relative">
             <Lock size={32} className="text-slate-400" />
             <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-violet-100 rounded-full border-4 border-white flex items-center justify-center">
-              <Zap size={16} className="text-fuchsia-600" />
+              <Zap size={16} className="text-brand-violet" />
             </div>
           </div>
           
@@ -314,7 +314,7 @@ export default function NouveauDevisPage() {
           </p>
 
           <Link href="/abonnement" className="w-full">
-            <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-gradient-zolio text-white font-bold rounded-xl shadow-xl shadow-fuchsia-500/20">
+            <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-gradient-zolio text-white font-bold rounded-xl shadow-brand-lg">
               Découvrir Zolio Pro
             </motion.button>
           </Link>
@@ -341,7 +341,7 @@ export default function NouveauDevisPage() {
           {[1, 2, 3].map((s) => (
             <div key={s} className="flex items-center flex-1 gap-2">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
-                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-fuchsia-500/30" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
+                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-brand" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
                 {step > s ? <Check size={14} /> : s}
               </div>
               {s < 3 && <div className={`flex-1 h-1 rounded-full transition-all ${step > s ? "bg-gradient-zolio" : "bg-slate-100 dark:bg-slate-800"}`} />}
@@ -360,8 +360,8 @@ export default function NouveauDevisPage() {
           {step === 1 && (
             <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
               {selectedClient ? (
-                <div className="bg-fuchsia-50 border border-violet-200 rounded-2xl p-4 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{(selectedClient.nom || '').charAt(0)}</div>
+                <div className="bg-violet-50 dark:bg-violet-500/10 border border-violet-200 rounded-2xl p-4 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+                  <div className="w-10 h-10 rounded-full bg-gradient-zolio text-white flex items-center justify-center font-bold text-sm">{(selectedClient.nom || '').charAt(0)}</div>
                   <div className="flex-1">
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient.email}</p>
@@ -373,7 +373,7 @@ export default function NouveauDevisPage() {
                   <div className="relative">
                     <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input type="text" placeholder="Rechercher un client..." value={searchClient} onChange={(e) => setSearchClient(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
                   </div>
                   <motion.button whileTap={{ scale: 0.96 }} onClick={() => setShowNewClient(true)}
                     className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 text-slate-500 dark:text-slate-400 text-sm">
@@ -383,13 +383,13 @@ export default function NouveauDevisPage() {
                   {showNewClient && (
                     <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col gap-2 border border-slate-200 dark:border-slate-700">
                       <input required placeholder="Nom" value={newClient.nom} onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
                       <input required type="email" placeholder="Email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
                       <input placeholder="Téléphone" value={newClient.telephone} onChange={(e) => setNewClient({ ...newClient, telephone: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
                       <input placeholder="Adresse" value={newClient.adresse} onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
                       <div className="flex gap-2 mt-1">
                         <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
                         <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient} disabled={isAddingClient}
@@ -407,7 +407,7 @@ export default function NouveauDevisPage() {
 
                   {isLoadingClients ? (
                     <div className="flex flex-col items-center justify-center py-8">
-                      <div className="w-8 h-8 border-4 border-fuchsia-200 border-t-fuchsia-500 rounded-full animate-spin"></div>
+                      <div className="w-8 h-8 border-4 border-violet-200 border-t-brand-violet rounded-full animate-spin"></div>
                       <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">Chargement de vos clients...</p>
                     </div>
                   ) : (
@@ -442,7 +442,7 @@ export default function NouveauDevisPage() {
               <div className="relative">
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input type="text" placeholder="Rechercher une prestation..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
               </div>
               <div className="flex gap-2 w-full mt-2">
                 <button
@@ -453,7 +453,7 @@ export default function NouveauDevisPage() {
                 </button>
                 <button
                   onClick={() => setShowAIModal(true)}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-fuchsia-50 border border-fuchsia-200 text-fuchsia-700 font-semibold rounded-xl hover:bg-fuchsia-100 transition dark:bg-fuchsia-900/30 dark:border-fuchsia-800 dark:text-fuchsia-300"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 dark:bg-violet-500/10 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 dark:bg-violet-900/30 transition dark:bg-violet-900/30 dark:border-violet-800 dark:text-violet-300"
                 >
                   <Sparkles size={18} /> Rédiger avec l'IA
                 </button>
@@ -464,8 +464,8 @@ export default function NouveauDevisPage() {
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
                 {filteredPrestations.map((p) => (
                   <motion.button key={p.id} whileTap={{ scale: 0.97 }} onClick={() => addLigne(p)}
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-fuchsia-50 hover:border-violet-200 transition">
-                    <Plus size={16} className="text-fuchsia-500 shrink-0" />
+                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-violet-50 dark:bg-violet-500/10 hover:border-violet-200 transition">
+                    <Plus size={16} className="text-brand-fuchsia shrink-0" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
                       <p className="text-[10px] text-slate-400">{p.categorie}</p>
@@ -494,7 +494,7 @@ export default function NouveauDevisPage() {
                             value={l.nomPrestation}
                             onChange={(e) => updateNom(i, e.target.value)}
                             placeholder="Nom de la prestation..."
-                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
+                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
                           />
                           <div className="flex items-center gap-2 mt-1">
                             <input 
@@ -508,14 +508,14 @@ export default function NouveauDevisPage() {
                         </div>
                         <input type="number" min="1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
                           className="w-16 text-center py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
-                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-fuchsia-500">
+                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-violet-500">
                             <option value="0">0%</option>
                             <option value="5.5">5.5%</option>
                             <option value="10">10%</option>
                             <option value="20">20%</option>
                           </select>
                           <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
-                            <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500" />
+                            <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-brand-violet focus:ring-violet-500" />
                             Option
                           </label>
                           <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{(l.totalLigne || 0).toFixed(0)}€</span>
@@ -542,7 +542,7 @@ export default function NouveauDevisPage() {
               <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2">Client</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-fuchsia-500 text-white flex items-center justify-center font-bold text-sm">{(selectedClient?.nom || '').charAt(0)}</div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-zolio text-white flex items-center justify-center font-bold text-sm">{(selectedClient?.nom || '').charAt(0)}</div>
                   <div>
                     <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient?.nom}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient?.email}</p>
@@ -571,7 +571,7 @@ export default function NouveauDevisPage() {
               <div className="flex items-center gap-3 mt-4">
                 <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Taux TVA :</label>
                 <select value={tva} onChange={(e) => setTva(e.target.value)}
-                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500">
+                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
                   <option value="0">0% (Auto-entrepreneur)</option>
                   <option value="5.5">5.5% (Rénovation)</option>
                   <option value="10">10% (Intermédiaire)</option>
@@ -583,14 +583,14 @@ export default function NouveauDevisPage() {
               <div className="flex items-center gap-3 mt-4">
                 <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Remise globale (%) :</label>
                 <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
-                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
               </div>
 
               {/* Acompte */}
               <div className="flex items-center gap-3 mt-4 mb-4">
                 <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Acompte à la signature (%) :</label>
                 <input type="number" placeholder="0" value={acompte} onChange={(e) => setAcompte(e.target.value)}
-                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500" />
+                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
               </div>
 
 
@@ -658,12 +658,12 @@ export default function NouveauDevisPage() {
           <motion.button whileTap={{ scale: 0.96 }}
             onClick={() => setStep(step + 1)}
             disabled={(step === 1 && !selectedClient) || (step === 2 && lignes.length === 0)}
-            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 flex items-center gap-2 text-sm disabled:opacity-40">
+            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand flex items-center gap-2 text-sm disabled:opacity-40">
             Suivant <ArrowRight size={16} />
           </motion.button>
         ) : (
           <motion.button whileTap={{ scale: 0.96 }} onClick={handleSend} disabled={sending}
-            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 flex items-center gap-2 text-sm disabled:opacity-40">
+            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand flex items-center gap-2 text-sm disabled:opacity-40">
             {sending ? "Envoi..." : <>Créer le devis <Send size={16} /></>}
           </motion.button>
         )}
@@ -675,7 +675,7 @@ export default function NouveauDevisPage() {
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-fuchsia-500" size={20} /> Rédiger avec l'IA</h3>
+                <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-brand-fuchsia" size={20} /> Rédiger avec l'IA</h3>
                 <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>
               </div>
               <p className="text-sm text-slate-500 mb-4">
@@ -685,7 +685,7 @@ export default function NouveauDevisPage() {
                 value={aiPrompt}
                 onChange={(e) => setAiPrompt(e.target.value)}
                 placeholder="Décrivez votre chantier..."
-                className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500 mb-4 resize-none"
+                className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4 resize-none"
               />
               <button
                 onClick={generateWithAI}
