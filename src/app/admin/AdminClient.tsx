@@ -1,12 +1,103 @@
 "use client";
-import React, { useState } from 'react';
-import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock } from "lucide-react";
+import React, { useState, useTransition } from 'react';
+import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock, Ban, Crown, UserX, Loader2 } from "lucide-react";
+import { toggleUserProStatus, banUser, deleteUserAccount, grantAdminRole, setSystemBanner, updateAdminSettings } from './actions';
 
 export default function AdminClient({ initialUsers = [], stats = {}, logs = [], systemBanner, currentGeminiKey }: any) {
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPro, setFilterPro] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+  const [bannerText, setBannerText] = useState(systemBanner || '');
+  const [geminiKey, setGeminiKey] = useState(currentGeminiKey || '');
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+
+  const handleTogglePro = async (userId: string, currentIsPro: boolean) => {
+    if (!confirm(currentIsPro ? 'Retirer le statut PRO à cet utilisateur ?' : 'Accorder le statut PRO à cet utilisateur ?')) return;
+    setLoadingUserId(userId);
+    try {
+      await toggleUserProStatus(userId, !currentIsPro);
+      setUsers((prev: any[]) => prev.map((u: any) => u.id === userId ? { ...u, isPro: !currentIsPro } : u));
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de modifier le statut PRO'));
+    }
+    setLoadingUserId(null);
+  };
+
+  const handleBanUser = async (userId: string, currentBanned: boolean) => {
+    if (!confirm(currentBanned ? 'Débannir cet utilisateur ?' : 'Bannir cet utilisateur ?')) return;
+    setLoadingUserId(userId);
+    try {
+      await banUser(userId, !currentBanned);
+      setUsers((prev: any[]) => prev.map((u: any) => u.id === userId ? { ...u, banned: !currentBanned } : u));
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de bannir/débannir'));
+    }
+    setLoadingUserId(null);
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Supprimer définitivement le compte de ${userName} ? Cette action est irréversible.`)) return;
+    setLoadingUserId(userId);
+    try {
+      await deleteUserAccount(userId);
+      setUsers((prev: any[]) => prev.filter((u: any) => u.id !== userId));
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de supprimer'));
+    }
+    setLoadingUserId(null);
+  };
+
+  const handleGrantAdmin = async (userId: string, currentIsAdmin: boolean) => {
+    if (!confirm(currentIsAdmin ? 'Retirer les droits admin ?' : 'Accorder les droits admin ?')) return;
+    setLoadingUserId(userId);
+    try {
+      await grantAdminRole(userId, !currentIsAdmin);
+      setUsers((prev: any[]) => prev.map((u: any) => u.id === userId ? { ...u, publicMetadata: { ...u.publicMetadata, isAdmin: !currentIsAdmin } } : u));
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de modifier les droits'));
+    }
+    setLoadingUserId(null);
+  };
+
+  const handleSetBanner = async () => {
+    try {
+      await setSystemBanner(bannerText);
+      alert(bannerText ? 'Bannière déployée !' : 'Bannière supprimée !');
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de mettre à jour la bannière'));
+    }
+  };
+
+  const handleSaveGeminiKey = async () => {
+    try {
+      const fd = new FormData();
+      fd.set('geminiKey', geminiKey);
+      await updateAdminSettings(fd);
+      alert('Clé API sauvegardée !');
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de sauvegarder la clé'));
+    }
+  };
+
+  const handleExportCSV = () => {
+    const headers = ['Nom', 'Email', 'Inscription', 'Statut', 'Devis IA'];
+    const rows = users.map((u: any) => [
+      u.name || 'Sans nom',
+      u.email || '',
+      u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '',
+      u.isPro ? 'PRO' : 'Gratuit',
+      u.aiGenerations || 0
+    ]);
+    const csv = [headers, ...rows].map(r => r.map((c: any) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `zolio-users-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   const filteredUsers = users.filter((user: any) => {
     const matchesSearch = (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -188,7 +279,7 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
               <p className="text-sm text-slate-500">Recherchez, filtrez et gérez tous les artisans inscrits.</p>
             </div>
             <div className="flex gap-2">
-              <button className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium flex items-center">
+              <button onClick={handleExportCSV} className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium flex items-center">
                 <Download className="w-4 h-4 mr-2" /> Exporter CSV
               </button>
             </div>
@@ -226,7 +317,8 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
                  </thead>
                  <tbody className="text-sm">
                    {filteredUsers.map((user: any, idx: number) => (
-                     <tr key={idx} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                     <React.Fragment key={idx}>
+                     <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                        <td className="py-4">
                          <div className="font-medium text-slate-900 dark:text-white">{user.name || 'Sans nom'}</div>
                          <div className="text-slate-500 text-xs">{user.email}</div>
@@ -243,19 +335,65 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
                          {user.aiGenerations || 0}
                        </td>
                        <td className="py-4 text-right">
-                         <div className="flex justify-end gap-2">
-                           <button className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors" title="Gérer l'abonnement PRO">
-                             <CreditCard className="w-4 h-4" />
-                           </button>
-                           <button className="p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Voir les détails">
-                             <Settings className="w-4 h-4" />
-                           </button>
-                           <button className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors" title="Bannir ou supprimer">
-                             <ShieldAlert className="w-4 h-4" />
-                           </button>
-                         </div>
+                         {loadingUserId === user.id ? (
+                           <Loader2 className="w-5 h-5 animate-spin text-slate-400 ml-auto" />
+                         ) : (
+                           <div className="flex justify-end gap-1">
+                             <button
+                               onClick={() => handleTogglePro(user.id, user.isPro)}
+                               className={`p-2 rounded-lg transition-colors ${user.isPro ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600'}`}
+                               title={user.isPro ? 'Retirer PRO' : 'Accorder PRO'}
+                             >
+                               <CreditCard className="w-4 h-4" />
+                             </button>
+                             <button
+                               onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
+                               className="p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                               title="Plus d'actions"
+                             >
+                               <Settings className="w-4 h-4" />
+                             </button>
+                             <button
+                               onClick={() => handleBanUser(user.id, user.banned)}
+                               className={`p-2 rounded-lg transition-colors ${user.banned ? 'text-orange-600 bg-orange-50 dark:bg-orange-900/30' : 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30'}`}
+                               title={user.banned ? 'Débannir' : 'Bannir'}
+                             >
+                               <Ban className="w-4 h-4" />
+                             </button>
+                             <button
+                               onClick={() => handleDeleteUser(user.id, user.name)}
+                               className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
+                               title="Supprimer définitivement"
+                             >
+                               <Trash2 className="w-4 h-4" />
+                             </button>
+                           </div>
+                         )}
                        </td>
                      </tr>
+                     {expandedUserId === user.id && (
+                       <tr className="bg-slate-50 dark:bg-slate-800/30">
+                         <td colSpan={5} className="px-4 py-3">
+                           <div className="flex flex-wrap gap-3 items-center text-sm">
+                             <span className="text-slate-500">Dernière connexion: {user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleDateString('fr-FR') : 'Jamais'}</span>
+                             <span className="text-slate-300 dark:text-slate-600">|</span>
+                             <span className={`${user.banned ? 'text-red-600 font-medium' : 'text-green-600'}`}>{user.banned ? '🚫 Banni' : '✅ Actif'}</span>
+                             <span className="text-slate-300 dark:text-slate-600">|</span>
+                             <button
+                               onClick={() => handleGrantAdmin(user.id, user.publicMetadata?.isAdmin)}
+                               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${user.publicMetadata?.isAdmin ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-purple-100 hover:text-purple-700'}`}
+                             >
+                               <Shield className="w-3 h-3 inline mr-1" />
+                               {user.publicMetadata?.isAdmin ? 'Admin ✓' : 'Rendre Admin'}
+                             </button>
+                             {user.publicMetadata?.parrainCode && (
+                               <span className="text-xs text-slate-400">Code parrain: {user.publicMetadata.parrainCode}</span>
+                             )}
+                           </div>
+                         </td>
+                       </tr>
+                     )}
+                     </React.Fragment>
                    ))}
                    {filteredUsers.length === 0 && (
                      <tr>
@@ -469,16 +607,17 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
             <p className="text-sm text-slate-500">Configuration technique de Zolio.</p>
           </div>
           <div className="p-6">
-            <form className="space-y-6 max-w-2xl">
+            <form className="space-y-6 max-w-2xl" onSubmit={(e) => e.preventDefault()}>
               <div>
                 <label className="block text-sm font-medium mb-2 text-slate-900 dark:text-white">Bannière d'Information Système (Vue par tous)</label>
                 <textarea 
                   className="w-full p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white"
                   rows={3}
                   placeholder="Ex: Maintenance prévue ce soir à 23h..."
-                  defaultValue={systemBanner}
+                  value={bannerText}
+                  onChange={(e) => setBannerText(e.target.value)}
                 />
-                <button type="button" className="mt-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium">Déployer la bannière</button>
+                <button type="button" onClick={handleSetBanner} className="mt-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium">{bannerText ? 'Déployer la bannière' : 'Supprimer la bannière'}</button>
               </div>
               <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
                 <label className="block text-sm font-medium mb-2 text-slate-900 dark:text-white">Clé API IA Custom (Gemini)</label>
@@ -486,8 +625,11 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
                   type="password"
                   className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white"
                   placeholder="Laisser vide pour utiliser celle du serveur..."
+                  value={geminiKey}
+                  onChange={(e) => setGeminiKey(e.target.value)}
                 />
                 <p className="text-xs text-slate-500 mt-1">Surcharge la clé globale uniquement pour les tests administrateur.</p>
+                <button type="button" onClick={handleSaveGeminiKey} className="mt-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors">Sauvegarder la clé</button>
               </div>
               <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
                  <h4 className="font-bold mb-3 text-slate-900 dark:text-white">Marque Blanche & Customisation</h4>
