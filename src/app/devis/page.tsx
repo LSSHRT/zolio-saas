@@ -137,8 +137,13 @@ export default function DevisPage() {
 
   return (
     <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
+      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-violet-400/12 to-fuchsia-400/8 dark:from-violet-500/20 dark:to-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-fuchsia-400/8 to-orange-400/6 dark:from-fuchsia-600/15 dark:to-orange-500/5 blur-[100px] -z-10 pointer-events-none"></div>
+
       {/* Header */}
-      <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-[#0c0a1d]/80 border-b border-violet-100/50 dark:border-violet-500/10 transition-all flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
             <ArrowLeft size={20} />

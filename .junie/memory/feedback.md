@@ -614,3 +614,27 @@
     "NEW INSTRUCTION": "WHEN user says \"Fait tout 1 par 1\" THEN break tasks into checklist and implement sequentially with confirmations"
 }
 
+[2026-03-15 13:51] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "aesthetic update missing",
+    "EXPECTATION": "Clients, Catalogue, Devis, Dépenses, and Planning pages should reflect the new Dashboard design.",
+    "NEW INSTRUCTION": "WHEN user says pages unchanged THEN verify latest changes deployed and ask URLs and screenshots"
+}
+
+[2026-03-15 13:51] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "unchanged pages",
+    "EXPECTATION": "The Clients/Catalogue/Devis/Dépenses/Planning pages should reflect the new Dashboard aesthetics.",
+    "NEW INSTRUCTION": "WHEN user reports pages unchanged after UI update THEN request page URLs, environment, and screenshots"
+}
+
+[2026-03-15 14:24] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "design inconsistency",
+    "EXPECTATION": "Non-dashboard pages (clients, catalogue, devis, dépense, planning) should match the dashboard aesthetics, including the colored background and updated styling.",
+    "NEW INSTRUCTION": "WHEN updating dashboard styles THEN apply same background/colors to clients, catalogue, devis, depense, planning pages"
+}
+
