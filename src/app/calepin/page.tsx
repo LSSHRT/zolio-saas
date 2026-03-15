@@ -67,7 +67,9 @@ export default function CalepinPage() {
   if (error) return <div className="p-4 text-red-500">Erreur lors du chargement des notes.</div>;
 
   return (
-    <div className="max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full p-4 md:p-6 pb-24 min-h-screen">
+    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm p-4 md:p-6">
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
       <div className="flex justify-between items-center mb-6">
         <div>
           <Link href="/" className="text-sm text-violet-600 dark:text-violet-400 mb-1 inline-block hover:underline">

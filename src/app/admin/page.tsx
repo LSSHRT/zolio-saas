@@ -116,18 +116,24 @@ export default async function AdminDashboard() {
   }));
 
   return (
-    <AdminClient 
-      initialUsers={serializedUsers}
-      stats={{
-        totalUsers: totalUsersCount,
-        totalAIGenerations: totalAiDevis,
-        activeSubscriptions: activeSubscriptions,
-        proUsers: proUsersCount,
-        recentUsersCount: recentUsersCount,
-        mrr: Math.round(mrr)
-      }}
-      systemBanner={currentSystemBanner}
-      currentGeminiKey={currentGeminiKey}
-    />
+    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm selection:bg-purple-200 dark:selection:bg-purple-900">
+      {/* Background Blobs */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
+      <div className="pt-8">
+        <AdminClient 
+          initialUsers={serializedUsers}
+          stats={{
+            totalUsers: totalUsersCount,
+            totalAIGenerations: totalAiDevis,
+            activeSubscriptions: activeSubscriptions,
+            proUsers: proUsersCount,
+            recentUsersCount: recentUsersCount,
+            mrr: Math.round(mrr)
+          }}
+          systemBanner={currentSystemBanner}
+          currentGeminiKey={currentGeminiKey}
+        />
+      </div>
+    </div>
   );
 }
