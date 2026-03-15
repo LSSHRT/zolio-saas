@@ -136,7 +136,7 @@ export default function DevisPage() {
   const totalAttente = devis.filter((d) => isEnAttente(d.statut)).reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
@@ -147,10 +147,10 @@ export default function DevisPage() {
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Devis</h1>
         <div className="flex-1" />
         <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-gray-800 dark:bg-slate-700 shadow text-fuchsia-600 dark:text-white' : 'text-slate-400'}`}>
+          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-fuchsia-600 dark:text-white' : 'text-slate-400'}`}>
             <List size={16} />
           </button>
-          <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-gray-800 dark:bg-slate-700 shadow text-fuchsia-600 dark:text-white' : 'text-slate-400'}`}>
+          <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-fuchsia-600 dark:text-white' : 'text-slate-400'}`}>
             <LayoutGrid size={16} />
           </button>
         </div>
@@ -296,7 +296,7 @@ export default function DevisPage() {
                         )}
                         <div className="flex gap-2">
                            <Link href={`/devis/${d.numero}`} className="flex-1">
-                             <button className="w-full py-1.5 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
+                             <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
                            </Link>
                            {pending && (
                              <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-xs font-bold rounded-lg hover:bg-violet-200 dark:hover:bg-violet-800 transition flex items-center justify-center gap-1 border border-violet-200 dark:border-violet-700">
@@ -417,7 +417,7 @@ export default function DevisPage() {
                   <div className="flex gap-2 mt-3">
                     <Link href={`/devis/${d.numero}`} className="flex-1">
                       <motion.button whileTap={{ scale: 0.96 }}
-                        className="w-full py-2.5 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-fuchsia-50 hover:border-violet-300 hover:text-fuchsia-600 transition">
+                        className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-fuchsia-50 hover:border-violet-300 hover:text-fuchsia-600 transition">
                         <Pencil size={14} /> Modifier
                       </motion.button>
                     </Link>
@@ -431,7 +431,7 @@ export default function DevisPage() {
                     <motion.button whileTap={{ scale: 0.96 }}
                       onClick={() => handleDelete(d.numero)}
                       disabled={deleting === d.numero}
-                      className="py-2.5 px-4 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-red-200 text-red-500 font-semibold rounded-xl flex items-center justify-center gap-1 text-sm hover:bg-red-50 hover:border-red-400 transition disabled:opacity-50">
+                      className="py-2.5 px-4 bg-white dark:bg-slate-900 border border-red-200 text-red-500 font-semibold rounded-xl flex items-center justify-center gap-1 text-sm hover:bg-red-50 hover:border-red-400 transition disabled:opacity-50">
                       <Trash2 size={14} /> {deleting === d.numero ? "..." : ""}
                     </motion.button>
                   </div>

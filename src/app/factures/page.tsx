@@ -3,9 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2, Download, MessageSquareQuote } from "lucide-react";
+import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2, Download, MessageSquareQuote, BadgeCheck } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 interface Facture {
   numero: string;
@@ -21,6 +22,7 @@ interface Facture {
 
 const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
   "Émise": { icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
+  "Payée": { icon: BadgeCheck, color: "text-blue-600", bg: "bg-blue-50" },
   "En retard": { icon: Clock, color: "text-red-500", bg: "bg-red-50" },
 };
 
@@ -35,6 +37,7 @@ export default function FacturesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [markingPaid, setMarkingPaid] = useState<string | null>(null);
 
   const googleReviewLink = (user?.unsafeMetadata?.companyGoogleReview as string) || (user?.publicMetadata?.companyGoogleReview as string);
 
@@ -52,11 +55,12 @@ export default function FacturesPage() {
       const res = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
       if (res.ok) {
         mutate(factures.filter((f: Facture) => f.numero !== numero), false);
+        toast.success("Facture supprimée");
       } else {
-        alert("Erreur lors de la suppression de la facture");
+        toast.error("Erreur lors de la suppression de la facture");
       }
     } catch (e) {
-      alert("Erreur réseau");
+      toast.error("Erreur réseau");
     } finally {
       setDeleting(null);
     }
@@ -144,6 +148,27 @@ export default function FacturesPage() {
     setIsDeletingBulk(false);
   };
 
+  const handleMarkAsPaid = async (numero: string) => {
+    setMarkingPaid(numero);
+    try {
+      const res = await fetch(`/api/factures/${numero}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ statut: "Payée" }),
+      });
+      if (res.ok) {
+        mutate(factures.map((f: Facture) => f.numero === numero ? { ...f, statut: "Payée" } : f), false);
+        toast.success("Facture marquée comme payée !");
+      } else {
+        toast.error("Erreur lors de la mise à jour");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    } finally {
+      setMarkingPaid(null);
+    }
+  };
+
   const handleRelance = (f: Facture) => {
     const sujet = encodeURIComponent(`Relance de paiement : Facture ${f.numero}`);
     const corps = encodeURIComponent(`Bonjour ${f.nomClient},\n\nSauf erreur de notre part, nous n'avons pas encore reçu le règlement de la facture ${f.numero} émise le ${f.date}, d'un montant de ${f.totalTTC}€.\n\nVous trouverez les coordonnées bancaires sur la facture pour effectuer le virement.\n\nNous vous remercions de bien vouloir faire le nécessaire dans les meilleurs délais.\n\nCordialement.`);
@@ -152,7 +177,7 @@ export default function FacturesPage() {
 
   const handleReviewRequest = (f: Facture) => {
     if (!googleReviewLink) {
-      alert("Veuillez d'abord configurer votre lien Google My Business dans les Paramètres.");
+      toast.error("Veuillez d'abord configurer votre lien Google My Business dans les Paramètres.");
       return;
     }
     const sujet = encodeURIComponent(`Votre avis compte pour nous !`);
@@ -162,7 +187,7 @@ export default function FacturesPage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
@@ -269,7 +294,7 @@ export default function FacturesPage() {
               };
               
               const late = isLate();
-              const displayStatut = late ? "En retard" : f.statut;
+              const displayStatut = f.statut === "Payée" ? "Payée" : (late ? "En retard" : f.statut);
               const config = statutConfig[displayStatut] || statutConfig["Émise"];
               const Icon = config.icon;
               return (
@@ -309,13 +334,23 @@ export default function FacturesPage() {
                           <MessageSquareQuote size={16} />
                         </button>
                       ) : (
-                        <button
-                          onClick={() => handleRelance(f)}
-                          className="text-amber-500 hover:text-amber-600 p-2 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors flex items-center justify-center"
-                          title="Relancer le client"
-                        >
-                          <Clock size={16} />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleMarkAsPaid(f.numero)}
+                            disabled={markingPaid === f.numero}
+                            className="text-blue-500 hover:text-blue-600 p-2 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center justify-center disabled:opacity-50"
+                            title="Marquer comme payée"
+                          >
+                            <BadgeCheck size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleRelance(f)}
+                            className="text-amber-500 hover:text-amber-600 p-2 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors flex items-center justify-center"
+                            title="Relancer le client"
+                          >
+                            <Clock size={16} />
+                          </button>
+                        </>
                       )}
                       <div>
                         <p className="text-[10px] text-slate-400">Total TTC</p>

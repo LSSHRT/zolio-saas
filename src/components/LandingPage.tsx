@@ -2,8 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Zap, PenTool, BrainCircuit, Smartphone, ShieldCheck } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight, CheckCircle2, Zap, PenTool, BrainCircuit } from "lucide-react";
 
 export default function LandingPage() {
   return (

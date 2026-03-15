@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Outfit } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SWRProvider } from "@/components/SWRProvider";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -43,7 +45,7 @@ export const viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: ReactNode;
 }>) {
   return (
     <ClerkProvider localization={frFR}>
@@ -58,6 +60,14 @@ export default function RootLayout({
           >
             <SWRProvider>
               {children}
+              <Toaster
+                position="bottom-center"
+                toastOptions={{
+                  classNames: {
+                    toast: "font-sans",
+                  },
+                }}
+              />
             </SWRProvider>
           </ThemeProvider>
         </body>

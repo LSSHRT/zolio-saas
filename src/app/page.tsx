@@ -1,10 +1,10 @@
 "use client";
 
-import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, FolderOpen, Package, Clock, Sun, Moon, CloudSun, Zap, ArrowRight, CheckCircle2, XCircle, StickyNote, Receipt , Pencil, Calendar } from "lucide-react";
+import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, Package, Clock, Sun, Moon, CloudSun, StickyNote, Receipt, Pencil, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { CallBackProps, STATUS, Step } from "react-joyride";
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
@@ -14,20 +14,21 @@ import { UserButton, useUser } from "@clerk/nextjs";
 import LandingPage from "@/components/LandingPage";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-interface Devis {
-  numero: string;
-  nomClient: string;
-  date: string;
-  totalHT: string;
-  totalTTC: string;
-  statut: string;
-}
-
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+function parseDevisDate(dateStr?: string): Date {
+  if (dateStr && dateStr.includes('/')) {
+    const parts = dateStr.split('/');
+    return new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+  } else if (dateStr) {
+    return new Date(dateStr);
+  }
+  return new Date();
+}
 
 function DashboardContent() {
   const { user, isLoaded } = useUser();
-  const { data, error, isLoading } = useSWR('/api/devis', fetcher);
+  const { data, isLoading } = useSWR('/api/devis', fetcher);
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
 
@@ -126,41 +127,29 @@ function DashboardContent() {
     setCurrentHour(new Date().getHours());
   }, []);
 
-  let greetingText = "Bonjour";
-  let WeatherIcon = Sun;
-  if (currentHour !== null) {
-    if (currentHour < 12) {
-      greetingText = "Bonjour";
-      WeatherIcon = CloudSun;
-    } else if (currentHour < 18) {
-      greetingText = "Bon après-midi";
-      WeatherIcon = Sun;
-    } else {
-      greetingText = "Bonsoir";
-      WeatherIcon = Moon;
-    }
+  let greetingText: string;
+  let WeatherIcon;
+  if (currentHour !== null && currentHour >= 18) {
+    greetingText = "Bonsoir";
+    WeatherIcon = Moon;
+  } else if (currentHour !== null && currentHour >= 12) {
+    greetingText = "Bon après-midi";
+    WeatherIcon = Sun;
+  } else {
+    greetingText = "Bonjour";
+    WeatherIcon = CloudSun;
   }
 
   const devisARelancer = devis.filter(d => {
     if (d.statut === "Accepté" || d.statut === "Refusé") return false;
-    let dateObj = new Date();
-    if (d.date && d.date.includes('/')) {
-       const parts = d.date.split('/');
-       dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
-    } else if (d.date) {
-       dateObj = new Date(d.date);
-    }
+    const dateObj = parseDevisDate(d.date);
     const diffTime = Math.abs(Date.now() - dateObj.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 7;
   }).slice(0, 3);
 
   return (
-    <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/10 dark:from-violet-500/10 dark:to-fuchsia-500/5 blur-3xl -z-10 pointer-events-none"></div>
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-violet-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-fuchsia-400/10 dark:bg-fuchsia-600/10 blur-[100px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
+    <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative">
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-96 bg-gradient-to-br from-violet-500/5 to-fuchsia-500/10 dark:from-violet-500/10 dark:to-fuchsia-500/5 blur-3xl -z-10 pointer-events-none"></div>
       <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-violet-400/10 dark:bg-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none mix-blend-multiply dark:mix-blend-screen"></div>
@@ -190,7 +179,7 @@ function DashboardContent() {
       />
       {/* Header */}
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white dark:bg-gray-800/70 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between p-6 pt-12 sm:pt-10 transition-all">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/90 dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between p-6 pt-12 sm:pt-10 transition-all">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 relative rounded-lg overflow-hidden shadow-sm">
             <Image src="/logo.png" alt="Zolio Logo" fill className="object-cover" />
@@ -213,7 +202,7 @@ function DashboardContent() {
           
           {/* Notifications Dropdown */}
           {showNotifications && (
-            <div className="absolute top-12 right-0 w-80 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
+            <div className="absolute top-12 right-0 w-80 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-2xl rounded-2xl p-4 z-50 origin-top-right">
               <div className="flex justify-between items-center mb-3">
                 <h3 className="font-bold text-slate-900 dark:text-white">Notifications</h3>
                 <span className="text-xs text-fuchsia-500 font-medium cursor-pointer hover:underline">Tout marquer comme lu</span>
@@ -480,13 +469,7 @@ function DashboardContent() {
 
             devis.forEach(d => {
               if (d.statut === "Accepté") {
-                let dateObj = new Date();
-                if (d.date && d.date.includes('/')) {
-                   const parts = d.date.split('/');
-                   dateObj = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
-                } else if (d.date) {
-                   dateObj = new Date(d.date);
-                }
+                const dateObj = parseDevisDate(d.date);
                 const m = dateObj.getMonth();
                 const y = dateObj.getFullYear();
                 const targetMonth = monthlyData.find(md => md.month === m && md.year === y);

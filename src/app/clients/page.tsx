@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil, Clock, FileText, CheckCircle, Clock as ClockIcon, Upload } from "lucide-react";
+import { ArrowLeft, Plus, User, Search, Phone, Mail, MapPin, X, Trash2, Pencil, History, FileText, CheckCircle, Upload } from "lucide-react";
 import Link from "next/link";
 import { useRef } from "react";
 
@@ -171,7 +171,7 @@ export default function ClientsPage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-gray-800 dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
+    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white dark:bg-slate-900 sm:shadow-xl sm:my-4 sm:rounded-[3rem] overflow-hidden relative">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
         <Link href="/">
@@ -257,13 +257,13 @@ export default function ClientsPage() {
           >
             <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier le client" : "Nouveau Client"}</h2>
             <input required placeholder="Nom complet" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <input required type="email" placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <input required placeholder="Téléphone" value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <input placeholder="Adresse" value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-gray-800 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
+              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-fuchsia-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter le client"}
@@ -318,6 +318,13 @@ export default function ClientsPage() {
                   </div>
                   <div className="flex items-center">
                     <button
+                      onClick={() => setHistoryClient(client)}
+                      className="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-colors"
+                      title="Voir l'historique"
+                    >
+                      <History size={16} />
+                    </button>
+                    <button
                       onClick={() => handleEdit(client)}
                       className="p-2 text-slate-400 hover:text-fuchsia-500 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-500/10 rounded-lg transition-colors"
                     >
@@ -354,6 +361,13 @@ export default function ClientsPage() {
           )
         )}
       </main>
+
+      {/* History Modal */}
+      <AnimatePresence>
+        {historyClient && (
+          <HistoryModal client={historyClient} onClose={() => setHistoryClient(null)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -366,12 +380,12 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
   const history = useMemo(() => {
     let items: any[] = [];
     if (devis && Array.isArray(devis)) {
-      devis.filter((d: any) => d.clientNom === client.nom || d.clientEmail === client.email).forEach((d: any) => {
+      devis.filter((d: any) => d.nomClient === client.nom || d.emailClient === client.email).forEach((d: any) => {
         items.push({ type: 'devis', id: d.numero, date: d.date, montant: d.totalTTC, statut: d.statut });
       });
     }
     if (factures && Array.isArray(factures)) {
-      factures.filter((f: any) => f.clientNom === client.nom || f.clientEmail === client.email).forEach((f: any) => {
+      factures.filter((f: any) => f.nomClient === client.nom || f.emailClient === client.email).forEach((f: any) => {
         items.push({ type: 'facture', id: f.numero, date: f.date, montant: f.totalTTC, statut: 'Payé' });
       });
     }
@@ -396,7 +410,7 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white dark:bg-gray-800 dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
+        className="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-xl overflow-hidden flex flex-col max-h-[80vh]"
       >
         <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <div>
@@ -415,7 +429,7 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
             <div className="relative border-l-2 border-slate-200 dark:border-slate-700 ml-3 space-y-8">
               {history.map((item, idx) => (
                 <div key={idx} className="relative pl-6">
-                  <div className={`absolute -left-[11px] bg-white dark:bg-gray-800 dark:bg-slate-800 p-0.5 rounded-full border-2 ${item.type === 'facture' ? 'border-green-500' : 'border-fuchsia-500'}`}>
+                  <div className={`absolute -left-[11px] bg-white dark:bg-slate-800 p-0.5 rounded-full border-2 ${item.type === 'facture' ? 'border-green-500' : 'border-fuchsia-500'}`}>
                     {item.type === 'facture' ? (
                       <CheckCircle className="w-4 h-4 text-green-500" />
                     ) : (
