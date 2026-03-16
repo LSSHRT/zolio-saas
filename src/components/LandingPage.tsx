@@ -669,7 +669,7 @@ export default function LandingPage() {
         </section>
 
         {/* Bento Box Features Section */}
-        <section id="features" className="py-32 bg-black relative">
+        <section id="features" className="py-32 bg-transparent relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -830,7 +830,7 @@ export default function LandingPage() {
 
         
         {/* Testimonials Section */}
-        <section className="py-32 bg-black relative">
+        <section className="py-32 bg-transparent relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ils nous font confiance</h2>
@@ -891,7 +891,7 @@ export default function LandingPage() {
         </section>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-32 bg-black relative">
+        <section id="faq" className="py-32 bg-transparent relative">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Questions fréquentes</h2>
@@ -919,7 +919,7 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing Section */}
-        <section id="pricing" className="py-32 bg-black relative">
+        <section id="pricing" className="py-32 bg-transparent relative">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Un tarif clair et unique</h2>
@@ -956,7 +956,7 @@ export default function LandingPage() {
         </section>
 
         {/* Footer */}
-        <footer className="border-t border-white/10 bg-black pt-20 pb-10">
+        <footer className="border-t border-white/10 bg-transparent pt-20 pb-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
               <div className="col-span-1 md:col-span-2">
