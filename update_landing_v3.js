@@ -1,4 +1,6 @@
-"use client";
+const fs = require('fs');
+
+const content = `"use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -120,13 +122,13 @@ const SpotlightCard = ({ children, className = "" }) => {
       onBlur={handleBlur}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl ${className}`}
+      className={\`relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl \${className}\`}
     >
       <div
         className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
         style={{
           opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(139, 92, 246, 0.15), transparent 40%)`,
+          background: \`radial-gradient(600px circle at \${position.x}px \${position.y}px, rgba(139, 92, 246, 0.15), transparent 40%)\`,
         }}
       />
       {children}
@@ -326,8 +328,8 @@ export default function LandingPage() {
                 <div className="w-64 border-r border-white/5 p-4 hidden md:flex flex-col gap-2 bg-black/20">
                   <div className="h-8 w-24 bg-white/10 rounded-md mb-6"></div>
                   {[1,2,3,4,5].map(i => (
-                    <div key={i} className={`h-10 rounded-lg ${i===1 ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'bg-white/5'} flex items-center px-3 gap-3`}>
-                      <div className={`w-5 h-5 rounded-md ${i===1 ? 'bg-violet-400' : 'bg-white/20'}`}></div>
+                    <div key={i} className={\`h-10 rounded-lg \${i===1 ? 'bg-violet-500/20 text-violet-300 border border-violet-500/30' : 'bg-white/5'} flex items-center px-3 gap-3\`}>
+                      <div className={\`w-5 h-5 rounded-md \${i===1 ? 'bg-violet-400' : 'bg-white/20'}\`}></div>
                       <div className="h-2 w-16 bg-white/20 rounded-full"></div>
                     </div>
                   ))}
@@ -623,3 +625,7 @@ export default function LandingPage() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('src/components/LandingPage.tsx', content);
+console.log('LandingPage.tsx updated successfully with 2026 design.');
