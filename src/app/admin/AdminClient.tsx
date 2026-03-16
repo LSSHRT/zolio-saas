@@ -32,6 +32,26 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
   const { data: cronData, mutate: mutateCron } = useSWR('/api/admin/settings?key=cron_prospect_enabled', fetcher);
   const isCronEnabled = cronData?.value !== 'false';
   const [togglingCron, setTogglingCron] = useState(false);
+  const [testingCron, setTestingCron] = useState(false);
+
+  const handleTestCron = async () => {
+    setTestingCron(true);
+    setProspectMessage(null);
+    try {
+      const res = await fetch('/api/cron/prospect');
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.message || "Erreur lors du test du robot");
+      
+      setProspectMessage({ text: `Robot exécuté : ${data.message} ${data.email ? `(${data.email})` : ''}`, type: "success" });
+      mutateMails();
+    } catch (err: any) {
+      setProspectMessage({ text: err.message || "Erreur lors de l'exécution du robot", type: "error" });
+    } finally {
+      setTestingCron(false);
+      setTimeout(() => setProspectMessage(null), 8000);
+    }
+  };
 
   const handleToggleCron = async () => {
     setTogglingCron(true);
@@ -566,17 +586,27 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
               </h3>
               <p className="text-sm text-slate-500">Envoyez des propositions de services Zolio aux artisans.</p>
             </div>
-            <div className="flex items-center gap-3">
-              <span className={`text-sm font-medium ${isCronEnabled ? 'text-green-600' : 'text-slate-500'}`}>
-                {isCronEnabled ? 'Robot Activé' : 'Robot Désactivé'}
-              </span>
+            <div className="flex items-center gap-4">
               <button
-                onClick={handleToggleCron}
-                disabled={togglingCron}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${isCronEnabled ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                onClick={handleTestCron}
+                disabled={testingCron}
+                className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center gap-2 transition disabled:opacity-50"
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isCronEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                {testingCron ? <Loader2 className="w-3 h-3 animate-spin" /> : <Clock className="w-3 h-3" />}
+                {testingCron ? "Exécution..." : "Tester le Robot"}
               </button>
+              <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-700 pl-4">
+                <span className={`text-sm font-medium ${isCronEnabled ? 'text-green-600' : 'text-slate-500'}`}>
+                  {isCronEnabled ? 'Robot Activé' : 'Robot Désactivé'}
+                </span>
+                <button
+                  onClick={handleToggleCron}
+                  disabled={togglingCron}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${isCronEnabled ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isCronEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
+              </div>
             </div>
           </div>
           <div className="p-6 space-y-8">
