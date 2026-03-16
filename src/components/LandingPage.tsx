@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import {
+  Lock,
   ArrowRight,
   CheckCircle,
   Smartphone,
@@ -92,23 +93,69 @@ const HorizontalScrollCarousel = () => {
         <motion.div style={{ x }} className="flex gap-8 px-12">
           {/* Card 1 */}
           <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
-            <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black p-12 flex flex-col justify-end">
-              <h3 className="text-4xl font-bold text-white mb-4">1. Devis sur chantier</h3>
-              <p className="text-xl text-neutral-400">Rédigez vos devis directement depuis votre smartphone, sans attendre le soir.</p>
+            <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black p-8 sm:p-12 flex flex-col">
+              <div className="flex-1 w-full flex items-center justify-center mb-8 relative pointer-events-none">
+                {/* Mockup Devis Mobile */}
+                <div className="w-[180px] h-[320px] bg-neutral-950 rounded-3xl border-4 border-neutral-800 shadow-2xl overflow-hidden relative">
+                  <div className="absolute top-0 w-full h-4 bg-neutral-900 flex justify-center"><div className="w-12 h-1 bg-neutral-700 rounded-b-lg"></div></div>
+                  <div className="mt-8 px-4 space-y-3">
+                    <div className="h-4 w-1/2 bg-violet-500/50 rounded-md"></div>
+                    <div className="h-16 w-full bg-neutral-800 rounded-xl"></div>
+                    <div className="h-8 w-3/4 bg-neutral-800 rounded-xl"></div>
+                    <div className="mt-auto pt-6"><div className="h-10 w-full bg-violet-600 rounded-full"></div></div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-auto z-10 pointer-events-none">
+                <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">1. Devis sur chantier</h3>
+                <p className="text-lg sm:text-xl text-neutral-400">Rédigez vos devis directement depuis votre smartphone, sans attendre le soir.</p>
+              </div>
             </div>
           </div>
           {/* Card 2 */}
           <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
-            <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black p-12 flex flex-col justify-end">
-              <h3 className="text-4xl font-bold text-white mb-4">2. Signature digitale</h3>
-              <p className="text-xl text-neutral-400">Faites signer vos clients directement sur l'écran pour un accord immédiat.</p>
+            <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black p-8 sm:p-12 flex flex-col">
+              <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
+                {/* Mockup Signature */}
+                <div className="w-[240px] h-[160px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-4 flex flex-col">
+                  <div className="h-3 w-1/3 bg-neutral-700 rounded mb-4"></div>
+                  <div className="flex-1 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative overflow-hidden bg-neutral-950">
+                     <svg viewBox="0 0 100 40" className="w-3/4 h-3/4 opacity-60">
+                        <path d="M 10 20 Q 20 10, 30 20 T 50 20 T 70 20 T 90 20" fill="transparent" stroke="#d946ef" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                     </svg>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-auto z-10 pointer-events-none">
+                <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">2. Signature digitale</h3>
+                <p className="text-lg sm:text-xl text-neutral-400">Faites signer vos clients directement sur l'écran pour un accord immédiat.</p>
+              </div>
             </div>
           </div>
           {/* Card 3 */}
           <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
-            <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black p-12 flex flex-col justify-end">
-              <h3 className="text-4xl font-bold text-white mb-4">3. Facturation en 1 clic</h3>
-              <p className="text-xl text-neutral-400">Transformez vos devis acceptés en factures professionnelles instantanément.</p>
+            <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black p-8 sm:p-12 flex flex-col">
+              <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
+                {/* Mockup Facture */}
+                <div className="w-[220px] h-[280px] bg-neutral-200 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-4 flex flex-col">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="w-8 h-8 rounded bg-orange-500"></div>
+                    <div className="h-3 w-16 bg-neutral-300 rounded"></div>
+                  </div>
+                  <div className="space-y-2 mb-6">
+                    <div className="h-2 w-full bg-neutral-300 rounded"></div>
+                    <div className="h-2 w-3/4 bg-neutral-300 rounded"></div>
+                  </div>
+                  <div className="mt-auto p-3 bg-white rounded-lg">
+                    <div className="h-3 w-1/2 bg-neutral-200 rounded mb-2"></div>
+                    <div className="h-4 w-full bg-orange-500/20 rounded"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-auto z-10 pointer-events-none">
+                <h3 className="text-3xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">3. Facturation en 1 clic</h3>
+                <p className="text-lg sm:text-xl text-neutral-400">Transformez vos devis acceptés en factures professionnelles instantanément.</p>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -273,16 +320,53 @@ export default function LandingPage() {
             </motion.div>
           </div>
           
-          {/* Spline 3D Integration Mockup - Using a placeholder 3D scene iframe from Spline */}
-          <div className="mt-20 relative w-full h-[500px] flex justify-center items-center opacity-90 hover:opacity-100 transition-opacity duration-700">
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent z-10 pointer-events-none" />
-            <iframe 
-              src="https://my.spline.design/interactivespheres-2780e92780f2d5930e1bd76db91a1d12/" 
-              frameBorder="0" 
-              width="100%" 
-              height="100%" 
-              className="w-full h-full max-w-5xl rounded-3xl overflow-hidden shadow-[0_0_100px_rgba(139,92,246,0.15)] pointer-events-auto"
-            ></iframe>
+          {/* Dashboard Showcase Mockup (replaces Spline) */}
+          <div className="mt-20 relative w-full max-w-5xl mx-auto opacity-90 hover:opacity-100 transition-opacity duration-700 z-20">
+            <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_0_100px_rgba(139,92,246,0.15)] overflow-hidden p-2 sm:p-4">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 mb-4 bg-white/5 rounded-xl">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                  <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                </div>
+                <div className="mx-auto flex items-center justify-center px-4 py-1 rounded-md bg-white/5 text-xs font-medium text-neutral-400 w-1/3 min-w-[150px]">
+                  <Lock className="w-3 h-3 mr-1 inline-block" /> zolio.site/dashboard
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-2 sm:p-6 bg-black/40 rounded-xl border border-white/5">
+                <div className="hidden md:flex flex-col gap-2 col-span-1 border-r border-white/10 pr-4">
+                  <div className="h-8 w-3/4 bg-white/10 rounded-md mb-4 animate-pulse"></div>
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/5">
+                      <div className="w-5 h-5 rounded bg-violet-500/20"></div>
+                      <div className="h-4 w-2/3 bg-white/10 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="col-span-1 md:col-span-3 flex flex-col gap-4">
+                  <div className="flex justify-between items-center">
+                     <div className="h-8 w-1/3 bg-white/10 rounded-md animate-pulse"></div>
+                     <div className="h-8 w-24 bg-violet-600/40 rounded-md"></div>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 shadow-sm">
+                        <div className="h-4 w-1/2 bg-white/10 rounded mb-4"></div>
+                        <div className="h-8 w-3/4 bg-white/20 rounded animate-pulse"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex-1 rounded-xl bg-white/5 border border-white/5 shadow-sm p-4 min-h-[250px] flex flex-col">
+                     <div className="h-5 w-1/4 bg-white/10 rounded mb-6"></div>
+                     <div className="flex-1 border-b border-white/10 flex items-end gap-2 pb-2">
+                        {[40, 70, 45, 90, 65, 80, 100].map((h, i) => (
+                          <div key={i} className="flex-1 bg-violet-500/60 rounded-t-sm" style={{ height: `${h}%` }}></div>
+                        ))}
+                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -453,7 +537,7 @@ export default function LandingPage() {
                 <div className="flex justify-between items-baseline mb-8">
                   <h3 className="text-3xl font-bold text-white">Zolio Pro</h3>
                   <div className="text-right">
-                    <span className="text-5xl font-extrabold text-white">49€</span>
+                    <span className="text-5xl font-extrabold text-white">29€</span>
                     <span className="text-neutral-400"> /mois</span>
                   </div>
                 </div>
