@@ -98,7 +98,7 @@ const HorizontalScrollCarousel = () => {
     <section className="relative py-24 bg-white/[0.02] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <h2 className="text-3xl sm:text-5xl font-bold text-white text-center">
-          Comment ça marche ? <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">En 3 étapes</span>
+          Comment ça marche ? <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient-x">En 3 étapes</span>
         </h2>
       </div>
 
@@ -258,7 +258,7 @@ const HorizontalScrollCarousel = () => {
 
 // Testimonial Card Component
 const TestimonialCard = ({ name, role, quote, stars = 5 }: any) => (
-  <SpotlightCard className="p-8">
+  <SpotlightCard className="p-8 transform transition-transform duration-500 hover:scale-[1.02] hover:-rotate-1">
     <div className="flex gap-1 mb-4">
       {[...Array(stars)].map((_, i) => (
         <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
