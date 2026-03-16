@@ -85,7 +85,7 @@ const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode
 // Section de Défilement Horizontal (Responsive & Native)
 const HorizontalScrollCarousel = () => {
   return (
-    <section className="relative py-24 bg-neutral-950 overflow-hidden">
+    <section className="relative py-24 bg-white/[0.02] overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <h2 className="text-3xl sm:text-5xl font-bold text-white text-center">
           Comment ça marche ? <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">En 3 étapes</span>
@@ -95,18 +95,18 @@ const HorizontalScrollCarousel = () => {
       <div className="flex overflow-x-auto pb-12 px-4 sm:px-6 lg:px-8 gap-6 sm:gap-8 snap-x snap-mandatory hide-scrollbar justify-start md:justify-center items-stretch">
         {/* Card 1 */}
         <div className="group relative w-[85vw] sm:w-[400px] flex-shrink-0 snap-center rounded-3xl bg-neutral-900 border border-neutral-800 overflow-hidden flex flex-col">
-          <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black"></div>
+          <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-[#05050A]"></div>
           
           <div className="relative z-10 p-8 sm:p-10 flex flex-col h-full">
             <div className="flex-1 w-full flex items-center justify-center mb-10 h-[300px]">
               {/* Mockup Devis Mobile */}
-              <div className="w-[200px] h-[320px] bg-neutral-950 rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col">
-                <div className="absolute top-0 w-full h-5 bg-neutral-900 flex justify-center z-10"><div className="w-16 h-4 bg-neutral-950 rounded-b-xl"></div></div>
+              <div className="w-[200px] h-[320px] bg-white/[0.02] rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col">
+                <div className="absolute top-0 w-full h-5 bg-neutral-900 flex justify-center z-10"><div className="w-16 h-4 bg-white/[0.02] rounded-b-xl"></div></div>
                 <div className="bg-neutral-900 pt-8 pb-3 px-4 flex justify-between items-center border-b border-neutral-800">
                    <span className="text-xs font-bold text-white">Nouveau Devis</span>
                    <span className="text-[10px] text-neutral-400">#D-0142</span>
                 </div>
-                <div className="flex-1 p-3 space-y-3 flex flex-col bg-neutral-950">
+                <div className="flex-1 p-3 space-y-3 flex flex-col bg-white/[0.02]">
                   <div className="bg-neutral-900 rounded-lg p-2">
                      <p className="text-[10px] text-neutral-400 mb-1">Client</p>
                      <p className="text-xs text-white font-medium">Jean Dupont</p>
@@ -140,7 +140,7 @@ const HorizontalScrollCarousel = () => {
 
         {/* Card 2 */}
         <div className="group relative w-[85vw] sm:w-[400px] flex-shrink-0 snap-center rounded-3xl bg-neutral-900 border border-neutral-800 overflow-hidden flex flex-col">
-          <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black"></div>
+          <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-[#05050A]"></div>
           
           <div className="relative z-10 p-8 sm:p-10 flex flex-col h-full">
             <div className="flex-1 w-full flex items-center justify-center mb-10 h-[300px]">
@@ -153,7 +153,7 @@ const HorizontalScrollCarousel = () => {
                 <p className="text-[10px] text-neutral-400 mb-4">
                    J'accepte les conditions du devis #D-0142 (1 250 €).
                 </p>
-                <div className="h-24 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative bg-neutral-950">
+                <div className="h-24 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative bg-white/[0.02]">
                    <span className="absolute text-neutral-600 text-[10px] font-medium uppercase tracking-widest">Signer ici</span>
                    <svg viewBox="0 0 100 40" className="w-full h-full opacity-80 z-10 drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]">
                       <motion.path 
@@ -179,7 +179,7 @@ const HorizontalScrollCarousel = () => {
 
         {/* Card 3 */}
         <div className="group relative w-[85vw] sm:w-[400px] flex-shrink-0 snap-center rounded-3xl bg-neutral-900 border border-neutral-800 overflow-hidden flex flex-col">
-          <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black"></div>
+          <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-[#05050A]"></div>
           
           <div className="relative z-10 p-8 sm:p-10 flex flex-col h-full">
             <div className="flex-1 w-full flex items-center justify-center mb-10 h-[300px]">
@@ -300,7 +300,9 @@ export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-black text-neutral-100 selection:bg-violet-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#05050A] text-neutral-100 selection:bg-violet-500/30 overflow-x-hidden relative">
+      {/* Global Background 2026 */}
+      <div className="absolute top-0 z-[-2] h-screen w-screen bg-[#05050A] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]"></div>
       {/* Aurora Background Effect */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-40">
         <div className="absolute top-[-20%] left-[-10%] w-[50vw] h-[50vh] bg-violet-600/30 rounded-full mix-blend-screen filter blur-[100px] animate-pulse" style={{ animationDuration: '8s' }} />
@@ -310,7 +312,7 @@ export default function LandingPage() {
 
       <div className="relative z-10">
         {/* Navigation */}
-        <nav className="fixed w-full z-50 top-0 transition-all duration-300 bg-black/50 backdrop-blur-xl border-b border-white/10">
+        <nav className="fixed w-full z-50 top-0 transition-all duration-300 bg-[#05050A]/50 backdrop-blur-xl border-b border-white/10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-20">
               <div className="flex items-center">
@@ -345,7 +347,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10"
+                className="md:hidden bg-[#05050A]/95 backdrop-blur-xl border-b border-white/10"
               >
                 <div className="px-4 pt-2 pb-6 space-y-4 flex flex-col">
                   <a href="#features" className="block text-base font-medium text-neutral-300 hover:text-white">Fonctionnalités</a>
@@ -414,7 +416,7 @@ export default function LandingPage() {
                   <Lock className="w-3 h-3 mr-1 inline-block" /> zolio.site/dashboard
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-2 sm:p-4 bg-black/40 rounded-xl border border-white/5 shadow-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-2 sm:p-4 bg-[#05050A]/40 rounded-xl border border-white/5 shadow-2xl">
                 {/* Sidebar */}
                 <div className="hidden md:flex flex-col gap-4 col-span-1 border-r border-white/10 pr-4 py-2">
                   <div className="flex items-center gap-3 px-2 mb-4">
@@ -554,7 +556,7 @@ export default function LandingPage() {
 
         
         {/* Metrics Banner Section */}
-        <section className="py-16 bg-neutral-950 border-y border-white/5 relative overflow-hidden -mt-8 z-20">
+        <section className="py-16 bg-white/[0.02] border-y border-white/5 relative overflow-hidden -mt-8 z-20">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-violet-900/10 via-black to-orange-900/10 opacity-60"></div>
           
@@ -615,7 +617,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="mt-8 h-48 rounded-xl bg-gradient-to-r from-neutral-800 to-neutral-900 border border-neutral-700 overflow-hidden relative">
-                   <div className="absolute right-0 top-4 w-4/5 h-full bg-black/50 border-t border-l border-neutral-700 rounded-tl-xl p-4 transform group-hover:-translate-x-4 transition-transform duration-500">
+                   <div className="absolute right-0 top-4 w-4/5 h-full bg-[#05050A]/50 border-t border-l border-neutral-700 rounded-tl-xl p-4 transform group-hover:-translate-x-4 transition-transform duration-500">
                      <div className="w-full h-4 bg-neutral-800 rounded mb-3"></div>
                      <div className="w-3/4 h-4 bg-neutral-800 rounded mb-3"></div>
                      <div className="w-1/2 h-4 bg-violet-600/50 rounded mb-3"></div>
@@ -681,7 +683,7 @@ export default function LandingPage() {
         </section>
 
         {/* Avant/Après Section */}
-        <section className="py-32 bg-neutral-950 relative overflow-hidden">
+        <section className="py-32 bg-white/[0.02] relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Transformez votre manière de travailler</h2>
