@@ -662,3 +662,11 @@
     "NEW INSTRUCTION": "WHEN user requests landing page improvement THEN add detailed sections and tasteful motion animations"
 }
 
+[2026-03-16 21:33] - Updated by Junie
+{
+    "TYPE": "preference",
+    "CATEGORY": "marketing tone",
+    "EXPECTATION": "Messaging should not overuse 'gratuit'; emphasize trial wording and Pro value/pricing instead.",
+    "NEW INSTRUCTION": "WHEN drafting marketing texts or emails THEN avoid 'gratuit' wording; emphasize trial and Pro value proposition"
+}
+
