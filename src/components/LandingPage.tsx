@@ -27,7 +27,7 @@ function useMousePosition() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   useEffect(() => {
-    const updateMousePosition = (e) => {
+    const updateMousePosition = (e: any) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener("mousemove", updateMousePosition);
@@ -45,7 +45,7 @@ const CustomCursor = () => {
   const [isHovering, setIsHovering] = useState(false);
 
   useEffect(() => {
-    const handleMouseOver = (e) => {
+    const handleMouseOver = (e: any) => {
       if (e.target.closest('button, a, [data-interactive="true"]')) {
         setIsHovering(true);
       } else {
@@ -86,13 +86,13 @@ const CustomCursor = () => {
 };
 
 // 2. Spotlight Card (Linear/Vercel style)
-const SpotlightCard = ({ children, className = "" }) => {
-  const divRef = useRef(null);
+const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
+  const divRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: any) => {
     if (!divRef.current || isFocused) return;
     const div = divRef.current;
     const rect = div.getBoundingClientRect();
@@ -135,7 +135,7 @@ const SpotlightCard = ({ children, className = "" }) => {
 };
 
 // 3. Scroll Reveal Text
-const RevealText = ({ text }) => {
+const RevealText = ({ text }: { text: string }) => {
   const words = text.split(" ");
   return (
     <span className="inline-block">
