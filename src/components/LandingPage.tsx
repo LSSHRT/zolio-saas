@@ -89,11 +89,11 @@ const HorizontalScrollCarousel = () => {
   const x = useTransform(scrollYProgress, [0, 1], ["1%", "-68%"]);
 
   return (
-    <section ref={targetRef} className="relative h-[250vh] bg-neutral-950">
-      <div className="sticky top-[10vh] flex h-[75vh] items-center overflow-hidden">
+    <section ref={targetRef} className="relative h-[200vh] bg-neutral-950">
+      <div className="sticky top-[20vh] flex h-[50vh] items-center overflow-hidden">
         <motion.div style={{ x }} className="flex gap-8 px-12">
           {/* Card 1 */}
-          <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
+          <div className="group relative h-[45vh] w-[70vw] sm:w-[40vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 relative pointer-events-none">
                 {/* Mockup Devis Mobile */}
@@ -138,7 +138,7 @@ const HorizontalScrollCarousel = () => {
             </div>
           </div>
           {/* Card 2 */}
-          <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
+          <div className="group relative h-[45vh] w-[70vw] sm:w-[40vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Signature */}
@@ -174,7 +174,7 @@ const HorizontalScrollCarousel = () => {
             </div>
           </div>
           {/* Card 3 */}
-          <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
+          <div className="group relative h-[45vh] w-[70vw] sm:w-[40vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Facture */}
