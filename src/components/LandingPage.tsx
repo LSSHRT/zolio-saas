@@ -414,36 +414,134 @@ export default function LandingPage() {
                   <Lock className="w-3 h-3 mr-1 inline-block" /> zolio.site/dashboard
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-2 sm:p-6 bg-black/40 rounded-xl border border-white/5">
-                <div className="hidden md:flex flex-col gap-2 col-span-1 border-r border-white/10 pr-4">
-                  <div className="h-8 w-3/4 bg-white/10 rounded-md mb-4 animate-pulse"></div>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4 p-2 sm:p-4 bg-black/40 rounded-xl border border-white/5 shadow-2xl">
+                {/* Sidebar */}
+                <div className="hidden md:flex flex-col gap-4 col-span-1 border-r border-white/10 pr-4 py-2">
+                  <div className="flex items-center gap-3 px-2 mb-4">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-violet-500/20">Z</div>
+                    <div className="h-4 w-20 bg-white/20 rounded"></div>
+                  </div>
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-white/5 border border-white/5">
-                      <div className="w-5 h-5 rounded bg-violet-500/20"></div>
-                      <div className="h-4 w-2/3 bg-white/10 rounded animate-pulse"></div>
+                    <div key={i} className={`flex items-center gap-3 p-2.5 rounded-lg ${i === 0 ? 'bg-violet-500/20 border border-violet-500/30 shadow-[0_0_15px_rgba(139,92,246,0.1)]' : 'hover:bg-white/5 border border-transparent'} transition-all cursor-default`}>
+                      <div className={`w-5 h-5 rounded ${i === 0 ? 'bg-violet-400' : 'bg-white/20'}`}></div>
+                      <div className={`h-3 w-16 rounded ${i === 0 ? 'bg-violet-200' : 'bg-white/30'}`}></div>
                     </div>
                   ))}
-                </div>
-                <div className="col-span-1 md:col-span-3 flex flex-col gap-4">
-                  <div className="flex justify-between items-center">
-                     <div className="h-8 w-1/3 bg-white/10 rounded-md animate-pulse"></div>
-                     <div className="h-8 w-24 bg-violet-600/40 rounded-md"></div>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/5 shadow-sm">
-                        <div className="h-4 w-1/2 bg-white/10 rounded mb-4"></div>
-                        <div className="h-8 w-3/4 bg-white/20 rounded animate-pulse"></div>
+                  <div className="mt-auto pt-4 border-t border-white/10">
+                    <div className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors">
+                      <div className="w-8 h-8 rounded-full bg-white/10"></div>
+                      <div className="flex flex-col gap-1.5">
+                        <div className="h-3 w-16 bg-white/40 rounded"></div>
+                        <div className="h-2 w-12 bg-white/20 rounded"></div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                  <div className="flex-1 rounded-xl bg-white/5 border border-white/5 shadow-sm p-4 min-h-[250px] flex flex-col">
-                     <div className="h-5 w-1/4 bg-white/10 rounded mb-6"></div>
-                     <div className="flex-1 border-b border-white/10 flex items-end gap-2 pb-2">
-                        {[40, 70, 45, 90, 65, 80, 100].map((h, i) => (
-                          <div key={i} className="flex-1 bg-violet-500/60 rounded-t-sm" style={{ height: `${h}%` }}></div>
-                        ))}
+                </div>
+                
+                {/* Main Content */}
+                <div className="col-span-1 md:col-span-4 flex flex-col gap-5 py-2">
+                  {/* Header */}
+                  <div className="flex justify-between items-center px-2">
+                     <div>
+                       <div className="h-6 w-40 bg-white/30 rounded-md mb-2"></div>
+                       <div className="h-3 w-56 bg-white/10 rounded-md hidden sm:block"></div>
                      </div>
+                     <div className="flex items-center gap-3">
+                       <div className="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/5">
+                         <div className="w-4 h-4 bg-white/30 rounded-sm"></div>
+                       </div>
+                       <div className="h-9 w-32 bg-violet-600 hover:bg-violet-500 transition-colors rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-violet-500/25 cursor-default">
+                         <div className="w-3 h-3 bg-white/80 rounded-sm"></div>
+                         <div className="h-3 w-16 bg-white/90 rounded"></div>
+                       </div>
+                     </div>
+                  </div>
+                  
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-2">
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 shadow-sm relative overflow-hidden group hover:border-violet-500/30 transition-colors">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-violet-500/10 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                      <div className="flex justify-between items-start mb-4 relative z-10">
+                        <div className="h-4 w-28 bg-white/40 rounded"></div>
+                        <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center border border-violet-500/20"><div className="w-4 h-4 bg-violet-400 rounded-sm"></div></div>
+                      </div>
+                      <div className="h-8 w-32 bg-white/90 rounded mb-3 relative z-10"></div>
+                      <div className="flex items-center gap-2 relative z-10">
+                        <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/20">+12%</div>
+                        <div className="h-3 w-16 bg-white/20 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 shadow-sm relative overflow-hidden group hover:border-orange-500/30 transition-colors">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-orange-500/10 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                      <div className="flex justify-between items-start mb-4 relative z-10">
+                        <div className="h-4 w-24 bg-white/40 rounded"></div>
+                        <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center border border-orange-500/20"><div className="w-4 h-4 bg-orange-400 rounded-sm"></div></div>
+                      </div>
+                      <div className="h-8 w-24 bg-white/90 rounded mb-3 relative z-10"></div>
+                      <div className="flex items-center gap-2 relative z-10">
+                        <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-neutral-500/20 text-neutral-400 border border-neutral-500/20">En cours</div>
+                        <div className="h-3 w-12 bg-white/20 rounded"></div>
+                      </div>
+                    </div>
+                    <div className="p-4 rounded-xl bg-white/5 border border-white/10 shadow-sm relative overflow-hidden group hover:border-fuchsia-500/30 transition-colors hidden sm:block">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-fuchsia-500/10 rounded-bl-full transition-transform group-hover:scale-110"></div>
+                      <div className="flex justify-between items-start mb-4 relative z-10">
+                        <div className="h-4 w-28 bg-white/40 rounded"></div>
+                        <div className="w-8 h-8 rounded-lg bg-fuchsia-500/20 flex items-center justify-center border border-fuchsia-500/20"><div className="w-4 h-4 bg-fuchsia-400 rounded-sm"></div></div>
+                      </div>
+                      <div className="h-8 w-20 bg-white/90 rounded mb-3 relative z-10"></div>
+                      <div className="flex items-center gap-2 relative z-10">
+                        <div className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/20">À relancer</div>
+                        <div className="h-3 w-20 bg-white/20 rounded"></div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Charts & Lists Area */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 px-2">
+                    {/* Main Chart */}
+                    <div className="col-span-2 rounded-xl bg-white/5 border border-white/10 shadow-sm p-4 flex flex-col min-h-[220px]">
+                       <div className="flex justify-between items-center mb-6">
+                         <div className="h-5 w-32 bg-white/40 rounded"></div>
+                         <div className="flex gap-2">
+                           <div className="h-6 w-16 bg-white/10 rounded-md"></div>
+                           <div className="h-6 w-16 bg-white/5 rounded-md border border-white/10"></div>
+                         </div>
+                       </div>
+                       <div className="flex-1 border-b border-white/10 flex items-end gap-2 sm:gap-3 pb-0 mt-auto px-2">
+                          {[40, 70, 45, 90, 65, 80, 100, 50, 85, 60, 95, 75].map((h, i) => (
+                            <div key={i} className="flex-1 bg-gradient-to-t from-violet-600/60 to-violet-400/80 rounded-t-md relative group hover:from-violet-500 hover:to-fuchsia-400 transition-colors" style={{ height: `${h}%` }}>
+                              <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-neutral-800 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10 shadow-xl pointer-events-none z-20">
+                                {h}00 €
+                              </div>
+                            </div>
+                          ))}
+                       </div>
+                    </div>
+                    
+                    {/* Recent Activity */}
+                    <div className="col-span-1 rounded-xl bg-white/5 border border-white/10 shadow-sm p-4 flex flex-col hidden sm:flex">
+                      <div className="flex justify-between items-center mb-5">
+                        <div className="h-5 w-28 bg-white/40 rounded"></div>
+                        <div className="h-4 w-4 bg-white/20 rounded-full"></div>
+                      </div>
+                      <div className="flex flex-col gap-4">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="flex items-center justify-between group cursor-default">
+                            <div className="flex items-center gap-3">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center border ${i === 0 ? 'bg-emerald-500/10 border-emerald-500/20' : i === 1 ? 'bg-orange-500/10 border-orange-500/20' : 'bg-white/5 border-white/10'}`}>
+                                <div className={`w-3 h-3 rounded-sm ${i === 0 ? 'bg-emerald-400' : i === 1 ? 'bg-orange-400' : 'bg-white/30'}`}></div>
+                              </div>
+                              <div className="flex flex-col gap-1.5">
+                                <div className="h-3 w-24 bg-white/70 rounded group-hover:bg-white transition-colors"></div>
+                                <div className="h-2 w-16 bg-white/30 rounded"></div>
+                              </div>
+                            </div>
+                            <div className="h-3 w-12 bg-white/40 rounded"></div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
