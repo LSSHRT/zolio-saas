@@ -129,7 +129,7 @@ export async function GET(req: Request) {
     const email = await trouverEmailArtisanAleatoire();
 
     if (!email) {
-      return NextResponse.json({ message: "Aucun email trouvé ce tour-ci, réessai plus tard." }, { status: 404 });
+      return NextResponse.json({ message: "Aucun email trouvé ce tour-ci, réessai plus tard." }, { status: 200 });
     }
 
     // 2. Vérifier si on a déjà envoyé un mail à cet artisan (pour éviter le spam)
