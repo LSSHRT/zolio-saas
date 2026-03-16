@@ -77,20 +77,40 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
     setSendingProspect(true);
     setProspectMessage(null);
 
+    const emails = prospectEmail.split(/[\s,;]+/).filter(e => e.trim().length > 0);
+
+    if (emails.length === 0) {
+      setSendingProspect(false);
+      return;
+    }
+
     try {
-      const res = await fetch("/api/admin/mail", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: prospectEmail }),
-      });
+      let successCount = 0;
+      let failCount = 0;
 
-      if (!res.ok) throw new Error("Erreur");
+      for (const email of emails) {
+        const res = await fetch("/api/admin/mail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
 
-      setProspectMessage({ text: `Email envoyé avec succès à ${prospectEmail}`, type: "success" });
-      setProspectEmail("");
+        if (res.ok) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      }
+
+      if (failCount === 0) {
+        setProspectMessage({ text: `${successCount} email(s) envoyé(s) avec succès.`, type: "success" });
+        setProspectEmail("");
+      } else {
+        setProspectMessage({ text: `${successCount} envoyés, ${failCount} erreurs.`, type: "error" });
+      }
       mutateMails();
     } catch (err) {
-      setProspectMessage({ text: "Erreur lors de l'envoi de l'email", type: "error" });
+      setProspectMessage({ text: "Erreur lors de l'envoi des emails", type: "error" });
     } finally {
       setSendingProspect(false);
       setTimeout(() => setProspectMessage(null), 5000);
@@ -612,27 +632,29 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
           <div className="p-6 space-y-8">
             {/* Formulaire manuel */}
             <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Envoi manuel (Test / Unité)</h4>
+              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Envoi manuel (Test / Liste)</h4>
               <p className="text-sm text-slate-500 mb-4">
-                Saisissez l'adresse email d'un artisan pour lui envoyer automatiquement une proposition.
+                Saisissez les adresses emails d'artisans (séparées par des virgules ou des espaces) pour leur envoyer une proposition.
               </p>
-              <form onSubmit={handleSendProspect} className="flex flex-col sm:flex-row gap-4">
-                <input
-                  type="email"
-                  placeholder="Email de l'artisan (ex: contact@peinture.fr)"
+              <form onSubmit={handleSendProspect} className="flex flex-col gap-4">
+                <textarea
+                  placeholder="Emails des artisans (ex: contact@peinture.fr, dupont@plomberie.fr)"
                   required
+                  rows={3}
                   value={prospectEmail}
                   onChange={(e) => setProspectEmail(e.target.value)}
-                  className="flex-1 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y"
                 />
-                <button
-                  disabled={sendingProspect || !prospectEmail}
-                  type="submit"
-                  className="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {sendingProspect ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                  {sendingProspect ? "Envoi..." : "Envoyer l'email"}
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    disabled={sendingProspect || !prospectEmail}
+                    type="submit"
+                    className="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    {sendingProspect ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                    {sendingProspect ? "Envoi en cours..." : "Envoyer aux artisans"}
+                  </button>
+                </div>
               </form>
               {prospectMessage && (
                 <div className={`mt-4 p-3 rounded-lg text-sm flex items-center gap-2 ${prospectMessage.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' : 'bg-red-100 text-red-700 dark:bg-red-900/30'}`}>
