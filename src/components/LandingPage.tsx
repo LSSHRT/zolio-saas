@@ -12,7 +12,8 @@ import {
   ChevronDown,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  FileText
 } from "lucide-react";
 import Image from "next/image";
 
@@ -96,13 +97,37 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 relative pointer-events-none">
                 {/* Mockup Devis Mobile */}
-                <div className="w-[180px] h-[320px] bg-neutral-950 rounded-3xl border-4 border-neutral-800 shadow-2xl overflow-hidden relative">
-                  <div className="absolute top-0 w-full h-4 bg-neutral-900 flex justify-center"><div className="w-12 h-1 bg-neutral-700 rounded-b-lg"></div></div>
-                  <div className="mt-8 px-4 space-y-3">
-                    <div className="h-4 w-1/2 bg-violet-500/50 rounded-md"></div>
-                    <div className="h-16 w-full bg-neutral-800 rounded-xl"></div>
-                    <div className="h-8 w-3/4 bg-neutral-800 rounded-xl"></div>
-                    <div className="mt-auto pt-6"><div className="h-10 w-full bg-violet-600 rounded-full"></div></div>
+                <div className="w-[200px] h-[350px] bg-neutral-950 rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col">
+                  {/* Encloche (Notch) */}
+                  <div className="absolute top-0 w-full h-5 bg-neutral-900 flex justify-center z-10"><div className="w-16 h-4 bg-neutral-950 rounded-b-xl"></div></div>
+                  {/* Header */}
+                  <div className="bg-neutral-900 pt-8 pb-3 px-4 flex justify-between items-center border-b border-neutral-800">
+                     <span className="text-xs font-bold text-white">Nouveau Devis</span>
+                     <span className="text-[10px] text-neutral-400">#D-0142</span>
+                  </div>
+                  {/* Body */}
+                  <div className="flex-1 p-3 space-y-3 flex flex-col bg-neutral-950">
+                    <div className="bg-neutral-900 rounded-lg p-2">
+                       <p className="text-[10px] text-neutral-400 mb-1">Client</p>
+                       <p className="text-xs text-white font-medium">Jean Dupont</p>
+                    </div>
+                    <div className="space-y-2">
+                       <div className="flex justify-between items-center">
+                          <span className="text-[10px] text-neutral-300">Peinture salon</span>
+                          <span className="text-[10px] text-white">850 €</span>
+                       </div>
+                       <div className="flex justify-between items-center">
+                          <span className="text-[10px] text-neutral-300">Main d'œuvre</span>
+                          <span className="text-[10px] text-white">400 €</span>
+                       </div>
+                    </div>
+                    <div className="mt-auto border-t border-neutral-800 pt-2 flex justify-between items-end">
+                       <span className="text-[10px] text-neutral-400">Total TTC</span>
+                       <span className="text-sm font-bold text-violet-400">1 250 €</span>
+                    </div>
+                    <div className="w-full bg-violet-600 text-white text-[10px] font-bold py-2 rounded-full text-center mt-2">
+                       Envoyer au client
+                    </div>
                   </div>
                 </div>
               </div>
@@ -117,12 +142,28 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Signature */}
-                <div className="w-[240px] h-[160px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-4 flex flex-col">
-                  <div className="h-3 w-1/3 bg-neutral-700 rounded mb-4"></div>
-                  <div className="flex-1 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative overflow-hidden bg-neutral-950">
-                     <svg viewBox="0 0 100 40" className="w-3/4 h-3/4 opacity-60">
-                        <path d="M 10 20 Q 20 10, 30 20 T 50 20 T 70 20 T 90 20" fill="transparent" stroke="#d946ef" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <div className="w-[280px] h-[200px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-5 flex flex-col relative overflow-hidden">
+                  <div className="flex justify-between items-center mb-3">
+                     <h4 className="text-white font-bold text-sm">Signature requise</h4>
+                     <FileText className="w-4 h-4 text-fuchsia-500" />
+                  </div>
+                  <p className="text-[10px] text-neutral-400 mb-3">
+                     Je soussigné, accepte les conditions du devis #D-0142 pour un montant de 1 250 €.
+                  </p>
+                  <div className="flex-1 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative bg-neutral-950 group">
+                     <span className="absolute text-neutral-600 text-xs font-medium uppercase tracking-widest">Signer ici</span>
+                     <svg viewBox="0 0 100 40" className="w-full h-full opacity-80 z-10 drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]">
+                        <motion.path 
+                           initial={{ pathLength: 0 }}
+                           animate={{ pathLength: 1 }}
+                           transition={{ duration: 2, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+                           d="M 10 25 C 20 5, 30 35, 40 15 C 50 -5, 60 40, 70 20 C 80 0, 90 30, 95 25" 
+                           fill="transparent" stroke="#d946ef" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" 
+                        />
                      </svg>
+                  </div>
+                  <div className="w-full bg-fuchsia-600 text-white text-[10px] font-bold py-2 rounded-lg text-center mt-3">
+                     Valider la signature
                   </div>
                 </div>
               </div>
@@ -137,18 +178,43 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Facture */}
-                <div className="w-[220px] h-[280px] bg-neutral-200 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-4 flex flex-col">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="w-8 h-8 rounded bg-orange-500"></div>
-                    <div className="h-3 w-16 bg-neutral-300 rounded"></div>
+                <div className="w-[240px] h-[300px] bg-neutral-100 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-5 flex flex-col relative">
+                  {/* Tampon "PAYÉ" */}
+                  <div className="absolute top-12 right-4 border-4 border-green-500 text-green-500 font-black text-xl px-2 py-1 transform rotate-12 opacity-80 rounded z-10">
+                     PAYÉ
                   </div>
-                  <div className="space-y-2 mb-6">
-                    <div className="h-2 w-full bg-neutral-300 rounded"></div>
-                    <div className="h-2 w-3/4 bg-neutral-300 rounded"></div>
+                  <div className="flex justify-between items-start mb-6 border-b border-neutral-300 pb-3">
+                    <div className="flex items-center gap-2">
+                       <div className="w-6 h-6 rounded-md bg-orange-500 flex items-center justify-center text-white font-bold text-[10px]">Z</div>
+                       <span className="text-neutral-800 font-bold text-xs">Facture</span>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-neutral-500 text-[8px]">#F-2026-042</p>
+                       <p className="text-neutral-800 font-bold text-[10px]">1 250 €</p>
+                    </div>
                   </div>
-                  <div className="mt-auto p-3 bg-white rounded-lg">
-                    <div className="h-3 w-1/2 bg-neutral-200 rounded mb-2"></div>
-                    <div className="h-4 w-full bg-orange-500/20 rounded"></div>
+                  <div className="space-y-3 mb-6 flex-1">
+                    <div className="flex justify-between text-[9px] text-neutral-500 border-b border-neutral-200 pb-1">
+                       <span>Description</span>
+                       <span>Montant</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-neutral-800 font-medium">
+                       <span>Peinture salon</span>
+                       <span>850 €</span>
+                    </div>
+                    <div className="flex justify-between text-[10px] text-neutral-800 font-medium">
+                       <span>Main d'œuvre</span>
+                       <span>400 €</span>
+                    </div>
+                  </div>
+                  <div className="mt-auto p-3 bg-white rounded-lg border border-neutral-200 shadow-sm">
+                    <div className="flex justify-between items-center mb-1">
+                       <span className="text-[10px] text-neutral-500">Net à payer</span>
+                       <span className="text-xs font-black text-neutral-900">0 €</span>
+                    </div>
+                    <div className="h-1.5 w-full bg-green-100 rounded-full overflow-hidden mt-2">
+                       <div className="h-full bg-green-500 w-full"></div>
+                    </div>
                   </div>
                 </div>
               </div>
