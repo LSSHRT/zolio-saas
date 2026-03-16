@@ -485,12 +485,24 @@ export default function LandingPage() {
         {/* Bento Box Features Section */}
         <section id="features" className="py-32 bg-black relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
-                Pensé pour l'artisanat moderne
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              viewport={{ once: true }}
+              className="text-center mb-20 flex flex-col items-center"
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">
+                <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                <span className="text-sm font-medium text-neutral-300">L'écosystème parfait</span>
+              </div>
+              <h2 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight text-white">
+                Pensé pour l'artisanat <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400">moderne</span>
               </h2>
-              <p className="text-xl text-neutral-400">Tout ce dont vous avez besoin, sans la complexité.</p>
-            </div>
+              <p className="text-xl md:text-2xl text-neutral-400 max-w-2xl mx-auto font-light">
+                Tout ce dont vous avez besoin pour gérer vos chantiers, <span className="text-neutral-200 font-medium">sans la complexité.</span>
+              </p>
+            </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <SpotlightCard className="md:col-span-2 md:row-span-2 p-10 flex flex-col justify-between group">
