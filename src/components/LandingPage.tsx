@@ -1091,6 +1091,19 @@ export default function LandingPage() {
             Créer mon compte
           </a>
         </div>
+
+        {/* PLG Badge (Product Led Growth) */}
+        <a
+          href="/"
+          className="fixed bottom-6 left-6 z-50 hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-[#05050A]/80 border border-white/10 backdrop-blur-md hover:border-violet-500/50 hover:bg-white/5 transition-all shadow-2xl group"
+        >
+          <div className="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500 flex items-center justify-center p-[2px]">
+            <Image src="/logo.png" alt="Zolio Logo" width={16} height={16} className="rounded-full" />
+          </div>
+          <span className="text-xs font-medium text-neutral-400 group-hover:text-white transition-colors">
+            Propulsé par <span className="text-white font-semibold">Zolio</span>
+          </span>
+        </a>
       </div>
     </div>
   );
