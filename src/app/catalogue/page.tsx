@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil, Upload } from "lucide-react";
 import Link from "next/link";
@@ -105,9 +105,9 @@ export default function CataloguePage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const filtered = prestations.filter(
+  const filtered = useMemo(() => prestations.filter(
     (p) => (p.nom || '').toLowerCase().includes((search || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((search || '').toLowerCase())
-  );
+  ), [prestations, search]);
 
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

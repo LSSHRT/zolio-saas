@@ -34,7 +34,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 export default function DevisPage() {
   const router = useRouter();
   const { userId } = useAuth();
-  const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher);
+  const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");

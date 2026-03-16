@@ -30,7 +30,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function FacturesPage() {
   const { user } = useUser();
-  const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher);
+  const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   const factures = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");

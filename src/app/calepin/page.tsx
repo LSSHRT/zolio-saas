@@ -16,7 +16,7 @@ interface Note {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CalepinPage() {
-  const { data: notes, error, isLoading, mutate } = useSWR<Note[]>("/api/notes", fetcher);
+  const { data: notes, error, isLoading, mutate } = useSWR<Note[]>("/api/notes", fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState<Partial<Note>>({});
   const [isSaving, setIsSaving] = useState(false);

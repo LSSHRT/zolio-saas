@@ -19,7 +19,7 @@ interface Client {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ClientsPage() {
-  const { data, error, isLoading, mutate } = useSWR('/api/clients', fetcher);
+  const { data, error, isLoading, mutate } = useSWR('/api/clients', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   const clients = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
   const [showForm, setShowForm] = useState(false);
@@ -33,9 +33,9 @@ export default function ClientsPage() {
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const filtered = clients.filter(
+  const filtered = useMemo(() => clients.filter(
     (c) => (c.nom || '').toLowerCase().includes((search || '').toLowerCase()) || (c.email || '').toLowerCase().includes((search || '').toLowerCase())
-  );
+  ), [clients, search]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -379,8 +379,8 @@ export default function ClientsPage() {
 
 
 function HistoryModal({ client, onClose }: { client: Client; onClose: () => void }) {
-  const { data: devis } = useSWR('/api/devis', fetcher);
-  const { data: factures } = useSWR('/api/factures', fetcher);
+  const { data: devis } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
+  const { data: factures } = useSWR('/api/factures', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
 
   const history = useMemo(() => {
     let items: any[] = [];

@@ -4,7 +4,7 @@ import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { CallBackProps, STATUS, Step } from "react-joyride";
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
@@ -28,7 +28,7 @@ function parseDevisDate(dateStr?: string): Date {
 
 function DashboardContent() {
   const { user, isLoaded } = useUser();
-  const { data, isLoading } = useSWR('/api/devis', fetcher);
+  const { data, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   const devis = Array.isArray(data) ? data : [];
   const loading = isLoading && !data;
 
@@ -115,9 +115,9 @@ function DashboardContent() {
 
 
   // Calculs dynamiques
-  const CA_HT = devis.reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0);
-  const CA_TTC = devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0);
-  const devisRecents = devis.slice(0, 3); // Les 3 derniers devis générés
+  const CA_HT = useMemo(() => devis.reduce((sum, d) => sum + (parseFloat(d.totalHT) || 0), 0), [devis]);
+  const CA_TTC = useMemo(() => devis.reduce((sum, d) => sum + (parseFloat(d.totalTTC) || 0), 0), [devis]);
+  const devisRecents = useMemo(() => devis.slice(0, 3), [devis]);
 
 
   
@@ -140,13 +140,13 @@ function DashboardContent() {
     WeatherIcon = CloudSun;
   }
 
-  const devisARelancer = devis.filter(d => {
+  const devisARelancer = useMemo(() => devis.filter(d => {
     if (d.statut === "Accepté" || d.statut === "Refusé") return false;
     const dateObj = parseDevisDate(d.date);
     const diffTime = Math.abs(Date.now() - dateObj.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 7;
-  }).slice(0, 3);
+  }).slice(0, 3), [devis]);
 
   return (
     <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">

@@ -86,7 +86,7 @@ function PlanningItem({ devis, mutate }: { devis: any; mutate: any }) {
 }
 
 export default function PlanningPage() {
-  const { data: devis, mutate, isLoading } = useSWR('/api/devis', fetcher);
+  const { data: devis, mutate, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   
   const devisAccepte = Array.isArray(devis) ? devis.filter((d) => d.statut === "Accepté") : [];
 

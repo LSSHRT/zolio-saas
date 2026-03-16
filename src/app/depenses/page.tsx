@@ -18,8 +18,8 @@ interface Depense {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DepensesPage() {
-  const { data: depenses, error, mutate } = useSWR<Depense[]>("/api/depenses", fetcher);
-  const { data: factures } = useSWR<any[]>("/api/factures", fetcher);
+  const { data: depenses, error, mutate } = useSWR<Depense[]>("/api/depenses", fetcher, { revalidateOnFocus: false, keepPreviousData: true });
+  const { data: factures } = useSWR<any[]>("/api/factures", fetcher, { revalidateOnFocus: false, keepPreviousData: true });
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({

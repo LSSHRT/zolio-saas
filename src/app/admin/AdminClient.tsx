@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useTransition } from 'react';
-import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock, Ban, Crown, UserX, Loader2 } from "lucide-react";
+import useSWR from 'swr';
+import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock, Ban, Crown, UserX, Loader2, Send, CheckCircle2, XCircle, History, Clock } from "lucide-react";
 import { toggleUserProStatus, banUser, deleteUserAccount, grantAdminRole, setSystemBanner, updateAdminSettings } from './actions';
+
+const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 export default function AdminClient({ initialUsers = [], stats = {}, logs = [], systemBanner, currentGeminiKey }: any) {
   const [activeTab, setActiveTab] = useState('overview');
@@ -13,6 +16,40 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
   const [bannerText, setBannerText] = useState(systemBanner || '');
   const [geminiKey, setGeminiKey] = useState(currentGeminiKey || '');
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+
+  // Prospection State
+  const { data: mailsData, mutate: mutateMails } = useSWR('/api/admin/mail', fetcher);
+  const mails = Array.isArray(mailsData) ? mailsData : [];
+  const [prospectEmail, setProspectEmail] = useState("");
+  const [sendingProspect, setSendingProspect] = useState(false);
+  const [prospectMessage, setProspectMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+
+  const handleSendProspect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prospectEmail) return;
+
+    setSendingProspect(true);
+    setProspectMessage(null);
+
+    try {
+      const res = await fetch("/api/admin/mail", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: prospectEmail }),
+      });
+
+      if (!res.ok) throw new Error("Erreur");
+
+      setProspectMessage({ text: `Email envoyé avec succès à ${prospectEmail}`, type: "success" });
+      setProspectEmail("");
+      mutateMails();
+    } catch (err) {
+      setProspectMessage({ text: "Erreur lors de l'envoi de l'email", type: "error" });
+    } finally {
+      setSendingProspect(false);
+      setTimeout(() => setProspectMessage(null), 5000);
+    }
+  };
 
   const handleTogglePro = async (userId: string, currentIsPro: boolean) => {
     if (!confirm(currentIsPro ? 'Retirer le statut PRO à cet utilisateur ?' : 'Accorder le statut PRO à cet utilisateur ?')) return;
@@ -122,6 +159,9 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
       </button>
       <button onClick={() => setActiveTab('marketing')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'marketing' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
         <Mail className="w-4 h-4 inline-block mr-2" /> Marketing
+      </button>
+      <button onClick={() => setActiveTab('prospection')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'prospection' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
+        <Send className="w-4 h-4 inline-block mr-2" /> Prospection
       </button>
       <button onClick={() => setActiveTab('automations')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'automations' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
         <Zap className="w-4 h-4 inline-block mr-2" /> Automatisations
@@ -489,6 +529,91 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
                  <button className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm border border-slate-200 dark:border-slate-700">Voir l'arbre</button>
                </div>
              </div>
+          </div>
+        </CardWrapper>
+      )}
+
+      {activeTab === 'prospection' && (
+        <CardWrapper>
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
+            <h3 className="font-bold text-lg flex items-center gap-2">
+              <Send className="w-5 h-5 text-purple-600" />
+              Prospection Automatisée
+            </h3>
+            <p className="text-sm text-slate-500">Envoyez des propositions de services Zolio aux artisans.</p>
+          </div>
+          <div className="p-6 space-y-8">
+            {/* Formulaire manuel */}
+            <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Envoi manuel (Test / Unité)</h4>
+              <p className="text-sm text-slate-500 mb-4">
+                Saisissez l'adresse email d'un artisan pour lui envoyer automatiquement une proposition.
+              </p>
+              <form onSubmit={handleSendProspect} className="flex flex-col sm:flex-row gap-4">
+                <input
+                  type="email"
+                  placeholder="Email de l'artisan (ex: contact@peinture.fr)"
+                  required
+                  value={prospectEmail}
+                  onChange={(e) => setProspectEmail(e.target.value)}
+                  className="flex-1 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                />
+                <button
+                  disabled={sendingProspect || !prospectEmail}
+                  type="submit"
+                  className="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {sendingProspect ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {sendingProspect ? "Envoi..." : "Envoyer l'email"}
+                </button>
+              </form>
+              {prospectMessage && (
+                <div className={`mt-4 p-3 rounded-lg text-sm flex items-center gap-2 ${prospectMessage.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' : 'bg-red-100 text-red-700 dark:bg-red-900/30'}`}>
+                  {prospectMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                  {prospectMessage.text}
+                </div>
+              )}
+            </div>
+
+            {/* Historique */}
+            <div>
+              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
+                <History className="w-4 h-4 text-purple-600" /> Historique d'envoi
+              </h4>
+              
+              {mails.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
+                  Aucun email de prospection n'a été envoyé pour le moment.
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+                  {mails.map((mail: any) => (
+                    <div key={mail.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-slate-900 dark:text-white text-sm">
+                          {mail.email}
+                        </span>
+                        <span className="text-xs text-slate-500 flex items-center gap-1 mt-1">
+                          <Clock className="w-3 h-3" />
+                          {new Date(mail.createdAt).toLocaleString("fr-FR")} · {mail.source}
+                        </span>
+                      </div>
+                      <div>
+                        {mail.status === "Sent" ? (
+                          <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                            <CheckCircle2 className="w-3 h-3" /> Envoyé
+                          </span>
+                        ) : (
+                          <span className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                            <XCircle className="w-3 h-3" /> Échec
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </CardWrapper>
       )}
