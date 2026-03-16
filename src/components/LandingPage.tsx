@@ -691,50 +691,138 @@ export default function LandingPage() {
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <SpotlightCard className="md:col-span-2 md:row-span-2 p-10 flex flex-col justify-between group">
-                <div>
-                  <div className="w-14 h-14 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-6 border border-violet-500/20">
+              {/* Mobile-First Absolu */}
+              <SpotlightCard className="md:col-span-2 md:row-span-2 p-10 flex flex-col justify-between group overflow-hidden relative bg-gradient-to-br from-white/[0.03] to-white/[0.01]">
+                <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-violet-500/20 rounded-full blur-[80px] pointer-events-none group-hover:bg-violet-500/30 transition-colors duration-700"></div>
+                <div className="relative z-10">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 flex items-center justify-center mb-6 border border-violet-500/20 backdrop-blur-xl shadow-[0_0_30px_rgba(139,92,246,0.2)]">
                     <Smartphone className="w-7 h-7 text-violet-400" />
                   </div>
-                  <h3 className="text-3xl font-bold text-white mb-4">Mobile-First Absolu</h3>
-                  <p className="text-neutral-400 text-lg leading-relaxed">
+                  <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Mobile-First Absolu</h3>
+                  <p className="text-neutral-400 text-lg leading-relaxed max-w-md">
                     Créez un devis, faites-le signer et envoyez la facture directement depuis votre camion ou le chantier.
                     L'interface s'adapte parfaitement à votre téléphone.
                   </p>
                 </div>
-                <div className="mt-8 h-48 rounded-xl bg-gradient-to-r from-neutral-800 to-neutral-900 border border-neutral-700 overflow-hidden relative">
-                   <div className="absolute right-0 top-4 w-4/5 h-full bg-[#05050A]/50 border-t border-l border-neutral-700 rounded-tl-xl p-4 transform group-hover:-translate-x-4 transition-transform duration-500">
-                     <div className="w-full h-4 bg-neutral-800 rounded mb-3"></div>
-                     <div className="w-3/4 h-4 bg-neutral-800 rounded mb-3"></div>
-                     <div className="w-1/2 h-4 bg-violet-600/50 rounded mb-3"></div>
+                
+                {/* 3D Mockup Effect */}
+                <div className="mt-12 h-64 rounded-2xl bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 border border-white/10 overflow-hidden relative shadow-2xl backdrop-blur-sm group-hover:border-violet-500/30 transition-colors duration-500">
+                   <div className="absolute right-[-10%] top-8 w-4/5 h-[120%] bg-[#05050A] border border-white/10 rounded-tl-3xl p-6 transform group-hover:-translate-x-6 group-hover:-translate-y-2 transition-all duration-700 shadow-[-20px_20px_40px_rgba(0,0,0,0.5)] flex flex-col gap-4">
+                     {/* Fake Mobile Header */}
+                     <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                        <div className="w-1/3 h-4 bg-white/10 rounded-full"></div>
+                        <div className="w-8 h-8 rounded-full bg-violet-500/20 flex items-center justify-center">
+                          <div className="w-4 h-4 rounded-full bg-violet-400"></div>
+                        </div>
+                     </div>
+                     {/* Fake Content */}
+                     <div className="space-y-3 mt-2">
+                       <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5 flex items-center px-4">
+                          <div className="w-6 h-6 rounded bg-violet-500/30 mr-3"></div>
+                          <div className="w-1/2 h-3 bg-white/20 rounded-full"></div>
+                       </div>
+                       <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5 flex items-center px-4">
+                          <div className="w-6 h-6 rounded bg-fuchsia-500/30 mr-3"></div>
+                          <div className="w-2/3 h-3 bg-white/20 rounded-full"></div>
+                       </div>
+                     </div>
+                     {/* Fake Action Button */}
+                     <div className="mt-auto w-full h-12 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.3)]">
+                        <div className="w-1/3 h-3 bg-white/80 rounded-full"></div>
+                     </div>
                    </div>
                 </div>
               </SpotlightCard>
 
-              <SpotlightCard>
-                <div className="w-12 h-12 rounded-xl bg-fuchsia-500/10 flex items-center justify-center mb-6 border border-fuchsia-500/20">
-                  <Calculator className="w-6 h-6 text-fuchsia-400" />
+              {/* Calcul de marge */}
+              <SpotlightCard className="group relative overflow-hidden bg-gradient-to-br from-white/[0.03] to-white/[0.01]">
+                <div className="absolute inset-0 bg-gradient-to-br from-fuchsia-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                <div className="relative z-10 h-full flex flex-col">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-fuchsia-500/20 to-fuchsia-500/5 flex items-center justify-center mb-6 border border-fuchsia-500/20 backdrop-blur-xl shadow-[0_0_20px_rgba(217,70,239,0.2)]">
+                    <Calculator className="w-6 h-6 text-fuchsia-400 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Calcul de marge</h3>
+                  <p className="text-neutral-400 flex-grow">Visualisez votre rentabilité en temps réel pendant la rédaction de votre devis.</p>
+                  
+                  {/* Mini Chart Mockup */}
+                  <div className="mt-6 flex items-end gap-2 h-16 opacity-60 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="w-1/4 bg-white/10 rounded-t-md h-1/3"></div>
+                    <div className="w-1/4 bg-white/10 rounded-t-md h-1/2"></div>
+                    <div className="w-1/4 bg-fuchsia-500/30 rounded-t-md h-3/4 relative">
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-fuchsia-400">+42%</div>
+                    </div>
+                    <div className="w-1/4 bg-gradient-to-t from-fuchsia-600 to-violet-600 rounded-t-md h-full shadow-[0_0_15px_rgba(217,70,239,0.4)]"></div>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">Calcul de marge</h3>
-                <p className="text-neutral-400">Visualisez votre rentabilité en temps réel pendant la rédaction de votre devis.</p>
               </SpotlightCard>
 
-              <SpotlightCard>
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6 border border-blue-500/20">
-                  <ShieldCheck className="w-6 h-6 text-blue-400" />
+              {/* Conforme 2026 */}
+              <SpotlightCard className="group relative overflow-hidden bg-gradient-to-br from-white/[0.03] to-white/[0.01]">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                <div className="relative z-10 h-full flex flex-col">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center mb-6 border border-blue-500/20 backdrop-blur-xl shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                    <ShieldCheck className="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-3 tracking-tight">Conforme 2026</h3>
+                  <p className="text-neutral-400 flex-grow">Facturation électronique et mentions légales gérées automatiquement.</p>
+                  
+                  {/* Badge & Verify Animation */}
+                  <div className="mt-6 flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                      <span className="text-xs font-medium text-blue-200">Factur-X Ready</span>
+                    </div>
+                    <svg className="w-4 h-4 text-blue-400 opacity-50 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">Conforme 2026</h3>
-                <p className="text-neutral-400">Facturation électronique et mentions légales gérées automatiquement.</p>
               </SpotlightCard>
 
-              <SpotlightCard className="md:col-span-3 h-64 flex flex-col justify-center items-center text-center overflow-hidden relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 via-fuchsia-600/20 to-orange-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                <Zap className="w-12 h-12 text-yellow-400 mb-6" />
-                <h3 className="text-3xl font-bold text-white mb-4 z-10">Vitesse foudroyante</h3>
-                <p className="text-neutral-400 text-lg max-w-2xl z-10">
-                  Chaque action dans Zolio est instantanée. Pas de temps de chargement, pas d'attente. 
-                  Gagnez en moyenne 4h de travail administratif par semaine.
-                </p>
+              {/* Vitesse foudroyante */}
+              <SpotlightCard className="md:col-span-3 h-auto py-12 flex flex-col md:flex-row justify-between items-center text-left overflow-hidden relative group bg-gradient-to-br from-white/[0.03] to-white/[0.01]">
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-600/10 via-fuchsia-600/10 to-orange-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+                
+                {/* Background Speed Lines */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20">
+                  <div className="absolute top-1/4 -left-20 w-[120%] h-px bg-gradient-to-r from-transparent via-white to-transparent transform -rotate-12 translate-x-full group-hover:-translate-x-full transition-transform duration-[2s] ease-in-out"></div>
+                  <div className="absolute top-2/4 -left-20 w-[120%] h-px bg-gradient-to-r from-transparent via-violet-500 to-transparent transform -rotate-12 translate-x-full group-hover:-translate-x-full transition-transform duration-[1.5s] ease-in-out delay-100"></div>
+                  <div className="absolute top-3/4 -left-20 w-[120%] h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent transform -rotate-12 translate-x-full group-hover:-translate-x-full transition-transform duration-[2.5s] ease-in-out delay-200"></div>
+                </div>
+
+                <div className="relative z-10 flex-1 md:pr-12 text-center md:text-left mb-8 md:mb-0 flex flex-col items-center md:items-start">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 flex items-center justify-center mb-6 border border-yellow-500/20 backdrop-blur-xl shadow-[0_0_30px_rgba(250,204,21,0.2)]">
+                    <Zap className="w-8 h-8 text-yellow-400" />
+                  </div>
+                  <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">Vitesse foudroyante</h3>
+                  <p className="text-neutral-400 text-lg md:text-xl max-w-2xl font-light">
+                    Chaque action dans Zolio est instantanée. Pas de temps de chargement, pas d'attente. 
+                    <span className="text-white font-medium"> Gagnez en moyenne 4h de travail administratif par semaine.</span>
+                  </p>
+                </div>
+
+                <div className="relative z-10 w-full md:w-auto flex flex-col items-center">
+                  {/* Speedometer visual */}
+                  <div className="relative w-48 h-48 flex items-center justify-center">
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                      {/* Background Track */}
+                      <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.05)" strokeWidth="8" fill="none" strokeDasharray="188 251" strokeLinecap="round" />
+                      {/* Active Track */}
+                      <circle cx="50" cy="50" r="40" stroke="url(#speedGradient)" strokeWidth="8" fill="none" strokeDasharray="0 251" strokeLinecap="round" className="group-hover:[stroke-dasharray:188_251] transition-all duration-1000 ease-out" />
+                      <defs>
+                        <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="50%" stopColor="#d946ef" />
+                          <stop offset="100%" stopColor="#f97316" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className="absolute flex flex-col items-center">
+                      <span className="text-3xl font-black text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-violet-400 group-hover:to-orange-400 transition-colors duration-500">0ms</span>
+                      <span className="text-xs text-neutral-500 uppercase tracking-widest font-bold">Latence</span>
+                    </div>
+                  </div>
+                </div>
               </SpotlightCard>
             </div>
           </div>
