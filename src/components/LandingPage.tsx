@@ -439,6 +439,34 @@ export default function LandingPage() {
         {/* Horizontal Scroll Section */}
         <HorizontalScrollCarousel />
 
+        
+        {/* Metrics Banner Section */}
+        <section className="py-16 bg-neutral-950 border-y border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-900/10 via-black to-orange-900/10 opacity-60"></div>
+          
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center divide-y md:divide-y-0 md:divide-x divide-white/5">
+              <div className="p-4 sm:p-8">
+                <div className="text-5xl md:text-6xl font-black bg-gradient-to-b from-white to-neutral-500 bg-clip-text text-transparent mb-2 tracking-tighter">3x</div>
+                <div className="text-violet-400 font-semibold mb-2 tracking-wide uppercase text-sm">Plus rapide</div>
+                <p className="text-neutral-500 text-sm max-w-xs mx-auto">Pour créer, envoyer et faire signer un devis professionnel</p>
+              </div>
+              <div className="p-4 sm:p-8">
+                <div className="text-5xl md:text-6xl font-black bg-gradient-to-b from-white to-neutral-500 bg-clip-text text-transparent mb-2 tracking-tighter">100%</div>
+                <div className="text-fuchsia-400 font-semibold mb-2 tracking-wide uppercase text-sm">Sur Chantier</div>
+                <p className="text-neutral-500 text-sm max-w-xs mx-auto">Conçu spécifiquement pour une utilisation mobile et tablette</p>
+              </div>
+              <div className="p-4 sm:p-8">
+                <div className="text-5xl md:text-6xl font-black bg-gradient-to-b from-white to-neutral-500 bg-clip-text text-transparent mb-2 tracking-tighter">0</div>
+                <div className="text-orange-400 font-semibold mb-2 tracking-wide uppercase text-sm">Oubli</div>
+                <p className="text-neutral-500 text-sm max-w-xs mx-auto">Fini la paperasse le soir, tout est centralisé et sécurisé</p>
+              </div>
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent"></div>
+        </section>
+
         {/* Bento Box Features Section */}
         <section id="features" className="py-32 bg-black relative">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
