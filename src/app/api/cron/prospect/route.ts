@@ -5,44 +5,48 @@ import { sendProspectEmail } from "@/lib/sendEmail";
 const prisma = new PrismaClient();
 const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "2663781be1b12bdd7aeefdd22d5103a094ceb6b7";
 
-// Fonction pour extraire des emails via une recherche web (Bing)
+// Fonction pour extraire des emails via une recherche web (Bing) avec relances
 async function findEmailViaSearch() {
   const metiers = ["Plombier", "Électricien", "Menuisier", "Peintre", "Maçon", "Carreleur", "Chauffagiste", "Serrurier", "Vitrier", "Couvreur", "Charpentier"];
   const villes = ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Montpellier", "Strasbourg", "Bordeaux", "Lille", "Rennes", "Reims", "Toulon", "Saint-Etienne", "Grenoble", "Dijon", "Angers", "Nîmes", "Villeurbanne"];
   const providers = ["@gmail.com", "@orange.fr", "@hotmail.fr", "@yahoo.fr"];
   
-  const metier = metiers[Math.floor(Math.random() * metiers.length)];
-  const ville = villes[Math.floor(Math.random() * villes.length)];
-  const provider = providers[Math.floor(Math.random() * providers.length)];
-  
-  const query = `${metier} ${ville} contact artisan "${provider}"`;
-  
-  try {
-    const response = await fetch("https://www.bing.com/search?q=" + encodeURIComponent(query), {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-      }
-    });
+  // On tente jusqu'à 5 fois pour être sûr de trouver un email, car les résultats Bing peuvent varier
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const metier = metiers[Math.floor(Math.random() * metiers.length)];
+    const ville = villes[Math.floor(Math.random() * villes.length)];
+    const provider = providers[Math.floor(Math.random() * providers.length)];
     
-    if (!response.ok) return null;
+    const query = `${metier} ${ville} contact artisan "${provider}"`;
     
-    const html = await response.text();
-    const emailRegex = /[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/gi;
-    const emails = html.match(emailRegex);
-    
-    if (emails) {
-      const uniqueEmails = [...new Set(emails.map(e => e.toLowerCase()))]
-        .filter(e => e.includes(provider.replace("@", "")))
-        .filter(e => !e.startsWith("22@") && !e.startsWith("27@") && !e.startsWith("u00") && e.length > 10);
+    try {
+      const response = await fetch("https://www.bing.com/search?q=" + encodeURIComponent(query), {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+        }
+      });
+      
+      if (response.ok) {
+        const html = await response.text();
+        const emailRegex = /[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+/gi;
+        const emails = html.match(emailRegex);
         
-      if (uniqueEmails.length > 0) {
-        // Retourne un email au hasard parmi ceux trouvés
-        return uniqueEmails[Math.floor(Math.random() * uniqueEmails.length)];
+        if (emails) {
+          const uniqueEmails = [...new Set(emails.map(e => e.toLowerCase()))]
+            .filter(e => e.includes(provider.replace("@", "")))
+            .filter(e => !e.startsWith("22@") && !e.startsWith("27@") && !e.startsWith("u00") && e.length > 10);
+            
+          if (uniqueEmails.length > 0) {
+            // Retourne un email au hasard parmi ceux trouvés lors de cet essai
+            return uniqueEmails[Math.floor(Math.random() * uniqueEmails.length)];
+          }
+        }
       }
+    } catch (e) {
+      console.error(`Erreur recherche web (essai ${attempt + 1}):`, e);
     }
-  } catch (e) {
-    console.error("Erreur recherche web:", e);
   }
+  
   return null;
 }
 
