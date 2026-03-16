@@ -977,40 +977,101 @@ export default function LandingPage() {
         </section>
 
         
-        {/* Pricing Section */}
+        {/* Pricing Section - 2026 Design */}
         <section id="pricing" className="py-32 bg-transparent relative">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Un tarif clair et unique</h2>
-              <p className="text-xl text-neutral-400">Pour développer votre entreprise sans limites.</p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6"
+              >
+                <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                <span className="text-sm font-medium text-white/80 tracking-wide uppercase">SANS ENGAGEMENT</span>
+              </motion.div>
+              <motion.h2 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-4xl md:text-6xl font-bold mb-6 tracking-tight"
+              >
+                Un tarif <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient bg-300%">clair et unique</span>
+              </motion.h2>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-xl text-neutral-400 max-w-2xl mx-auto"
+              >
+                Pour développer votre entreprise sans limites.
+              </motion.p>
             </div>
 
-            <div className="max-w-lg mx-auto">
-              <SpotlightCard className="p-10 border-violet-500/30 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
-                <div className="flex justify-between items-baseline mb-8">
-                  <h3 className="text-3xl font-bold text-white">Zolio Pro</h3>
-                  <div className="text-right">
-                    <span className="text-5xl font-extrabold text-white">29€</span>
-                    <span className="text-neutral-400"> /mois</span>
+            <motion.div 
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="max-w-lg mx-auto relative group perspective"
+            >
+              {/* Magic Glowing Border */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-600 rounded-3xl blur opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+              
+              <SpotlightCard className="p-10 relative overflow-hidden rounded-3xl bg-neutral-950/80 backdrop-blur-2xl border border-white/10 transform transition-transform duration-500 hover:scale-[1.02] preserve-3d">
+                {/* Aurora inside the card */}
+                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-150"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-600/10 rounded-full blur-3xl -ml-32 -mb-32 transition-transform duration-700 group-hover:scale-150"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex justify-between items-baseline mb-8">
+                    <div>
+                      <h3 className="text-3xl font-bold text-white mb-2">Zolio Pro</h3>
+                      <p className="text-violet-300 text-sm font-medium">Tout inclus</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60">29€</span>
+                      <span className="text-neutral-400 block mt-1">/mois</span>
+                    </div>
                   </div>
+                  
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-8"></div>
+                  
+                  <ul className="space-y-5 mb-10">
+                    {['Devis et factures illimités', 'Catalogue de prix intégré', 'Signature électronique', 'Support prioritaire 7j/7'].map((feature, idx) => (
+                      <motion.li 
+                        key={idx} 
+                        initial={{ opacity: 0, x: -10 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.4 + (idx * 0.1) }}
+                        className="flex items-center text-neutral-200 group/item"
+                      >
+                        <div className="relative mr-4 flex-shrink-0">
+                          <div className="absolute inset-0 bg-violet-500 rounded-full blur opacity-0 group-hover/item:opacity-50 transition-opacity"></div>
+                          <CheckCircle className="w-6 h-6 text-violet-400 relative z-10" />
+                        </div>
+                        <span className="text-lg">{feature}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                  
+                  <a 
+                    href="/sign-up?redirect_url=/dashboard"
+                    className="group/btn relative block w-full py-4 rounded-xl font-bold text-center transition-all duration-300 transform hover:scale-[1.02] active:scale-95 overflow-hidden"
+                  >
+                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 opacity-90 group-hover/btn:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 w-full h-full bg-white/20 scale-x-0 group-hover/btn:scale-x-100 origin-left transition-transform duration-500 ease-out"></div>
+                    <span className="relative z-10 text-white flex items-center justify-center gap-2">
+                      Démarrer l'essai (1 devis)
+                      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
+                    </span>
+                  </a>
                 </div>
-                <ul className="space-y-4 mb-10">
-                  {['Devis et factures illimités', 'Catalogue de prix intégré', 'Signature électronique', 'Support prioritaire 7j/7'].map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-neutral-300">
-                      <CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <a 
-                  href="/sign-up?redirect_url=/dashboard"
-                  className="block w-full py-4 rounded-xl bg-white text-black font-semibold text-center hover:bg-neutral-200 transition-colors"
-                >
-                  Démarrer l'essai (1 devis)
-                </a>
               </SpotlightCard>
-            </div>
+            </motion.div>
           </div>
         </section>
 
