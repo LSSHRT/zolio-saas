@@ -103,7 +103,7 @@ export default function ParametresEntreprise() {
       {/* Background Blobs */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
       <div className="bg-white/50 dark:bg-slate-800/50 backdrop-blur-md border-b dark:border-slate-700/50 px-4 py-4 sticky top-0 z-10 shadow-sm flex items-center gap-3 sm:rounded-t-[3rem]">
-        <Link href="/" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-white">
+        <Link href="/dashboard" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         </Link>
         <h1 className="text-xl font-bold text-slate-800 dark:text-white">Paramètres de l'entreprise</h1>

@@ -40,7 +40,7 @@ export default function AbonnementPage() {
 
       {/* Header */}
       <header className="relative z-10 flex items-center gap-4 p-6 pt-12 sm:pt-10">
-        <Link href="/">
+        <Link href="/dashboard">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-white dark:bg-slate-900/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-white">
             <ArrowLeft size={20} />
           </motion.div>

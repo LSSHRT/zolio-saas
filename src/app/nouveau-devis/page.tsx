@@ -280,7 +280,7 @@ export default function NouveauDevisPage() {
           className="text-slate-400 text-center text-xs mb-8">
           Enregistré avec succès
         </motion.p>
-        <Link href="/">
+        <Link href="/dashboard">
           <motion.button whileTap={{ scale: 0.96 }} className="px-8 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg">
             Retour à l&apos;accueil
           </motion.button>
@@ -294,7 +294,7 @@ export default function NouveauDevisPage() {
     return (
       <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
         <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
-          <Link href="/">
+          <Link href="/dashboard">
             <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
               <ArrowLeft size={20} />
             </motion.div>
@@ -329,7 +329,7 @@ export default function NouveauDevisPage() {
     <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
       {/* Header */}
       <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
-        <Link href="/">
+        <Link href="/dashboard">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
             <ArrowLeft size={20} />
           </motion.div>

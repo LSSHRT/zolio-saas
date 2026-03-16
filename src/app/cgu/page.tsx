@@ -17,7 +17,7 @@ export default function CGU() {
       <p className="mb-4">L'utilisateur est seul responsable de l'usage qu'il fait de l'application et des documents générés. Zolio ne vérifie pas l'exactitude légale ou comptable des devis et factures édités par l'utilisateur.</p>
 
       <div className="mt-8 pt-4 border-t">
-        <a href="/" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
+        <a href="/dashboard" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
       </div>
     </div>
   );

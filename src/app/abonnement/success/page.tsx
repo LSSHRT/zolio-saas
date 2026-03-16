@@ -67,7 +67,7 @@ export default function AbonnementSuccessPage() {
           </div>
         </div>
 
-        <Link href="/">
+        <Link href="/dashboard">
           <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2">
             <Home size={18} /> Retour à l'accueil
           </motion.button>

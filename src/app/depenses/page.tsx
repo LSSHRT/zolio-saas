@@ -117,7 +117,7 @@ export default function DepensesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link href="/" className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+          <Link href="/dashboard" className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
             <ArrowLeft size={20} className="text-slate-600 dark:text-slate-300" />
           </Link>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">

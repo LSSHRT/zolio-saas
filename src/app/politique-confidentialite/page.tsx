@@ -20,7 +20,7 @@ export default function PolitiqueConfidentialite() {
       <p className="mb-4">Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, d'effacement et de portabilité de vos données. Vous pouvez exercer ces droits en nous contactant via les coordonnées indiquées dans nos mentions légales.</p>
 
       <div className="mt-8 pt-4 border-t">
-        <a href="/" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
+        <a href="/dashboard" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ export default function MentionsLegales() {
       <p className="mb-4">L'ensemble du contenu de ce site est soumis à la législation française et internationale sur les droits d'auteur et la propriété intellectuelle. Toute reproduction est interdite sans l'autorisation expresse de l'éditeur.</p>
 
       <div className="mt-8 pt-4 border-t">
-        <a href="/" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
+        <a href="/dashboard" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
       </div>
     </div>
   );

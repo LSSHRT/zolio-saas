@@ -24,10 +24,10 @@ export default function LandingPage() {
             <span className="text-xl font-bold text-gradient-zolio tracking-tight">Zolio</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/sign-in" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors hidden sm:block">
+            <Link href="/sign-in?redirect_url=/dashboard" className="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-violet-600 dark:hover:text-violet-400 transition-colors hidden sm:block">
               Se connecter
             </Link>
-            <Link href="/sign-up" className="bg-gradient-zolio hover:opacity-90 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:scale-105 shadow-brand">
+            <Link href="/sign-up?redirect_url=/dashboard" className="bg-gradient-zolio hover:opacity-90 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:scale-105 shadow-brand">
               Essayer Zolio
             </Link>
           </div>
@@ -56,7 +56,7 @@ export default function LandingPage() {
             Créez des devis professionnels, faites-les signer sur place ou en ligne, et suivez vos chantiers. L'application pensée pour les artisans qui veulent gagner du temps.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/sign-up" className="w-full sm:w-auto bg-gradient-zolio hover:opacity-90 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-brand-lg">
+            <Link href="/sign-up?redirect_url=/dashboard" className="w-full sm:w-auto bg-gradient-zolio hover:opacity-90 text-white px-8 py-4 rounded-full text-lg font-semibold transition-all hover:scale-105 flex items-center justify-center gap-2 shadow-brand-lg">
               Commencer maintenant <ArrowRight className="w-5 h-5" />
             </Link>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 sm:mt-0 sm:ml-4">
@@ -149,7 +149,7 @@ export default function LandingPage() {
             <p className="text-slate-600 dark:text-slate-400">
               L'outil complet pour les professionnels exigeants.
             </p>
-            <Link href="/sign-up" className="mt-8 block w-full bg-gradient-zolio hover:opacity-90 text-white text-center py-3.5 rounded-xl font-semibold transition-all shadow-brand hover:scale-[1.02]">
+            <Link href="/sign-up?redirect_url=/dashboard" className="mt-8 block w-full bg-gradient-zolio hover:opacity-90 text-white text-center py-3.5 rounded-xl font-semibold transition-all shadow-brand hover:scale-[1.02]">
               Démarrer l'essai
             </Link>
           </div>
@@ -185,7 +185,7 @@ export default function LandingPage() {
           <p className="text-white/80 mb-8 max-w-2xl mx-auto text-lg">
             Rejoignez les artisans qui font confiance à Zolio pour développer leur entreprise.
           </p>
-          <Link href="/sign-up" className="inline-block bg-white text-violet-700 hover:bg-violet-50 px-8 py-4 rounded-full text-lg font-bold transition-all hover:scale-105 shadow-brand-lg">
+          <Link href="/sign-up?redirect_url=/dashboard" className="inline-block bg-white text-violet-700 hover:bg-violet-50 px-8 py-4 rounded-full text-lg font-bold transition-all hover:scale-105 shadow-brand-lg">
             Créer mon compte
           </Link>
         </div>

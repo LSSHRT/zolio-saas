@@ -73,7 +73,7 @@ export default function CalepinPage() {
       
       {/* Header */}
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-[#0c0a1d]/80 border-b border-violet-100/50 dark:border-violet-500/10 transition-all flex items-center gap-4 p-6 pt-12 sm:pt-10">
-        <Link href="/">
+        <Link href="/dashboard">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
             <ArrowLeft size={20} />
           </motion.div>

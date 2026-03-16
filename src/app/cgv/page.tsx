@@ -20,7 +20,7 @@ export default function CGV() {
       <p className="mb-4">Zolio s'engage à fournir ses services avec diligence, mais ne saurait être tenu responsable des pertes de données accidentelles ou des interruptions de service indépendantes de sa volonté.</p>
 
       <div className="mt-8 pt-4 border-t">
-        <a href="/" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
+        <a href="/dashboard" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
       </div>
     </div>
   );
