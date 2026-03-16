@@ -2,6 +2,25 @@
 
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { prisma } from "@/lib/prisma";
+
+export async function markMailAsFailed(mailId: string) {
+  const user = await currentUser();
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
+  
+  if (!user || (user?.emailAddresses[0]?.emailAddress !== adminEmail && !isAdminRole)) {
+    throw new Error("Non autorisé");
+  }
+
+  await prisma.prospectMail.update({
+    where: { id: mailId },
+    data: { status: "Failed" }
+  });
+
+  revalidatePath('/admin');
+  return { success: true };
+}
 
 export async function updateAdminSettings(formData: FormData) {
   const user = await currentUser();

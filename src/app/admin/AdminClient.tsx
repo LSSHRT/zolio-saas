@@ -2,7 +2,7 @@
 import React, { useState, useTransition } from 'react';
 import useSWR from 'swr';
 import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock, Ban, Crown, UserX, Loader2, Send, CheckCircle2, XCircle, History, Clock } from "lucide-react";
-import { toggleUserProStatus, banUser, deleteUserAccount, grantAdminRole, setSystemBanner, updateAdminSettings } from './actions';
+import { toggleUserProStatus, banUser, deleteUserAccount, grantAdminRole, setSystemBanner, updateAdminSettings, markMailAsFailed } from './actions';
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
@@ -182,6 +182,16 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
       alert('Clé API sauvegardée !');
     } catch (e: any) {
       alert('Erreur: ' + (e.message || 'Impossible de sauvegarder la clé'));
+    }
+  };
+
+  const handleMarkAsFailed = async (mailId: string) => {
+    if (!confirm('Marquer cet email comme "Échec" (Rebond/Erreur) ?')) return;
+    try {
+      await markMailAsFailed(mailId);
+      mutateMails();
+    } catch (e: any) {
+      alert('Erreur: ' + (e.message || 'Impossible de marquer comme échec'));
     }
   };
 
@@ -687,11 +697,20 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
                           {new Date(mail.createdAt).toLocaleString("fr-FR")} · {mail.source}
                         </span>
                       </div>
-                      <div>
+                      <div className="flex items-center gap-2">
                         {mail.status === "Sent" ? (
-                          <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> Envoyé
-                          </span>
+                          <>
+                            <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" /> Envoyé
+                            </span>
+                            <button 
+                              onClick={() => handleMarkAsFailed(mail.id)}
+                              title="Marquer comme Échec (Rebond)"
+                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </button>
+                          </>
                         ) : (
                           <span className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
                             <XCircle className="w-3 h-3" /> Échec
