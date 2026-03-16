@@ -257,26 +257,6 @@ const HorizontalScrollCarousel = () => {
 };
 
 
-// Testimonial Card Component
-const TestimonialCard = ({ name, role, quote, stars = 5 }: any) => (
-  <SpotlightCard className="p-8 transform transition-transform duration-500 hover:scale-[1.02] hover:-rotate-1">
-    <div className="flex gap-1 mb-4">
-      {[...Array(stars)].map((_, i) => (
-        <Star key={i} className="w-5 h-5 fill-yellow-500 text-yellow-500" />
-      ))}
-    </div>
-    <p className="text-neutral-300 mb-6 italic">"{quote}"</p>
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-full flex items-center justify-center font-bold text-white">
-        {name.charAt(0)}
-      </div>
-      <div>
-        <h4 className="font-bold text-white">{name}</h4>
-        <p className="text-sm text-neutral-400">{role}</p>
-      </div>
-    </div>
-  </SpotlightCard>
-);
 
 // FAQ Item Component
 const FAQItem = ({ question, answer }: any) => {
@@ -813,29 +793,34 @@ export default function LandingPage() {
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent"></div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className="py-32 bg-transparent relative">
+        {/* Trustpilot Reviews Section */}
+        <section className="py-32 bg-transparent relative" id="testimonials">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
+            <div className="text-center mb-16">
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ils nous font confiance</h2>
-              <p className="text-xl text-neutral-400">Rejoignez les artisans qui ont transformé leur quotidien.</p>
+              <p className="text-xl text-neutral-400">Découvrez ce que les artisans pensent de Zolio sur Trustpilot.</p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <TestimonialCard 
-                name="Jean Dupont" 
-                role="Électricien" 
-                quote="Avant Zolio, je passais mes soirées sur mes devis. Aujourd'hui tout est fait sur le chantier. Un vrai gain de temps !" 
-              />
-              <TestimonialCard 
-                name="Marc Leroy" 
-                role="Plombier" 
-                quote="Le design est incroyable, mes clients sont impressionnés quand je leur fais signer le devis sur ma tablette." 
-              />
-              <TestimonialCard 
-                name="Sophie Martin" 
-                role="Peintre" 
-                quote="La facturation en 1 clic a changé ma vie. Je suis payée beaucoup plus rapidement et je n'oublie plus aucune facture." 
-              />
+            
+            {/* Trustpilot Widget Placeholder */}
+            <div className="w-full flex justify-center items-center min-h-[200px] rounded-3xl bg-neutral-900 border border-neutral-800 p-8 shadow-2xl">
+              <div className="text-center">
+                <div className="flex justify-center mb-6 space-x-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <div key={star} className="w-10 h-10 bg-[#00B67A] flex items-center justify-center rounded-sm">
+                      <Star className="w-6 h-6 text-white fill-white" />
+                    </div>
+                  ))}
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-2">Excellent</h3>
+                <p className="text-neutral-400">Le widget officiel Trustpilot sera affiché ici</p>
+                
+                {/* 
+                  Code d'intégration Trustpilot (à insérer plus tard) :
+                  <div className="trustpilot-widget" data-locale="fr-FR" data-template-id="..." data-businessunit-id="..." data-style-height="24px" data-style-width="100%" data-theme="dark">
+                    <a href="https://fr.trustpilot.com/review/zolio.site" target="_blank" rel="noopener">Trustpilot</a>
+                  </div>
+                */}
+              </div>
             </div>
           </div>
         </section>
