@@ -1,4 +1,6 @@
-"use client";
+const fs = require('fs');
+
+const newContent = `"use client";
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -161,7 +163,7 @@ export default function LandingPage() {
                  <div className="h-5 w-1/4 bg-slate-200 dark:bg-slate-800 rounded mb-6"></div>
                  <div className="flex-1 border-b border-slate-100 dark:border-slate-800 flex items-end gap-2 pb-2">
                     {[40, 70, 45, 90, 65, 80, 100].map((h, i) => (
-                      <div key={i} className="flex-1 bg-violet-500/80 rounded-t-sm" style={{ height: `${h}%` }}></div>
+                      <div key={i} className="flex-1 bg-violet-500/80 rounded-t-sm" style={{ height: \`\${h}%\` }}></div>
                     ))}
                  </div>
               </div>
@@ -383,7 +385,7 @@ export default function LandingPage() {
                 className="flex justify-between items-center w-full p-6 text-left font-bold text-lg hover:text-violet-600 transition-colors"
               >
                 {faq.q}
-                <ChevronDown className={`w-5 h-5 text-slate-400 transition-transform duration-300 ${openFaq === index ? 'rotate-180' : ''}`} />
+                <ChevronDown className={\`w-5 h-5 text-slate-400 transition-transform duration-300 \${openFaq === index ? 'rotate-180' : ''}\`} />
               </button>
               <AnimatePresence>
                 {openFaq === index && (
@@ -484,3 +486,7 @@ function LockIcon(props: any) {
     </svg>
   );
 }
+`;
+
+fs.writeFileSync('src/components/LandingPage.tsx', newContent);
+console.log('LandingPage.tsx updated successfully.');
