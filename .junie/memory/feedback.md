@@ -654,3 +654,11 @@
     "NEW INSTRUCTION": "WHEN prospection email input blurs while typing THEN stop remounts on change and confirm fix"
 }
 
+[2026-03-16 12:37] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "landing page professionalism",
+    "EXPECTATION": "The landing page should be more detailed, professional, and include animations/motion design.",
+    "NEW INSTRUCTION": "WHEN user requests landing page improvement THEN add detailed sections and tasteful motion animations"
+}
+

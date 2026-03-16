@@ -1,4 +1,6 @@
-"use client";
+const fs = require('fs');
+
+const content = `"use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
 import Link from "next/link";
@@ -241,8 +243,8 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className="glass-card dark:bg-white/[0.02] p-8 rounded-3xl hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group border border-violet-100/50 dark:border-white/5 relative overflow-hidden"
               >
-                <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500 rounded-full`}></div>
-                <div className={`w-16 h-16 ${feature.bg} ${feature.text} rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm`}>
+                <div className={\`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br \${feature.color} opacity-0 group-hover:opacity-10 blur-2xl transition-opacity duration-500 rounded-full\`}></div>
+                <div className={\`w-16 h-16 \${feature.bg} \${feature.text} rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-sm\`}>
                   {feature.icon}
                 </div>
                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{feature.title}</h3>
@@ -345,3 +347,7 @@ export default function LandingPage() {
     </div>
   );
 }
+`;
+
+fs.writeFileSync('src/components/LandingPage.tsx', content);
+console.log('LandingPage.tsx updated successfully');
