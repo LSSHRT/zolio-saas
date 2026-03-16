@@ -422,7 +422,30 @@ export default function LandingPage() {
           </div>
           
           {/* Dashboard Showcase Mockup (replaces Spline) */}
-          <div className="mt-20 relative w-full max-w-5xl mx-auto opacity-90 hover:opacity-100 transition-opacity duration-700 z-20">
+          <div id="demo" className="mt-20 relative w-full max-w-5xl mx-auto opacity-90 hover:opacity-100 transition-opacity duration-700 z-20 scroll-mt-32 group">
+            
+            {/* Demo Floating Badges */}
+            <div className="absolute -left-4 sm:-left-12 top-1/4 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
+              <div className="bg-[#05050A]/80 backdrop-blur-xl border border-violet-500/30 p-3 rounded-xl shadow-2xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-violet-500/30 flex items-center justify-center text-violet-300 font-bold animate-pulse">1</div>
+                <p className="text-sm text-white font-medium">Navigation simplifiée<br/><span className="text-neutral-400 text-xs">Tout à portée de main</span></p>
+              </div>
+            </div>
+
+            <div className="absolute right-10 sm:-right-8 top-1/3 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
+              <div className="bg-[#05050A]/80 backdrop-blur-xl border border-orange-500/30 p-3 rounded-xl shadow-2xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-300 font-bold animate-pulse">2</div>
+                <p className="text-sm text-white font-medium">Statistiques directes<br/><span className="text-neutral-400 text-xs">Suivi en temps réel</span></p>
+              </div>
+            </div>
+
+            <div className="absolute left-1/3 -bottom-6 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
+              <div className="bg-[#05050A]/80 backdrop-blur-xl border border-fuchsia-500/30 p-3 rounded-xl shadow-2xl flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-fuchsia-500/30 flex items-center justify-center text-fuchsia-300 font-bold animate-pulse">3</div>
+                <p className="text-sm text-white font-medium">Création en 1 clic<br/><span className="text-neutral-400 text-xs">Devis ou Facture</span></p>
+              </div>
+            </div>
+
             <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_0_100px_rgba(139,92,246,0.15)] overflow-hidden p-2 sm:p-4">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 mb-4 bg-white/5 rounded-xl">
                 <div className="flex gap-1.5">
