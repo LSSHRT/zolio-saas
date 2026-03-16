@@ -28,6 +28,28 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
   const [sendingProspect, setSendingProspect] = useState(false);
   const [prospectMessage, setProspectMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
+  // Toggle cron state
+  const { data: cronData, mutate: mutateCron } = useSWR('/api/admin/settings?key=cron_prospect_enabled', fetcher);
+  const isCronEnabled = cronData?.value !== 'false';
+  const [togglingCron, setTogglingCron] = useState(false);
+
+  const handleToggleCron = async () => {
+    setTogglingCron(true);
+    try {
+      const newValue = isCronEnabled ? 'false' : 'true';
+      await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'cron_prospect_enabled', value: newValue }),
+      });
+      mutateCron();
+    } catch (err) {
+      alert("Erreur lors de la modification");
+    } finally {
+      setTogglingCron(false);
+    }
+  };
+
   const handleSendProspect = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prospectEmail) return;
@@ -536,12 +558,26 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
 
       {activeTab === 'prospection' && (
         <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg flex items-center gap-2">
-              <Send className="w-5 h-5 text-purple-600" />
-              Prospection Automatisée
-            </h3>
-            <p className="text-sm text-slate-500">Envoyez des propositions de services Zolio aux artisans.</p>
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <div>
+              <h3 className="font-bold text-lg flex items-center gap-2">
+                <Send className="w-5 h-5 text-purple-600" />
+                Prospection Automatisée
+              </h3>
+              <p className="text-sm text-slate-500">Envoyez des propositions de services Zolio aux artisans.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-medium ${isCronEnabled ? 'text-green-600' : 'text-slate-500'}`}>
+                {isCronEnabled ? 'Robot Activé' : 'Robot Désactivé'}
+              </span>
+              <button
+                onClick={handleToggleCron}
+                disabled={togglingCron}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${isCronEnabled ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isCronEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
           </div>
           <div className="p-6 space-y-8">
             {/* Formulaire manuel */}

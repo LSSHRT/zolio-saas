@@ -21,6 +21,15 @@ async function trouverEmailArtisanAleatoire() {
 
 export async function GET(req: Request) {
   try {
+    // Vérifier si le cron est activé dans les paramètres
+    const cronSetting = await prisma.adminSetting.findUnique({
+      where: { key: "cron_prospect_enabled" }
+    });
+
+    if (cronSetting && cronSetting.value === "false") {
+      return NextResponse.json({ message: "Le robot de prospection est désactivé manuellement." });
+    }
+
     // 1. Trouver un email d'artisan
     const email = await trouverEmailArtisanAleatoire();
 

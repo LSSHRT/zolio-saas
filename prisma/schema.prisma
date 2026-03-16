@@ -96,3 +96,10 @@ model ProspectMail {
   source    String   @default("Manual") // Manual, Automated
   createdAt DateTime @default(now())
 }
+
+model AdminSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
