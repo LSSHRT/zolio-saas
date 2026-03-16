@@ -645,6 +645,40 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Avant/Après Section */}
+        <section className="py-32 bg-white/[0.02] relative overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-20">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Transformez votre manière de travailler</h2>
+              <p className="text-xl text-neutral-400">Passez à la vitesse supérieure avec Zolio.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
+              <SpotlightCard className="border-red-900/30 bg-red-950/10">
+                <h3 className="text-2xl font-bold text-red-400 mb-6 flex items-center">
+                  <X className="mr-3" /> Avant Zolio
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Soirées passées à rédiger des devis</li>
+                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Papiers perdus et relances oubliées</li>
+                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Calcul de marge approximatif</li>
+                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Logiciels compliqués des années 2000</li>
+                </ul>
+              </SpotlightCard>
+              <SpotlightCard className="border-violet-500/30 bg-violet-900/10">
+                <h3 className="text-2xl font-bold text-violet-400 mb-6 flex items-center">
+                  <CheckCircle className="mr-3" /> Avec Zolio
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Devis réalisés sur le chantier en 3 min</li>
+                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Signature immédiate sur le smartphone</li>
+                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Rentabilité connue en temps réel</li>
+                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Interface ultra-rapide et intuitive</li>
+                </ul>
+              </SpotlightCard>
+            </div>
+          </div>
+        </section>
+
         {/* Horizontal Scroll Section */}
         <HorizontalScrollCarousel />
 
@@ -674,6 +708,33 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent"></div>
+        </section>
+
+        {/* Testimonials Section */}
+        <section className="py-32 bg-transparent relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-20">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ils nous font confiance</h2>
+              <p className="text-xl text-neutral-400">Rejoignez les artisans qui ont transformé leur quotidien.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <TestimonialCard 
+                name="Jean Dupont" 
+                role="Électricien" 
+                quote="Avant Zolio, je passais mes soirées sur mes devis. Aujourd'hui tout est fait sur le chantier. Un vrai gain de temps !" 
+              />
+              <TestimonialCard 
+                name="Marc Leroy" 
+                role="Plombier" 
+                quote="Le design est incroyable, mes clients sont impressionnés quand je leur fais signer le devis sur ma tablette." 
+              />
+              <TestimonialCard 
+                name="Sophie Martin" 
+                role="Peintre" 
+                quote="La facturation en 1 clic a changé ma vie. Je suis payée beaucoup plus rapidement et je n'oublie plus aucune facture." 
+              />
+            </div>
+          </div>
         </section>
 
         {/* Bento Box Features Section */}
@@ -837,95 +898,6 @@ export default function LandingPage() {
         </section>
 
         
-        {/* Testimonials Section */}
-        <section className="py-32 bg-transparent relative">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ils nous font confiance</h2>
-              <p className="text-xl text-neutral-400">Rejoignez les artisans qui ont transformé leur quotidien.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <TestimonialCard 
-                name="Jean Dupont" 
-                role="Électricien" 
-                quote="Avant Zolio, je passais mes soirées sur mes devis. Aujourd'hui tout est fait sur le chantier. Un vrai gain de temps !" 
-              />
-              <TestimonialCard 
-                name="Marc Leroy" 
-                role="Plombier" 
-                quote="Le design est incroyable, mes clients sont impressionnés quand je leur fais signer le devis sur ma tablette." 
-              />
-              <TestimonialCard 
-                name="Sophie Martin" 
-                role="Peintre" 
-                quote="La facturation en 1 clic a changé ma vie. Je suis payée beaucoup plus rapidement et je n'oublie plus aucune facture." 
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Avant/Après Section */}
-        <section className="py-32 bg-white/[0.02] relative overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Transformez votre manière de travailler</h2>
-              <p className="text-xl text-neutral-400">Passez à la vitesse supérieure avec Zolio.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
-              <SpotlightCard className="border-red-900/30 bg-red-950/10">
-                <h3 className="text-2xl font-bold text-red-400 mb-6 flex items-center">
-                  <X className="mr-3" /> Avant Zolio
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Soirées passées à rédiger des devis</li>
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Papiers perdus et relances oubliées</li>
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Calcul de marge approximatif</li>
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Logiciels compliqués des années 2000</li>
-                </ul>
-              </SpotlightCard>
-              <SpotlightCard className="border-violet-500/30 bg-violet-900/10">
-                <h3 className="text-2xl font-bold text-violet-400 mb-6 flex items-center">
-                  <CheckCircle className="mr-3" /> Avec Zolio
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Devis réalisés sur le chantier en 3 min</li>
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Signature immédiate sur le smartphone</li>
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Rentabilité connue en temps réel</li>
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Interface ultra-rapide et intuitive</li>
-                </ul>
-              </SpotlightCard>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section id="faq" className="py-32 bg-transparent relative">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Questions fréquentes</h2>
-              <p className="text-xl text-neutral-400">Tout ce que vous devez savoir avant de vous lancer.</p>
-            </div>
-            <div className="space-y-2">
-              <FAQItem 
-                question="L'application fonctionne-t-elle sur téléphone sans internet ?" 
-                answer="Zolio est optimisé pour les mobiles. Si vous perdez la connexion sur un chantier, vous pouvez continuer à préparer votre devis, il se synchronisera automatiquement dès que vous retrouverez du réseau." 
-              />
-              <FAQItem 
-                question="Puis-je importer ma liste de clients existante ?" 
-                answer="Oui ! Vous pouvez très prochainement importer vos clients et votre catalogue de prix au format Excel/CSV en quelques clics." 
-              />
-              <FAQItem 
-                question="Que se passe-t-il après mon devis d'essai ?" 
-                answer="Une fois votre devis d'essai utilisé, vous pourrez passer à la version Pro pour débloquer les devis et factures illimités, sans aucun engagement de durée." 
-              />
-              <FAQItem 
-                question="Mes données sont-elles sécurisées ?" 
-                answer="Absolument. Vos données sont hébergées sur des serveurs sécurisés en Europe et sauvegardées quotidiennement. Vous êtes le seul propriétaire de vos informations." 
-              />
-            </div>
-          </div>
-        </section>
-
         {/* Pricing Section */}
         <section id="pricing" className="py-32 bg-transparent relative">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -959,6 +931,34 @@ export default function LandingPage() {
                   Démarrer l'essai (1 devis)
                 </a>
               </SpotlightCard>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section id="faq" className="py-32 bg-transparent relative">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Questions fréquentes</h2>
+              <p className="text-xl text-neutral-400">Tout ce que vous devez savoir avant de vous lancer.</p>
+            </div>
+            <div className="space-y-2">
+              <FAQItem 
+                question="L'application fonctionne-t-elle sur téléphone sans internet ?" 
+                answer="Zolio est optimisé pour les mobiles. Si vous perdez la connexion sur un chantier, vous pouvez continuer à préparer votre devis, il se synchronisera automatiquement dès que vous retrouverez du réseau." 
+              />
+              <FAQItem 
+                question="Puis-je importer ma liste de clients existante ?" 
+                answer="Oui ! Vous pouvez très prochainement importer vos clients et votre catalogue de prix au format Excel/CSV en quelques clics." 
+              />
+              <FAQItem 
+                question="Que se passe-t-il après mon devis d'essai ?" 
+                answer="Une fois votre devis d'essai utilisé, vous pourrez passer à la version Pro pour débloquer les devis et factures illimités, sans aucun engagement de durée." 
+              />
+              <FAQItem 
+                question="Mes données sont-elles sécurisées ?" 
+                answer="Absolument. Vos données sont hébergées sur des serveurs sécurisés en Europe et sauvegardées quotidiennement. Vous êtes le seul propriétaire de vos informations." 
+              />
             </div>
           </div>
         </section>
