@@ -89,15 +89,15 @@ const HorizontalScrollCarousel = () => {
   const x = useTransform(scrollYProgress, [0, 1], ["1%", "-68%"]);
 
   return (
-    <section ref={targetRef} className="relative h-[300vh] bg-neutral-950">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
+    <section ref={targetRef} className="relative h-[250vh] bg-neutral-950">
+      <div className="sticky top-[10vh] flex h-[75vh] items-center overflow-hidden">
         <motion.div style={{ x }} className="flex gap-8 px-12">
           {/* Card 1 */}
           <div className="group relative h-[60vh] w-[80vw] sm:w-[50vw] overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 flex-shrink-0">
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 relative pointer-events-none">
                 {/* Mockup Devis Mobile */}
-                <div className="w-[200px] h-[350px] bg-neutral-950 rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col transform scale-75 sm:scale-95 origin-center">
+                <div className="w-[200px] h-[350px] bg-neutral-950 rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col transform scale-[0.65] sm:scale-75 origin-center">
                   {/* Encloche (Notch) */}
                   <div className="absolute top-0 w-full h-5 bg-neutral-900 flex justify-center z-10"><div className="w-16 h-4 bg-neutral-950 rounded-b-xl"></div></div>
                   {/* Header */}
@@ -142,7 +142,7 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Signature */}
-                <div className="w-[280px] h-[200px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-5 flex flex-col relative overflow-hidden transform scale-75 sm:scale-95 origin-center">
+                <div className="w-[280px] h-[200px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-5 flex flex-col relative overflow-hidden transform scale-[0.65] sm:scale-75 origin-center">
                   <div className="flex justify-between items-center mb-3">
                      <h4 className="text-white font-bold text-sm">Signature requise</h4>
                      <FileText className="w-4 h-4 text-fuchsia-500" />
@@ -178,7 +178,7 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Facture */}
-                <div className="w-[240px] h-[300px] bg-neutral-100 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-5 flex flex-col relative transform scale-75 sm:scale-95 origin-center">
+                <div className="w-[240px] h-[300px] bg-neutral-100 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-5 flex flex-col relative transform scale-[0.65] sm:scale-75 origin-center">
                   {/* Tampon "PAYÉ" */}
                   <div className="absolute top-12 right-4 border-4 border-green-500 text-green-500 font-black text-xl px-2 py-1 transform rotate-12 opacity-80 rounded z-10">
                      PAYÉ
@@ -441,7 +441,7 @@ export default function LandingPage() {
 
         
         {/* Metrics Banner Section */}
-        <section className="py-16 bg-neutral-950 border-y border-white/5 relative overflow-hidden">
+        <section className="py-16 bg-neutral-950 border-y border-white/5 relative overflow-hidden -mt-8 z-20">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-violet-900/10 via-black to-orange-900/10 opacity-60"></div>
           
