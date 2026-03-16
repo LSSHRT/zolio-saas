@@ -646,35 +646,114 @@ export default function LandingPage() {
         </section>
 
         {/* Avant/Après Section */}
-        <section className="py-32 bg-white/[0.02] relative overflow-hidden">
+        <section className="py-32 relative z-10">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Transformez votre manière de travailler</h2>
-              <p className="text-xl text-neutral-400">Passez à la vitesse supérieure avec Zolio.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-16">
-              <SpotlightCard className="border-red-900/30 bg-red-950/10">
-                <h3 className="text-2xl font-bold text-red-400 mb-6 flex items-center">
-                  <X className="mr-3" /> Avant Zolio
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Soirées passées à rédiger des devis</li>
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Papiers perdus et relances oubliées</li>
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Calcul de marge approximatif</li>
-                  <li className="flex items-start text-neutral-400"><X className="w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5" /> Logiciels compliqués des années 2000</li>
-                </ul>
-              </SpotlightCard>
-              <SpotlightCard className="border-violet-500/30 bg-violet-900/10">
-                <h3 className="text-2xl font-bold text-violet-400 mb-6 flex items-center">
-                  <CheckCircle className="mr-3" /> Avec Zolio
-                </h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Devis réalisés sur le chantier en 3 min</li>
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Signature immédiate sur le smartphone</li>
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Rentabilité connue en temps réel</li>
-                  <li className="flex items-start text-neutral-300"><CheckCircle className="w-5 h-5 text-violet-400 mr-3 flex-shrink-0 mt-0.5" /> Interface ultra-rapide et intuitive</li>
-                </ul>
-              </SpotlightCard>
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-20 relative"
+            >
+              <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+                <span className="w-2 h-2 rounded-full bg-orange-500 mr-2 animate-pulse"></span>
+                <span className="text-sm font-medium text-neutral-300">L'évolution est en marche</span>
+              </div>
+              <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight">
+                Transformez votre manière de <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-fuchsia-500 to-violet-500">travailler</span>
+              </h2>
+              <p className="text-xl text-neutral-400 max-w-2xl mx-auto">Passez à la vitesse supérieure avec Zolio. Dites adieu à la paperasse et bonjour à la rentabilité en temps réel.</p>
+            </motion.div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
+              {/* Ligne de connexion au centre (visible uniquement sur desktop) */}
+              <div className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 z-20 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+                <ArrowRight className="text-violet-400" />
+              </div>
+
+              {/* Avant Zolio */}
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="group relative"
+              >
+                <div className="absolute -inset-px bg-gradient-to-br from-red-500/20 to-neutral-800 rounded-3xl opacity-50 blur-sm transition-opacity group-hover:opacity-100"></div>
+                <div className="relative h-full bg-[#0a0a0c] border border-red-900/30 rounded-3xl p-8 sm:p-10 overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <X className="w-32 h-32 text-red-500" />
+                  </div>
+                  
+                  <div className="flex items-center mb-8 relative z-10">
+                    <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20 mr-4">
+                      <X className="text-red-500 w-6 h-6" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-neutral-300">Sans Zolio</h3>
+                  </div>
+                  
+                  <ul className="space-y-6 relative z-10">
+                    {[
+                      { title: "Soirées sacrifiées", desc: "Des heures passées à rédiger des devis après le chantier." },
+                      { title: "Papiers perdus", desc: "Des relances oubliées et des factures en retard." },
+                      { title: "Marge incertaine", desc: "Un calcul de rentabilité approximatif à la fin du mois." },
+                      { title: "Outils obsolètes", desc: "Des logiciels compliqués des années 2000." }
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start">
+                        <div className="mt-1 mr-4 flex-shrink-0 w-8 h-8 rounded-full bg-red-950/50 flex items-center justify-center border border-red-900/50">
+                          <X className="w-4 h-4 text-red-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-neutral-300 mb-1">{item.title}</h4>
+                          <p className="text-neutral-500">{item.desc}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
+
+              {/* Avec Zolio */}
+              <motion.div 
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="group relative"
+              >
+                <div className="absolute -inset-px bg-gradient-to-br from-violet-500 to-fuchsia-500 rounded-3xl opacity-30 blur-md transition-opacity duration-500 group-hover:opacity-70 group-hover:animate-pulse"></div>
+                <div className="relative h-full bg-[#0a0a0c] border border-violet-500/30 rounded-3xl p-8 sm:p-10 overflow-hidden shadow-[inset_0_0_80px_rgba(139,92,246,0.1)]">
+                  {/* Effet Spotlight interne */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/10 rounded-full blur-[80px]"></div>
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px]"></div>
+                  
+                  <div className="flex items-center mb-8 relative z-10">
+                    <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center border border-violet-400/30 mr-4 shadow-[0_0_15px_rgba(139,92,246,0.4)]">
+                      <CheckCircle className="text-violet-400 w-6 h-6" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-white">Avec Zolio</h3>
+                  </div>
+                  
+                  <ul className="space-y-6 relative z-10">
+                    {[
+                      { title: "Devis instantanés", desc: "Réalisés sur le chantier en 3 min depuis votre téléphone." },
+                      { title: "Signature digitale", desc: "Accord client immédiat et sans impression papier." },
+                      { title: "Rentabilité en temps réel", desc: "Visualisez votre marge nette avant même l'envoi." },
+                      { title: "Écosystème 2026", desc: "Une interface fluide, ultra-rapide et intuitive." }
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start">
+                        <div className="mt-1 mr-4 flex-shrink-0 w-8 h-8 rounded-full bg-violet-900/40 flex items-center justify-center border border-violet-500/50 shadow-[0_0_10px_rgba(139,92,246,0.3)]">
+                          <CheckCircle className="w-4 h-4 text-violet-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-semibold text-white mb-1">{item.title}</h4>
+                          <p className="text-violet-200/70">{item.desc}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </motion.div>
             </div>
           </div>
         </section>
