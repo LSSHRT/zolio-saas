@@ -690,7 +690,7 @@ export default function LandingPage() {
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 relative">
               {/* Ligne de connexion au centre (visible uniquement sur desktop) */}
-              <div className="hidden lg:block absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 z-20 rounded-full bg-neutral-950 border border-neutral-800 flex items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.3)]">
+              <div className="hidden lg:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 z-20 rounded-full bg-neutral-950 border border-neutral-800 items-center justify-center shadow-[0_0_30px_rgba(139,92,246,0.3)]">
                 <ArrowRight className="text-violet-400" />
               </div>
 
