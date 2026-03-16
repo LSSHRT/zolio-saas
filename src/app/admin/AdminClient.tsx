@@ -6,6 +6,10 @@ import { toggleUserProStatus, banUser, deleteUserAccount, grantAdminRole, setSys
 
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
+const CardWrapper = ({ children, className = "" }: any) => (
+  <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${className}`}>{children}</div>
+);
+
 export default function AdminClient({ initialUsers = [], stats = {}, logs = [], systemBanner, currentGeminiKey }: any) {
   const [activeTab, setActiveTab] = useState('overview');
   const [users, setUsers] = useState(initialUsers);
@@ -181,9 +185,6 @@ export default function AdminClient({ initialUsers = [], stats = {}, logs = [], 
     </div>
   );
 
-  const CardWrapper = ({ children, className = "" }: any) => (
-    <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${className}`}>{children}</div>
-  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-12">

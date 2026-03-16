@@ -646,3 +646,11 @@
     "NEW INSTRUCTION": "WHEN drafting outreach or marketing emails THEN avoid free offers and present paid tiers and referral terms"
 }
 
+[2026-03-16 12:16] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "input focus regression",
+    "EXPECTATION": "In the Prospection email field, the user should be able to type continuously without being kicked out of the input on each character.",
+    "NEW INSTRUCTION": "WHEN prospection email input blurs while typing THEN stop remounts on change and confirm fix"
+}
+
