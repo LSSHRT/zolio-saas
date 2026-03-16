@@ -148,19 +148,31 @@ export async function GET(req: Request) {
         }
 
         if (peutEnvoyer && !emailsEnvoyes.includes(email)) {
-          // Envoyer le mail
-          await sendProspectEmail(email);
-          
-          // Enregistrer dans la base
-          await prisma.prospectMail.create({
-            data: {
-              email,
-              status: "Sent",
-              source: source,
-            },
-          });
-          
-          emailsEnvoyes.push(email);
+          try {
+            // Envoyer le mail
+            await sendProspectEmail(email);
+            
+            // Enregistrer dans la base
+            await prisma.prospectMail.create({
+              data: {
+                email,
+                status: "Sent",
+                source: source,
+              },
+            });
+            
+            emailsEnvoyes.push(email);
+          } catch (emailErr) {
+            console.error(`Erreur d'envoi pour l'email ${email}:`, emailErr);
+            // On enregistre l'échec pour ne pas réessayer cet email défectueux en boucle
+            await prisma.prospectMail.create({
+              data: {
+                email,
+                status: "Failed",
+                source: source,
+              },
+            });
+          }
         }
       }
     }
