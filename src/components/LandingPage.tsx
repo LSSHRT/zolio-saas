@@ -97,7 +97,7 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-violet-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 relative pointer-events-none">
                 {/* Mockup Devis Mobile */}
-                <div className="w-[200px] h-[350px] bg-neutral-950 rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col transform scale-[0.45] sm:scale-50 origin-center">
+                <div className="w-[200px] h-[350px] bg-neutral-950 rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col ">
                   {/* Encloche (Notch) */}
                   <div className="absolute top-0 w-full h-5 bg-neutral-900 flex justify-center z-10"><div className="w-16 h-4 bg-neutral-950 rounded-b-xl"></div></div>
                   {/* Header */}
@@ -142,7 +142,7 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-fuchsia-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Signature */}
-                <div className="w-[280px] h-[200px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-5 flex flex-col relative overflow-hidden transform scale-[0.45] sm:scale-50 origin-center">
+                <div className="w-[280px] h-[200px] bg-neutral-900 rounded-2xl border border-neutral-700 shadow-2xl p-5 flex flex-col relative overflow-hidden ">
                   <div className="flex justify-between items-center mb-3">
                      <h4 className="text-white font-bold text-sm">Signature requise</h4>
                      <FileText className="w-4 h-4 text-fuchsia-500" />
@@ -178,7 +178,7 @@ const HorizontalScrollCarousel = () => {
             <div className="absolute inset-0 z-0 transition-transform duration-500 group-hover:scale-105 bg-gradient-to-br from-orange-900/40 to-black p-8 sm:p-12 flex flex-col">
               <div className="flex-1 w-full flex items-center justify-center mb-8 pointer-events-none">
                 {/* Mockup Facture */}
-                <div className="w-[240px] h-[300px] bg-neutral-100 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-5 flex flex-col relative transform scale-[0.45] sm:scale-50 origin-center">
+                <div className="w-[240px] h-[300px] bg-neutral-100 rounded-xl shadow-[0_0_50px_rgba(249,115,22,0.15)] p-5 flex flex-col relative ">
                   {/* Tampon "PAYÉ" */}
                   <div className="absolute top-12 right-4 border-4 border-green-500 text-green-500 font-black text-xl px-2 py-1 transform rotate-12 opacity-80 rounded z-10">
                      PAYÉ
