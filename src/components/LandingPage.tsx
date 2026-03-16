@@ -135,7 +135,7 @@ const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode
 };
 
 // 3. Scroll Reveal Text
-const RevealText = ({ text }: { text: string }) => {
+const RevealText = ({ text, className }: { text: string; className?: string }) => {
   const words = text.split(" ");
   return (
     <span className="inline-block">
@@ -146,7 +146,7 @@ const RevealText = ({ text }: { text: string }) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5, delay: i * 0.1 }}
-          className="inline-block mr-2"
+          className={`inline-block mr-2 ${className || ""}`}
         >
           {word}
         </motion.span>
@@ -257,9 +257,10 @@ export default function LandingPage() {
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tighter mb-8 max-w-5xl leading-[1.1]">
             <RevealText text="Gérez vos chantiers." /> <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400">
-              <RevealText text="Pas la paperasse." />
-            </span>
+            <RevealText 
+              text="Pas la paperasse." 
+              className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400" 
+            />
           </h1>
 
           <motion.p
