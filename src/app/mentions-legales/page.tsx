@@ -1,36 +1,62 @@
+import React from "react";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 export default function MentionsLegales() {
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Mentions Légales</h1>
-      
-      <h2 className="text-xl font-semibold mt-6 mb-2">Éditeur du site</h2>
-      <p className="mb-2">Le site Zolio est édité par :</p>
-      <p className="mb-4">
-        [Nom de la société / Nom Prénom]<br/>
-        [Statut juridique (ex: SAS, Auto-entrepreneur)]<br/>
-        [Capital social (si applicable)]<br/>
-        [Adresse du siège social]<br/>
-        [Numéro de téléphone]<br/>
-        [Adresse email de contact]
-      </p>
+    <div className="min-h-screen bg-[#05050A] text-neutral-300 py-20 px-4 sm:px-6 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 z-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")' }}></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-violet-900/20 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">Directeur de la publication</h2>
-      <p className="mb-4">Le directeur de la publication est [Nom du directeur de la publication].</p>
+      <div className="max-w-4xl mx-auto relative z-10">
+        <Link href="/" className="inline-flex items-center text-violet-400 hover:text-violet-300 mb-12 transition-colors">
+          <ArrowLeft className="w-4 h-4 mr-2" /> Retour à l'accueil
+        </Link>
+        
+        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-12">Mentions Légales</h1>
+        
+        <div className="space-y-12 text-lg leading-relaxed bg-neutral-900/50 backdrop-blur-md p-8 sm:p-12 rounded-3xl border border-white/5">
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">1. Éditeur du site</h2>
+            <p>
+              Le site <strong>Zolio</strong> est édité par la société [Nom de votre entreprise/Statut (ex: Zolio SAS)], 
+              au capital de [Montant] €, immatriculée au Registre du Commerce et des Sociétés de [Ville] sous le numéro [Numéro SIRET].
+            </p>
+            <p className="mt-4">
+              <strong>Siège social :</strong> [Votre adresse complète]<br/>
+              <strong>Directeur de la publication :</strong> [Votre Nom Prénom]<br/>
+              <strong>Contact :</strong> contact@zolio.site<br/>
+              <strong>Téléphone :</strong> [Votre numéro - Optionnel]
+            </p>
+          </section>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">Hébergement</h2>
-      <p className="mb-4">
-        Le site Zolio est hébergé par :<br/>
-        Vercel Inc.<br/>
-        340 S Lemon Ave #4133<br/>
-        Walnut, CA 91789<br/>
-        États-Unis
-      </p>
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">2. Hébergement</h2>
+            <p>
+              Le site est hébergé par <strong>Vercel Inc.</strong><br/>
+              340 S Lemon Ave #4133<br/>
+              Walnut, CA 91789<br/>
+              États-Unis<br/>
+              Site web : <a href="https://vercel.com" className="text-violet-400 hover:underline" target="_blank" rel="noreferrer">https://vercel.com</a>
+            </p>
+          </section>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">Propriété intellectuelle</h2>
-      <p className="mb-4">L'ensemble du contenu de ce site est soumis à la législation française et internationale sur les droits d'auteur et la propriété intellectuelle. Toute reproduction est interdite sans l'autorisation expresse de l'éditeur.</p>
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">3. Propriété intellectuelle</h2>
+            <p>
+              L'ensemble du contenu de ce site (structure, design, textes, images, animations, logos) est la propriété exclusive de Zolio. 
+              Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable.
+            </p>
+          </section>
 
-      <div className="mt-8 pt-4 border-t">
-        <a href="/dashboard" className="text-blue-600 hover:underline">← Retour à l'accueil</a>
+          <section>
+            <h2 className="text-2xl font-semibold text-white mb-4">4. Limitation de responsabilité</h2>
+            <p>
+              Zolio s'efforce de fournir sur son site des informations aussi précises que possible. Toutefois, l'entreprise ne pourra être tenue responsable des omissions, des inexactitudes et des carences dans la mise à jour, qu'elles soient de son fait ou du fait des tiers partenaires qui lui fournissent ces informations.
+            </p>
+          </section>
+        </div>
       </div>
     </div>
   );

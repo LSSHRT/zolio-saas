@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 import {
   Lock,
   ArrowRight,
@@ -1151,9 +1152,9 @@ export default function LandingPage() {
               <div>
                 <h4 className="text-white font-semibold mb-6">Légal</h4>
                 <ul className="space-y-4">
-                  <li><a href="#" className="text-neutral-400 hover:text-white transition-colors">Mentions légales</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-white transition-colors">Politique de confidentialité</a></li>
-                  <li><a href="#" className="text-neutral-400 hover:text-white transition-colors">CGV</a></li>
+                  <li><Link href="/mentions-legales" className="text-neutral-400 hover:text-white transition-colors">Mentions légales</Link></li>
+                  <li><Link href="/politique-confidentialite" className="text-neutral-400 hover:text-white transition-colors">Politique de confidentialité</Link></li>
+                  <li><Link href="/cgv" className="text-neutral-400 hover:text-white transition-colors">CGV</Link></li>
                 </ul>
               </div>
             </div>
