@@ -305,7 +305,7 @@ function DashboardContent() {
                   <p className="text-white/70 text-xs">Création rapide ⚡️</p>
                 ) : (
                   <p className="text-white/90 text-[10px] font-medium bg-white dark:bg-slate-900/20 inline-block px-2 py-0.5 rounded-full mt-1">
-                    {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 3)}/3 gratuits`}
+                    {loading || !isLoaded ? "Chargement..." : `Essai : ${Math.min(devis.length, 1)}/1`}
                   </p>
                 )}
               </div>

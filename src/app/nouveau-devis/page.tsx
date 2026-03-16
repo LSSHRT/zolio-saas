@@ -312,7 +312,7 @@ export default function NouveauDevisPage() {
           
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Fonctionnalité Premium</h2>
           <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 px-4 leading-relaxed">
-            Vous avez atteint la limite de 3 devis gratuits. Passez à la version Zolio Pro pour créer des devis illimités.
+            Vous avez atteint la limite de 1 devis d'essai. Passez à la version Zolio Pro pour créer des devis illimités.
           </p>
 
           <Link href="/abonnement" className="w-full">

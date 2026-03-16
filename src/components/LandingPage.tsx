@@ -28,7 +28,7 @@ export default function LandingPage() {
               Se connecter
             </Link>
             <Link href="/sign-up" className="bg-gradient-zolio hover:opacity-90 text-white px-5 py-2.5 rounded-full text-sm font-medium transition-all hover:scale-105 shadow-brand">
-              Essayer gratuitement
+              Essayer Zolio
             </Link>
           </div>
         </div>
@@ -150,7 +150,7 @@ export default function LandingPage() {
               L'outil complet pour les professionnels exigeants.
             </p>
             <Link href="/sign-up" className="mt-8 block w-full bg-gradient-zolio hover:opacity-90 text-white text-center py-3.5 rounded-xl font-semibold transition-all shadow-brand hover:scale-[1.02]">
-              Démarrer l'essai gratuit
+              Démarrer l'essai
             </Link>
           </div>
           <div className="p-8 sm:p-10">
@@ -186,7 +186,7 @@ export default function LandingPage() {
             Rejoignez les artisans qui font confiance à Zolio pour développer leur entreprise.
           </p>
           <Link href="/sign-up" className="inline-block bg-white text-violet-700 hover:bg-violet-50 px-8 py-4 rounded-full text-lg font-bold transition-all hover:scale-105 shadow-brand-lg">
-            Créer mon compte gratuitement
+            Créer mon compte
           </Link>
         </div>
       </section>

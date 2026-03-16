@@ -349,7 +349,7 @@ export default function ParametresEntreprise() {
               <h2 className="text-xl font-bold">Parrainez un confrère</h2>
             </div>
             <p className="text-violet-100 mb-6 max-w-md text-sm leading-relaxed">
-              Invitez un confrère à utiliser Zolio. S'il s'abonne à la <strong>version PRO</strong>, vous gagnez tous les deux <strong>1 mois d'abonnement gratuit</strong> ! C'est le meilleur moyen de faire grandir notre communauté.
+              Invitez un confrère à utiliser Zolio. S'il s'abonne à la <strong>version PRO</strong>, vous gagnez tous les deux <strong>-50% sur votre prochain mois</strong> ! C'est le meilleur moyen de faire grandir notre communauté.
             </p>
             
             <div className="bg-white/10 p-4 rounded-xl backdrop-blur-sm border border-white/20 mb-6">
@@ -361,7 +361,7 @@ export default function ParametresEntreprise() {
                 <button
                   onClick={() => {
                     const code = user.id.slice(-8).toUpperCase();
-                    navigator.clipboard.writeText(`Rejoignez Zolio avec mon code de parrainage ${code} pour gagner 1 mois gratuit sur l'abonnement PRO ! https://zolio.site/sign-up?ref=${code}`);
+                    navigator.clipboard.writeText(`Rejoignez Zolio avec mon code de parrainage ${code} pour gagner -50% sur l'abonnement sur l'abonnement PRO ! https://zolio.site/sign-up?ref=${code}`);
                     setMessage({ type: "success", text: "Message de parrainage copié !" });
                   }}
                   className="bg-white text-violet-600 p-3 rounded-lg hover:bg-violet-50 transition-colors flex items-center justify-center shadow-sm"

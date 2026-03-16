@@ -638,3 +638,11 @@
     "NEW INSTRUCTION": "WHEN updating dashboard styles THEN apply same background/colors to clients, catalogue, devis, depense, planning pages"
 }
 
+[2026-03-16 12:12] - Updated by Junie
+{
+    "TYPE": "correction",
+    "CATEGORY": "pricing and messaging",
+    "EXPECTATION": "The outreach email should not promise free services and must align with revised pricing, PLG approach, and referral program to reduce freebies.",
+    "NEW INSTRUCTION": "WHEN drafting outreach or marketing emails THEN avoid free offers and present paid tiers and referral terms"
+}
+

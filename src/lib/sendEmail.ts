@@ -167,11 +167,11 @@ export async function sendProspectEmail(toEmail: string) {
           </ul>
           <div style="text-align:center;margin:30px 0;">
             <a href="https://zolio.site" style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);color:white;padding:14px 32px;border-radius:12px;font-weight:bold;font-size:16px;text-decoration:none;display:inline-block;box-shadow:0 4px 6px -1px rgba(139,92,246,0.3);">
-              Découvrir Zolio gratuitement
+              Découvrir Zolio
             </a>
           </div>
           <p style="color:#475569;font-size:15px;line-height:1.6;">
-            Essayez dès maintenant, c'est gratuit et sans engagement. 
+            Démarrez votre essai dès maintenant et simplifiez votre quotidien. 
             N'hésitez pas à nous répondre si vous avez la moindre question !
           </p>
           <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:20px;">

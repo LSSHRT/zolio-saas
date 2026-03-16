@@ -353,7 +353,7 @@ export async function generateDevisPDF(data: DevisData): Promise<Buffer> {
   if (data.entreprise?.assurance) footerLinesDevis.push(data.entreprise.assurance);
   if (data.entreprise?.legal) footerLinesDevis.push(data.entreprise.legal);
   if (data.tva === "0" || data.tva === "0%") footerLinesDevis.push("TVA non applicable, art. 293 B du CGI.");
-  if (!data.isPro) footerLinesDevis.push("Document gratuit généré par Zolio · zolio.site");
+  if (!data.isPro) footerLinesDevis.push("Document généré avec la version d'essai de Zolio · zolio.site");
   footerLinesDevis.push("Ce devis est valable 30 jours à compter de sa date d'émission.");
 
   doc.setTextColor(148, 163, 184);
@@ -674,7 +674,7 @@ export async function generateFacturePDF(data: DevisData): Promise<Buffer> {
   if (data.entreprise?.assurance) footerLinesFacture.push(data.entreprise.assurance);
   if (data.entreprise?.legal) footerLinesFacture.push(data.entreprise.legal);
   if (data.tva === "0" || data.tva === "0%") footerLinesFacture.push("TVA non applicable, art. 293 B du CGI.");
-  if (!data.isPro) footerLinesFacture.push("Document gratuit généré par Zolio · zolio.site");
+  if (!data.isPro) footerLinesFacture.push("Document généré avec la version d'essai de Zolio · zolio.site");
   footerLinesFacture.push("En cas de retard de paiement, une pénalité de 3 fois le taux d'intérêt légal sera appliquée.");
 
   doc.setTextColor(148, 163, 184);
