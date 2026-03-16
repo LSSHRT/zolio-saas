@@ -20,11 +20,11 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Zolio",
   },
-  title: "Zolio - Logiciel de Devis et Factures pour Artisans du Bâtiment",
+  title: "Zolio - Votre Partenaire Chantier Nouvelle Génération",
   description: "Zolio est l'application tout-en-un pour les professionnels du bâtiment : créez des devis et factures en quelques secondes, faites signer vos clients électroniquement, et suivez vos chantiers avec intelligence artificielle.",
   keywords: ["devis", "factures", "artisan", "bâtiment", "logiciel", "signature électronique", "btp", "auto-entrepreneur"],
   openGraph: {
-    title: "Zolio - Logiciel de Devis et Factures pour Artisans",
+    title: "Zolio - Votre Partenaire Chantier Nouvelle Génération",
     description: "L'application tout-en-un pour les pros du bâtiment. Créez vos devis avec l'IA et faites-les signer instantanément.",
     url: "https://www.zolio.site",
     siteName: "Zolio",

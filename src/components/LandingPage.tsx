@@ -20,70 +20,9 @@ import {
   X
 } from "lucide-react";
 import Link from "next/link";
-
-// --- CUSTOM HOOKS & UTILS ---
-
-function useMousePosition() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
-  useEffect(() => {
-    const updateMousePosition = (e: any) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", updateMousePosition);
-    return () => window.removeEventListener("mousemove", updateMousePosition);
-  }, []);
-  
-  return mousePosition;
-}
+import Image from "next/image";
 
 // --- COMPONENTS ---
-
-// 1. Custom Magnetic Cursor
-const CustomCursor = () => {
-  const { x, y } = useMousePosition();
-  const [isHovering, setIsHovering] = useState(false);
-
-  useEffect(() => {
-    const handleMouseOver = (e: any) => {
-      if (e.target.closest('button, a, [data-interactive="true"]')) {
-        setIsHovering(true);
-      } else {
-        setIsHovering(false);
-      }
-    };
-    window.addEventListener("mouseover", handleMouseOver);
-    return () => window.removeEventListener("mouseover", handleMouseOver);
-  }, []);
-
-  // Hide on mobile
-  if (typeof window !== "undefined" && window.innerWidth < 768) return null;
-
-  return (
-    <>
-      <motion.div
-        className="fixed top-0 left-0 w-4 h-4 bg-violet-500 rounded-full pointer-events-none z-[9999] mix-blend-screen"
-        animate={{
-          x: x - 8,
-          y: y - 8,
-          scale: isHovering ? 2.5 : 1,
-          opacity: isHovering ? 0.5 : 1,
-        }}
-        transition={{ type: "spring", stiffness: 500, damping: 28, mass: 0.5 }}
-      />
-      <motion.div
-        className="fixed top-0 left-0 w-32 h-32 border border-violet-500/30 rounded-full pointer-events-none z-[9998]"
-        animate={{
-          x: x - 64,
-          y: y - 64,
-          scale: isHovering ? 1.5 : 1,
-          opacity: isHovering ? 0 : 0.8,
-        }}
-        transition={{ type: "spring", stiffness: 250, damping: 20, mass: 0.8 }}
-      />
-    </>
-  );
-};
 
 // 2. Spotlight Card (Linear/Vercel style)
 const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
@@ -172,8 +111,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-violet-500/30 font-sans overflow-x-hidden">
-      <CustomCursor />
-      
       {/* Dynamic Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-violet-600/20 blur-[150px] rounded-full mix-blend-screen" />
@@ -186,8 +123,8 @@ export default function LandingPage() {
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-black/20 backdrop-blur-xl supports-[backdrop-filter]:bg-black/10">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.5)]">
-              <span className="text-white font-bold text-xl leading-none">Z</span>
+            <div className="w-8 h-8 relative rounded-lg overflow-hidden shadow-[0_0_20px_rgba(139,92,246,0.5)]">
+              <Image src="/logo.png" alt="Zolio Logo" fill className="object-cover" />
             </div>
             <span className="text-xl font-bold tracking-tight text-white">Zolio</span>
           </div>
@@ -579,8 +516,8 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-16">
             <div className="col-span-2">
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-xl leading-none">Z</span>
+                <div className="w-8 h-8 relative rounded-lg overflow-hidden">
+                  <Image src="/logo.png" alt="Zolio Logo" fill className="object-cover" />
                 </div>
                 <span className="text-xl font-bold tracking-tight text-white">Zolio</span>
               </div>
