@@ -7,8 +7,9 @@ export async function updateAdminSettings(formData: FormData) {
   const user = await currentUser();
   const userEmail = user?.emailAddresses[0]?.emailAddress;
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
   
-  if (!user || userEmail !== adminEmail) {
+  if (!user || (userEmail !== adminEmail && !isAdminRole)) {
     throw new Error("Non autorisé");
   }
 
@@ -29,8 +30,9 @@ export async function toggleUserProStatus(userId: string, isPro: boolean) {
   const user = await currentUser();
   const userEmail = user?.emailAddresses[0]?.emailAddress;
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
   
-  if (!user || userEmail !== adminEmail) {
+  if (!user || (userEmail !== adminEmail && !isAdminRole)) {
     throw new Error("Non autorisé");
   }
 
@@ -53,7 +55,8 @@ export async function toggleUserProStatus(userId: string, isPro: boolean) {
 export async function banUser(userId: string, isBanned: boolean) {
   const user = await currentUser();
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!user || user?.emailAddresses[0]?.emailAddress !== adminEmail) throw new Error("Non autorisé");
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
+  if (!user || (user?.emailAddresses[0]?.emailAddress !== adminEmail && !isAdminRole)) throw new Error("Non autorisé");
   const client = await clerkClient();
   if (isBanned) {
     await client.users.banUser(userId);
@@ -67,7 +70,8 @@ export async function banUser(userId: string, isBanned: boolean) {
 export async function deleteUserAccount(userId: string) {
   const user = await currentUser();
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!user || user?.emailAddresses[0]?.emailAddress !== adminEmail) throw new Error("Non autorisé");
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
+  if (!user || (user?.emailAddresses[0]?.emailAddress !== adminEmail && !isAdminRole)) throw new Error("Non autorisé");
   const client = await clerkClient();
   await client.users.deleteUser(userId);
   revalidatePath('/admin');
@@ -77,7 +81,8 @@ export async function deleteUserAccount(userId: string) {
 export async function setSystemBanner(message: string) {
   const user = await currentUser();
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!user || user?.emailAddresses[0]?.emailAddress !== adminEmail) throw new Error("Non autorisé");
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
+  if (!user || (user?.emailAddresses[0]?.emailAddress !== adminEmail && !isAdminRole)) throw new Error("Non autorisé");
   const client = await clerkClient();
   await client.users.updateUserMetadata(user.id, {
     publicMetadata: {
@@ -92,7 +97,8 @@ export async function setSystemBanner(message: string) {
 export async function grantAdminRole(userId: string, isAdmin: boolean) {
   const user = await currentUser();
   const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  if (!user || user?.emailAddresses[0]?.emailAddress !== adminEmail) throw new Error("Non autorisé");
+  const isAdminRole = user?.publicMetadata?.isAdmin === true;
+  if (!user || (user?.emailAddresses[0]?.emailAddress !== adminEmail && !isAdminRole)) throw new Error("Non autorisé");
   const client = await clerkClient();
   const targetUser = await client.users.getUser(userId);
   await client.users.updateUserMetadata(userId, {
