@@ -47,6 +47,13 @@ export function AdminSidebar({
   sections,
   onSelect,
 }: AdminSidebarProps) {
+  const initials = currentAdmin.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((chunk) => chunk.charAt(0).toUpperCase())
+    .join("");
+
   return (
     <aside className="hidden lg:flex lg:w-[296px] lg:flex-col lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-white/8 lg:bg-slate-950/55 lg:backdrop-blur-xl">
       <div className="flex-1 p-6">
@@ -108,7 +115,7 @@ export function AdminSidebar({
       <div className="border-t border-white/8 px-6 py-5">
         <div className="flex items-center gap-3 rounded-2xl bg-white/4 px-4 py-3 ring-1 ring-white/8">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/60 to-fuchsia-500/60 text-sm font-semibold text-white">
-            {currentAdmin.name.charAt(0)}
+            {initials || "A"}
           </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-white">{currentAdmin.name}</p>
