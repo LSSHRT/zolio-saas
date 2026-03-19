@@ -144,6 +144,31 @@ function auditLogLevelClasses(level: AdminAuditLogItem["level"]) {
   }
 }
 
+function prospectStatusMeta(status: string) {
+  switch (status) {
+    case "Sent":
+      return {
+        label: "Envoyé",
+        classes: "bg-emerald-500/12 text-emerald-100 ring-emerald-300/20",
+      };
+    case "Queued":
+      return {
+        label: "En attente",
+        classes: "bg-amber-400/12 text-amber-100 ring-amber-300/20",
+      };
+    case "Blocked":
+      return {
+        label: "Bloqué",
+        classes: "bg-rose-500/12 text-rose-100 ring-rose-300/20",
+      };
+    default:
+      return {
+        label: "Échec",
+        classes: "bg-red-500/12 text-red-100 ring-red-300/20",
+      };
+  }
+}
+
 function Panel({
   action,
   children,
@@ -234,14 +259,19 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   const auditLogs = Array.isArray(auditLogsData) ? auditLogsData : data.auditLogs;
 
   const sentCount = mails.filter((mail) => mail.status === "Sent").length;
-  const failedCount = mails.filter((mail) => mail.status !== "Sent").length;
+  const failedCount = mails.filter((mail) => mail.status === "Failed").length;
+  const queuedCount = mails.filter((mail) => mail.status === "Queued").length;
+  const attemptedCount = sentCount + failedCount;
   const totalMailCount = mails.length;
-  const manualCount = mails.filter((mail) => mail.source === "Manual").length;
-  const automatedCount = mails.filter((mail) => mail.source !== "Manual").length;
-  const deliveryRate = totalMailCount > 0 ? Math.round((sentCount / totalMailCount) * 100) : 0;
+  const manualCount = mails.filter((mail) => mail.source.startsWith("Manual")).length;
+  const automatedCount = mails.filter((mail) => !mail.source.startsWith("Manual")).length;
+  const deliveryRate = attemptedCount > 0 ? Math.round((sentCount / attemptedCount) * 100) : 0;
 
   const baseAlerts = data.alerts.filter(
-    (alert) => !["failed-mails", "cron-disabled", "maintenance-active", "all-clear"].includes(alert.id),
+    (alert) =>
+      !["failed-mails", "queued-leads", "cron-disabled", "maintenance-active", "all-clear"].includes(
+        alert.id,
+      ),
   );
   const alerts: AdminAlertItem[] = [];
 
@@ -253,6 +283,17 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       severity: "critical",
       section: "acquisition",
       ctaLabel: "Voir l'historique",
+    });
+  }
+
+  if (queuedCount > 0) {
+    alerts.push({
+      id: "queued-leads",
+      title: `${queuedCount} lead${queuedCount > 1 ? "s" : ""} en attente`,
+      description: "Le robot alimente une file de leads sans envoi automatique tant que le sender prospect n'est pas prêt.",
+      severity: "info",
+      section: "acquisition",
+      ctaLabel: "Voir la file",
     });
   }
 
@@ -745,6 +786,16 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
 
   async function handleSendProspect(event: FormEvent) {
     event.preventDefault();
+
+    if (!data.environment.canManualProspectSend) {
+      const message =
+        data.environment.prospectReason ||
+        "La prospection manuelle est désactivée tant que le sender prospect n'est pas configuré.";
+      setProspectMessage({ text: message, type: "error" });
+      toast.error(message);
+      return;
+    }
+
     const emails = prospectEmail
       .split(/[\s,;]+/)
       .map((value) => value.trim())
@@ -772,6 +823,10 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         if (response.ok) {
           successCount += 1;
         } else {
+          const payload = await response.json().catch(() => null);
+          if (payload?.error && failCount === 0) {
+            setProspectMessage({ text: payload.error, type: "error" });
+          }
           failCount += 1;
         }
       }
@@ -1362,24 +1417,32 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       <div className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="admin-kpi-card bg-gradient-to-br from-violet-500/18 via-fuchsia-500/10 to-transparent">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Total envoyés</p>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Pipeline traité</p>
             <p className="mt-4 text-3xl font-semibold text-white">{totalMailCount}</p>
-            <p className="mt-3 text-sm text-slate-300">{manualCount} manuels • {automatedCount} auto</p>
+            <p className="mt-3 text-sm text-slate-300">{manualCount} manuels • {automatedCount} robot</p>
           </div>
           <div className="admin-kpi-card bg-gradient-to-br from-emerald-500/18 via-emerald-400/10 to-transparent">
             <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Délivrabilité</p>
             <p className="mt-4 text-3xl font-semibold text-white">{deliveryRate}%</p>
-            <p className="mt-3 text-sm text-slate-300">{sentCount} succès confirmés</p>
+            <p className="mt-3 text-sm text-slate-300">{sentCount} succès • {attemptedCount} tentatives</p>
           </div>
-          <div className="admin-kpi-card bg-gradient-to-br from-red-500/18 via-red-400/10 to-transparent">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Échecs</p>
-            <p className="mt-4 text-3xl font-semibold text-white">{failedCount}</p>
-            <p className="mt-3 text-sm text-slate-300">Requiert une revue ou un rebond contrôlé.</p>
+          <div className="admin-kpi-card bg-gradient-to-br from-amber-400/18 via-orange-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">En attente</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{queuedCount}</p>
+            <p className="mt-3 text-sm text-slate-300">Leads collectés en attente d&apos;un sender sain.</p>
           </div>
           <div className="admin-kpi-card bg-gradient-to-br from-sky-500/18 via-sky-400/10 to-transparent">
             <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Robot</p>
-            <p className="mt-4 text-3xl font-semibold text-white">{isCronEnabled ? "ON" : "OFF"}</p>
-            <p className="mt-3 text-sm text-slate-300">Piloté par cron + secret serveur.</p>
+            <p className="mt-4 text-3xl font-semibold text-white">
+              {!isCronEnabled ? "OFF" : data.environment.prospectMode === "live" ? "LIVE" : "QUEUE"}
+            </p>
+            <p className="mt-3 text-sm text-slate-300">
+              {!isCronEnabled
+                ? "Pilotage désactivé côté admin."
+                : data.environment.canAutoProspectSend
+                  ? "Sourcing + envoi automatique autorisés."
+                  : "Sourcing actif, envoi automatique bloqué."}
+            </p>
           </div>
         </div>
 
@@ -1419,10 +1482,25 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                 <span className="admin-chip bg-white/8 text-slate-200 ring-white/10">
                   {data.environment.hasHunter ? "Hunter configuré" : "Hunter optionnel absent"}
                 </span>
+                <span
+                  className={`admin-chip ${data.environment.canManualProspectSend ? "bg-sky-500/12 text-sky-100 ring-sky-300/20" : "bg-red-500/12 text-red-100 ring-red-300/20"}`}
+                >
+                  {data.environment.canManualProspectSend
+                    ? data.environment.canAutoProspectSend
+                      ? "Sender prospect live"
+                      : "Sender manuel uniquement"
+                    : "Sender prospect bloqué"}
+                </span>
                 <span className={`admin-chip ${data.environment.hasCronSecret ? "bg-white/8 text-slate-200 ring-white/10" : "bg-red-500/12 text-red-100 ring-red-300/20"}`}>
                   {data.environment.hasCronSecret ? "CRON_SECRET présent" : "CRON_SECRET absent"}
                 </span>
               </div>
+
+              {data.environment.prospectReason && (
+                <div className="mt-4 rounded-2xl border border-amber-300/14 bg-amber-400/8 px-4 py-3 text-sm text-amber-50">
+                  {data.environment.prospectReason}
+                </div>
+              )}
 
               <form onSubmit={handleSendProspect} className="mt-5 space-y-4">
                 <textarea
@@ -1430,15 +1508,20 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   rows={5}
                   value={prospectEmail}
                   onChange={(event) => setProspectEmail(event.target.value)}
+                  disabled={!data.environment.canManualProspectSend}
                   className="w-full rounded-[24px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-slate-400">
-                    Envoi manuel en lot. Les adresses peuvent être séparées par espace, virgule ou point-virgule.
+                    {data.environment.canManualProspectSend
+                      ? "Envoi manuel très contrôlé. Les adresses peuvent être séparées par espace, virgule ou point-virgule."
+                      : "La campagne manuelle est verrouillée tant que le sender prospect n'est pas dédié et sain."}
                   </p>
                   <button
                     type="submit"
-                    disabled={sendingProspect || !prospectEmail.trim()}
+                    disabled={
+                      sendingProspect || !prospectEmail.trim() || !data.environment.canManualProspectSend
+                    }
                     className="w-full rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
                   >
                     <span className="inline-flex items-center gap-2">
@@ -1476,12 +1559,12 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium text-white">{mail.email}</p>
                         <p className="mt-1 text-sm text-slate-400">
-                          {mail.source === "Manual" ? "Manuel" : "Automatique"} • {formatDateTime(mail.createdAt)}
+                          {mail.source.startsWith("Manual") ? "Manuel" : "Robot"} • {formatDateTime(mail.createdAt)}
                         </p>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`admin-chip ${mail.status === "Sent" ? "bg-emerald-500/12 text-emerald-100 ring-emerald-300/20" : "bg-red-500/12 text-red-100 ring-red-300/20"}`}>
-                          {mail.status === "Sent" ? "Envoyé" : "Échec"}
+                        <span className={`admin-chip ${prospectStatusMeta(mail.status).classes}`}>
+                          {prospectStatusMeta(mail.status).label}
                         </span>
                         {mail.status === "Sent" && (
                           <button

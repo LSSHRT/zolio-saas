@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { getAdminEmail } from "@/lib/admin";
 import { getAdminAuditLogs, getAdminRuntimeState } from "@/lib/admin-settings";
+import { getProspectingRuntime } from "@/lib/prospecting";
 import type {
   AdminActivityItem,
   AdminAlertItem,
@@ -58,6 +59,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
 
   const currentGeminiKey = readString(adminUser.publicMetadata?.customGeminiKey);
   const runtimeState = await getAdminRuntimeState();
+  const prospectingRuntime = getProspectingRuntime();
   const currentSystemBanner =
     runtimeState.systemBanner || readString(adminUser.publicMetadata?.systemBanner);
 
@@ -132,11 +134,13 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   }
 
   const sentCount = prospectMails.filter((mail) => mail.status === "Sent").length;
-  const failedCount = prospectMails.filter((mail) => mail.status !== "Sent").length;
-  const manualCount = prospectMails.filter((mail) => mail.source === "Manual").length;
-  const automatedCount = prospectMails.filter((mail) => mail.source !== "Manual").length;
+  const failedCount = prospectMails.filter((mail) => mail.status === "Failed").length;
+  const queuedCount = prospectMails.filter((mail) => mail.status === "Queued").length;
+  const attemptedCount = sentCount + failedCount;
+  const manualCount = prospectMails.filter((mail) => mail.source.startsWith("Manual")).length;
+  const automatedCount = prospectMails.filter((mail) => !mail.source.startsWith("Manual")).length;
   const totalMailCount = prospectMails.length;
-  const deliveryRate = totalMailCount > 0 ? Math.round((sentCount / totalMailCount) * 100) : 0;
+  const deliveryRate = attemptedCount > 0 ? Math.round((sentCount / attemptedCount) * 100) : 0;
 
   let activeSubscriptions = 0;
   let mrr = 0;
@@ -195,6 +199,17 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       severity: "critical",
       section: "acquisition",
       ctaLabel: "Ouvrir l'acquisition",
+    });
+  }
+
+  if (queuedCount > 0) {
+    alerts.push({
+      id: "queued-leads",
+      title: `${queuedCount} lead${queuedCount > 1 ? "s" : ""} en attente`,
+      description: "Le robot a trouvé des contacts mais l'envoi automatique est volontairement bloqué ou différé.",
+      severity: "info",
+      section: "acquisition",
+      ctaLabel: "Voir la file",
     });
   }
 
@@ -264,8 +279,15 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     })),
     ...prospectMails.slice(0, 6).map((mail) => ({
       id: `mail-${mail.id}`,
-      title: mail.status === "Sent" ? "Email de prospection envoyé" : "Email de prospection en échec",
-      description: `${mail.email} • ${mail.source === "Manual" ? "manuel" : "automatique"}`,
+      title:
+        mail.status === "Sent"
+          ? "Email de prospection envoyé"
+          : mail.status === "Queued"
+            ? "Lead mis en file d'attente"
+            : mail.status === "Blocked"
+              ? "Envoi de prospection bloqué"
+              : "Email de prospection en échec",
+      description: `${mail.email} • ${mail.source.startsWith("Manual") ? "manuel" : "robot"}`,
       timestamp: mail.createdAt,
       section: "acquisition" as const,
       kind: "acquisition" as const,
@@ -314,6 +336,21 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       detail: process.env.SMTP_USER && process.env.SMTP_PASS
         ? "Transport SMTP prêt"
         : "Configuration SMTP incomplète",
+    },
+    {
+      id: "prospecting-mailer",
+      label: "Sender prospection",
+      status: prospectingRuntime.canManualSend
+        ? prospectingRuntime.canAutoSend
+          ? "healthy"
+          : "warning"
+        : "critical",
+      detail: prospectingRuntime.canManualSend
+        ? prospectingRuntime.canAutoSend
+          ? "Prospection manuelle et robot autorisés"
+          : "Envoi manuel autorisé, robot en mode collecte"
+        : prospectingRuntime.reason || "Sender prospect indisponible",
+      meta: prospectingRuntime.fromEmail || undefined,
     },
     {
       id: "cron",
@@ -472,6 +509,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       totalCount: totalMailCount,
       sentCount,
       failedCount,
+      queuedCount,
       manualCount,
       automatedCount,
       deliveryRate,
@@ -492,6 +530,10 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       hasCronSecret: Boolean(process.env.CRON_SECRET),
       hasPublicLinkSecret: Boolean(process.env.PUBLIC_DEVIS_LINK_SECRET),
       hasGemini: Boolean(process.env.GEMINI_API_KEY || currentGeminiKey),
+      canManualProspectSend: prospectingRuntime.canManualSend,
+      canAutoProspectSend: prospectingRuntime.canAutoSend,
+      prospectMode: prospectingRuntime.mode,
+      prospectReason: prospectingRuntime.reason,
       hasMaintenanceMode: true,
       hasCentralizedLogs: true,
       dbLatencyMs,

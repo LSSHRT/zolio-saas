@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { createProspectTransport } from "@/lib/prospecting";
 
 function escapeHtml(value: string) {
   return value
@@ -147,20 +148,36 @@ export async function sendDevisSignedEmail(
  * Envoie un email de prospection automatique à un artisan.
  */
 export async function sendProspectEmail(toEmail: string) {
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  const { runtime, transporter } = createProspectTransport();
+  const unsubscribeMailto = runtime.replyToEmail
+    ? `<mailto:${runtime.replyToEmail}?subject=unsubscribe>`
+    : undefined;
+  const unsubscribeHeader = runtime.unsubscribeUrl
+    ? [unsubscribeMailto, `<${runtime.unsubscribeUrl}>`].filter(Boolean).join(", ")
+    : unsubscribeMailto;
+  const headers: Record<string, string> = {
+    "X-Auto-Response-Suppress": "All",
+  };
+
+  if (unsubscribeHeader) {
+    headers["List-Unsubscribe"] = unsubscribeHeader;
+  }
 
   const mailOptions = {
-    from: `"Zolio" <${process.env.SMTP_USER || "noreply@zolio.site"}>`,
+    from: `"Zolio" <${runtime.fromEmail}>`,
     to: toEmail,
+    replyTo: runtime.replyToEmail || undefined,
     subject: `Simplifiez la gestion de votre activité avec Zolio`,
+    text: [
+      "Bonjour,",
+      "",
+      "Zolio aide les artisans a creer leurs devis et factures plus vite.",
+      "Vous pouvez tester l'outil sur https://zolio.site",
+      "",
+      runtime.replyToEmail
+        ? `Pour ne plus recevoir ce type de message, repondez a ${runtime.replyToEmail} avec le mot STOP.`
+        : "Pour ne plus recevoir ce type de message, repondez a cet email avec le mot STOP.",
+    ].join("\n"),
     html: `
       <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
         <div style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);padding:30px;border-radius:16px 16px 0 0;text-align:center;">
@@ -192,11 +209,12 @@ export async function sendProspectEmail(toEmail: string) {
           </p>
           <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:20px;">
             Cet email vous a été envoyé car nous aidons les artisans de votre secteur. <br/>
-            Si vous ne souhaitez plus recevoir de propositions de notre part, merci de nous le signaler.
+            Si vous ne souhaitez plus recevoir de propositions de notre part, répondez STOP ou utilisez le lien de désinscription disponible dans l’email.
           </p>
         </div>
       </div>
     `,
+    headers,
   };
 
   await transporter.sendMail(mailOptions);

@@ -95,6 +95,7 @@ export interface AdminAcquisitionSnapshot {
   totalCount: number;
   sentCount: number;
   failedCount: number;
+  queuedCount: number;
   manualCount: number;
   automatedCount: number;
   deliveryRate: number;
@@ -117,6 +118,10 @@ export interface AdminEnvironmentSnapshot {
   hasCronSecret: boolean;
   hasPublicLinkSecret: boolean;
   hasGemini: boolean;
+  canManualProspectSend: boolean;
+  canAutoProspectSend: boolean;
+  prospectMode: "queue_only" | "manual_only" | "live";
+  prospectReason: string | null;
   hasMaintenanceMode: boolean;
   hasCentralizedLogs: boolean;
   dbLatencyMs: number | null;

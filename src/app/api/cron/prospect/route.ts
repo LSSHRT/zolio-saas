@@ -4,104 +4,133 @@ import { sendProspectEmail } from "@/lib/sendEmail";
 import { isAdminUser } from "@/lib/admin";
 import { ADMIN_SETTING_KEYS, appendAdminAuditLog } from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
+import {
+  ProspectingConfigError,
+  getProspectCooldownCutoff,
+  getProspectingRuntime,
+  isPersonalMailbox,
+  isValidEmail,
+  normalizeEmail,
+} from "@/lib/prospecting";
 import { prisma } from "@/lib/prisma";
 
 const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "";
 
-export const maxDuration = 60; // Autorise la fonction à tourner jusqu'à 60 secondes sur Vercel
-export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
 
-// Fonction pour extraire des emails via une recherche web (Bing)
-async function findEmailViaSearch() {
-  const metiers = ["Plombier", "Électricien", "Menuisier", "Peintre", "Maçon", "Carreleur", "Chauffagiste", "Serrurier", "Vitrier", "Couvreur", "Charpentier", "Plaquiste", "Façadier"];
-  const villes = ["Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Montpellier", "Strasbourg", "Bordeaux", "Lille", "Rennes", "Reims", "Toulon", "Saint-Etienne", "Grenoble", "Dijon", "Angers", "Nîmes", "Villeurbanne", "Clermont-Ferrand", "Le Mans", "Aix-en-Provence", "Brest", "Tours", "Amiens"];
-  const providers = ["@gmail.com", "@orange.fr", "@hotmail.fr", "@yahoo.fr", "@wanadoo.fr", "@sfr.fr"];
-  
-  const metier = metiers[Math.floor(Math.random() * metiers.length)];
-  const ville = villes[Math.floor(Math.random() * villes.length)];
-  const provider = providers[Math.floor(Math.random() * providers.length)];
-  
-  const query = `${metier} ${ville} contact artisan "${provider}"`;
-  
+type ProspectCandidate = {
+  email: string;
+  source: string;
+};
+
+async function discoverFrenchBusinessDomains() {
+  const trades = [
+    "plombier",
+    "electricien",
+    "menuisier",
+    "peintre batiment",
+    "macon",
+    "chauffagiste",
+  ];
+  const cities = ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux", "Nantes", "Lille"];
+
+  const trade = trades[Math.floor(Math.random() * trades.length)];
+  const city = cities[Math.floor(Math.random() * cities.length)];
+  const query = `${trade} ${city} artisan site:.fr -pagesjaunes -facebook -instagram`;
+
   try {
-    const response = await fetch("https://www.bing.com/search?q=" + encodeURIComponent(query), {
+    const response = await fetch(`https://www.bing.com/search?q=${encodeURIComponent(query)}`, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-      }
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      },
+      cache: "no-store",
     });
-    
-    if (response.ok) {
-      const html = await response.text();
-      const emailRegex = /[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+.[a-zA-Z0-9_-]+/gi;
-      const emails = html.match(emailRegex);
-      
-      if (emails) {
-        const uniqueEmails = [...new Set(emails.map(e => e.toLowerCase()))]
-          .filter(e => e.includes(provider.replace("@", "")))
-          .filter(e => !e.startsWith("22@") && !e.startsWith("27@") && !e.startsWith("u00") && e.length > 10);
-          
-        if (uniqueEmails.length > 0) {
-          return uniqueEmails; // On retourne tous les emails trouvés
-        }
+
+    if (!response.ok) return [];
+
+    const html = await response.text();
+    const domainRegex = /https?:\/\/(?:www\.)?([a-zA-Z0-9-]+\.(?:fr|com|net))/g;
+    const domains = new Set<string>();
+
+    for (const match of html.matchAll(domainRegex)) {
+      const domain = match[1]?.toLowerCase();
+      if (!domain) continue;
+      if (
+        domain.includes("bing.") ||
+        domain.includes("pagesjaunes") ||
+        domain.includes("travaux") ||
+        domain.includes("yelp")
+      ) {
+        continue;
       }
+      domains.add(domain);
     }
-  } catch (e) {
-    console.error("Erreur recherche web:", e);
+
+    return Array.from(domains).slice(0, 5);
+  } catch (error) {
+    console.error("prospect-domain-discovery", error);
+    return [];
   }
-  
-  return [];
 }
 
-// Fonction pour trouver des domaines via recherche, puis utiliser l'API Hunter
-async function findEmailsViaHunter() {
+async function findEmailsViaHunter(): Promise<ProspectCandidate[]> {
   if (!HUNTER_API_KEY) return [];
 
-  const metiers = ["Plomberie", "Électricité", "Menuiserie", "Peinture bâtiment", "Maçonnerie", "Chauffagiste"];
-  const villes = ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux", "Nantes", "Lille"];
-  
-  const metier = metiers[Math.floor(Math.random() * metiers.length)];
-  const ville = villes[Math.floor(Math.random() * villes.length)];
-  
-  const query = `${metier} ${ville} artisan site:fr`;
-  const foundEmails: string[] = [];
-  
-  try {
-    const response = await fetch("https://www.bing.com/search?q=" + encodeURIComponent(query), {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-      }
-    });
-    
-    if (!response.ok) return [];
-    
-    const html = await response.text();
-    const domainRegex = /https?:\/\/(www\.)?([a-zA-Z0-9-]+\.fr)/g;
-    let match;
-    const domains = new Set();
-    while ((match = domainRegex.exec(html)) !== null) {
-      if (!match[2].includes("bing") && !match[2].includes("pagesjaunes") && !match[2].includes("yelp") && !match[2].includes("travaux")) {
-        domains.add(match[2]);
-      }
-    }
-    
-    const domainArray = Array.from(domains);
-    
-    for (let i = 0; i < Math.min(domainArray.length, 2); i++) {
-      const domain = domainArray[i];
+  const domains = await discoverFrenchBusinessDomains();
+  const results: ProspectCandidate[] = [];
+
+  for (const domain of domains) {
+    try {
       const hunterUrl = `https://api.hunter.io/v2/domain-search?domain=${domain}&api_key=${HUNTER_API_KEY}`;
-      
-      const hunterRes = await fetch(hunterUrl);
-      if (hunterRes.ok) {
-        const data = await hunterRes.json();
-        if (data.data && data.data.emails && data.data.emails.length > 0) {
-          foundEmails.push(data.data.emails[0].value);
+      const hunterRes = await fetch(hunterUrl, { cache: "no-store" });
+      if (!hunterRes.ok) continue;
+
+      const payload = await hunterRes.json();
+      const emails = Array.isArray(payload?.data?.emails) ? payload.data.emails : [];
+
+      for (const item of emails) {
+        const email = typeof item?.value === "string" ? normalizeEmail(item.value) : "";
+        if (!email || !isValidEmail(email) || isPersonalMailbox(email)) {
+          continue;
         }
+
+        results.push({
+          email,
+          source: `Robot (Hunter:${domain})`,
+        });
       }
+    } catch (error) {
+      console.error("prospect-hunter", error);
     }
-  } catch (e) {
-    console.error("Erreur Hunter:", e);
   }
-  return foundEmails;
+
+  const uniqueByEmail = new Map<string, ProspectCandidate>();
+  for (const item of results) {
+    if (!uniqueByEmail.has(item.email)) {
+      uniqueByEmail.set(item.email, item);
+    }
+  }
+
+  return Array.from(uniqueByEmail.values()).slice(0, 5);
+}
+
+async function alreadyProcessedRecently(email: string) {
+  const previous = await prisma.prospectMail.findFirst({
+    where: {
+      email,
+      createdAt: {
+        gt: getProspectCooldownCutoff(),
+      },
+      status: {
+        in: ["Sent", "Queued", "Blocked"],
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return Boolean(previous);
 }
 
 export async function GET(req: Request) {
@@ -116,12 +145,11 @@ export async function GET(req: Request) {
       return jsonError("Non autorisé", 403);
     }
 
-    // Vérifier si le cron est activé dans les paramètres
     const cronSetting = await prisma.adminSetting.findUnique({
-      where: { key: ADMIN_SETTING_KEYS.cronProspectEnabled }
+      where: { key: ADMIN_SETTING_KEYS.cronProspectEnabled },
     });
 
-    if (cronSetting && cronSetting.value === "false") {
+    if (cronSetting?.value === "false") {
       await appendAdminAuditLog({
         level: "warning",
         scope: "acquisition",
@@ -134,103 +162,110 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Le robot de prospection est désactivé manuellement." });
     }
 
-    const emailsEnvoyes: string[] = [];
-    const maxEmailsToSend = 3; // On envoie jusqu'à 3 emails par exécution pour être plus rapide et utile
-    
-    // On boucle pour chercher activement des emails (limite de 8 tentatives de recherche max)
-    for (let searchAttempt = 0; searchAttempt < 8; searchAttempt++) {
-      if (emailsEnvoyes.length >= maxEmailsToSend) break;
-      
-      // On alterne entre Hunter et Recherche Web
-      let emailsTrouves = [];
-      let source = "";
-      
-      if (searchAttempt % 2 === 0) {
-        emailsTrouves = await findEmailsViaHunter();
-        source = "Cron (Hunter)";
-      } else {
-        emailsTrouves = await findEmailViaSearch();
-        source = "Cron (Bot)";
-      }
-      
-      for (const email of emailsTrouves) {
-        if (emailsEnvoyes.length >= maxEmailsToSend) break;
-        
-        // Vérifier si on a déjà envoyé un mail à cet artisan
-        const envoiPrecedent = await prisma.prospectMail.findFirst({
-          where: { email },
-          orderBy: { createdAt: "desc" }
-        });
-
-        let peutEnvoyer = true;
-        if (envoiPrecedent) {
-          const deuxMoisEnMs = 60 * 24 * 60 * 60 * 1000;
-          const dateLimite = new Date(Date.now() - deuxMoisEnMs);
-          if (new Date(envoiPrecedent.createdAt) > dateLimite) {
-            peutEnvoyer = false;
-          }
-        }
-
-        if (peutEnvoyer && !emailsEnvoyes.includes(email)) {
-          try {
-            // Envoyer le mail
-            await sendProspectEmail(email);
-            
-            // Enregistrer dans la base
-            await prisma.prospectMail.create({
-              data: {
-                email,
-                status: "Sent",
-                source: source,
-              },
-            });
-            
-            emailsEnvoyes.push(email);
-          } catch (emailErr) {
-            console.error("Erreur d'envoi d'un email de prospection:", emailErr);
-            // On enregistre l'échec pour ne pas réessayer cet email défectueux en boucle
-            await prisma.prospectMail.create({
-              data: {
-                email,
-                status: "Failed",
-                source: source,
-              },
-            });
-          }
-        }
-      }
-    }
-
-    if (emailsEnvoyes.length === 0) {
+    if (!HUNTER_API_KEY) {
       await appendAdminAuditLog({
-        level: "info",
+        level: "warning",
         scope: "acquisition",
-        action: isAdminTrigger ? "cron.test" : "cron.run",
+        action: "cron.no_hunter",
         actor: isAdminTrigger
           ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
           : "Cron Vercel",
-        message: "Le robot de prospection n'a trouvé aucun nouvel email exploitable.",
+        message: "Le robot ne peut pas sourcer de nouveaux leads sans HUNTER_API_KEY.",
       });
-      return NextResponse.json({ message: "Aucun nouvel email valide trouvé ce tour-ci, réessai plus tard." }, { status: 200 });
+
+      return NextResponse.json(
+        { message: "Hunter n'est pas configuré. Le robot ne peut pas découvrir de leads fiables." },
+        { status: 200 },
+      );
     }
 
+    const runtime = getProspectingRuntime();
+    const candidates = await findEmailsViaHunter();
+    const recentProcessed = new Set<string>();
+    const queued: string[] = [];
+    const sent: string[] = [];
+    const failed: string[] = [];
+
+    for (const candidate of candidates) {
+      if (recentProcessed.has(candidate.email)) continue;
+      recentProcessed.add(candidate.email);
+
+      if (await alreadyProcessedRecently(candidate.email)) {
+        continue;
+      }
+
+      if (!runtime.canAutoSend) {
+        await prisma.prospectMail.create({
+          data: {
+            email: candidate.email,
+            status: "Queued",
+            source: candidate.source,
+          },
+        });
+        queued.push(candidate.email);
+        continue;
+      }
+
+      try {
+        await sendProspectEmail(candidate.email);
+        await prisma.prospectMail.create({
+          data: {
+            email: candidate.email,
+            status: "Sent",
+            source: candidate.source,
+          },
+        });
+        sent.push(candidate.email);
+      } catch (error) {
+        const status = error instanceof ProspectingConfigError ? "Blocked" : "Failed";
+        await prisma.prospectMail.create({
+          data: {
+            email: candidate.email,
+            status,
+            source: candidate.source,
+          },
+        });
+        failed.push(candidate.email);
+      }
+    }
+
+    const actor = isAdminTrigger
+      ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
+      : "Cron Vercel";
+
+    const messageParts = [
+      sent.length > 0 ? `${sent.length} email(s) envoyé(s)` : null,
+      queued.length > 0 ? `${queued.length} lead(s) mis en file d'attente` : null,
+      failed.length > 0 ? `${failed.length} échec(s)` : null,
+    ].filter(Boolean);
+
+    const message =
+      messageParts.length > 0
+        ? `Robot exécuté : ${messageParts.join(" • ")}.`
+        : runtime.canAutoSend
+          ? "Aucun nouveau lead exploitable trouvé sur ce tour."
+          : "Aucun nouveau lead exploitable trouvé. Le robot reste en mode collecte.";
+
     await appendAdminAuditLog({
-      level: "success",
+      level: failed.length > 0 ? "warning" : "success",
       scope: "acquisition",
       action: isAdminTrigger ? "cron.test" : "cron.run",
-      actor: isAdminTrigger
-        ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
-        : "Cron Vercel",
-      message: `Le robot de prospection a envoyé ${emailsEnvoyes.length} email(s).`,
-      meta: emailsEnvoyes.join(", "),
+      actor,
+      message,
+      meta: runtime.canAutoSend
+        ? sent.join(", ") || undefined
+        : queued.join(", ") || runtime.reason || undefined,
     });
 
-    return NextResponse.json({ 
-      message: `Robot exécuté avec succès : ${emailsEnvoyes.length} email(s) envoyé(s) !`, 
-      emails: emailsEnvoyes 
+    return NextResponse.json({
+      message,
+      sent,
+      queued,
+      failed,
+      mode: runtime.mode,
+      sendingReason: runtime.reason,
     });
-
   } catch (error) {
-    return internalServerError("cron-prospect", error, "Erreur lors de l'envoi");
+    return internalServerError("cron-prospect", error, "Erreur lors de l'exécution du robot");
   }
 }
