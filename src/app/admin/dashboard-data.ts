@@ -71,7 +71,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     users = res.data.map((user) => {
       const metadata = user.publicMetadata || {};
       const stripeSubscriptionId = readNullableString(metadata.stripeSubscriptionId);
-      const isPro = readBoolean(metadata.isPro) || Boolean(stripeSubscriptionId);
+      const isPro = readBoolean(metadata.isPro);
 
       return {
         id: user.id,
@@ -97,7 +97,9 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   }
 
   const proUsersCount = users.filter((user) => user.isPro).length;
-  const stripeBackedProUsers = users.filter((user) => Boolean(user.publicMetadata.stripeSubscriptionId)).length;
+  const stripeBackedProUsers = users.filter(
+    (user) => user.isPro && Boolean(user.publicMetadata.stripeSubscriptionId),
+  ).length;
   const manualProUsers = Math.max(proUsersCount - stripeBackedProUsers, 0);
   const recentUsersCount = users.filter((user) => {
     if (!user.createdAt) return false;

@@ -16,6 +16,17 @@ function formatAdminActor(user: Awaited<ReturnType<typeof requireAdminUser>>) {
   return name ? `${name} • ${email}` : email;
 }
 
+async function purgeUserWorkspaceData(userId: string) {
+  await prisma.$transaction([
+    prisma.devis.deleteMany({ where: { userId } }),
+    prisma.facture.deleteMany({ where: { userId } }),
+    prisma.depense.deleteMany({ where: { userId } }),
+    prisma.note.deleteMany({ where: { userId } }),
+    prisma.prestation.deleteMany({ where: { userId } }),
+    prisma.client.deleteMany({ where: { userId } }),
+  ]);
+}
+
 export async function markMailAsFailed(mailId: string) {
   const adminUser = await requireAdminUser();
 
@@ -115,6 +126,7 @@ export async function deleteUserAccount(userId: string) {
   const adminUser = await requireAdminUser();
   const client = await clerkClient();
   const targetUser = await client.users.getUser(userId);
+  await purgeUserWorkspaceData(userId);
   await client.users.deleteUser(userId);
   await appendAdminAuditLog({
     level: "error",
