@@ -37,6 +37,7 @@ import {
 } from "./actions";
 import { AdminConfirmDialog } from "./components/AdminConfirmDialog";
 import { AdminKpiStrip } from "./components/AdminKpiStrip";
+import { AdminMobileNav } from "./components/AdminMobileNav";
 import { AdminSidebar, type AdminSidebarSection } from "./components/AdminSidebar";
 import { AdminUserDrawer } from "./components/AdminUserDrawer";
 import type {
@@ -146,7 +147,7 @@ function Panel({
     <section className={`admin-panel rounded-[30px] ${className}`}>
       {(title || description || action) && (
         <div className="flex flex-col gap-4 border-b border-white/8 px-5 py-5 sm:px-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
               {title && <h3 className="text-lg font-semibold text-white">{title}</h3>}
               {description && <p className="mt-1 text-sm leading-6 text-slate-400">{description}</p>}
@@ -350,6 +351,26 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       badge: systemRiskCount > 0 ? String(systemRiskCount) : undefined,
     },
   ];
+
+  function renderUserBadges(user: AdminUserRow) {
+    return (
+      <div className="flex flex-wrap gap-2">
+        <span
+          className={`admin-chip ${user.isPro ? "bg-sky-500/12 text-sky-100 ring-sky-300/20" : "bg-white/8 text-slate-200 ring-white/10"}`}
+        >
+          {user.isPro ? "PRO" : "Gratuit"}
+        </span>
+        {user.banned && (
+          <span className="admin-chip bg-red-500/12 text-red-100 ring-red-300/20">Banni</span>
+        )}
+        {user.publicMetadata.isAdmin && (
+          <span className="admin-chip bg-violet-500/12 text-violet-100 ring-violet-300/20">
+            Admin
+          </span>
+        )}
+      </div>
+    );
+  }
 
   function pushActivity(item: AdminActivityItem) {
     setActivityFeed((current) =>
@@ -722,11 +743,11 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
 
   function renderQuickAction() {
     if (activeSection === "utilisateurs") {
-      return (
+          return (
         <button
           type="button"
           onClick={handleExportCSV}
-          className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+          className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 sm:w-auto"
         >
           <span className="inline-flex items-center gap-2">
             <Download className="h-4 w-4" />
@@ -742,7 +763,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
           type="button"
           onClick={handleTestCron}
           disabled={testingCron}
-          className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+          className="w-full rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50 sm:w-auto"
         >
           <span className="inline-flex items-center gap-2">
             {testingCron ? <Loader2 className="h-4 w-4 animate-spin" /> : <RadioTower className="h-4 w-4" />}
@@ -784,14 +805,14 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                 <button
                   type="button"
                   onClick={() => setActiveSection("acquisition")}
-                  className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                  className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 sm:w-auto"
                 >
                   Passer en acquisition
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveSection("utilisateurs")}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 sm:w-auto"
                 >
                   Inspecter les utilisateurs
                 </button>
@@ -928,7 +949,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             <button
               type="button"
               onClick={handleExportCSV}
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 sm:w-auto"
             >
               <span className="inline-flex items-center gap-2">
                 <Download className="h-4 w-4" />
@@ -937,7 +958,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             </button>
           }
         >
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
+          <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px] xl:grid-cols-[minmax(0,1fr)_260px]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
               <input
@@ -952,13 +973,89 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             <button
               type="button"
               onClick={() => setFilterProOnly((current) => !current)}
-              className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${filterProOnly ? "border-sky-300/20 bg-sky-400/10 text-sky-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"}`}
+              className={`w-full rounded-2xl border px-4 py-3 text-sm font-medium transition ${filterProOnly ? "border-sky-300/20 bg-sky-400/10 text-sky-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"}`}
             >
               {filterProOnly ? "Filtre PRO actif" : "Filtrer PRO uniquement"}
             </button>
           </div>
 
-          <div className="mt-6 overflow-hidden rounded-[26px] border border-white/8">
+          <div className="mt-6 space-y-3 md:hidden">
+            {filteredUsers.map((user) => (
+              <article
+                key={user.id}
+                className="rounded-[26px] border border-white/8 bg-white/4 p-4 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.72)]"
+              >
+                <button
+                  type="button"
+                  onClick={() => setSelectedUserId(user.id)}
+                  className="flex w-full items-start gap-3 text-left"
+                >
+                  {user.imageUrl ? (
+                    <>
+                      {/* External avatar URLs come from Clerk and are not optimized locally. */}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={user.imageUrl}
+                        alt={user.name}
+                        className="h-12 w-12 rounded-2xl object-cover ring-1 ring-white/10"
+                      />
+                    </>
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-semibold text-white">
+                      {user.name.charAt(0)}
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{user.name}</p>
+                        <p className="mt-1 truncate text-sm text-slate-400">{user.email}</p>
+                      </div>
+                      <span className="admin-chip bg-white/8 text-slate-200 ring-white/10">
+                        {user.aiGenerations} IA
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                <div className="mt-4">{renderUserBadges(user)}</div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-[22px] border border-white/8 bg-slate-950/35 p-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                      Dernière connexion
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-white">
+                      {formatDateTime(user.lastSignInAt)}
+                    </p>
+                  </div>
+                  <div className="rounded-[22px] border border-white/8 bg-slate-950/35 p-3">
+                    <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">
+                      Inscription
+                    </p>
+                    <p className="mt-2 text-sm font-medium text-white">
+                      {formatDateTime(user.createdAt)}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedUserId(user.id)}
+                  className="mt-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Inspecter ce compte
+                </button>
+              </article>
+            ))}
+            {filteredUsers.length === 0 && (
+              <div className="rounded-[26px] border border-dashed border-white/12 bg-white/4 px-4 py-10 text-center text-sm text-slate-400">
+                Aucun utilisateur ne correspond à ce filtre.
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 hidden overflow-hidden rounded-[26px] border border-white/8 md:block">
             <div className="overflow-x-auto">
               <table className="min-w-full text-left">
                 <thead className="bg-white/4 text-xs uppercase tracking-[0.24em] text-slate-500">
@@ -1004,21 +1101,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                         </button>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex flex-wrap gap-2">
-                          <span className={`admin-chip ${user.isPro ? "bg-sky-500/12 text-sky-100 ring-sky-300/20" : "bg-white/8 text-slate-200 ring-white/10"}`}>
-                            {user.isPro ? "PRO" : "Gratuit"}
-                          </span>
-                          {user.banned && (
-                            <span className="admin-chip bg-red-500/12 text-red-100 ring-red-300/20">
-                              Banni
-                            </span>
-                          )}
-                          {user.publicMetadata.isAdmin && (
-                            <span className="admin-chip bg-violet-500/12 text-violet-100 ring-violet-300/20">
-                              Admin
-                            </span>
-                          )}
-                        </div>
+                        {renderUserBadges(user)}
                       </td>
                       <td className="px-4 py-4 text-sm text-slate-300">{user.aiGenerations}</td>
                       <td className="px-4 py-4 text-sm text-slate-400">
@@ -1183,7 +1266,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   type="button"
                   onClick={handleTestCron}
                   disabled={testingCron}
-                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50 sm:w-auto"
                 >
                   <span className="inline-flex items-center gap-2">
                     {testingCron ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clock3 className="h-4 w-4" />}
@@ -1194,7 +1277,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   type="button"
                   onClick={handleToggleCron}
                   disabled={togglingCron}
-                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${isCronEnabled ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-amber-400 text-slate-950 hover:bg-amber-300"}`}
+                  className={`w-full rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50 sm:w-auto ${isCronEnabled ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-amber-400 text-slate-950 hover:bg-amber-300"}`}
                 >
                   {togglingCron ? "Mise à jour..." : isCronEnabled ? "Désactiver le robot" : "Activer le robot"}
                 </button>
@@ -1229,7 +1312,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   <button
                     type="submit"
                     disabled={sendingProspect || !prospectEmail.trim()}
-                    className="rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                    className="w-full rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
                   >
                     <span className="inline-flex items-center gap-2">
                       {sendingProspect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -1347,7 +1430,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                     type="button"
                     onClick={handleSetBanner}
                     disabled={savingBanner}
-                    className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-50"
+                    className="w-full rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-50 sm:w-auto"
                   >
                     {savingBanner ? "Mise à jour..." : bannerText ? "Déployer la bannière" : "Supprimer la bannière"}
                   </button>
@@ -1373,7 +1456,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                     type="button"
                     onClick={handleSaveGeminiKey}
                     disabled={savingGeminiKey}
-                    className="rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                    className="w-full rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
                   >
                     {savingGeminiKey ? "Sauvegarde..." : "Sauvegarder la clé"}
                   </button>
@@ -1423,7 +1506,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     <div className="min-h-screen admin-cockpit">
       <div className="pointer-events-none absolute inset-0 admin-grid-overlay" />
 
-      <div className="relative flex min-h-screen">
+      <div className="relative flex min-h-screen pb-[calc(env(safe-area-inset-bottom)+5.75rem)] lg:pb-0">
         <AdminSidebar
           activeSection={activeSection}
           currentAdmin={data.currentAdmin}
@@ -1450,32 +1533,14 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                     {currentSectionMeta?.description}
                   </p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">{renderQuickAction()}</div>
-              </div>
-
-              <div className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:hidden">
-                {sections.map((section) => {
-                  const Icon = section.icon;
-                  const isActive = section.id === activeSection;
-                  return (
-                    <button
-                      key={section.id}
-                      type="button"
-                      onClick={() => setActiveSection(section.id)}
-                      className={`shrink-0 rounded-2xl border px-4 py-3 text-sm font-medium transition ${isActive ? "border-violet-300/24 bg-white text-slate-950" : "border-white/10 bg-white/5 text-slate-200"}`}
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <Icon className="h-4 w-4" />
-                        {section.label}
-                      </span>
-                    </button>
-                  );
-                })}
+                <div className="flex w-full flex-wrap items-center gap-3 xl:w-auto">
+                  {renderQuickAction()}
+                </div>
               </div>
             </div>
           </header>
 
-          <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <main className="px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeSection}
@@ -1557,6 +1622,12 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         isPending={confirmPending}
         onClose={() => !confirmPending && setConfirmDialog(null)}
         onConfirm={handleDialogConfirm}
+      />
+
+      <AdminMobileNav
+        activeSection={activeSection}
+        sections={sections}
+        onSelect={setActiveSection}
       />
     </div>
   );

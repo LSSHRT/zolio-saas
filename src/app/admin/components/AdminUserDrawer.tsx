@@ -55,7 +55,7 @@ export function AdminUserDrawer({
             onClick={onClose}
           />
           <motion.aside
-            className="fixed inset-y-0 right-0 z-50 w-full max-w-[420px] border-l border-white/10 bg-slate-950/88 p-5 backdrop-blur-2xl"
+            className="fixed inset-0 z-50 w-full overflow-y-auto border-white/10 bg-slate-950/88 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] backdrop-blur-2xl sm:inset-y-0 sm:left-auto sm:right-0 sm:max-w-[420px] sm:border-l sm:p-5"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
