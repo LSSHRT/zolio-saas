@@ -1,17 +1,16 @@
 "use client";
 
-import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, Package, Clock, Sun, Moon, CloudSun, StickyNote, Receipt, Pencil, Calendar } from "lucide-react";
+import { Bell, Home, FileText, Users, Settings, Plus, User, Briefcase, FileCheck, Package, Clock, Sun, Moon, CloudSun, StickyNote, Receipt, Pencil, Calendar, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import { CallBackProps, STATUS, Step } from "react-joyride";
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
-import LandingPage from "@/components/LandingPage";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -29,19 +28,22 @@ function parseDevisDate(dateStr?: string): Date {
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { data, isLoading } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
-  const devis = Array.isArray(data) ? data : [];
+  const { data: adminViewerData } = useSWR(isLoaded ? "/api/admin/me" : null, fetcher, {
+    revalidateOnFocus: false,
+    keepPreviousData: true,
+  });
+  const devis = useMemo(() => (Array.isArray(data) ? data : []), [data]);
   const loading = isLoading && !data;
+  const canAccessAdminDashboard =
+    user?.publicMetadata?.isAdmin === true || adminViewerData?.isAdmin === true;
 
-  
-  const [objectif, setObjectif] = useState(5000);
-  useEffect(() => {
-    if (user?.unsafeMetadata?.objectifMensuel) {
-      setObjectif(Number(user.unsafeMetadata.objectifMensuel));
-    }
-  }, [user]);
+  const objectifMensuel = Number(user?.unsafeMetadata?.objectifMensuel);
+  const objectifInitial = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : 5000;
+  const [objectif, setObjectif] = useState(objectifInitial);
+  const objectifActif = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;
 
   const handleUpdateObjectif = async () => {
-    const newVal = prompt("Entrez votre nouvel objectif mensuel (en €) :", objectif.toString());
+    const newVal = prompt("Entrez votre nouvel objectif mensuel (en €) :", objectifActif.toString());
     const parsed = Number(newVal);
     if (newVal && !isNaN(parsed) && parsed > 0) {
       setObjectif(parsed);
@@ -54,21 +56,17 @@ export default function DashboardPage() {
             }
           });
         }
-      } catch(e) {
+      } catch {
         alert("Erreur lors de la sauvegarde de l'objectif.");
       }
     }
   };
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [runTour, setRunTour] = useState(false);
-  useEffect(() => {
-    // Check if user has seen tour
-    const hasSeenTour = localStorage.getItem('zolio_has_seen_tour');
-    if (!hasSeenTour) {
-      setRunTour(true);
-    }
-  }, []);
+  const [runTour, setRunTour] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !localStorage.getItem("zolio_has_seen_tour");
+  });
 
   const handleJoyrideCallback = (data: CallBackProps) => {
     const { status } = data;
@@ -122,17 +120,14 @@ export default function DashboardPage() {
 
   
   // Dynamic greeting
-  const [currentHour, setCurrentHour] = useState<number | null>(null);
-  useEffect(() => {
-    setCurrentHour(new Date().getHours());
-  }, []);
+  const [currentHour] = useState(() => new Date().getHours());
 
   let greetingText: string;
   let WeatherIcon;
-  if (currentHour !== null && currentHour >= 18) {
+  if (currentHour >= 18) {
     greetingText = "Bonsoir";
     WeatherIcon = Moon;
-  } else if (currentHour !== null && currentHour >= 12) {
+  } else if (currentHour >= 12) {
     greetingText = "Bon après-midi";
     WeatherIcon = Sun;
   } else {
@@ -140,13 +135,15 @@ export default function DashboardPage() {
     WeatherIcon = CloudSun;
   }
 
+  const [todayMs] = useState(() => Date.now());
+
   const devisARelancer = useMemo(() => devis.filter(d => {
     if (d.statut === "Accepté" || d.statut === "Refusé") return false;
     const dateObj = parseDevisDate(d.date);
-    const diffTime = Math.abs(Date.now() - dateObj.getTime());
+    const diffTime = Math.abs(todayMs - dateObj.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays > 7;
-  }).slice(0, 3), [devis]);
+  }).slice(0, 3), [devis, todayMs]);
 
   return (
     <div className="tour-dashboard flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
@@ -189,6 +186,16 @@ export default function DashboardPage() {
         
         <div className="flex items-center gap-4 relative">
           <ThemeToggle />
+          {canAccessAdminDashboard && (
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 rounded-full border border-violet-200/60 bg-violet-50/90 px-3 py-2 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-100 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-100 dark:hover:bg-violet-500/15"
+              aria-label="Accéder au dashboard administrateur"
+            >
+              <ShieldCheck size={18} />
+              <span className="hidden sm:inline">Admin</span>
+            </Link>
+          )}
           <Link href="/parametres" className="tour-parametres text-slate-400 hover:text-violet-600 dark:text-slate-400 dark:hover:text-violet-400 transition" aria-label="Paramètres">
             <Settings size={24} />
           </Link>
@@ -229,7 +236,7 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <p className="text-sm text-slate-800 dark:text-slate-200"><span className="font-semibold">Nouveauté</span></p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Le design s'adapte maintenant à vos écrans.</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Le design s&apos;adapte maintenant à vos écrans.</p>
                   </div>
                 </div>
               </div>
@@ -272,11 +279,11 @@ export default function DashboardPage() {
                     const res = await fetch("/api/stripe/portal", { method: "POST" });
                     const data = await res.json();
                     if (data.url) window.location.href = data.url;
-                  } catch (err) { }
+                  } catch { }
                 }}
                 className="text-xs text-brand-violet font-medium hover:underline bg-violet-50 dark:bg-violet-500/10 px-3 py-2 rounded-xl transition"
               >
-                Gérer l'abonnement
+                Gérer l&apos;abonnement
               </button>
             )}
           </div>
@@ -421,7 +428,7 @@ export default function DashboardPage() {
           <div className="absolute left-[-5%] top-[40%] w-20 h-20 bg-orange-400/15 rounded-full blur-2xl"></div>
           
           <div className="relative z-10">
-            <p className="text-violet-100 text-sm font-medium mb-1">Chiffre d'Affaires Global</p>
+            <p className="text-violet-100 text-sm font-medium mb-1">Chiffre d&apos;Affaires Global</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-4">
               {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(CA_TTC)}
             </h2>
@@ -429,14 +436,14 @@ export default function DashboardPage() {
             {/* Gamification Objectif */}
             <div className="mb-5 bg-white/90 rounded-xl p-3 backdrop-blur-sm border border-white/20 dark:bg-white/5 dark:border-white/10 dark:text-white">
               <div className="flex justify-between items-center text-xs font-medium mb-2">
-                <span>Objectif ({objectif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition" aria-label="Modifier l'objectif"><Pencil size={12} /></button></span>
-                <span>{Math.min((CA_TTC / objectif) * 100, 100).toFixed(0)}%</span>
+                <span>Objectif ({objectifActif.toLocaleString("fr-FR")}€) <button onClick={handleUpdateObjectif} className="ml-2 hover:text-white transition" aria-label="Modifier l'objectif"><Pencil size={12} /></button></span>
+                <span>{Math.min((CA_TTC / objectifActif) * 100, 100).toFixed(0)}%</span>
               </div>
               <div className="w-full bg-black/20 rounded-full h-2.5 overflow-hidden">
-                <div className="bg-gradient-to-r from-white to-white/80 rounded-full h-2.5 transition-all duration-1000 shadow-[0_0_12px_rgba(255,255,255,0.6)] dark:from-fuchsia-400 dark:to-orange-400 dark:shadow-[0_0_12px_rgba(217,70,239,0.6)]" style={{ width: `${Math.min((CA_TTC / objectif) * 100, 100)}%` }}></div>
+                <div className="bg-gradient-to-r from-white to-white/80 rounded-full h-2.5 transition-all duration-1000 shadow-[0_0_12px_rgba(255,255,255,0.6)] dark:from-fuchsia-400 dark:to-orange-400 dark:shadow-[0_0_12px_rgba(217,70,239,0.6)]" style={{ width: `${Math.min((CA_TTC / objectifActif) * 100, 100)}%` }}></div>
               </div>
               <p className="text-[10px] text-violet-200 mt-1.5 text-right">
-                {CA_TTC >= objectif ? '🎉 Objectif atteint !' : `Encore ${(objectif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
+                {CA_TTC >= objectifActif ? '🎉 Objectif atteint !' : `Encore ${(objectifActif - CA_TTC).toLocaleString('fr-FR', { maximumFractionDigits: 0 })}€ pour l'atteindre`}
               </p>
             </div>
             
@@ -465,7 +472,7 @@ export default function DashboardPage() {
           className="glass-card dark:bg-[#0c0a1d]/80 rounded-[1.5rem] shadow-sm p-5"
         >
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-slate-900 dark:text-white text-sm font-bold">Suivi du Chiffre d'Affaires</h3>
+            <h3 className="text-slate-900 dark:text-white text-sm font-bold">Suivi du Chiffre d&apos;Affaires</h3>
             <div className="bg-violet-50 dark:bg-violet-500/10 text-brand-violet dark:text-violet-300 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1">
               <FileText size={12} /> {devis.length} Devis
             </div>
@@ -725,4 +732,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

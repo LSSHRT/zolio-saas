@@ -43,7 +43,7 @@ export function AdminKpiStrip({ items }: { items: AdminKpi[] }) {
             <div className="mt-4 flex items-end justify-between gap-4">
               <p className="text-3xl font-semibold tracking-tight text-white">{item.value}</p>
               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/6 text-white ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
-                <Icon className="h-4.5 w-4.5" />
+                <Icon className="h-5 w-5 text-white/90" strokeWidth={2.2} />
               </div>
             </div>
             <p className="mt-4 text-sm text-slate-300">{item.hint}</p>
