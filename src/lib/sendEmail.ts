@@ -144,10 +144,24 @@ export async function sendDevisSignedEmail(
   await transporter.sendMail(mailOptions);
 }
 
+type ProspectEmailContext = {
+  companyName?: string;
+  tradeLabel?: string;
+  city?: string;
+};
+
+function prospectAudienceLabel(context?: ProspectEmailContext) {
+  if (!context?.tradeLabel) {
+    return "les entreprises du batiment";
+  }
+
+  return `les ${context.tradeLabel}`;
+}
+
 /**
  * Envoie un email de prospection automatique à un artisan.
  */
-export async function sendProspectEmail(toEmail: string) {
+export async function sendProspectEmail(toEmail: string, context?: ProspectEmailContext) {
   const { runtime, transporter } = createProspectTransport();
   const unsubscribeMailto = runtime.replyToEmail
     ? `<mailto:${runtime.replyToEmail}?subject=unsubscribe>`
@@ -163,16 +177,31 @@ export async function sendProspectEmail(toEmail: string) {
     headers["List-Unsubscribe"] = unsubscribeHeader;
   }
 
+  const audienceLabel = prospectAudienceLabel(context);
+  const locationLine = context?.city
+    ? `comme celles basees a ${context.city}`
+    : "comme la votre";
+  const companyLine = context?.companyName
+    ? `Je me permets de vous contacter au sujet de ${context.companyName}.`
+    : "Je me permets de vous contacter car nous accompagnons de nombreuses entreprises du batiment.";
+
   const mailOptions = {
     from: `"Zolio" <${runtime.fromEmail}>`,
     to: toEmail,
     replyTo: runtime.replyToEmail || undefined,
-    subject: `Simplifiez la gestion de votre activité avec Zolio`,
+    subject: "Moins de temps perdu sur vos devis et factures",
     text: [
       "Bonjour,",
       "",
-      "Zolio aide les artisans a creer leurs devis et factures plus vite.",
-      "Vous pouvez tester l'outil sur https://zolio.site",
+      companyLine,
+      `Zolio aide ${audienceLabel} ${locationLine} a gagner du temps sur les devis, les factures et les signatures clients.`,
+      "",
+      "Concretement, Zolio permet de :",
+      "- creer un devis propre en quelques minutes",
+      "- faire signer les clients en ligne",
+      "- suivre les factures et les relances au meme endroit",
+      "",
+      "Si vous voulez voir a quoi cela ressemble, vous pouvez decouvrir l'outil ici : https://zolio.site",
       "",
       runtime.replyToEmail
         ? `Pour ne plus recevoir ce type de message, repondez a ${runtime.replyToEmail} avec le mot STOP.`
@@ -187,16 +216,19 @@ export async function sendProspectEmail(toEmail: string) {
         <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
           <p style="color:#334155;font-size:16px;">Bonjour,</p>
           <p style="color:#475569;font-size:15px;line-height:1.6;">
-            En tant qu'artisan, vous perdez probablement beaucoup de temps à faire vos devis et factures le soir ou le week-end. 
-            C'est pour cela que nous avons créé <strong>Zolio</strong>.
+            ${companyLine}
           </p>
           <p style="color:#475569;font-size:15px;line-height:1.6;">
-            Avec Zolio, vous pouvez :
+            <strong>Zolio</strong> aide ${audienceLabel} ${locationLine} a gagner du temps sur les devis,
+            les factures et les signatures clients, sans revenir aux fichiers Excel le soir.
+          </p>
+          <p style="color:#475569;font-size:15px;line-height:1.6;">
+            Concretement, avec Zolio vous pouvez :
           </p>
           <ul style="color:#475569;font-size:15px;line-height:1.6;padding-left:20px;">
-            <li>Créer des devis professionnels en moins de 3 minutes</li>
+            <li>Creer un devis clair en quelques minutes</li>
             <li>Faire signer vos clients directement en ligne</li>
-            <li>Suivre votre chiffre d'affaires et relancer vos impayés facilement</li>
+            <li>Suivre vos factures et vos relances depuis le meme outil</li>
           </ul>
           <div style="text-align:center;margin:30px 0;">
             <a href="https://zolio.site" style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);color:white;padding:14px 32px;border-radius:12px;font-weight:bold;font-size:16px;text-decoration:none;display:inline-block;box-shadow:0 4px 6px -1px rgba(139,92,246,0.3);">
@@ -204,12 +236,11 @@ export async function sendProspectEmail(toEmail: string) {
             </a>
           </div>
           <p style="color:#475569;font-size:15px;line-height:1.6;">
-            Démarrez votre essai dès maintenant et simplifiez votre quotidien. 
-            N'hésitez pas à nous répondre si vous avez la moindre question !
+            Si le sujet vous interesse, vous pouvez repondre directement a cet email et nous vous orienterons vers le meilleur point de depart.
           </p>
           <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:20px;">
-            Cet email vous a été envoyé car nous aidons les artisans de votre secteur. <br/>
-            Si vous ne souhaitez plus recevoir de propositions de notre part, répondez STOP ou utilisez le lien de désinscription disponible dans l’email.
+            Cet email vous a ete envoye car nous aidons des entreprises du batiment a simplifier leur gestion. <br/>
+            Si vous ne souhaitez plus recevoir de propositions de notre part, repondez STOP ou utilisez le lien de desinscription disponible dans l'email.
           </p>
         </div>
       </div>

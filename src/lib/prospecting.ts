@@ -59,6 +59,11 @@ export function getProspectCooldownDays() {
   return Number.isFinite(raw) && raw > 0 ? raw : 60;
 }
 
+export function getProspectDailyLimit() {
+  const raw = Number.parseInt(process.env.PROSPECT_DAILY_LIMIT || "", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : 3;
+}
+
 export function getProspectCooldownCutoff() {
   return new Date(Date.now() - getProspectCooldownDays() * 24 * 60 * 60 * 1000);
 }
