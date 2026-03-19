@@ -22,8 +22,16 @@ const PERSONAL_MAILBOX_DOMAINS = new Set([
   "msn.com",
   "aol.com",
 ]);
+const PROSPECT_TIMEZONE = "Europe/Paris";
 
 export type ProspectingMode = "queue_only" | "manual_only" | "live";
+export type ProspectWarmupStageKey = "starter" | "ramp" | "growth" | "steady";
+
+export type ProspectWarmupStage = {
+  key: ProspectWarmupStageKey;
+  label: string;
+  dailyLimit: number;
+};
 
 export class ProspectingConfigError extends Error {
   constructor(message: string) {
@@ -61,7 +69,7 @@ export function getProspectCooldownDays() {
 
 export function getProspectDailyLimit() {
   const raw = Number.parseInt(process.env.PROSPECT_DAILY_LIMIT || "", 10);
-  return Number.isFinite(raw) && raw > 0 ? raw : 3;
+  return Number.isFinite(raw) && raw > 0 ? raw : 10;
 }
 
 export function getProspectCooldownCutoff() {
@@ -70,6 +78,104 @@ export function getProspectCooldownCutoff() {
 
 export function isRecentProspectActivity(dateLike: string | Date) {
   return new Date(dateLike) > getProspectCooldownCutoff();
+}
+
+function getTimeZoneParts(date: Date, timeZone: string) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    weekday: "short",
+    hour12: false,
+  });
+
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+
+  return {
+    year: Number(parts.year),
+    month: Number(parts.month),
+    day: Number(parts.day),
+    hour: Number(parts.hour),
+    minute: Number(parts.minute),
+    second: Number(parts.second),
+    weekday: parts.weekday || "Mon",
+  };
+}
+
+function getTimeZoneOffsetMs(date: Date, timeZone: string) {
+  const parts = getTimeZoneParts(date, timeZone);
+  const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
+  return asUtc - date.getTime();
+}
+
+export function getProspectParisTimeParts(date = new Date()) {
+  const parts = getTimeZoneParts(date, PROSPECT_TIMEZONE);
+  return {
+    ...parts,
+    isWeekday: ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(parts.weekday),
+  };
+}
+
+export function getProspectParisDayRange(date = new Date()) {
+  const parts = getProspectParisTimeParts(date);
+  const offsetMs = getTimeZoneOffsetMs(date, PROSPECT_TIMEZONE);
+  const startUtcMs = Date.UTC(parts.year, parts.month - 1, parts.day, 0, 0, 0) - offsetMs;
+
+  return {
+    start: new Date(startUtcMs),
+    end: new Date(startUtcMs + 24 * 60 * 60 * 1000),
+  };
+}
+
+export function isProspectWorkingHour(date = new Date()) {
+  const parts = getProspectParisTimeParts(date);
+  return parts.hour >= 8 && parts.hour <= 16;
+}
+
+export function isProspectSendingHour(date = new Date()) {
+  const parts = getProspectParisTimeParts(date);
+  return parts.isWeekday && parts.hour >= 9 && parts.hour <= 16;
+}
+
+export function getProspectWarmupStage(daysSinceStart: number): ProspectWarmupStage {
+  if (daysSinceStart < 5) {
+    return {
+      key: "starter",
+      label: "Jours 1 a 5",
+      dailyLimit: 3,
+    };
+  }
+
+  if (daysSinceStart < 10) {
+    return {
+      key: "ramp",
+      label: "Jours 6 a 10",
+      dailyLimit: 5,
+    };
+  }
+
+  if (daysSinceStart < 20) {
+    return {
+      key: "growth",
+      label: "Jours 11 a 20",
+      dailyLimit: 8,
+    };
+  }
+
+  return {
+    key: "steady",
+    label: "Apres 20 jours",
+    dailyLimit: 10,
+  };
 }
 
 export function getProspectingRuntime() {

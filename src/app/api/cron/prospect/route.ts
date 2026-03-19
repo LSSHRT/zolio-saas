@@ -2,14 +2,24 @@ import { NextResponse } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import { sendProspectEmail } from "@/lib/sendEmail";
 import { isAdminUser } from "@/lib/admin";
-import { ADMIN_SETTING_KEYS, appendAdminAuditLog } from "@/lib/admin-settings";
+import {
+  ADMIN_SETTING_KEYS,
+  appendAdminAuditLog,
+  getAdminSettingValue,
+  setAdminSettingValue,
+} from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
 import {
   ProspectingConfigError,
   getProspectCooldownCutoff,
   getProspectDailyLimit,
+  getProspectParisDayRange,
+  getProspectParisTimeParts,
+  getProspectWarmupStage,
   getProspectingRuntime,
   isPersonalMailbox,
+  isProspectSendingHour,
+  isProspectWorkingHour,
   isValidEmail,
   normalizeEmail,
 } from "@/lib/prospecting";
@@ -19,6 +29,7 @@ const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "";
 const SEARCH_TARGETS_PER_RUN = 3;
 const DOMAINS_PER_TARGET = 3;
 const CANDIDATE_POOL_MULTIPLIER = 4;
+const MANUAL_QUEUE_CAP = 3;
 const SEARCH_RESULT_BLOCKLIST = [
   "bing.",
   "pagesjaunes",
@@ -257,7 +268,7 @@ function scoreHunterEmail(item: unknown): HunterEmailResult | null {
   return { email, score };
 }
 
-async function findEmailsViaHunter() {
+async function findEmailsViaHunter(poolSize: number) {
   const targets = getDailySearchTargets();
   const candidates: ProspectCandidate[] = [];
 
@@ -304,10 +315,7 @@ async function findEmailsViaHunter() {
 
   return {
     targets,
-    candidates: Array.from(uniqueByEmail.values()).slice(
-      0,
-      Math.max(getProspectDailyLimit() * CANDIDATE_POOL_MULTIPLIER, getProspectDailyLimit()),
-    ),
+    candidates: Array.from(uniqueByEmail.values()).slice(0, poolSize),
   };
 }
 
@@ -328,6 +336,56 @@ async function alreadyProcessedRecently(email: string) {
   return Boolean(previous);
 }
 
+async function getWarmupStartDate(now: Date, canAutoSend: boolean) {
+  if (!canAutoSend) {
+    return null;
+  }
+
+  const existing = await getAdminSettingValue(ADMIN_SETTING_KEYS.prospectWarmupStartedAt);
+  if (existing) {
+    const parsed = new Date(existing);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed;
+    }
+  }
+
+  await setAdminSettingValue(ADMIN_SETTING_KEYS.prospectWarmupStartedAt, now.toISOString());
+  return now;
+}
+
+async function getTodayAttemptCount(now: Date) {
+  const range = getProspectParisDayRange(now);
+  return prisma.prospectMail.count({
+    where: {
+      createdAt: {
+        gte: range.start,
+        lt: range.end,
+      },
+      status: {
+        in: ["Sent", "Failed", "Blocked"],
+      },
+    },
+  });
+}
+
+function getScheduleReason(now: Date) {
+  const paris = getProspectParisTimeParts(now);
+
+  if (!paris.isWeekday) {
+    return "Le week-end, le robot collecte des leads mais n'envoie pas automatiquement.";
+  }
+
+  if (!isProspectWorkingHour(now)) {
+    return "Le robot est en dehors de sa plage horaire de travail locale (08:00-16:59 Europe/Paris).";
+  }
+
+  if (!isProspectSendingHour(now)) {
+    return "L'envoi automatique est reserve du lundi au vendredi entre 09:00 et 16:59 (heure de Paris).";
+  }
+
+  return null;
+}
+
 export async function GET(req: Request) {
   try {
     const currentAdmin = await currentUser();
@@ -337,7 +395,7 @@ export async function GET(req: Request) {
     const isCronTrigger = Boolean(cronSecret && authorization === `Bearer ${cronSecret}`);
 
     if (!isCronTrigger && !isAdminTrigger) {
-      return jsonError("Non autorisé", 403);
+      return jsonError("Non autorise", 403);
     }
 
     const cronSetting = await prisma.adminSetting.findUnique({
@@ -375,68 +433,136 @@ export async function GET(req: Request) {
     }
 
     const runtime = getProspectingRuntime();
-    const dailyLimit = getProspectDailyLimit();
-    const { targets, candidates } = await findEmailsViaHunter();
-    const recentProcessed = new Set<string>();
-    const queued: string[] = [];
+    const now = new Date();
+    const paris = getProspectParisTimeParts(now);
+    const scheduleReason = getScheduleReason(now);
+    const hardCap = getProspectDailyLimit();
+    const warmupStart = await getWarmupStartDate(now, runtime.canAutoSend);
+    const daysSinceWarmupStart = warmupStart
+      ? Math.max(0, Math.floor((now.getTime() - warmupStart.getTime()) / (24 * 60 * 60 * 1000)))
+      : 0;
+    const warmupStage = getProspectWarmupStage(daysSinceWarmupStart);
+    const effectiveDailyLimit = runtime.canAutoSend
+      ? Math.max(1, Math.min(hardCap, warmupStage.dailyLimit))
+      : Math.min(hardCap, MANUAL_QUEUE_CAP);
+    const attemptedToday = runtime.canAutoSend ? await getTodayAttemptCount(now) : 0;
+    const canSendNow = runtime.canAutoSend && isProspectSendingHour(now);
+    const canDiscoverNow = !paris.isWeekday || isProspectWorkingHour(now);
+    const queueOnlyReason = !runtime.canAutoSend ? runtime.reason : scheduleReason;
     const sent: string[] = [];
+    const queued: string[] = [];
     const failed: string[] = [];
+    const recentProcessed = new Set<string>();
 
-    for (const candidate of candidates) {
-      if (sent.length + queued.length + failed.length >= dailyLimit) {
-        break;
+    if (canSendNow) {
+      const remainingBeforeQueue = Math.max(0, effectiveDailyLimit - attemptedToday);
+      if (remainingBeforeQueue > 0) {
+        const queuedRows = await prisma.prospectMail.findMany({
+          where: { status: "Queued" },
+          orderBy: { createdAt: "asc" },
+          take: remainingBeforeQueue,
+        });
+
+        for (const row of queuedRows) {
+          try {
+            await sendProspectEmail(row.email);
+            await prisma.prospectMail.update({
+              where: { id: row.id },
+              data: {
+                status: "Sent",
+                createdAt: new Date(),
+              },
+            });
+            sent.push(row.email);
+            recentProcessed.add(row.email);
+          } catch (error) {
+            const status = error instanceof ProspectingConfigError ? "Blocked" : "Failed";
+            await prisma.prospectMail.update({
+              where: { id: row.id },
+              data: {
+                status,
+                createdAt: new Date(),
+              },
+            });
+            failed.push(row.email);
+            recentProcessed.add(row.email);
+          }
+
+          if (attemptedToday + sent.length + failed.length >= effectiveDailyLimit) {
+            break;
+          }
+        }
       }
+    }
 
-      if (recentProcessed.has(candidate.email)) continue;
-      recentProcessed.add(candidate.email);
+    const remainingForDiscovery = canSendNow
+      ? Math.max(0, effectiveDailyLimit - (attemptedToday + sent.length + failed.length))
+      : effectiveDailyLimit;
+    let targets: ProspectSearchTarget[] = [];
 
-      if (await alreadyProcessedRecently(candidate.email)) {
-        continue;
-      }
+    if (canDiscoverNow && remainingForDiscovery > 0) {
+      const poolSize = Math.max(remainingForDiscovery * CANDIDATE_POOL_MULTIPLIER, remainingForDiscovery);
+      const discovery = await findEmailsViaHunter(poolSize);
+      targets = discovery.targets;
 
-      if (!runtime.canAutoSend) {
-        await prisma.prospectMail.create({
-          data: {
-            email: candidate.email,
-            status: "Queued",
-            source: candidate.source,
-          },
-        });
-        queued.push(candidate.email);
-        continue;
-      }
+      for (const candidate of discovery.candidates) {
+        if ((canSendNow ? sent.length + queued.length + failed.length : queued.length) >= remainingForDiscovery) {
+          break;
+        }
 
-      try {
-        await sendProspectEmail(candidate.email, {
-          companyName: candidate.companyName,
-          tradeLabel: candidate.tradeLabel,
-          city: candidate.city,
-        });
-        await prisma.prospectMail.create({
-          data: {
-            email: candidate.email,
-            status: "Sent",
-            source: candidate.source,
-          },
-        });
-        sent.push(candidate.email);
-      } catch (error) {
-        const status = error instanceof ProspectingConfigError ? "Blocked" : "Failed";
-        await prisma.prospectMail.create({
-          data: {
-            email: candidate.email,
-            status,
-            source: candidate.source,
-          },
-        });
-        failed.push(candidate.email);
+        if (recentProcessed.has(candidate.email)) continue;
+        recentProcessed.add(candidate.email);
+
+        if (await alreadyProcessedRecently(candidate.email)) {
+          continue;
+        }
+
+        if (canSendNow) {
+          try {
+            await sendProspectEmail(candidate.email, {
+              companyName: candidate.companyName,
+              tradeLabel: candidate.tradeLabel,
+              city: candidate.city,
+            });
+            await prisma.prospectMail.create({
+              data: {
+                email: candidate.email,
+                status: "Sent",
+                source: candidate.source,
+              },
+            });
+            sent.push(candidate.email);
+          } catch (error) {
+            const status = error instanceof ProspectingConfigError ? "Blocked" : "Failed";
+            await prisma.prospectMail.create({
+              data: {
+                email: candidate.email,
+                status,
+                source: candidate.source,
+              },
+            });
+            failed.push(candidate.email);
+          }
+        } else {
+          await prisma.prospectMail.create({
+            data: {
+              email: candidate.email,
+              status: "Queued",
+              source: candidate.source,
+            },
+          });
+          queued.push(candidate.email);
+        }
       }
     }
 
     const actor = isAdminTrigger
       ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
       : "Cron Vercel";
-    const targetSummary = targets.map((target) => `${target.label} • ${target.city}`).join(" | ");
+    const targetSummary =
+      targets.length > 0
+        ? targets.map((target) => `${target.label} • ${target.city}`).join(" | ")
+        : "aucun ciblage execute";
     const messageParts = [
       sent.length > 0 ? `${sent.length} email(s) envoye(s)` : null,
       queued.length > 0 ? `${queued.length} lead(s) mis en file d'attente` : null,
@@ -444,10 +570,10 @@ export async function GET(req: Request) {
     ].filter(Boolean);
     const message =
       messageParts.length > 0
-        ? `Robot execute : ${messageParts.join(" • ")}. Ciblage du jour : ${targetSummary}.`
-        : runtime.canAutoSend
-          ? `Aucun nouveau lead exploitable trouve. Ciblage du jour : ${targetSummary}.`
-          : `Aucun nouveau lead exploitable trouve. Le robot reste en mode collecte. Ciblage du jour : ${targetSummary}.`;
+        ? `Robot execute : ${messageParts.join(" • ")}. Fenetre active : Lun-Ven 09:00-16:59 Europe/Paris. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
+        : canDiscoverNow
+          ? `Aucun nouveau lead exploitable trouve. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
+          : `Robot en veille hors plage horaire locale. ${queueOnlyReason || "Aucune action executee."}`;
 
     await appendAdminAuditLog({
       level: failed.length > 0 ? "warning" : "success",
@@ -455,9 +581,14 @@ export async function GET(req: Request) {
       action: isAdminTrigger ? "cron.test" : "cron.run",
       actor,
       message,
-      meta: runtime.canAutoSend
-        ? sent.join(", ") || targetSummary
-        : queued.join(", ") || runtime.reason || targetSummary,
+      meta: [
+        queueOnlyReason,
+        `Warmup: ${warmupStage.label}`,
+        `Quota: ${effectiveDailyLimit}`,
+        `Paris: ${paris.weekday} ${String(paris.hour).padStart(2, "0")}:${String(paris.minute).padStart(2, "0")}`,
+      ]
+        .filter(Boolean)
+        .join(" | "),
     });
 
     return NextResponse.json({
@@ -466,12 +597,14 @@ export async function GET(req: Request) {
       queued,
       failed,
       mode: runtime.mode,
-      sendingReason: runtime.reason,
+      sendingReason: queueOnlyReason,
       targets: targets.map((target) => ({
         trade: target.label,
         city: target.city,
       })),
-      dailyLimit,
+      dailyLimit: effectiveDailyLimit,
+      attemptedToday,
+      warmupStage: warmupStage.label,
     });
   } catch (error) {
     return internalServerError("cron-prospect", error, "Erreur lors de l'execution du robot");

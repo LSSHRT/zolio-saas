@@ -3,7 +3,11 @@
   "crons": [
     {
       "path": "/api/cron/prospect",
-      "schedule": "0 8 * * *"
+      "schedule": "0 6-16 * * 1-5"
+    },
+    {
+      "path": "/api/cron/prospect",
+      "schedule": "0 8 * * 0,6"
     }
   ]
 }

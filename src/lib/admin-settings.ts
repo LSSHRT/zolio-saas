@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export const ADMIN_SETTING_KEYS = {
   cronProspectEnabled: "cron_prospect_enabled",
+  prospectWarmupStartedAt: "cron_prospect_warmup_started_at",
   systemBanner: "system_banner",
   maintenanceEnabled: "maintenance_mode_enabled",
   maintenanceMessage: "maintenance_mode_message",
