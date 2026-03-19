@@ -1,883 +1,1563 @@
 "use client";
-import React, { useState, useTransition } from 'react';
-import useSWR from 'swr';
-import { Users, CreditCard, Activity, Settings, Search, ShieldAlert, Trash2, Shield, Download, FileText, BarChart3, Map, Mail, Zap, BookOpen, Server, HelpCircle, MessageSquare, Power, Lock, Ban, Crown, UserX, Loader2, Send, CheckCircle2, XCircle, History, Clock } from "lucide-react";
-import { toggleUserProStatus, banUser, deleteUserAccount, grantAdminRole, setSystemBanner, updateAdminSettings, markMailAsFailed } from './actions';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+import type { FormEvent, ReactNode } from "react";
+import { useDeferredValue, useState } from "react";
+import useSWR from "swr";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  Activity,
+  AlertTriangle,
+  Bot,
+  CheckCircle2,
+  ChevronRight,
+  Clock3,
+  Download,
+  Gauge,
+  LayoutDashboard,
+  Loader2,
+  MessageSquareDashed,
+  RadioTower,
+  Search,
+  Send,
+  Server,
+  Shield,
+  Sparkles,
+  TriangleAlert,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
+import {
+  banUser,
+  deleteUserAccount,
+  grantAdminRole,
+  markMailAsFailed,
+  setSystemBanner,
+  toggleUserProStatus,
+  updateAdminSettings,
+} from "./actions";
+import { AdminConfirmDialog } from "./components/AdminConfirmDialog";
+import { AdminKpiStrip } from "./components/AdminKpiStrip";
+import { AdminSidebar, type AdminSidebarSection } from "./components/AdminSidebar";
+import { AdminUserDrawer } from "./components/AdminUserDrawer";
+import type {
+  AdminActivityItem,
+  AdminAlertItem,
+  AdminDashboardData,
+  AdminMailItem,
+  AdminSectionId,
+  AdminSeverity,
+  AdminSystemStatus,
+  AdminUserRow,
+} from "./types";
 
-const CardWrapper = ({ children, className = "" }: any) => (
-  <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm ${className}`}>{children}</div>
-);
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  return response.json();
+};
 
-export default function AdminClient({ initialUsers = [], stats = {}, logs = [], systemBanner, currentGeminiKey }: any) {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [users, setUsers] = useState(initialUsers);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterPro, setFilterPro] = useState(false);
-  const [isPending, startTransition] = useTransition();
+type ConfirmDialogState = {
+  title: string;
+  description: string;
+  confirmLabel: string;
+  tone: "brand" | "danger" | "warning";
+  action: () => Promise<void>;
+};
+
+function formatDateTime(value: string | null) {
+  if (!value) return "Indisponible";
+
+  return new Intl.DateTimeFormat("fr-FR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function formatTimeAgo(value: string) {
+  const diffMs = new Date(value).getTime() - Date.now();
+  const diffMinutes = Math.round(diffMs / 60000);
+  const formatter = new Intl.RelativeTimeFormat("fr", { numeric: "auto" });
+
+  if (Math.abs(diffMinutes) < 60) {
+    return formatter.format(diffMinutes, "minute");
+  }
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (Math.abs(diffHours) < 24) {
+    return formatter.format(diffHours, "hour");
+  }
+
+  const diffDays = Math.round(diffHours / 24);
+  return formatter.format(diffDays, "day");
+}
+
+function alertClasses(severity: AdminSeverity) {
+  switch (severity) {
+    case "critical":
+      return "border-red-400/18 bg-red-500/10 text-red-100";
+    case "warning":
+      return "border-amber-300/16 bg-amber-400/10 text-amber-50";
+    case "success":
+      return "border-emerald-300/16 bg-emerald-500/10 text-emerald-50";
+    default:
+      return "border-sky-300/16 bg-sky-500/10 text-sky-50";
+  }
+}
+
+function alertIcon(severity: AdminSeverity) {
+  switch (severity) {
+    case "critical":
+      return <AlertTriangle className="h-4 w-4" />;
+    case "warning":
+      return <TriangleAlert className="h-4 w-4" />;
+    case "success":
+      return <CheckCircle2 className="h-4 w-4" />;
+    default:
+      return <Sparkles className="h-4 w-4" />;
+  }
+}
+
+function systemStatusClasses(status: AdminSystemStatus["status"]) {
+  switch (status) {
+    case "healthy":
+      return "text-emerald-200 bg-emerald-500/12 ring-emerald-300/18";
+    case "warning":
+      return "text-amber-100 bg-amber-400/12 ring-amber-300/18";
+    case "critical":
+      return "text-red-100 bg-red-500/12 ring-red-300/18";
+    default:
+      return "text-slate-200 bg-slate-500/12 ring-white/10";
+  }
+}
+
+function Panel({
+  action,
+  children,
+  className = "",
+  description,
+  title,
+}: {
+  action?: ReactNode;
+  children: ReactNode;
+  className?: string;
+  description?: string;
+  title?: string;
+}) {
+  return (
+    <section className={`admin-panel rounded-[30px] ${className}`}>
+      {(title || description || action) && (
+        <div className="flex flex-col gap-4 border-b border-white/8 px-5 py-5 sm:px-6">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              {title && <h3 className="text-lg font-semibold text-white">{title}</h3>}
+              {description && <p className="mt-1 text-sm leading-6 text-slate-400">{description}</p>}
+            </div>
+            {action}
+          </div>
+        </div>
+      )}
+      <div className="px-5 py-5 sm:px-6">{children}</div>
+    </section>
+  );
+}
+
+export default function AdminClient({ data }: { data: AdminDashboardData }) {
+  const [activeSection, setActiveSection] = useState<AdminSectionId>("pilotage");
+  const [users, setUsers] = useState(data.users);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const deferredSearchTerm = useDeferredValue(searchTerm);
+  const [filterProOnly, setFilterProOnly] = useState(false);
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
-  const [bannerText, setBannerText] = useState(systemBanner || '');
-  const [geminiKey, setGeminiKey] = useState(currentGeminiKey || '');
-  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
-
-  // Prospection State
-  const { data: mailsData, mutate: mutateMails } = useSWR('/api/admin/mail', fetcher);
-  const mails = Array.isArray(mailsData) ? mailsData : [];
+  const [bannerText, setBannerText] = useState(data.settings.systemBanner);
+  const [geminiKey, setGeminiKey] = useState(data.settings.currentGeminiKey);
+  const [savingBanner, setSavingBanner] = useState(false);
+  const [savingGeminiKey, setSavingGeminiKey] = useState(false);
   const [prospectEmail, setProspectEmail] = useState("");
   const [sendingProspect, setSendingProspect] = useState(false);
-  const [prospectMessage, setProspectMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
-
-  // Toggle cron state
-  const { data: cronData, mutate: mutateCron } = useSWR('/api/admin/settings?key=cron_prospect_enabled', fetcher);
-  const isCronEnabled = cronData?.value !== 'false';
-  const [togglingCron, setTogglingCron] = useState(false);
   const [testingCron, setTestingCron] = useState(false);
+  const [togglingCron, setTogglingCron] = useState(false);
+  const [prospectMessage, setProspectMessage] = useState<{
+    text: string;
+    type: "success" | "error";
+  } | null>(null);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
+  const [confirmPending, setConfirmPending] = useState(false);
+  const [activityFeed, setActivityFeed] = useState(data.activity);
 
-  const handleTestCron = async () => {
+  const { data: mailsData, mutate: mutateMails } = useSWR<AdminMailItem[]>(
+    "/api/admin/mail",
+    fetcher,
+    {
+      fallbackData: data.prospectMails,
+      keepPreviousData: true,
+      revalidateOnFocus: false,
+    },
+  );
+  const { data: cronData, mutate: mutateCron } = useSWR<{ value: string | null }>(
+    "/api/admin/settings?key=cron_prospect_enabled",
+    fetcher,
+    {
+      fallbackData: { value: data.acquisition.isCronEnabled ? "true" : "false" },
+      revalidateOnFocus: false,
+    },
+  );
+
+  const mails = Array.isArray(mailsData) ? mailsData : data.prospectMails;
+  const isCronEnabled = cronData?.value !== "false";
+
+  const sentCount = mails.filter((mail) => mail.status === "Sent").length;
+  const failedCount = mails.filter((mail) => mail.status !== "Sent").length;
+  const totalMailCount = mails.length;
+  const manualCount = mails.filter((mail) => mail.source === "Manual").length;
+  const automatedCount = mails.filter((mail) => mail.source !== "Manual").length;
+  const deliveryRate = totalMailCount > 0 ? Math.round((sentCount / totalMailCount) * 100) : 0;
+
+  const baseAlerts = data.alerts.filter(
+    (alert) => !["failed-mails", "cron-disabled", "all-clear"].includes(alert.id),
+  );
+  const alerts: AdminAlertItem[] = [];
+
+  if (failedCount > 0) {
+    alerts.push({
+      id: "failed-mails",
+      title: `${failedCount} envoi${failedCount > 1 ? "s" : ""} en échec`,
+      description: "Des emails de prospection demandent une revue ou une relance ciblée.",
+      severity: "critical",
+      section: "acquisition",
+      ctaLabel: "Voir l'historique",
+    });
+  }
+
+  if (!isCronEnabled) {
+    alerts.push({
+      id: "cron-disabled",
+      title: "Robot de prospection désactivé",
+      description: "Le moteur d'acquisition automatique est stoppé côté admin.",
+      severity: "warning",
+      section: "acquisition",
+      ctaLabel: "Réactiver",
+    });
+  }
+
+  alerts.push(...baseAlerts);
+
+  if (alerts.length === 0) {
+    alerts.push({
+      id: "all-clear",
+      title: "Aucune alerte prioritaire",
+      description: "Les signaux critiques restent au vert sur le cockpit.",
+      severity: "success",
+      section: "pilotage",
+      ctaLabel: "Continuer",
+    });
+  }
+
+  const heroStatus =
+    alerts.some((alert) => alert.severity === "critical")
+      ? {
+          label: "Attention requise",
+          description: "Le cockpit détecte au moins un point opérationnel à traiter en priorité.",
+          tone: "critical" as const,
+        }
+      : alerts.some((alert) => alert.severity === "warning")
+        ? {
+            label: "Sous contrôle",
+            description: "La plateforme tourne correctement avec quelques sujets à garder dans le radar.",
+            tone: "warning" as const,
+          }
+        : {
+            label: "Opérationnel",
+            description: "Les briques critiques sont alignées et l'activité reste stable.",
+            tone: "success" as const,
+          };
+
+  const systemStatuses: AdminSystemStatus[] = data.systemStatuses.map((status) => {
+    if (status.id !== "cron") return status;
+
+    if (!data.environment.hasCronSecret) {
+      return {
+        ...status,
+        status: "critical" as const,
+        detail: "CRON_SECRET manquant",
+      };
+    }
+
+    return {
+      ...status,
+      status: isCronEnabled ? "healthy" : "warning",
+      detail: isCronEnabled ? "Automatisation autorisée" : "Robot désactivé par l'admin",
+    };
+  });
+
+  const liveKpis = data.kpis.map((kpi) => {
+    if (kpi.id !== "mrr") return kpi;
+    return {
+      ...kpi,
+      hint: `${data.revenue.activeSubscriptions} abonnement${data.revenue.activeSubscriptions > 1 ? "s" : ""} Stripe`,
+    };
+  });
+
+  const normalizedSearch = deferredSearchTerm.trim().toLowerCase();
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      !normalizedSearch ||
+      user.name.toLowerCase().includes(normalizedSearch) ||
+      user.email.toLowerCase().includes(normalizedSearch);
+    const matchesPro = filterProOnly ? user.isPro : true;
+    return matchesSearch && matchesPro;
+  });
+  const selectedUser = users.find((user) => user.id === selectedUserId) || null;
+
+  const systemRiskCount = systemStatuses.filter(
+    (status) => status.status === "critical" || status.status === "warning",
+  ).length;
+  const attentionCount = alerts.filter((alert) => alert.severity !== "success").length;
+
+  const sections: AdminSidebarSection[] = [
+    {
+      id: "pilotage",
+      label: "Pilotage",
+      description: "Vue synthèse, alertes et activité récente.",
+      icon: LayoutDashboard,
+      badge: attentionCount > 0 ? String(attentionCount) : undefined,
+    },
+    {
+      id: "utilisateurs",
+      label: "Utilisateurs",
+      description: "Inspection, modération et privilèges.",
+      icon: Users,
+      badge: users.length > 0 ? String(users.length) : undefined,
+    },
+    {
+      id: "revenus",
+      label: "Revenus",
+      description: "MRR, conversion et lecture business réelle.",
+      icon: Gauge,
+      badge: `${data.revenue.mrr}€`,
+    },
+    {
+      id: "acquisition",
+      label: "Acquisition",
+      description: "Prospection manuelle et moteur automatisé.",
+      icon: RadioTower,
+      badge: failedCount > 0 ? String(failedCount) : isCronEnabled ? "ON" : "OFF",
+    },
+    {
+      id: "systeme",
+      label: "Système",
+      description: "Santé de la plateforme et configuration critique.",
+      icon: Server,
+      badge: systemRiskCount > 0 ? String(systemRiskCount) : undefined,
+    },
+  ];
+
+  function pushActivity(item: AdminActivityItem) {
+    setActivityFeed((current) =>
+      [item, ...current]
+        .sort((left, right) => new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime())
+        .slice(0, 10),
+    );
+  }
+
+  function openConfirmation(dialog: ConfirmDialogState) {
+    setConfirmDialog(dialog);
+  }
+
+  async function handleDialogConfirm() {
+    if (!confirmDialog) return;
+
+    setConfirmPending(true);
+    try {
+      await confirmDialog.action();
+      setConfirmDialog(null);
+    } finally {
+      setConfirmPending(false);
+    }
+  }
+
+  async function handleTogglePro(user: AdminUserRow) {
+    setLoadingUserId(user.id);
+    try {
+      await toggleUserProStatus(user.id, !user.isPro);
+      setUsers((current) =>
+        current.map((candidate) =>
+          candidate.id === user.id
+            ? {
+                ...candidate,
+                isPro: !user.isPro,
+                publicMetadata: {
+                  ...candidate.publicMetadata,
+                  isPro: !user.isPro,
+                },
+              }
+            : candidate,
+        ),
+      );
+      toast.success(user.isPro ? "Statut PRO retiré" : "Statut PRO accordé");
+      pushActivity({
+        id: `pro-${user.id}-${Date.now()}`,
+        title: user.isPro ? "Statut PRO retiré" : "Statut PRO accordé",
+        description: `${user.name} • ${user.email}`,
+        timestamp: new Date().toISOString(),
+        section: "utilisateurs",
+        kind: "billing",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de modifier le statut PRO");
+    } finally {
+      setLoadingUserId(null);
+    }
+  }
+
+  async function handleBanUser(user: AdminUserRow) {
+    setLoadingUserId(user.id);
+    try {
+      await banUser(user.id, !user.banned);
+      setUsers((current) =>
+        current.map((candidate) =>
+          candidate.id === user.id ? { ...candidate, banned: !user.banned } : candidate,
+        ),
+      );
+      toast.success(user.banned ? "Utilisateur débanni" : "Utilisateur banni");
+      pushActivity({
+        id: `ban-${user.id}-${Date.now()}`,
+        title: user.banned ? "Compte débanni" : "Compte banni",
+        description: `${user.name} • ${user.email}`,
+        timestamp: new Date().toISOString(),
+        section: "utilisateurs",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de modifier le statut de bannissement");
+    } finally {
+      setLoadingUserId(null);
+    }
+  }
+
+  async function handleDeleteUser(user: AdminUserRow) {
+    setLoadingUserId(user.id);
+    try {
+      await deleteUserAccount(user.id);
+      setUsers((current) => current.filter((candidate) => candidate.id !== user.id));
+      if (selectedUserId === user.id) {
+        setSelectedUserId(null);
+      }
+      toast.success("Compte supprimé");
+      pushActivity({
+        id: `delete-${user.id}-${Date.now()}`,
+        title: "Compte supprimé",
+        description: `${user.name} • ${user.email}`,
+        timestamp: new Date().toISOString(),
+        section: "utilisateurs",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de supprimer ce compte");
+    } finally {
+      setLoadingUserId(null);
+    }
+  }
+
+  async function handleGrantAdmin(user: AdminUserRow) {
+    setLoadingUserId(user.id);
+    try {
+      await grantAdminRole(user.id, !user.publicMetadata.isAdmin);
+      setUsers((current) =>
+        current.map((candidate) =>
+          candidate.id === user.id
+            ? {
+                ...candidate,
+                publicMetadata: {
+                  ...candidate.publicMetadata,
+                  isAdmin: !user.publicMetadata.isAdmin,
+                },
+              }
+            : candidate,
+        ),
+      );
+      toast.success(
+        user.publicMetadata.isAdmin ? "Droits admin retirés" : "Droits admin accordés",
+      );
+      pushActivity({
+        id: `admin-${user.id}-${Date.now()}`,
+        title: user.publicMetadata.isAdmin ? "Droits admin retirés" : "Droits admin accordés",
+        description: `${user.name} • ${user.email}`,
+        timestamp: new Date().toISOString(),
+        section: "utilisateurs",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de modifier les droits admin");
+    } finally {
+      setLoadingUserId(null);
+    }
+  }
+
+  async function handleSetBanner() {
+    setSavingBanner(true);
+    try {
+      await setSystemBanner(bannerText);
+      toast.success(bannerText ? "Bannière système déployée" : "Bannière système supprimée");
+      pushActivity({
+        id: `banner-${Date.now()}`,
+        title: bannerText ? "Bannière système mise à jour" : "Bannière système supprimée",
+        description: bannerText || "Aucun message actif",
+        timestamp: new Date().toISOString(),
+        section: "systeme",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de mettre à jour la bannière");
+    } finally {
+      setSavingBanner(false);
+    }
+  }
+
+  async function handleSaveGeminiKey() {
+    setSavingGeminiKey(true);
+    try {
+      const formData = new FormData();
+      formData.set("geminiKey", geminiKey);
+      await updateAdminSettings(formData);
+      toast.success("Clé Gemini sauvegardée");
+      pushActivity({
+        id: `gemini-${Date.now()}`,
+        title: "Configuration Gemini mise à jour",
+        description: geminiKey ? "Surcharge admin active" : "Retour à la configuration serveur",
+        timestamp: new Date().toISOString(),
+        section: "systeme",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de sauvegarder la clé Gemini");
+    } finally {
+      setSavingGeminiKey(false);
+    }
+  }
+
+  async function handleMarkAsFailed(mail: AdminMailItem) {
+    try {
+      await markMailAsFailed(mail.id);
+      await mutateMails();
+      toast.success("Email marqué comme échec");
+      pushActivity({
+        id: `mail-failed-${mail.id}-${Date.now()}`,
+        title: "Envoi marqué en échec",
+        description: `${mail.email} • ${mail.source}`,
+        timestamp: new Date().toISOString(),
+        section: "acquisition",
+        kind: "acquisition",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de marquer cet envoi en échec");
+    }
+  }
+
+  async function handleTestCron() {
     setTestingCron(true);
     setProspectMessage(null);
     try {
-      const res = await fetch('/api/cron/prospect');
-      const data = await res.json();
-      
-      if (!res.ok) throw new Error(data.message || "Erreur lors du test du robot");
-      
-      setProspectMessage({ text: `Robot exécuté : ${data.message} ${data.email ? `(${data.email})` : ''}`, type: "success" });
-      mutateMails();
-    } catch (err: any) {
-      setProspectMessage({ text: err.message || "Erreur lors de l'exécution du robot", type: "error" });
+      const response = await fetch("/api/cron/prospect");
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || payload.message || "Erreur lors du test du robot");
+      }
+
+      const message = payload.message || "Robot exécuté avec succès";
+      setProspectMessage({ text: message, type: "success" });
+      toast.success(message);
+      await mutateMails();
+      pushActivity({
+        id: `cron-test-${Date.now()}`,
+        title: "Test du robot exécuté",
+        description: message,
+        timestamp: new Date().toISOString(),
+        section: "acquisition",
+        kind: "acquisition",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Erreur lors de l'exécution du robot";
+      setProspectMessage({ text: message, type: "error" });
+      toast.error(message);
     } finally {
       setTestingCron(false);
-      setTimeout(() => setProspectMessage(null), 8000);
     }
-  };
+  }
 
-  const handleToggleCron = async () => {
+  async function handleToggleCron() {
     setTogglingCron(true);
     try {
-      const newValue = isCronEnabled ? 'false' : 'true';
-      await fetch('/api/admin/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'cron_prospect_enabled', value: newValue }),
+      const newValue = isCronEnabled ? "false" : "true";
+      const response = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: "cron_prospect_enabled", value: newValue }),
       });
-      mutateCron();
-    } catch (err) {
-      alert("Erreur lors de la modification");
+
+      if (!response.ok) {
+        throw new Error("Impossible de modifier l'état du robot");
+      }
+
+      await mutateCron({ value: newValue }, { revalidate: false });
+      toast.success(newValue === "true" ? "Robot réactivé" : "Robot désactivé");
+      pushActivity({
+        id: `cron-toggle-${Date.now()}`,
+        title: newValue === "true" ? "Robot réactivé" : "Robot désactivé",
+        description: "Mise à jour du paramètre cron_prospect_enabled",
+        timestamp: new Date().toISOString(),
+        section: "acquisition",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de modifier l'état du robot");
     } finally {
       setTogglingCron(false);
     }
-  };
+  }
 
-  const handleSendProspect = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!prospectEmail) return;
+  async function handleSendProspect(event: FormEvent) {
+    event.preventDefault();
+    const emails = prospectEmail
+      .split(/[\s,;]+/)
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    if (emails.length === 0) {
+      toast.error("Ajoute au moins un email valide");
+      return;
+    }
 
     setSendingProspect(true);
     setProspectMessage(null);
-
-    const emails = prospectEmail.split(/[\s,;]+/).filter(e => e.trim().length > 0);
-
-    if (emails.length === 0) {
-      setSendingProspect(false);
-      return;
-    }
 
     try {
       let successCount = 0;
       let failCount = 0;
 
       for (const email of emails) {
-        const res = await fetch("/api/admin/mail", {
+        const response = await fetch("/api/admin/mail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email }),
         });
 
-        if (res.ok) {
-          successCount++;
+        if (response.ok) {
+          successCount += 1;
         } else {
-          failCount++;
+          failCount += 1;
         }
       }
 
+      await mutateMails();
+
       if (failCount === 0) {
-        setProspectMessage({ text: `${successCount} email(s) envoyé(s) avec succès.`, type: "success" });
+        const message = `${successCount} email(s) envoyé(s) avec succès.`;
+        setProspectMessage({ text: message, type: "success" });
         setProspectEmail("");
+        toast.success(message);
       } else {
-        setProspectMessage({ text: `${successCount} envoyés, ${failCount} erreurs.`, type: "error" });
+        const message = `${successCount} envoyés, ${failCount} en erreur.`;
+        setProspectMessage({ text: message, type: "error" });
+        toast.error(message);
       }
-      mutateMails();
-    } catch (err) {
-      setProspectMessage({ text: "Erreur lors de l'envoi des emails", type: "error" });
+
+      pushActivity({
+        id: `manual-campaign-${Date.now()}`,
+        title: "Envoi manuel de prospection",
+        description: `${emails.length} destinataire(s) ciblé(s)`,
+        timestamp: new Date().toISOString(),
+        section: "acquisition",
+        kind: "acquisition",
+      });
+    } catch (error) {
+      console.error(error);
+      const message = "Erreur lors de l'envoi des emails";
+      setProspectMessage({ text: message, type: "error" });
+      toast.error(message);
     } finally {
       setSendingProspect(false);
-      setTimeout(() => setProspectMessage(null), 5000);
     }
-  };
+  }
 
-  const handleTogglePro = async (userId: string, currentIsPro: boolean) => {
-    if (!confirm(currentIsPro ? 'Retirer le statut PRO à cet utilisateur ?' : 'Accorder le statut PRO à cet utilisateur ?')) return;
-    setLoadingUserId(userId);
-    try {
-      await toggleUserProStatus(userId, !currentIsPro);
-      setUsers((prev: any[]) => prev.map((u: any) => u.id === userId ? { ...u, isPro: !currentIsPro } : u));
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de modifier le statut PRO'));
-    }
-    setLoadingUserId(null);
-  };
-
-  const handleBanUser = async (userId: string, currentBanned: boolean) => {
-    if (!confirm(currentBanned ? 'Débannir cet utilisateur ?' : 'Bannir cet utilisateur ?')) return;
-    setLoadingUserId(userId);
-    try {
-      await banUser(userId, !currentBanned);
-      setUsers((prev: any[]) => prev.map((u: any) => u.id === userId ? { ...u, banned: !currentBanned } : u));
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de bannir/débannir'));
-    }
-    setLoadingUserId(null);
-  };
-
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`Supprimer définitivement le compte de ${userName} ? Cette action est irréversible.`)) return;
-    setLoadingUserId(userId);
-    try {
-      await deleteUserAccount(userId);
-      setUsers((prev: any[]) => prev.filter((u: any) => u.id !== userId));
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de supprimer'));
-    }
-    setLoadingUserId(null);
-  };
-
-  const handleGrantAdmin = async (userId: string, currentIsAdmin: boolean) => {
-    if (!confirm(currentIsAdmin ? 'Retirer les droits admin ?' : 'Accorder les droits admin ?')) return;
-    setLoadingUserId(userId);
-    try {
-      await grantAdminRole(userId, !currentIsAdmin);
-      setUsers((prev: any[]) => prev.map((u: any) => u.id === userId ? { ...u, publicMetadata: { ...u.publicMetadata, isAdmin: !currentIsAdmin } } : u));
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de modifier les droits'));
-    }
-    setLoadingUserId(null);
-  };
-
-  const handleSetBanner = async () => {
-    try {
-      await setSystemBanner(bannerText);
-      alert(bannerText ? 'Bannière déployée !' : 'Bannière supprimée !');
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de mettre à jour la bannière'));
-    }
-  };
-
-  const handleSaveGeminiKey = async () => {
-    try {
-      const fd = new FormData();
-      fd.set('geminiKey', geminiKey);
-      await updateAdminSettings(fd);
-      alert('Clé API sauvegardée !');
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de sauvegarder la clé'));
-    }
-  };
-
-  const handleMarkAsFailed = async (mailId: string) => {
-    if (!confirm('Marquer cet email comme "Échec" (Rebond/Erreur) ?')) return;
-    try {
-      await markMailAsFailed(mailId);
-      mutateMails();
-    } catch (e: any) {
-      alert('Erreur: ' + (e.message || 'Impossible de marquer comme échec'));
-    }
-  };
-
-  const handleExportCSV = () => {
-    const headers = ['Nom', 'Email', 'Inscription', 'Statut', 'Devis IA'];
-    const rows = users.map((u: any) => [
-      u.name || 'Sans nom',
-      u.email || '',
-      u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '',
-      u.isPro ? 'PRO' : 'Gratuit',
-      u.aiGenerations || 0
+  function handleExportCSV() {
+    const headers = ["Nom", "Email", "Inscription", "Statut", "Devis IA"];
+    const rows = users.map((user) => [
+      user.name,
+      user.email,
+      user.createdAt ? new Date(user.createdAt).toLocaleDateString("fr-FR") : "",
+      user.isPro ? "PRO" : "Gratuit",
+      String(user.aiGenerations),
     ]);
-    const csv = [headers, ...rows].map(r => r.map((c: any) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+    const csvContent = [headers, ...rows]
+      .map((row) =>
+        row
+          .map((cell) => `"${cell.replace(/"/g, '""')}"`)
+          .join(";"),
+      )
+      .join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `zolio-users-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click(); URL.revokeObjectURL(url);
-  };
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `zolio-admin-users-${new Date().toISOString().split("T")[0]}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    toast.success("Export utilisateurs généré");
+  }
 
-  const filteredUsers = users.filter((user: any) => {
-    const matchesSearch = (user.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          (user.email || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesPro = filterPro ? user.isPro : true;
-    return matchesSearch && matchesPro;
-  });
+  const currentSectionMeta = sections.find((section) => section.id === activeSection);
 
-  const renderTabNav = () => (
-    <div className="flex flex-wrap gap-2 mb-8 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl">
-      <button onClick={() => setActiveTab('overview')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Activity className="w-4 h-4 inline-block mr-2" /> Vue d'ensemble
-      </button>
-      <button onClick={() => setActiveTab('users')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'users' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Users className="w-4 h-4 inline-block mr-2" /> Utilisateurs
-      </button>
-      <button onClick={() => setActiveTab('analytics')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'analytics' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <BarChart3 className="w-4 h-4 inline-block mr-2" /> Analytique
-      </button>
-      <button onClick={() => setActiveTab('behavior')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'behavior' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Map className="w-4 h-4 inline-block mr-2" /> Comportement
-      </button>
-      <button onClick={() => setActiveTab('marketing')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'marketing' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Mail className="w-4 h-4 inline-block mr-2" /> Marketing
-      </button>
-      <button onClick={() => setActiveTab('prospection')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'prospection' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Send className="w-4 h-4 inline-block mr-2" /> Prospection
-      </button>
-      <button onClick={() => setActiveTab('automations')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'automations' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Zap className="w-4 h-4 inline-block mr-2" /> Automatisations
-      </button>
-      <button onClick={() => setActiveTab('cms')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'cms' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <BookOpen className="w-4 h-4 inline-block mr-2" /> CMS & Contenu
-      </button>
-      <button onClick={() => setActiveTab('support')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'support' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <HelpCircle className="w-4 h-4 inline-block mr-2" /> Support
-      </button>
-      <button onClick={() => setActiveTab('system')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'system' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Server className="w-4 h-4 inline-block mr-2" /> Système & Logs
-      </button>
-      <button onClick={() => setActiveTab('settings')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'settings' ? 'bg-white dark:bg-slate-700 shadow text-purple-600 dark:text-purple-400' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}>
-        <Settings className="w-4 h-4 inline-block mr-2" /> Paramètres
-      </button>
-    </div>
-  );
+  function renderQuickAction() {
+    if (activeSection === "utilisateurs") {
+      return (
+        <button
+          type="button"
+          onClick={handleExportCSV}
+          className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+        >
+          <span className="inline-flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Exporter les utilisateurs
+          </span>
+        </button>
+      );
+    }
 
+    if (activeSection === "acquisition") {
+      return (
+        <button
+          type="button"
+          onClick={handleTestCron}
+          disabled={testingCron}
+          className="rounded-2xl border border-white/10 bg-white/6 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+        >
+          <span className="inline-flex items-center gap-2">
+            {testingCron ? <Loader2 className="h-4 w-4 animate-spin" /> : <RadioTower className="h-4 w-4" />}
+            {testingCron ? "Exécution..." : "Tester le robot"}
+          </span>
+        </button>
+      );
+    }
 
-  return (
-    <div className="max-w-7xl mx-auto space-y-6 pb-12">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center">
-            <Shield className="w-8 h-8 mr-3 text-purple-600" />
-            Super Admin Zolio
-          </h1>
-          <p className="text-slate-500 mt-2">Centre de contrôle global de la plateforme SaaS.</p>
-        </div>
-        <div className="flex gap-4">
-           <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-bold flex items-center">
-             <Activity className="w-4 h-4 mr-2" /> Système Opérationnel
-           </span>
+    return (
+      <div className="admin-chip bg-white/8 text-white/80 ring-white/10">
+        <span className="inline-flex items-center gap-2">
+          <Activity className="h-3.5 w-3.5" />
+          {heroStatus.label}
+        </span>
+      </div>
+    );
+  }
+
+  function renderPilotage() {
+    return (
+      <div className="space-y-6">
+        <section className="admin-panel-strong relative overflow-hidden rounded-[34px] p-6 sm:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.22),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(244,114,182,0.16),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
+          <div className="relative grid gap-8 xl:grid-cols-[1.35fr_0.95fr]">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.34em] text-violet-200/70">
+                Poste de pilotage
+              </p>
+              <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                Un centre de contrôle plus net, plus dense, plus utile.
+              </h2>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+                Tu vois ici les signaux qui demandent une action, la traction récente et les briques
+                critiques de la plateforme, sans faux modules ni bruit décoratif.
+              </p>
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => setActiveSection("acquisition")}
+                  className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+                >
+                  Passer en acquisition
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveSection("utilisateurs")}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+                >
+                  Inspecter les utilisateurs
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Alertes ouvertes</p>
+                <p className="mt-4 text-3xl font-semibold text-white">{attentionCount}</p>
+                <p className="mt-2 text-sm text-slate-300">Signalements qui demandent une décision.</p>
+              </div>
+              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Base de données</p>
+                <p className="mt-4 text-3xl font-semibold text-white">
+                  {data.environment.dbLatencyMs === null ? "N/A" : `${data.environment.dbLatencyMs} ms`}
+                </p>
+                <p className="mt-2 text-sm text-slate-300">Dernière mesure de disponibilité Prisma.</p>
+              </div>
+              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Robot acquisition</p>
+                <p className="mt-4 text-3xl font-semibold text-white">{isCronEnabled ? "ON" : "OFF"}</p>
+                <p className="mt-2 text-sm text-slate-300">Moteur automatisé de prospection.</p>
+              </div>
+              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Délivrabilité</p>
+                <p className="mt-4 text-3xl font-semibold text-white">{deliveryRate}%</p>
+                <p className="mt-2 text-sm text-slate-300">Ratio d&apos;emails envoyés avec succès.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <AdminKpiStrip items={liveKpis} />
+
+        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <Panel
+            title="Alertes à traiter"
+            description="Des signaux opérationnels triés par impact réel. Chaque carte t’amène au bon module."
+          >
+            <div className="grid gap-3">
+              {alerts.map((alert) => (
+                <button
+                  key={alert.id}
+                  type="button"
+                  onClick={() => setActiveSection(alert.section)}
+                  className={`rounded-[26px] border p-4 text-left transition hover:translate-y-[-1px] hover:border-white/16 ${alertClasses(alert.severity)}`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                        {alertIcon(alert.severity)}
+                        {alert.title}
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-white/72">{alert.description}</p>
+                    </div>
+                    <span className="mt-1 inline-flex items-center gap-1 text-xs text-white/70">
+                      {alert.ctaLabel}
+                      <ChevronRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </Panel>
+
+          <div className="grid gap-6">
+            <Panel
+              title="Activité récente"
+              description="Ce qui vient de se passer sur la plateforme ou dans les actions admin."
+            >
+              <div className="space-y-3">
+                {activityFeed.length === 0 ? (
+                  <div className="rounded-[24px] border border-dashed border-white/12 bg-white/4 px-4 py-6 text-sm text-slate-400">
+                    Aucun événement récent à afficher pour le moment.
+                  </div>
+                ) : (
+                  activityFeed.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setActiveSection(item.section)}
+                      className="flex w-full items-start justify-between gap-4 rounded-[24px] border border-white/8 bg-white/4 px-4 py-4 text-left transition hover:border-white/14 hover:bg-white/6"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white">{item.title}</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-400">{item.description}</p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <p className="text-xs text-slate-500">{formatTimeAgo(item.timestamp)}</p>
+                        <p className="mt-1 text-xs text-slate-500">{formatDateTime(item.timestamp)}</p>
+                      </div>
+                    </button>
+                  ))
+                )}
+              </div>
+            </Panel>
+
+            <Panel
+              title="Santé système"
+              description="Lecture rapide des briques critiques. Pas de faux logs, uniquement des états réels ou assumés."
+            >
+              <div className="grid gap-3 sm:grid-cols-2">
+                {systemStatuses.slice(0, 4).map((status) => (
+                  <button
+                    key={status.id}
+                    type="button"
+                    onClick={() => setActiveSection("systeme")}
+                    className="rounded-[24px] border border-white/8 bg-white/4 p-4 text-left transition hover:border-white/14 hover:bg-white/6"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium text-white">{status.label}</p>
+                      <span className={`admin-chip ${systemStatusClasses(status.status)}`}>{status.status}</span>
+                    </div>
+                    <p className="mt-3 text-sm text-slate-400">{status.detail}</p>
+                    {status.meta && <p className="mt-2 text-xs text-slate-500">{status.meta}</p>}
+                  </button>
+                ))}
+              </div>
+            </Panel>
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {renderTabNav()}
+  function renderUsers() {
+    return (
+      <div className="space-y-6">
+        <Panel
+          title="Base utilisateurs"
+          description="Inspection, privilèges et modération dans une table plus lisible. Les actions sensibles passent par le panneau latéral."
+          action={
+            <button
+              type="button"
+              onClick={handleExportCSV}
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10"
+            >
+              <span className="inline-flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Export CSV
+              </span>
+            </button>
+          }
+        >
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_260px]">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Rechercher par nom ou email..."
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/30 focus:bg-white/7"
+              />
+            </div>
 
-      {activeTab === 'overview' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <CardWrapper className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white border-0">
-              <div className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-purple-100 text-sm font-medium mb-1">Total Artisans</p>
-                    <h3 className="text-4xl font-bold">{stats.totalUsers}</h3>
-                  </div>
-                  <div className="p-3 bg-white/20 rounded-lg"><Users className="w-6 h-6" /></div>
-                </div>
-              </div>
-            </CardWrapper>
-            <CardWrapper>
-              <div className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Abonnements PRO</p>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.proUsers}</h3>
-                    <p className="text-xs text-green-600 mt-1">Taux de conv: {Math.round((stats.proUsers/Math.max(stats.totalUsers,1))*100)}%</p>
-                  </div>
-                  <div className="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg"><CreditCard className="w-6 h-6" /></div>
-                </div>
-              </div>
-            </CardWrapper>
-            <CardWrapper>
-              <div className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">MRR Estimé</p>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.mrr || (stats.proUsers * 29) || 0} €</h3>
-                    <p className="text-xs text-slate-400 mt-1">Revenu Mensuel</p>
-                  </div>
-                  <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg"><Activity className="w-6 h-6" /></div>
-                </div>
-              </div>
-            </CardWrapper>
-            <CardWrapper>
-              <div className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Devis IA Générés</p>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">{stats.totalAIGenerations}</h3>
-                  </div>
-                  <div className="p-3 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 rounded-lg"><FileText className="w-6 h-6" /></div>
-                </div>
-              </div>
-            </CardWrapper>
+            <button
+              type="button"
+              onClick={() => setFilterProOnly((current) => !current)}
+              className={`rounded-2xl border px-4 py-3 text-sm font-medium transition ${filterProOnly ? "border-sky-300/20 bg-sky-400/10 text-sky-100" : "border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"}`}
+            >
+              {filterProOnly ? "Filtre PRO actif" : "Filtrer PRO uniquement"}
+            </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <CardWrapper>
-               <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                 <h3 className="font-bold text-lg">Dernières Inscriptions</h3>
-               </div>
-               <div className="p-6">
-                 <div className="space-y-4">
-                   {users.slice(0, 5).map((user: any, i: number) => (
-                     <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                       <div className="flex items-center space-x-3">
-                         <div className="w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold">
-                           {user.name?.[0] || 'U'}
-                         </div>
-                         <div>
-                           <p className="font-medium text-slate-900 dark:text-white">{user.name || 'Utilisateur Anonyme'}</p>
-                           <p className="text-xs text-slate-500">{user.email}</p>
-                         </div>
-                       </div>
-                       <div className="text-right">
-                         <span className={`text-xs px-2 py-1 rounded-full ${user.isPro ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}`}>
-                           {user.isPro ? 'PRO' : 'Gratuit'}
-                         </span>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               </div>
-             </CardWrapper>
+          <div className="mt-6 overflow-hidden rounded-[26px] border border-white/8">
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-left">
+                <thead className="bg-white/4 text-xs uppercase tracking-[0.24em] text-slate-500">
+                  <tr>
+                    <th className="px-4 py-4 font-medium">Utilisateur</th>
+                    <th className="px-4 py-4 font-medium">Statut</th>
+                    <th className="px-4 py-4 font-medium">IA</th>
+                    <th className="px-4 py-4 font-medium">Dernière connexion</th>
+                    <th className="px-4 py-4 font-medium text-right">Inspection</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/8">
+                  {filteredUsers.map((user) => (
+                    <tr
+                      key={user.id}
+                      className={`transition hover:bg-white/[0.045] ${selectedUserId === user.id ? "bg-white/[0.055]" : ""}`}
+                    >
+                      <td className="px-4 py-4">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUserId(user.id)}
+                          className="flex items-center gap-3 text-left"
+                        >
+                          {user.imageUrl ? (
+                            <>
+                              {/* External avatar URLs come from Clerk and are not optimized locally. */}
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={user.imageUrl}
+                                alt={user.name}
+                                className="h-11 w-11 rounded-2xl object-cover ring-1 ring-white/10"
+                              />
+                            </>
+                          ) : (
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-sm font-semibold text-white">
+                              {user.name.charAt(0)}
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-white">{user.name}</p>
+                            <p className="truncate text-sm text-slate-400">{user.email}</p>
+                          </div>
+                        </button>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-2">
+                          <span className={`admin-chip ${user.isPro ? "bg-sky-500/12 text-sky-100 ring-sky-300/20" : "bg-white/8 text-slate-200 ring-white/10"}`}>
+                            {user.isPro ? "PRO" : "Gratuit"}
+                          </span>
+                          {user.banned && (
+                            <span className="admin-chip bg-red-500/12 text-red-100 ring-red-300/20">
+                              Banni
+                            </span>
+                          )}
+                          {user.publicMetadata.isAdmin && (
+                            <span className="admin-chip bg-violet-500/12 text-violet-100 ring-violet-300/20">
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-slate-300">{user.aiGenerations}</td>
+                      <td className="px-4 py-4 text-sm text-slate-400">
+                        {formatDateTime(user.lastSignInAt)}
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUserId(user.id)}
+                          className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+                        >
+                          Inspecter
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="px-4 py-10 text-center text-sm text-slate-400">
+                        Aucun utilisateur ne correspond à ce filtre.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-             <CardWrapper>
-               <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                 <h3 className="font-bold text-lg">Activité Système</h3>
-               </div>
-               <div className="p-6">
-                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 border-l-4 border-green-500 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg">
-                      <div>
-                        <p className="text-sm font-medium">Lancement Super Admin</p>
-                        <p className="text-xs text-slate-500">Mise à jour v3.0 déployée avec succès.</p>
-                      </div>
-                      <span className="text-xs text-slate-400">À l'instant</span>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border-l-4 border-blue-500 bg-slate-50 dark:bg-slate-800/50 rounded-r-lg">
-                      <div>
-                        <p className="text-sm font-medium">Sauvegarde automatique</p>
-                        <p className="text-xs text-slate-500">Base de données synchronisée.</p>
-                      </div>
-                      <span className="text-xs text-slate-400">Il y a 2h</span>
-                    </div>
-                 </div>
-               </div>
-             </CardWrapper>
+          <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-400">
+            <span>{filteredUsers.length} utilisateur(s) affiché(s)</span>
+            <span className="text-slate-600">•</span>
+            <span>{users.filter((user) => user.isPro).length} compte(s) PRO</span>
+            <span className="text-slate-600">•</span>
+            <span>{users.filter((user) => user.banned).length} compte(s) banni(s)</span>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
+
+  function renderRevenue() {
+    const businessSignals = [
+      {
+        title: "Source de vérité",
+        value: data.revenue.sourceLabel,
+        detail: data.environment.hasStripe
+          ? "Les abonnements actifs sont lus depuis Stripe."
+          : "Le MRR est estimé à partir des comptes PRO.",
+      },
+      {
+        title: "Conversion globale",
+        value: `${data.revenue.conversionRate}%`,
+        detail: `${data.revenue.proUsers} comptes PRO sur ${data.revenue.totalUsers} utilisateurs.`,
+      },
+      {
+        title: "Arrivée récente",
+        value: `${data.revenue.recentUsersCount}`,
+        detail: "Nouveaux comptes sur les 30 derniers jours.",
+      },
+    ];
+
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="admin-kpi-card bg-gradient-to-br from-emerald-500/18 via-emerald-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">MRR estimé</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{data.revenue.mrr} €</p>
+            <p className="mt-3 text-sm text-slate-300">{data.revenue.sourceLabel}</p>
+          </div>
+          <div className="admin-kpi-card bg-gradient-to-br from-violet-500/18 via-fuchsia-500/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">ARR estimé</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{data.revenue.estimatedArr} €</p>
+            <p className="mt-3 text-sm text-slate-300">Projection simple sur 12 mois.</p>
+          </div>
+          <div className="admin-kpi-card bg-gradient-to-br from-sky-500/18 via-sky-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Abonnements actifs</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{data.revenue.activeSubscriptions}</p>
+            <p className="mt-3 text-sm text-slate-300">Souscriptions actuellement actives.</p>
+          </div>
+          <div className="admin-kpi-card bg-gradient-to-br from-amber-400/18 via-orange-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Conversion</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{data.revenue.conversionRate}%</p>
+            <p className="mt-3 text-sm text-slate-300">Transformation global free vers PRO.</p>
           </div>
         </div>
-      )}
 
-      {activeTab === 'users' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
-            <div>
-              <h3 className="font-bold text-lg">Gestion des Utilisateurs</h3>
-              <p className="text-sm text-slate-500">Recherchez, filtrez et gérez tous les artisans inscrits.</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={handleExportCSV} className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium flex items-center">
-                <Download className="w-4 h-4 mr-2" /> Exporter CSV
-              </button>
-            </div>
-          </div>
-          <div className="p-6">
-             <div className="flex gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="w-5 h-5 absolute left-3 top-2.5 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Rechercher par nom ou email..." 
-                    className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-                <button 
-                  onClick={() => setFilterPro(!filterPro)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${filterPro ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800' : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'}`}
+        <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <Panel
+            title="Lecture business réelle"
+            description="Seulement des indicateurs calculables aujourd’hui, sans graphiques inventés ni promesses produit."
+          >
+            <div className="grid gap-4 md:grid-cols-3">
+              {businessSignals.map((signal) => (
+                <article
+                  key={signal.title}
+                  className="rounded-[26px] border border-white/8 bg-white/4 p-5"
                 >
-                  Pro Uniquement
-                </button>
-             </div>
-             
-             <div className="overflow-x-auto">
-               <table className="w-full text-left border-collapse">
-                 <thead>
-                   <tr className="border-b border-slate-200 dark:border-slate-700 text-sm text-slate-500">
-                     <th className="pb-3 font-medium">Utilisateur</th>
-                     <th className="pb-3 font-medium">Inscription</th>
-                     <th className="pb-3 font-medium">Statut</th>
-                     <th className="pb-3 font-medium">Devis IA</th>
-                     <th className="pb-3 font-medium text-right">Actions</th>
-                   </tr>
-                 </thead>
-                 <tbody className="text-sm">
-                   {filteredUsers.map((user: any, idx: number) => (
-                     <React.Fragment key={idx}>
-                     <tr className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                       <td className="py-4">
-                         <div className="font-medium text-slate-900 dark:text-white">{user.name || 'Sans nom'}</div>
-                         <div className="text-slate-500 text-xs">{user.email}</div>
-                       </td>
-                       <td className="py-4 text-slate-600 dark:text-slate-400">
-                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR') : '-'}
-                       </td>
-                       <td className="py-4">
-                         <span className={`text-xs px-2 py-1 rounded-full ${user.isPro ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}`}>
-                           {user.isPro ? 'PRO' : 'Gratuit'}
-                         </span>
-                       </td>
-                       <td className="py-4 text-slate-600 dark:text-slate-400">
-                         {user.aiGenerations || 0}
-                       </td>
-                       <td className="py-4 text-right">
-                         {loadingUserId === user.id ? (
-                           <Loader2 className="w-5 h-5 animate-spin text-slate-400 ml-auto" />
-                         ) : (
-                           <div className="flex justify-end gap-1">
-                             <button
-                               onClick={() => handleTogglePro(user.id, user.isPro)}
-                               className={`p-2 rounded-lg transition-colors ${user.isPro ? 'text-blue-600 bg-blue-50 dark:bg-blue-900/30' : 'text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600'}`}
-                               title={user.isPro ? 'Retirer PRO' : 'Accorder PRO'}
-                             >
-                               <CreditCard className="w-4 h-4" />
-                             </button>
-                             <button
-                               onClick={() => setExpandedUserId(expandedUserId === user.id ? null : user.id)}
-                               className="p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 rounded-lg transition-colors"
-                               title="Plus d'actions"
-                             >
-                               <Settings className="w-4 h-4" />
-                             </button>
-                             <button
-                               onClick={() => handleBanUser(user.id, user.banned)}
-                               className={`p-2 rounded-lg transition-colors ${user.banned ? 'text-orange-600 bg-orange-50 dark:bg-orange-900/30' : 'text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/30'}`}
-                               title={user.banned ? 'Débannir' : 'Bannir'}
-                             >
-                               <Ban className="w-4 h-4" />
-                             </button>
-                             <button
-                               onClick={() => handleDeleteUser(user.id, user.name)}
-                               className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                               title="Supprimer définitivement"
-                             >
-                               <Trash2 className="w-4 h-4" />
-                             </button>
-                           </div>
-                         )}
-                       </td>
-                     </tr>
-                     {expandedUserId === user.id && (
-                       <tr className="bg-slate-50 dark:bg-slate-800/30">
-                         <td colSpan={5} className="px-4 py-3">
-                           <div className="flex flex-wrap gap-3 items-center text-sm">
-                             <span className="text-slate-500">Dernière connexion: {user.lastSignInAt ? new Date(user.lastSignInAt).toLocaleDateString('fr-FR') : 'Jamais'}</span>
-                             <span className="text-slate-300 dark:text-slate-600">|</span>
-                             <span className={`${user.banned ? 'text-red-600 font-medium' : 'text-green-600'}`}>{user.banned ? '🚫 Banni' : '✅ Actif'}</span>
-                             <span className="text-slate-300 dark:text-slate-600">|</span>
-                             <button
-                               onClick={() => handleGrantAdmin(user.id, user.publicMetadata?.isAdmin)}
-                               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${user.publicMetadata?.isAdmin ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300 hover:bg-purple-100 hover:text-purple-700'}`}
-                             >
-                               <Shield className="w-3 h-3 inline mr-1" />
-                               {user.publicMetadata?.isAdmin ? 'Admin ✓' : 'Rendre Admin'}
-                             </button>
-                             {user.publicMetadata?.parrainCode && (
-                               <span className="text-xs text-slate-400">Code parrain: {user.publicMetadata.parrainCode}</span>
-                             )}
-                           </div>
-                         </td>
-                       </tr>
-                     )}
-                     </React.Fragment>
-                   ))}
-                   {filteredUsers.length === 0 && (
-                     <tr>
-                       <td colSpan={5} className="py-8 text-center text-slate-500">Aucun utilisateur trouvé.</td>
-                     </tr>
-                   )}
-                 </tbody>
-               </table>
-             </div>
-          </div>
-        </CardWrapper>
-      )}
-
-      {/* NEW MOCK TABS FOR THE 40 FEATURES */}
-      {activeTab === 'analytics' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Analytique Financière & SaaS</h3>
-            <p className="text-sm text-slate-500">Cohortes, LTV, et prévisions financières.</p>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                <p className="text-sm text-slate-500">LTV (Valeur Vie Client) Moyenne</p>
-                <h3 className="text-2xl font-bold mt-1 text-slate-900 dark:text-white">290 €</h3>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                <p className="text-sm text-slate-500">Taux de Rétention (Mois 3)</p>
-                <h3 className="text-2xl font-bold mt-1 text-slate-900 dark:text-white">85%</h3>
-              </div>
-              <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                <p className="text-sm text-slate-500">Paiements échoués (Dunning)</p>
-                <h3 className="text-2xl font-bold mt-1 text-orange-500">0</h3>
-              </div>
+                  <p className="text-sm text-slate-400">{signal.title}</p>
+                  <p className="mt-4 text-2xl font-semibold text-white">{signal.value}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-400">{signal.detail}</p>
+                </article>
+              ))}
             </div>
-            <div className="h-64 bg-slate-50 dark:bg-slate-800/30 rounded-xl flex items-center justify-center text-slate-400 border border-dashed border-slate-300 dark:border-slate-700">
-              Graphique d'Analyse de Cohorte (Module en cours de collecte de données)
-            </div>
-          </div>
-        </CardWrapper>
-      )}
+          </Panel>
 
-      {activeTab === 'behavior' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Comportement & Engagement</h3>
-            <p className="text-sm text-slate-500">Analysez comment vos artisans utilisent Zolio.</p>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-800/30">
-                <Map className="w-8 h-8 text-blue-500 mb-4" />
-                <h4 className="font-bold mb-2 text-slate-900 dark:text-white">Carte Thermique d'Activité</h4>
-                <p className="text-sm text-slate-500">La majorité des connexions s'effectuent depuis la France métropolitaine, avec un pic entre 18h et 20h.</p>
+          <Panel
+            title="Ce qui n’est pas encore collecté"
+            description="On assume clairement les angles morts au lieu d'afficher de faux graphes de cohorte ou de LTV."
+          >
+            <div className="rounded-[26px] border border-dashed border-white/12 bg-white/4 p-5">
+              <div className="flex items-center gap-3">
+                <MessageSquareDashed className="h-5 w-5 text-slate-400" />
+                <h4 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">
+                  Données non branchées
+                </h4>
               </div>
-              <div className="p-6 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-800/30">
-                <Server className="w-8 h-8 text-purple-500 mb-4" />
-                <h4 className="font-bold mb-2 text-slate-900 dark:text-white">Stockage Utilisé</h4>
-                <p className="text-sm text-slate-500">Moyenne : 15 Mo / utilisateur (Photos de chantier et PDFs). Espace total largement disponible.</p>
-              </div>
+              <p className="mt-4 text-sm leading-7 text-slate-400">
+                Pas encore de pipeline pour les cohortes, la LTV, les paiements échoués historisés
+                ou les courbes de revenu dans le temps. Le cockpit l&apos;affiche comme un manque de
+                télémétrie, pas comme une donnée réelle.
+              </p>
             </div>
-          </div>
-        </CardWrapper>
-      )}
+          </Panel>
+        </div>
+      </div>
+    );
+  }
 
-      {activeTab === 'marketing' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Marketing & Ventes</h3>
-            <p className="text-sm text-slate-500">Parrainage, codes promos et communication.</p>
+  function renderAcquisition() {
+    return (
+      <div className="space-y-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="admin-kpi-card bg-gradient-to-br from-violet-500/18 via-fuchsia-500/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Total envoyés</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{totalMailCount}</p>
+            <p className="mt-3 text-sm text-slate-300">{manualCount} manuels • {automatedCount} auto</p>
           </div>
-          <div className="p-6">
-             <div className="space-y-4">
-               <div className="flex justify-between items-center p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                 <div>
-                   <h4 className="font-bold text-slate-900 dark:text-white">Campagnes E-mailing (Newsletter)</h4>
-                   <p className="text-sm text-slate-500">Envoyez des mises à jour à tous vos utilisateurs d'un clic.</p>
-                 </div>
-                 <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm">Créer une campagne</button>
-               </div>
-               <div className="flex justify-between items-center p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                 <div>
-                   <h4 className="font-bold text-slate-900 dark:text-white">Générateur de Codes Promo</h4>
-                   <p className="text-sm text-slate-500">Codes Stripe actifs : LANCEMENT50 (50% de réduction).</p>
-                 </div>
-                 <button className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm border border-slate-200 dark:border-slate-700">Gérer les codes</button>
-               </div>
-               <div className="flex justify-between items-center p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                 <div>
-                   <h4 className="font-bold text-slate-900 dark:text-white">Arbre de Parrainage</h4>
-                   <p className="text-sm text-slate-500">Visualisez qui invite qui sur la plateforme.</p>
-                 </div>
-                 <button className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg text-sm border border-slate-200 dark:border-slate-700">Voir l'arbre</button>
-               </div>
-             </div>
+          <div className="admin-kpi-card bg-gradient-to-br from-emerald-500/18 via-emerald-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Délivrabilité</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{deliveryRate}%</p>
+            <p className="mt-3 text-sm text-slate-300">{sentCount} succès confirmés</p>
           </div>
-        </CardWrapper>
-      )}
+          <div className="admin-kpi-card bg-gradient-to-br from-red-500/18 via-red-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Échecs</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{failedCount}</p>
+            <p className="mt-3 text-sm text-slate-300">Requiert une revue ou un rebond contrôlé.</p>
+          </div>
+          <div className="admin-kpi-card bg-gradient-to-br from-sky-500/18 via-sky-400/10 to-transparent">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Robot</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{isCronEnabled ? "ON" : "OFF"}</p>
+            <p className="mt-3 text-sm text-slate-300">Piloté par cron + secret serveur.</p>
+          </div>
+        </div>
 
-      {activeTab === 'prospection' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
-            <div>
-              <h3 className="font-bold text-lg flex items-center gap-2">
-                <Send className="w-5 h-5 text-purple-600" />
-                Prospection Automatisée
-              </h3>
-              <p className="text-sm text-slate-500">Envoyez des propositions de services Zolio aux artisans.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleTestCron}
-                disabled={testingCron}
-                className="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg flex items-center gap-2 transition disabled:opacity-50"
-              >
-                {testingCron ? <Loader2 className="w-3 h-3 animate-spin" /> : <Clock className="w-3 h-3" />}
-                {testingCron ? "Exécution..." : "Tester le Robot"}
-              </button>
-              <div className="flex items-center gap-3 border-l border-slate-200 dark:border-slate-700 pl-4">
-                <span className={`text-sm font-medium ${isCronEnabled ? 'text-green-600' : 'text-slate-500'}`}>
-                  {isCronEnabled ? 'Robot Activé' : 'Robot Désactivé'}
-                </span>
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <Panel
+            title="Cockpit d’acquisition"
+            description="Tout le nécessaire pour piloter la prospection réelle: état du robot, test manuel et campagne ciblée."
+            action={
+              <div className="flex flex-wrap gap-2">
                 <button
+                  type="button"
+                  onClick={handleTestCron}
+                  disabled={testingCron}
+                  className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white transition hover:bg-white/10 disabled:opacity-50"
+                >
+                  <span className="inline-flex items-center gap-2">
+                    {testingCron ? <Loader2 className="h-4 w-4 animate-spin" /> : <Clock3 className="h-4 w-4" />}
+                    {testingCron ? "Exécution..." : "Tester"}
+                  </span>
+                </button>
+                <button
+                  type="button"
                   onClick={handleToggleCron}
                   disabled={togglingCron}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${isCronEnabled ? 'bg-purple-600' : 'bg-slate-300 dark:bg-slate-600'}`}
+                  className={`rounded-2xl px-4 py-3 text-sm font-semibold transition disabled:opacity-50 ${isCronEnabled ? "bg-white text-slate-950 hover:bg-slate-100" : "bg-amber-400 text-slate-950 hover:bg-amber-300"}`}
                 >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isCronEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                  {togglingCron ? "Mise à jour..." : isCronEnabled ? "Désactiver le robot" : "Activer le robot"}
                 </button>
               </div>
-            </div>
-          </div>
-          <div className="p-6 space-y-8">
-            {/* Formulaire manuel */}
-            <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-              <h4 className="font-bold text-slate-900 dark:text-white mb-2">Envoi manuel (Test / Liste)</h4>
-              <p className="text-sm text-slate-500 mb-4">
-                Saisissez les adresses emails d'artisans (séparées par des virgules ou des espaces) pour leur envoyer une proposition.
-              </p>
-              <form onSubmit={handleSendProspect} className="flex flex-col gap-4">
+            }
+          >
+            <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className={`admin-chip ${isCronEnabled ? "bg-emerald-500/12 text-emerald-100 ring-emerald-300/20" : "bg-amber-400/12 text-amber-100 ring-amber-300/20"}`}>
+                  {isCronEnabled ? "Robot activé" : "Robot désactivé"}
+                </span>
+                <span className="admin-chip bg-white/8 text-slate-200 ring-white/10">
+                  {data.environment.hasHunter ? "Hunter configuré" : "Hunter optionnel absent"}
+                </span>
+                <span className={`admin-chip ${data.environment.hasCronSecret ? "bg-white/8 text-slate-200 ring-white/10" : "bg-red-500/12 text-red-100 ring-red-300/20"}`}>
+                  {data.environment.hasCronSecret ? "CRON_SECRET présent" : "CRON_SECRET absent"}
+                </span>
+              </div>
+
+              <form onSubmit={handleSendProspect} className="mt-5 space-y-4">
                 <textarea
-                  placeholder="Emails des artisans (ex: contact@peinture.fr, dupont@plomberie.fr)"
-                  required
-                  rows={3}
+                  placeholder="contact@artisan.fr, dupont@plomberie.fr, ..."
+                  rows={5}
                   value={prospectEmail}
-                  onChange={(e) => setProspectEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-y"
+                  onChange={(event) => setProspectEmail(event.target.value)}
+                  className="w-full rounded-[24px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
-                <div className="flex justify-end">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm text-slate-400">
+                    Envoi manuel en lot. Les adresses peuvent être séparées par espace, virgule ou point-virgule.
+                  </p>
                   <button
-                    disabled={sendingProspect || !prospectEmail}
                     type="submit"
-                    className="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition disabled:opacity-50 flex items-center justify-center gap-2 w-full sm:w-auto"
+                    disabled={sendingProspect || !prospectEmail.trim()}
+                    className="rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
                   >
-                    {sendingProspect ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                    {sendingProspect ? "Envoi en cours..." : "Envoyer aux artisans"}
+                    <span className="inline-flex items-center gap-2">
+                      {sendingProspect ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      {sendingProspect ? "Envoi en cours..." : "Lancer la campagne"}
+                    </span>
                   </button>
                 </div>
               </form>
+
               {prospectMessage && (
-                <div className={`mt-4 p-3 rounded-lg text-sm flex items-center gap-2 ${prospectMessage.type === 'success' ? 'bg-green-100 text-green-700 dark:bg-green-900/30' : 'bg-red-100 text-red-700 dark:bg-red-900/30'}`}>
-                  {prospectMessage.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                <div className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${prospectMessage.type === "success" ? "border-emerald-300/16 bg-emerald-500/10 text-emerald-100" : "border-red-300/16 bg-red-500/10 text-red-100"}`}>
                   {prospectMessage.text}
                 </div>
               )}
             </div>
+          </Panel>
 
-            {/* Historique */}
-            <div>
-              <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-                <History className="w-4 h-4 text-purple-600" /> Historique d'envoi
-              </h4>
-              
-              {mails.length === 0 ? (
-                <div className="text-center py-8 text-slate-500 bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
-                  Aucun email de prospection n'a été envoyé pour le moment.
-                </div>
-              ) : (
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                  {mails.map((mail: any) => (
-                    <div key={mail.id} className="flex items-center justify-between p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-slate-900 dark:text-white text-sm">
-                          {mail.email}
-                        </span>
-                        <span className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(mail.createdAt).toLocaleString("fr-FR")} · {mail.source}
-                        </span>
+          <Panel
+            title="Historique d’envoi"
+            description="Journal réel des envois de prospection. Les échecs peuvent être marqués proprement depuis ici."
+          >
+            {mails.length === 0 ? (
+              <div className="rounded-[26px] border border-dashed border-white/12 bg-white/4 px-5 py-10 text-center text-sm text-slate-400">
+                Aucun envoi enregistré pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {mails.slice(0, 12).map((mail) => (
+                  <article
+                    key={mail.id}
+                    className="rounded-[24px] border border-white/8 bg-white/4 p-4"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-white">{mail.email}</p>
+                        <p className="mt-1 text-sm text-slate-400">
+                          {mail.source === "Manual" ? "Manuel" : "Automatique"} • {formatDateTime(mail.createdAt)}
+                        </p>
                       </div>
-                      <div className="flex items-center gap-2">
-                        {mail.status === "Sent" ? (
-                          <>
-                            <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3" /> Envoyé
-                            </span>
-                            <button 
-                              onClick={() => handleMarkAsFailed(mail.id)}
-                              title="Marquer comme Échec (Rebond)"
-                              className="p-1 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition-colors"
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <span className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
-                            <XCircle className="w-3 h-3" /> Échec
-                          </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={`admin-chip ${mail.status === "Sent" ? "bg-emerald-500/12 text-emerald-100 ring-emerald-300/20" : "bg-red-500/12 text-red-100 ring-red-300/20"}`}>
+                          {mail.status === "Sent" ? "Envoyé" : "Échec"}
+                        </span>
+                        {mail.status === "Sent" && (
+                          <button
+                            type="button"
+                            onClick={() => handleMarkAsFailed(mail)}
+                            className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white transition hover:bg-white/10"
+                          >
+                            Marquer en échec
+                          </button>
                         )}
                       </div>
                     </div>
-                  ))}
+                  </article>
+                ))}
+              </div>
+            )}
+          </Panel>
+        </div>
+      </div>
+    );
+  }
+
+  function renderSystem() {
+    const healthyCount = systemStatuses.filter((status) => status.status === "healthy").length;
+
+    return (
+      <div className="space-y-6">
+        <Panel
+          title="Santé de la plateforme"
+          description="États réels des intégrations et de la configuration critique qui soutiennent Zolio."
+          action={
+            <div className="admin-chip bg-white/8 text-slate-200 ring-white/10">
+              {healthyCount}/{systemStatuses.length} briques au vert
+            </div>
+          }
+        >
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {systemStatuses.map((status) => (
+              <article
+                key={status.id}
+                className="rounded-[26px] border border-white/8 bg-white/4 p-5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-white">{status.label}</p>
+                  <span className={`admin-chip ${systemStatusClasses(status.status)}`}>{status.status}</span>
                 </div>
-              )}
-            </div>
+                <p className="mt-4 text-sm leading-6 text-slate-400">{status.detail}</p>
+                {status.meta && <p className="mt-3 text-xs text-slate-500">{status.meta}</p>}
+              </article>
+            ))}
           </div>
-        </CardWrapper>
-      )}
+        </Panel>
 
-      {activeTab === 'automations' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Automatisations & Webhooks (No-Code)</h3>
-            <p className="text-sm text-slate-500">Configurez des règles métiers intelligentes.</p>
-          </div>
-          <div className="p-6">
-             <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-300 dark:border-slate-700">
-               <Zap className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
-               <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-white">Constructeur de Règles Zolio</h3>
-               <p className="text-slate-500 mb-6 max-w-md mx-auto">Connectez Zolio à Zapier ou créez des déclencheurs internes (ex: "Envoyer un SMS quand un devis de +10 000€ est signé").</p>
-               <button className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg font-medium">Ajouter un Webhook</button>
-             </div>
-          </div>
-        </CardWrapper>
-      )}
-
-      {activeTab === 'cms' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Gestion du Contenu (CMS)</h3>
-            <p className="text-sm text-slate-500">Modifiez les textes et modèles de la plateforme.</p>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-                <BookOpen className="w-6 h-6 mb-2 text-purple-600" />
-                <h4 className="font-bold text-slate-900 dark:text-white">Éditeur de Changelog</h4>
-                <p className="text-sm text-slate-500 mt-1">Publier une notification "Nouveautés" sur le dashboard des artisans.</p>
-              </div>
-              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-                <FileText className="w-6 h-6 mb-2 text-purple-600" />
-                <h4 className="font-bold text-slate-900 dark:text-white">Modèles PDF & Mentions</h4>
-                <p className="text-sm text-slate-500 mt-1">Ajouter de nouveaux designs de factures pour les utilisateurs PRO.</p>
-              </div>
-              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer hover:border-purple-500 dark:hover:border-purple-500 transition-colors">
-                <Lock className="w-6 h-6 mb-2 text-purple-600" />
-                <h4 className="font-bold text-slate-900 dark:text-white">Mise à jour CGV/CGU</h4>
-                <p className="text-sm text-slate-500 mt-1">Forcer l'acceptation des nouvelles conditions lors de la connexion.</p>
-              </div>
-            </div>
-          </div>
-        </CardWrapper>
-      )}
-
-      {activeTab === 'support' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Support Client & Communauté</h3>
-            <p className="text-sm text-slate-500">Gérez les tickets et les demandes de vos utilisateurs.</p>
-          </div>
-          <div className="p-6">
-            <div className="flex flex-col gap-4">
-              <div className="p-4 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800/50 rounded-lg flex items-start">
-                 <MessageSquare className="w-5 h-5 text-orange-600 mt-1 mr-3 flex-shrink-0" />
-                 <div>
-                   <h4 className="font-bold text-orange-900 dark:text-orange-300">Ticket #102 - Problème d'impression PDF</h4>
-                   <p className="text-sm text-orange-700 dark:text-orange-400/80 mt-1">"Bonjour, quand j'ai 50 lignes de prestation, la dernière ligne est un peu coupée. Merci." - Jean B.</p>
-                   <div className="mt-3 flex gap-2">
-                     <button className="text-xs px-3 py-1 bg-white dark:bg-slate-800 border border-orange-200 dark:border-orange-800 rounded-md text-orange-800 dark:text-orange-300">Répondre</button>
-                     <button className="text-xs px-3 py-1 bg-white dark:bg-slate-800 border border-orange-200 dark:border-orange-800 rounded-md text-orange-800 dark:text-orange-300">Connecter en tant que Jean</button>
-                   </div>
-                 </div>
-              </div>
-              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30">
-                <h4 className="font-bold mb-2 flex items-center text-slate-900 dark:text-white"><Activity className="w-4 h-4 mr-2" /> Tableau des Votes (Idées)</h4>
-                <p className="text-sm text-slate-500">1. Application iPad native (45 votes)<br/>2. Synchronisation Pennylane (32 votes)</p>
-              </div>
-            </div>
-          </div>
-        </CardWrapper>
-      )}
-
-      {activeTab === 'system' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Santé du Système & Logs</h3>
-            <p className="text-sm text-slate-500">Supervision technique de l'infrastructure.</p>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                <p className="text-sm font-medium text-slate-500">Statut Base de données</p>
-                <div className="flex items-center mt-2 text-green-600 font-bold"><Activity className="w-4 h-4 mr-2" /> En ligne (24ms)</div>
-              </div>
-              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg">
-                <p className="text-sm font-medium text-slate-500">Quotas API Gemini</p>
-                <div className="flex items-center mt-2 text-blue-600 font-bold"><Activity className="w-4 h-4 mr-2" /> Normal (2% utilisés)</div>
-              </div>
-              <div className="p-4 border border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800/50 rounded-lg">
-                <p className="text-sm font-medium text-red-800 dark:text-red-400">Mode Maintenance</p>
-                <button className="mt-2 w-full py-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-bold transition-colors flex justify-center items-center">
-                  <Power className="w-3 h-3 mr-1" /> Activer (Couper l'accès)
-                </button>
-              </div>
-            </div>
-            <div className="p-4 bg-slate-900 text-green-400 font-mono text-xs rounded-lg overflow-hidden h-40">
-              <p>[INFO] Serveur démarré sur port 3000</p>
-              <p>[INFO] Connexion Google Sheets établie</p>
-              <p>[WARN] Rate limit Stripe avertissement (ignoré)</p>
-              <p>[INFO] CRON Job Backup exécuté avec succès</p>
-              <p className="animate-pulse">_</p>
-            </div>
-          </div>
-        </CardWrapper>
-      )}
-
-      {activeTab === 'settings' && (
-        <CardWrapper>
-          <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 className="font-bold text-lg">Paramètres Globaux</h3>
-            <p className="text-sm text-slate-500">Configuration technique de Zolio.</p>
-          </div>
-          <div className="p-6">
-            <form className="space-y-6 max-w-2xl" onSubmit={(e) => e.preventDefault()}>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-900 dark:text-white">Bannière d'Information Système (Vue par tous)</label>
-                <textarea 
-                  className="w-full p-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white"
-                  rows={3}
-                  placeholder="Ex: Maintenance prévue ce soir à 23h..."
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <Panel
+            title="Configuration admin"
+            description="Réglages utiles immédiatement. Les feedbacks passent en inline et en toast, sans alertes natives."
+          >
+            <div className="space-y-6">
+              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+                <label className="block text-sm font-medium text-white">
+                  Bannière d’information globale
+                </label>
+                <textarea
+                  rows={4}
                   value={bannerText}
-                  onChange={(e) => setBannerText(e.target.value)}
+                  onChange={(event) => setBannerText(event.target.value)}
+                  placeholder="Maintenance prévue ce soir à 23h..."
+                  className="mt-3 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
-                <button type="button" onClick={handleSetBanner} className="mt-2 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-lg text-sm font-medium">{bannerText ? 'Déployer la bannière' : 'Supprimer la bannière'}</button>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSetBanner}
+                    disabled={savingBanner}
+                    className="rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:opacity-50"
+                  >
+                    {savingBanner ? "Mise à jour..." : bannerText ? "Déployer la bannière" : "Supprimer la bannière"}
+                  </button>
+                  <span className="text-sm text-slate-400">
+                    {bannerText ? "Message prêt à être publié à tous les utilisateurs." : "Aucun message global actif."}
+                  </span>
+                </div>
               </div>
-              <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
-                <label className="block text-sm font-medium mb-2 text-slate-900 dark:text-white">Clé API IA Custom (Gemini)</label>
-                <input 
+
+              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+                <label className="block text-sm font-medium text-white">
+                  Clé Gemini admin
+                </label>
+                <input
                   type="password"
-                  className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-transparent text-slate-900 dark:text-white"
-                  placeholder="Laisser vide pour utiliser celle du serveur..."
                   value={geminiKey}
-                  onChange={(e) => setGeminiKey(e.target.value)}
+                  onChange={(event) => setGeminiKey(event.target.value)}
+                  placeholder="Laisser vide pour utiliser la clé serveur"
+                  className="mt-3 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
-                <p className="text-xs text-slate-500 mt-1">Surcharge la clé globale uniquement pour les tests administrateur.</p>
-                <button type="button" onClick={handleSaveGeminiKey} className="mt-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors">Sauvegarder la clé</button>
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleSaveGeminiKey}
+                    disabled={savingGeminiKey}
+                    className="rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                  >
+                    {savingGeminiKey ? "Sauvegarde..." : "Sauvegarder la clé"}
+                  </button>
+                  <span className="text-sm text-slate-400">
+                    {geminiKey ? "Surcharge admin active pour les tests." : "La configuration serveur reste prioritaire."}
+                  </span>
+                </div>
               </div>
-              <div className="border-t border-slate-200 dark:border-slate-800 pt-6">
-                 <h4 className="font-bold mb-3 text-slate-900 dark:text-white">Marque Blanche & Customisation</h4>
-                 <div className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800/30">
-                   <div>
-                     <p className="font-medium text-slate-900 dark:text-white">Autoriser les domaines personnalisés</p>
-                     <p className="text-xs text-slate-500">Fonctionnalité Entreprise (devis.client.com)</p>
-                   </div>
-                   <input type="checkbox" className="w-5 h-5 rounded text-purple-600" />
-                 </div>
+            </div>
+          </Panel>
+
+          <Panel
+            title="Capacités non branchées"
+            description="Ce cockpit montre aussi ce qui n’est pas encore implémenté ou pas encore câblé proprement."
+          >
+            <div className="space-y-3">
+              <div className="rounded-[24px] border border-dashed border-white/12 bg-white/4 p-5">
+                <div className="flex items-center gap-3">
+                  <Shield className="h-4 w-4 text-slate-300" />
+                  <div>
+                    <p className="text-sm font-medium text-white">Mode maintenance</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Aucune implémentation backend fiable n’est branchée. On l’affiche comme capacité absente, pas comme bouton fake.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </form>
-          </div>
-        </CardWrapper>
-      )}
+              <div className="rounded-[24px] border border-dashed border-white/12 bg-white/4 p-5">
+                <div className="flex items-center gap-3">
+                  <Bot className="h-4 w-4 text-slate-300" />
+                  <div>
+                    <p className="text-sm font-medium text-white">Logs centralisés</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      Pas de pipeline de logs ou d’observabilité centralisée exposé ici pour le moment.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Panel>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen admin-cockpit">
+      <div className="pointer-events-none absolute inset-0 admin-grid-overlay" />
+
+      <div className="relative flex min-h-screen">
+        <AdminSidebar
+          activeSection={activeSection}
+          currentAdmin={data.currentAdmin}
+          heroStatus={heroStatus}
+          sections={sections}
+          onSelect={setActiveSection}
+        />
+
+        <div className="min-w-0 flex-1">
+          <header className="sticky top-0 z-30 border-b border-white/8 bg-slate-950/55 backdrop-blur-xl">
+            <div className="px-4 py-4 sm:px-6 lg:px-8">
+              <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                <div className="min-w-0">
+                  <p className="text-[11px] uppercase tracking-[0.34em] text-slate-500">Administration</p>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                    <h1 className="text-3xl font-semibold tracking-tight text-white">
+                      {currentSectionMeta?.label}
+                    </h1>
+                    <span className={`admin-chip ${heroStatus.tone === "critical" ? "bg-red-500/12 text-red-100 ring-red-300/18" : heroStatus.tone === "warning" ? "bg-amber-400/12 text-amber-100 ring-amber-300/18" : "bg-emerald-500/12 text-emerald-100 ring-emerald-300/18"}`}>
+                      {heroStatus.label}
+                    </span>
+                  </div>
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
+                    {currentSectionMeta?.description}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">{renderQuickAction()}</div>
+              </div>
+
+              <div className="mt-5 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+                {sections.map((section) => {
+                  const Icon = section.icon;
+                  const isActive = section.id === activeSection;
+                  return (
+                    <button
+                      key={section.id}
+                      type="button"
+                      onClick={() => setActiveSection(section.id)}
+                      className={`shrink-0 rounded-2xl border px-4 py-3 text-sm font-medium transition ${isActive ? "border-violet-300/24 bg-white text-slate-950" : "border-white/10 bg-white/5 text-slate-200"}`}
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Icon className="h-4 w-4" />
+                        {section.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </header>
+
+          <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSection}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.18 }}
+                className="mx-auto max-w-[1540px]"
+              >
+                {activeSection === "pilotage" && renderPilotage()}
+                {activeSection === "utilisateurs" && renderUsers()}
+                {activeSection === "revenus" && renderRevenue()}
+                {activeSection === "acquisition" && renderAcquisition()}
+                {activeSection === "systeme" && renderSystem()}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
+      </div>
+
+      <AdminUserDrawer
+        open={Boolean(selectedUser)}
+        user={selectedUser}
+        pending={loadingUserId === selectedUser?.id}
+        onClose={() => setSelectedUserId(null)}
+        onTogglePro={() => {
+          if (!selectedUser) return;
+          openConfirmation({
+            title: selectedUser.isPro ? "Retirer le statut PRO ?" : "Accorder le statut PRO ?",
+            description: `${selectedUser.name} conservera son compte, mais ses accès premium seront ${selectedUser.isPro ? "retirés" : "activés"}.`,
+            confirmLabel: selectedUser.isPro ? "Retirer PRO" : "Accorder PRO",
+            tone: "brand",
+            action: async () => handleTogglePro(selectedUser),
+          });
+        }}
+        onGrantAdmin={() => {
+          if (!selectedUser) return;
+          openConfirmation({
+            title: selectedUser.publicMetadata.isAdmin ? "Retirer les droits admin ?" : "Promouvoir administrateur ?",
+            description: `${selectedUser.name} ${selectedUser.publicMetadata.isAdmin ? "perdra" : "obtiendra"} l’accès complet au cockpit admin.`,
+            confirmLabel: selectedUser.publicMetadata.isAdmin ? "Retirer les droits" : "Promouvoir admin",
+            tone: "warning",
+            action: async () => handleGrantAdmin(selectedUser),
+          });
+        }}
+        onToggleBan={() => {
+          if (!selectedUser) return;
+          openConfirmation({
+            title: selectedUser.banned ? "Débannir ce compte ?" : "Bannir ce compte ?",
+            description: `${selectedUser.name} ${selectedUser.banned ? "retrouvera l’accès à la plateforme" : "sera bloqué au prochain contrôle d’accès"}.`,
+            confirmLabel: selectedUser.banned ? "Débannir" : "Bannir",
+            tone: "warning",
+            action: async () => handleBanUser(selectedUser),
+          });
+        }}
+        onDelete={() => {
+          if (!selectedUser) return;
+          openConfirmation({
+            title: "Supprimer définitivement ce compte ?",
+            description: `Le compte de ${selectedUser.name} sera supprimé de manière irréversible.`,
+            confirmLabel: "Supprimer le compte",
+            tone: "danger",
+            action: async () => handleDeleteUser(selectedUser),
+          });
+        }}
+      />
+
+      <AdminConfirmDialog
+        dialog={
+          confirmDialog
+            ? {
+                title: confirmDialog.title,
+                description: confirmDialog.description,
+                confirmLabel: confirmDialog.confirmLabel,
+                tone: confirmDialog.tone,
+              }
+            : null
+        }
+        isPending={confirmPending}
+        onClose={() => !confirmPending && setConfirmDialog(null)}
+        onConfirm={handleDialogConfirm}
+      />
     </div>
   );
 }
