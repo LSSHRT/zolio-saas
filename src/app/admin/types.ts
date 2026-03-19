@@ -124,6 +124,7 @@ export interface AdminEnvironmentSnapshot {
   prospectReason: string | null;
   hasMaintenanceMode: boolean;
   hasCentralizedLogs: boolean;
+  dbProvider: string;
   dbLatencyMs: number | null;
 }
 

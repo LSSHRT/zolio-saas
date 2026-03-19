@@ -50,6 +50,96 @@ function serializeProspectMails(
   }));
 }
 
+function detectDatabaseProvider(databaseUrl: string | undefined) {
+  const normalized = databaseUrl?.toLowerCase() || "";
+
+  if (!normalized) return "Base distante";
+  if (normalized.includes("xata")) return "Xata";
+  if (
+    normalized.startsWith("postgres://") ||
+    normalized.startsWith("postgresql://") ||
+    normalized.startsWith("prisma+postgres://")
+  ) {
+    return "Postgres";
+  }
+  if (normalized.startsWith("mysql://")) return "MySQL";
+  if (normalized.startsWith("file:") || normalized.includes("sqlite")) return "SQLite";
+
+  return "Base distante";
+}
+
+function getDatabaseThresholds(provider: string) {
+  if (provider === "Xata") {
+    return {
+      healthyMs: 900,
+      warningMs: 1800,
+    };
+  }
+
+  if (provider === "SQLite") {
+    return {
+      healthyMs: 80,
+      warningMs: 250,
+    };
+  }
+
+  return {
+    healthyMs: 350,
+    warningMs: 1200,
+  };
+}
+
+function getStatusCount(
+  groups: Array<{ status: string; _count: { _all: number } }>,
+  targetStatus: string,
+) {
+  return groups.find((group) => group.status === targetStatus)?._count._all || 0;
+}
+
+function getManualCount(groups: Array<{ source: string; _count: { _all: number } }>) {
+  return groups.reduce((total, group) => {
+    if (!group.source.startsWith("Manual")) {
+      return total;
+    }
+
+    return total + group._count._all;
+  }, 0);
+}
+
+function getDatabaseHealth(provider: string, latencyMs: number | null) {
+  if (latencyMs === null) {
+    return {
+      status: "critical" as const,
+      detail: "Sonde Prisma indisponible",
+      meta: `${provider} • aucune mesure`,
+    };
+  }
+
+  const thresholds = getDatabaseThresholds(provider);
+
+  if (latencyMs <= thresholds.healthyMs) {
+    return {
+      status: "healthy" as const,
+      detail: provider === "Xata" ? "Latence distante maîtrisée" : "Réponse base stable",
+      meta: `${provider} • ${latencyMs} ms`,
+    };
+  }
+
+  if (latencyMs <= thresholds.warningMs) {
+    return {
+      status: "warning" as const,
+      detail: provider === "Xata" ? "Latence distante à surveiller" : "Latence à surveiller",
+      meta: `${provider} • ${latencyMs} ms`,
+    };
+  }
+
+  return {
+    status: "critical" as const,
+    detail: "Latence élevée ou connexion instable",
+    meta: `${provider} • ${latencyMs} ms`,
+  };
+}
+
 export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<AdminDashboardData> {
   const client = await clerkClient();
   const thirtyDaysAgo = new Date();
@@ -60,6 +150,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   const currentGeminiKey = readString(adminUser.publicMetadata?.customGeminiKey);
   const runtimeState = await getAdminRuntimeState();
   const prospectingRuntime = getProspectingRuntime();
+  const dbProvider = detectDatabaseProvider(process.env.DATABASE_URL);
   const currentSystemBanner =
     runtimeState.systemBanner || readString(adminUser.publicMetadata?.systemBanner);
 
@@ -119,28 +210,53 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   let dbLatencyMs: number | null = null;
   let isCronEnabled = true;
   let prospectMails: AdminMailItem[] = [];
+  let sentCount = 0;
+  let failedCount = 0;
+  let queuedCount = 0;
+  let manualCount = 0;
+  let automatedCount = 0;
+  let totalMailCount = 0;
 
   try {
     const dbStartedAt = Date.now();
-    const [cronSetting, rawMails] = await Promise.all([
-      prisma.adminSetting.findUnique({ where: { key: "cron_prospect_enabled" } }),
-      prisma.prospectMail.findMany({ orderBy: { createdAt: "desc" } }),
-    ]);
+    await prisma.$queryRaw`SELECT 1`;
     dbLatencyMs = Date.now() - dbStartedAt;
+  } catch (error) {
+    console.error("admin-dashboard: unable to ping Prisma", error);
+  }
+
+  try {
+    const [cronSetting, totalProspectMails, statusGroups, sourceGroups, rawMails] = await Promise.all([
+      prisma.adminSetting.findUnique({ where: { key: "cron_prospect_enabled" } }),
+      prisma.prospectMail.count(),
+      prisma.prospectMail.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+      }),
+      prisma.prospectMail.groupBy({
+        by: ["source"],
+        _count: { _all: true },
+      }),
+      prisma.prospectMail.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 24,
+      }),
+    ]);
     isCronEnabled = cronSetting?.value !== "false";
+    totalMailCount = totalProspectMails;
+    sentCount = getStatusCount(statusGroups, "Sent");
+    failedCount = getStatusCount(statusGroups, "Failed");
+    queuedCount = getStatusCount(statusGroups, "Queued");
+    manualCount = getManualCount(sourceGroups);
+    automatedCount = Math.max(totalMailCount - manualCount, 0);
     prospectMails = serializeProspectMails(rawMails);
   } catch (error) {
     console.error("admin-dashboard: unable to load Prisma data", error);
   }
 
-  const sentCount = prospectMails.filter((mail) => mail.status === "Sent").length;
-  const failedCount = prospectMails.filter((mail) => mail.status === "Failed").length;
-  const queuedCount = prospectMails.filter((mail) => mail.status === "Queued").length;
   const attemptedCount = sentCount + failedCount;
-  const manualCount = prospectMails.filter((mail) => mail.source.startsWith("Manual")).length;
-  const automatedCount = prospectMails.filter((mail) => !mail.source.startsWith("Manual")).length;
-  const totalMailCount = prospectMails.length;
   const deliveryRate = attemptedCount > 0 ? Math.round((sentCount / attemptedCount) * 100) : 0;
+  const databaseHealth = getDatabaseHealth(dbProvider, dbLatencyMs);
 
   let activeSubscriptions = 0;
   let mrr = 0;
@@ -313,12 +429,9 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     {
       id: "database",
       label: "Base de données",
-      status: dbLatencyMs === null ? "critical" : dbLatencyMs > 150 ? "warning" : "healthy",
-      detail:
-        dbLatencyMs === null
-          ? "Connexion Prisma indisponible"
-          : "Synchronisation opérationnelle",
-      meta: dbLatencyMs === null ? "Aucune mesure" : `${dbLatencyMs} ms`,
+      status: databaseHealth.status,
+      detail: databaseHealth.detail,
+      meta: databaseHealth.meta,
     },
     {
       id: "stripe",
@@ -536,6 +649,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       prospectReason: prospectingRuntime.reason,
       hasMaintenanceMode: true,
       hasCentralizedLogs: true,
+      dbProvider,
       dbLatencyMs,
     },
     auditLogs,

@@ -231,7 +231,6 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     "/api/admin/mail",
     fetcher,
     {
-      fallbackData: data.prospectMails,
       keepPreviousData: true,
       revalidateOnFocus: false,
     },
@@ -257,15 +256,31 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   const mails = Array.isArray(mailsData) ? mailsData : data.prospectMails;
   const isCronEnabled = cronData?.value !== "false";
   const auditLogs = Array.isArray(auditLogsData) ? auditLogsData : data.auditLogs;
-
-  const sentCount = mails.filter((mail) => mail.status === "Sent").length;
-  const failedCount = mails.filter((mail) => mail.status === "Failed").length;
-  const queuedCount = mails.filter((mail) => mail.status === "Queued").length;
+  const liveMailMetrics = Array.isArray(mailsData)
+    ? {
+        sentCount: mailsData.filter((mail) => mail.status === "Sent").length,
+        failedCount: mailsData.filter((mail) => mail.status === "Failed").length,
+        queuedCount: mailsData.filter((mail) => mail.status === "Queued").length,
+        totalMailCount: mailsData.length,
+        manualCount: mailsData.filter((mail) => mail.source.startsWith("Manual")).length,
+      }
+    : null;
+  const sentCount = liveMailMetrics?.sentCount ?? data.acquisition.sentCount;
+  const failedCount = liveMailMetrics?.failedCount ?? data.acquisition.failedCount;
+  const queuedCount = liveMailMetrics?.queuedCount ?? data.acquisition.queuedCount;
   const attemptedCount = sentCount + failedCount;
-  const totalMailCount = mails.length;
-  const manualCount = mails.filter((mail) => mail.source.startsWith("Manual")).length;
-  const automatedCount = mails.filter((mail) => !mail.source.startsWith("Manual")).length;
-  const deliveryRate = attemptedCount > 0 ? Math.round((sentCount / attemptedCount) * 100) : 0;
+  const totalMailCount = liveMailMetrics?.totalMailCount ?? data.acquisition.totalCount;
+  const manualCount = liveMailMetrics?.manualCount ?? data.acquisition.manualCount;
+  const automatedCount =
+    liveMailMetrics !== null
+      ? Math.max(totalMailCount - manualCount, 0)
+      : data.acquisition.automatedCount;
+  const deliveryRate =
+    liveMailMetrics !== null
+      ? attemptedCount > 0
+        ? Math.round((sentCount / attemptedCount) * 100)
+        : 0
+      : data.acquisition.deliveryRate;
 
   const baseAlerts = data.alerts.filter(
     (alert) =>
@@ -974,9 +989,13 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
               <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Base de données</p>
                 <p className="mt-4 text-3xl font-semibold text-white">
-                  {data.environment.dbLatencyMs === null ? "N/A" : `${data.environment.dbLatencyMs} ms`}
+                  {data.environment.dbLatencyMs === null
+                    ? "N/A"
+                    : `${data.environment.dbProvider} • ${data.environment.dbLatencyMs} ms`}
                 </p>
-                <p className="mt-2 text-sm text-slate-300">Dernière mesure de disponibilité Prisma.</p>
+                <p className="mt-2 text-sm text-slate-300">
+                  Sonde Prisma légère, séparée du chargement du cockpit.
+                </p>
               </div>
               <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Robot acquisition</p>
