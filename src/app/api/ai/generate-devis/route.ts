@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { internalServerError } from "@/lib/http";
 
 export async function POST(req: NextRequest) {
   try {
@@ -92,7 +93,6 @@ Exemple:
 
     return NextResponse.json({ lignes });
   } catch (error) {
-    console.error("Erreur IA:", error);
-    return NextResponse.json({ error: "Erreur lors de la génération", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("ai-generate-devis", error, "Erreur lors de la génération");
   }
 }

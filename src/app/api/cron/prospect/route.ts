@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { currentUser } from "@clerk/nextjs/server";
 import { sendProspectEmail } from "@/lib/sendEmail";
+import { isAdminUser } from "@/lib/admin";
+import { internalServerError, jsonError } from "@/lib/http";
 
 const prisma = new PrismaClient();
-const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "2663781be1b12bdd7aeefdd22d5103a094ceb6b7";
+const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "";
 
 export const maxDuration = 60; // Autorise la fonction à tourner jusqu'à 60 secondes sur Vercel
 export const dynamic = 'force-dynamic';
@@ -51,6 +54,8 @@ async function findEmailViaSearch() {
 
 // Fonction pour trouver des domaines via recherche, puis utiliser l'API Hunter
 async function findEmailsViaHunter() {
+  if (!HUNTER_API_KEY) return [];
+
   const metiers = ["Plomberie", "Électricité", "Menuiserie", "Peinture bâtiment", "Maçonnerie", "Chauffagiste"];
   const villes = ["Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux", "Nantes", "Lille"];
   
@@ -99,8 +104,25 @@ async function findEmailsViaHunter() {
   return foundEmails;
 }
 
+async function isAuthorizedRequest(req: Request) {
+  const cronSecret = process.env.CRON_SECRET;
+  const authorization = req.headers.get("authorization");
+  const expectedAuthorization = cronSecret ? `Bearer ${cronSecret}` : null;
+
+  if (expectedAuthorization && authorization === expectedAuthorization) {
+    return true;
+  }
+
+  const user = await currentUser();
+  return isAdminUser(user);
+}
+
 export async function GET(req: Request) {
   try {
+    if (!(await isAuthorizedRequest(req))) {
+      return jsonError("Non autorisé", 403);
+    }
+
     // Vérifier si le cron est activé dans les paramètres
     const cronSetting = await prisma.adminSetting.findUnique({
       where: { key: "cron_prospect_enabled" }
@@ -163,7 +185,7 @@ export async function GET(req: Request) {
             
             emailsEnvoyes.push(email);
           } catch (emailErr) {
-            console.error(`Erreur d'envoi pour l'email ${email}:`, emailErr);
+            console.error("Erreur d'envoi d'un email de prospection:", emailErr);
             // On enregistre l'échec pour ne pas réessayer cet email défectueux en boucle
             await prisma.prospectMail.create({
               data: {
@@ -187,7 +209,6 @@ export async function GET(req: Request) {
     });
 
   } catch (error) {
-    console.error("Erreur Cron Prospection:", error);
-    return NextResponse.json({ message: "Erreur lors de l'envoi", error: String(error) }, { status: 500 });
+    return internalServerError("cron-prospect", error, "Erreur lors de l'envoi");
   }
 }

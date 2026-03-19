@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
+import { internalServerError } from "@/lib/http";
 
 // Initialisation de Stripe
 function getStripe() {
@@ -61,7 +62,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-    console.error("Erreur Customer Portal:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return internalServerError("stripe-portal", error, "Impossible d'ouvrir le portail client");
   }
 }

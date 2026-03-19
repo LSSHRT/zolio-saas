@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { internalServerError } from "@/lib/http";
 
 export async function GET() {
   try {
@@ -24,8 +25,7 @@ export async function GET() {
 
     return NextResponse.json(mapped);
   } catch (error) {
-    console.error("Erreur GET prestations:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les prestations", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("prestations-get", error, "Impossible de récupérer les prestations");
   }
 }
 
@@ -73,7 +73,6 @@ export async function POST(request: Request) {
       stock: prestation.stock || 0
     });
   } catch (error) {
-    console.error("Erreur POST prestation:", error);
-    return NextResponse.json({ error: "Impossible d'ajouter la prestation", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("prestations-post", error, "Impossible d'ajouter la prestation");
   }
 }

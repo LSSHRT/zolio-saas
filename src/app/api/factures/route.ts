@@ -1,8 +1,10 @@
+import { NextResponse } from "next/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
-import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { getCompanyProfile } from "@/lib/company";
+import { internalServerError } from "@/lib/http";
 
 export async function POST(request: Request) {
   try {
@@ -10,29 +12,15 @@ export async function POST(request: Request) {
     const user = await currentUser();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const meta = (user?.unsafeMetadata as any) || (user?.publicMetadata as any) || {};
-    const entrepriseName = meta.companyName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise");
-    const entrepriseEmail = user?.emailAddresses?.[0]?.emailAddress || "";
-    const entreprisePhone = meta.companyPhone || "";
-    const entrepriseAddress = meta.companyAddress || "";
-    const entrepriseSiret = meta.companySiret || "";
-    const entrepriseColor = meta.companyColor || "";
-    const entrepriseLogo = meta.companyLogo || "";
-    const entrepriseIban = meta.companyIban || "";
-    const entrepriseBic = meta.companyBic || "";
-    const entrepriseLegal = meta.companyLegal || "";
-    const entrepriseStatut = meta.companyStatut || "";
-    const entrepriseAssurance = meta.companyAssurance || "";
-
+    const entreprise = getCompanyProfile(user);
     const body = await request.json();
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
 
-    // Generate numero
     const year = new Date().getFullYear();
     const count = await prisma.facture.count({
-      where: { userId, numero: { startsWith: `FAC-${year}` } }
+      where: { userId, numero: { startsWith: `FAC-${year}` } },
     });
-    
+
     const numeroFacture = `FAC-${year}-${String(count + 1).padStart(3, "0")}`;
     const date = new Date();
 
@@ -48,18 +36,29 @@ export async function POST(request: Request) {
         statut: "Émise",
         devisRef: devisNumero || null,
         date,
-      }
+      },
     });
 
     const formattedDate = date.toLocaleDateString("fr-FR");
-
-    // Generate PDF
     const pdfBuffer = await generateFacturePDF({
       numeroDevis: numeroFacture,
       date: formattedDate,
       client,
       isPro: user?.publicMetadata?.isPro === true,
-      entreprise: { nom: entrepriseName, email: entrepriseEmail, telephone: entreprisePhone, adresse: entrepriseAddress, siret: entrepriseSiret, color: entrepriseColor, logo: entrepriseLogo, iban: entrepriseIban, bic: entrepriseBic, legal: entrepriseLegal, statut: entrepriseStatut, assurance: entrepriseAssurance },
+      entreprise: {
+        nom: entreprise.nom,
+        email: entreprise.email,
+        telephone: entreprise.telephone,
+        adresse: entreprise.adresse,
+        siret: entreprise.siret,
+        color: entreprise.color,
+        logo: entreprise.logo,
+        iban: entreprise.iban,
+        bic: entreprise.bic,
+        legal: entreprise.legal,
+        statut: entreprise.statut,
+        assurance: entreprise.assurance,
+      },
       lignes,
       totalHT,
       tva,
@@ -88,8 +87,7 @@ export async function POST(request: Request) {
       emailSent,
     });
   } catch (error) {
-    console.error("Erreur POST facture:", error);
-    return NextResponse.json({ error: "Impossible de créer la facture", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("factures-post", error, "Impossible de créer la facture");
   }
 }
 
@@ -100,24 +98,27 @@ export async function GET() {
 
     const facturesDb = await prisma.facture.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
 
-    const factures = facturesDb.map(f => ({
-      numero: f.numero,
-      date: f.date.toLocaleDateString("fr-FR"),
-      nomClient: f.nomClient,
-      emailClient: f.emailClient || "",
-      totalHT: f.totalHT,
-      tva: f.tva,
-      totalTTC: f.totalTTC,
-      statut: f.statut,
-      devisRef: f.devisRef || "",
+    const factures = facturesDb.map((facture) => ({
+      numero: facture.numero,
+      date: facture.date.toLocaleDateString("fr-FR"),
+      nomClient: facture.nomClient,
+      emailClient: facture.emailClient || "",
+      totalHT: facture.totalHT,
+      tva: facture.tva,
+      totalTTC: facture.totalTTC,
+      statut: facture.statut,
+      devisRef: facture.devisRef || "",
     }));
 
     return NextResponse.json(factures);
   } catch (error) {
-    console.error("Erreur GET factures:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les factures", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError(
+      "factures-get",
+      error,
+      "Impossible de récupérer les factures",
+    );
   }
 }

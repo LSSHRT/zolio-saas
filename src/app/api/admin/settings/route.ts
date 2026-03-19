@@ -1,21 +1,20 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import { auth } from "@clerk/nextjs/server";
+import { requireAdminUser } from "@/lib/admin";
+import { internalServerError, jsonError } from "@/lib/http";
 
 const prisma = new PrismaClient();
+const ALLOWED_ADMIN_SETTINGS = new Set(["cron_prospect_enabled"]);
 
 export async function GET(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Non autorisé", { status: 401 });
-    }
+    await requireAdminUser();
 
     const { searchParams } = new URL(req.url);
     const key = searchParams.get("key");
 
-    if (!key) {
-      return new NextResponse("Clé manquante", { status: 400 });
+    if (!key || !ALLOWED_ADMIN_SETTINGS.has(key)) {
+      return jsonError("Clé invalide", 400);
     }
 
     const setting = await prisma.adminSetting.findUnique({
@@ -24,23 +23,22 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ value: setting ? setting.value : null });
   } catch (error) {
-    console.error("Erreur Settings GET:", error);
-    return new NextResponse("Erreur serveur", { status: 500 });
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return jsonError("Non autorisé", 403);
+    }
+    return internalServerError("admin-settings-get", error);
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return new NextResponse("Non autorisé", { status: 401 });
-    }
+    await requireAdminUser();
 
     const body = await req.json();
     const { key, value } = body;
 
-    if (!key || value === undefined) {
-      return new NextResponse("Clé ou valeur manquante", { status: 400 });
+    if (!key || value === undefined || !ALLOWED_ADMIN_SETTINGS.has(String(key))) {
+      return jsonError("Clé ou valeur invalide", 400);
     }
 
     const setting = await prisma.adminSetting.upsert({
@@ -51,7 +49,9 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, setting });
   } catch (error) {
-    console.error("Erreur Settings POST:", error);
-    return new NextResponse("Erreur serveur", { status: 500 });
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return jsonError("Non autorisé", 403);
+    }
+    return internalServerError("admin-settings-post", error);
   }
 }

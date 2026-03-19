@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { internalServerError } from "@/lib/http";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,8 +26,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur DELETE client:", error);
-    return NextResponse.json({ error: "Impossible de supprimer le client", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("client-delete", error, "Impossible de supprimer le client");
   }
 }
 
@@ -67,7 +67,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       dateAjout: updatedClient.createdAt.toLocaleDateString("fr-FR")
     });
   } catch (error) {
-    console.error("Erreur PUT client:", error);
-    return NextResponse.json({ error: "Impossible de modifier le client", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("client-put", error, "Impossible de modifier le client");
   }
 }

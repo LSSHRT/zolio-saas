@@ -11,7 +11,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   const unwrappedParams = use(params);
   const numero = unwrappedParams.numero;
   const searchParams = useSearchParams();
-  const userId = searchParams.get("u");
+  const token = searchParams.get("token");
   
   const [devis, setDevis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +22,13 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   const sigCanvas = useRef<any>(null);
 
   useEffect(() => {
-    fetch(`/api/public/devis/${numero}${userId ? `?u=${userId}` : ''}`)
+    if (!token) {
+      setError("Lien invalide ou expiré");
+      setLoading(false);
+      return;
+    }
+
+    fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(token)}`)
       .then(res => res.json())
       .then(data => {
         if (data.error) setError(data.error);
@@ -30,7 +36,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
       })
       .catch(() => setError("Erreur de connexion"))
       .finally(() => setLoading(false));
-  }, [numero]);
+  }, [numero, token]);
 
   const clear = () => {
     sigCanvas.current?.clear();
@@ -43,8 +49,12 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
     }
     setSigning(true);
     try {
+      if (!token) {
+        alert("Lien invalide ou expiré");
+        return;
+      }
       const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
-      const res = await fetch(`/api/public/devis/${numero}${userId ? `?u=${userId}` : ''}`, {
+      const res = await fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(token)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signatureBase64 }),
@@ -82,7 +92,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
     );
   }
 
-  if (success || devis.statut === "Accepté" || devis.signatureBase64) {
+  if (success || devis.statut === "Accepté" || devis.signature) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 p-6 text-center">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">

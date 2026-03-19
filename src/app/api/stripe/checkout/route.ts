@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { internalServerError } from "@/lib/http";
 
 // Initialisation de Stripe avec la clé secrète (lazy pour éviter le crash au build)
 function getStripe() {
@@ -67,7 +68,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-    console.error("Erreur Stripe:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return internalServerError("stripe-checkout", error, "Impossible de créer la session de paiement");
   }
 }

@@ -1,28 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendProspectEmail } from "@/lib/sendEmail";
-import { auth, currentUser } from "@clerk/nextjs/server";
-
-// Optionnel: vérifier si l'utilisateur est admin
-// Pour l'instant, on vérifie juste qu'il est connecté. On pourrait ajouter une vérification d'email
-const ADMIN_EMAILS = ["admin@zolio.site", "valentindelaunay@gmail.com"]; // Ajustez selon les besoins réels
-
-async function isAdmin() {
-  const { userId } = await auth();
-  if (!userId) return false;
-  
-  const user = await currentUser();
-  const userEmail = user?.emailAddresses[0]?.emailAddress;
-  
-  // Pour le test on autorise tout utilisateur authentifié ou on peut restreindre
-  // return userEmail && ADMIN_EMAILS.includes(userEmail);
-  return true; // À sécuriser si nécessaire en prod
-}
+import { requireAdminUser } from "@/lib/admin";
+import { internalServerError, jsonError } from "@/lib/http";
 
 export async function GET() {
   try {
-    const isAuthorized = await isAdmin();
-    if (!isAuthorized) return new NextResponse("Non autorisé", { status: 401 });
+    await requireAdminUser();
 
     const mails = await prisma.prospectMail.findMany({
       orderBy: { createdAt: 'desc' }
@@ -30,21 +14,22 @@ export async function GET() {
 
     return NextResponse.json(mails);
   } catch (error) {
-    console.error("Erreur GET mails admin:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les emails" }, { status: 500 });
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return jsonError("Non autorisé", 403);
+    }
+    return internalServerError("admin-mail-get", error, "Impossible de récupérer les emails");
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const isAuthorized = await isAdmin();
-    if (!isAuthorized) return new NextResponse("Non autorisé", { status: 401 });
+    await requireAdminUser();
 
     const body = await request.json();
-    const { email } = body;
+    const email = typeof body.email === "string" ? body.email.trim() : "";
 
     if (!email) {
-      return NextResponse.json({ error: "L'adresse email est requise" }, { status: 400 });
+      return jsonError("L'adresse email est requise", 400);
     }
 
     try {
@@ -73,7 +58,9 @@ export async function POST(request: Request) {
       return NextResponse.json(failed, { status: 500, statusText: "Erreur d'envoi" });
     }
   } catch (error) {
-    console.error("Erreur POST admin mail:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    if (error instanceof Error && error.message === "FORBIDDEN") {
+      return jsonError("Non autorisé", 403);
+    }
+    return internalServerError("admin-mail-post", error);
   }
 }

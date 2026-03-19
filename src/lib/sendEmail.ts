@@ -1,5 +1,14 @@
 import nodemailer from "nodemailer";
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 /**
  * Envoie un devis par email au client avec le PDF en pièce jointe.
  * 
@@ -14,6 +23,10 @@ export async function sendDevisEmail(
   totalTTC: string,
   pdfBuffer: Buffer
 ) {
+  const safeName = escapeHtml(toName);
+  const safeNumero = escapeHtml(numeroDevis);
+  const safeTotal = escapeHtml(totalTTC);
+
   // Configuration du transporteur SMTP
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -36,17 +49,17 @@ export async function sendDevisEmail(
           <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Devis professionnel</p>
         </div>
         <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
-          <p style="color:#334155;font-size:16px;">Bonjour <strong>${toName}</strong>,</p>
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${safeName}</strong>,</p>
           <p style="color:#64748b;font-size:14px;line-height:1.6;">
-            Veuillez trouver ci-joint votre devis <strong>${numeroDevis}</strong> 
-            d'un montant de <strong>${totalTTC}€ TTC</strong>.
+            Veuillez trouver ci-joint votre devis <strong>${safeNumero}</strong> 
+            d'un montant de <strong>${safeTotal}€ TTC</strong>.
           </p>
           <p style="color:#64748b;font-size:14px;line-height:1.6;">
             Ce devis est valable 30 jours. N'hésitez pas à nous contacter pour toute question.
           </p>
           <div style="text-align:center;margin:25px 0;">
             <span style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:12px 30px;border-radius:10px;font-weight:bold;font-size:14px;display:inline-block;">
-              ${totalTTC}€ TTC
+              ${safeTotal}€ TTC
             </span>
           </div>
           <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:20px;">
@@ -77,6 +90,9 @@ export async function sendDevisSignedEmail(
   totalTTC: string,
   pdfBuffer: Buffer
 ) {
+  const safeName = escapeHtml(toName);
+  const safeNumero = escapeHtml(numeroDevis);
+
   // Configuration du transporteur SMTP
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "smtp.gmail.com",
@@ -99,9 +115,9 @@ export async function sendDevisSignedEmail(
           <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Devis validé et signé</p>
         </div>
         <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
-          <p style="color:#334155;font-size:16px;">Bonjour <strong>${toName}</strong>,</p>
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${safeName}</strong>,</p>
           <p style="color:#64748b;font-size:14px;line-height:1.6;">
-            Nous vous confirmons la bonne réception de votre signature pour le devis <strong>${numeroDevis}</strong>.
+            Nous vous confirmons la bonne réception de votre signature pour le devis <strong>${safeNumero}</strong>.
           </p>
           <p style="color:#64748b;font-size:14px;line-height:1.6;">
             Vous trouverez ci-joint un exemplaire PDF de votre devis portant la mention "Bon pour accord" ainsi que votre signature.

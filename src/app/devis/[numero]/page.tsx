@@ -6,7 +6,6 @@ const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: f
 import { motion } from "framer-motion";
 import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
 
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; isOptional?: boolean; }
 
@@ -37,7 +36,6 @@ interface Prestation { id: string; categorie: string; nom: string; unite: string
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
   const { numero } = use(params);
-  const { userId } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [devisInfo, setDevisInfo] = useState<any>(null);
@@ -215,7 +213,11 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   };
 
   const handleCopySignLink = () => {
-    const link = `${window.location.origin}/signer/${numero}${userId ? `?u=${userId}` : ''}`;
+    if (!devisInfo?.signingToken) {
+      alert("Impossible de générer le lien de signature.");
+      return;
+    }
+    const link = `${window.location.origin}/signer/${numero}?token=${encodeURIComponent(devisInfo.signingToken)}`;
     navigator.clipboard.writeText(link);
     alert("Lien de signature copié ! Envoyez-le à votre client.");
   };
@@ -227,8 +229,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     }
     setSignLoading(true);
     try {
+      if (!devisInfo?.signingToken) {
+        alert("Lien de signature indisponible.");
+        return;
+      }
       const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
-      const res = await fetch(`/api/public/devis/${numero}${userId ? `?u=${userId}` : ''}`, {
+      const res = await fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(devisInfo.signingToken)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signatureBase64 }),

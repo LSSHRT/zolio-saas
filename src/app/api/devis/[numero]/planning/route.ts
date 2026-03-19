@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { internalServerError } from "@/lib/http";
 
 export async function PUT(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
@@ -21,7 +22,6 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur PUT planning devis:", error);
-    return NextResponse.json({ error: "Impossible de sauvegarder le planning", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("devis-planning", error, "Impossible de sauvegarder le planning");
   }
 }

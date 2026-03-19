@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { internalServerError } from "@/lib/http";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
@@ -24,8 +25,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
 
     return NextResponse.json({ success: true, statut: updated.statut });
   } catch (error) {
-    console.error("Erreur PATCH facture:", error);
-    return NextResponse.json({ error: "Impossible de mettre à jour la facture" }, { status: 500 });
+    return internalServerError("facture-patch", error, "Impossible de mettre à jour la facture");
   }
 }
 
@@ -51,7 +51,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ n
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur DELETE facture:", error);
-    return NextResponse.json({ error: "Impossible de supprimer la facture", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("facture-delete", error, "Impossible de supprimer la facture");
   }
 }

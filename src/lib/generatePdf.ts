@@ -1,15 +1,11 @@
 import { jsPDF } from "jspdf";
+import { fetchRemoteImageAsDataUrl } from "@/lib/remote-image";
 
 
 async function fetchImageAsBase64(url: string): Promise<string | null> {
   if (!url) return null;
   try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const contentType = response.headers.get('content-type') || 'image/jpeg';
-    return `data:${contentType};base64,${buffer.toString('base64')}`;
+    return await fetchRemoteImageAsDataUrl(url);
   } catch (error) {
     console.error("Erreur de récupération du logo:", error);
     return null;

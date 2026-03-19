@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { internalServerError } from "@/lib/http";
 
 export async function PATCH(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
@@ -63,7 +64,6 @@ export async function PATCH(request: Request, context: { params: Promise<{ numer
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur PUT statut devis:", error);
-    return NextResponse.json({ error: "Impossible de modifier le statut", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("devis-statut", error, "Impossible de modifier le statut");
   }
 }

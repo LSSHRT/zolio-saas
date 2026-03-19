@@ -2,18 +2,17 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { ShieldAlert } from "lucide-react";
 import AdminClient from "./AdminClient";
+import { getAdminEmail, isAdminUser } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
   const user = await currentUser();
-  const userEmail = user?.emailAddresses[0]?.emailAddress;
   
   // Security check
-  const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-  const isAdminRole = user?.publicMetadata?.isAdmin === true;
+  const adminEmail = getAdminEmail();
   
-  if (!user || (userEmail !== adminEmail && !isAdminRole)) {
+  if (!isAdminUser(user)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 font-sans">
         <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-slate-200 dark:border-slate-800">

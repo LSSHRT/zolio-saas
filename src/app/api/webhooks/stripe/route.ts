@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { clerkClient } from "@clerk/nextjs/server";
+import { internalServerError } from "@/lib/http";
 
 // Stripe webhook endpoint
 export async function POST(req: Request) {
@@ -25,7 +26,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, signature, secret);
   } catch (error: any) {
     console.error("Webhook signature verification failed:", error.message);
-    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 });
+    return new NextResponse("Webhook signature verification failed", { status: 400 });
   }
 
   try {
@@ -75,7 +76,6 @@ export async function POST(req: Request) {
 
     return new NextResponse(null, { status: 200 });
   } catch (error) {
-    console.error("Erreur serveur webhook:", error);
-    return new NextResponse("Internal webhook error", { status: 500 });
+    return internalServerError("stripe-webhook", error, "Internal webhook error");
   }
 }

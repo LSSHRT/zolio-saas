@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { internalServerError } from "@/lib/http";
 
 export async function GET() {
   try {
@@ -23,8 +24,7 @@ export async function GET() {
 
     return NextResponse.json(mappedClients);
   } catch (error) {
-    console.error("Erreur GET clients:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les clients", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("clients-get", error, "Impossible de récupérer les clients");
   }
 }
 
@@ -61,7 +61,6 @@ export async function POST(request: Request) {
       dateAjout: client.createdAt.toLocaleDateString("fr-FR")
     });
   } catch (error: any) {
-    console.error("Erreur POST client:", error);
-    return NextResponse.json({ error: "Impossible d'ajouter le client", details: error.message || String(error) }, { status: 500 });
+    return internalServerError("clients-post", error, "Impossible d'ajouter le client");
   }
 }

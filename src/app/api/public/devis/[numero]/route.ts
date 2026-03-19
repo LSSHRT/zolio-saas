@@ -1,70 +1,84 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
+import { clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { sendDevisSignedEmail } from "@/lib/sendEmail";
 import { generateDevisPDF } from "@/lib/generatePdf";
-import { clerkClient } from "@clerk/nextjs/server";
+import { getCompanyProfile } from "@/lib/company";
+import { internalServerError, jsonError } from "@/lib/http";
+import { verifyPublicDevisToken } from "@/lib/public-devis-token";
+
+function getValidatedToken(request: Request, numero: string) {
+  const token = new URL(request.url).searchParams.get("token");
+
+  if (!token) {
+    throw new Error("MISSING_TOKEN");
+  }
+
+  return verifyPublicDevisToken(token, numero);
+}
 
 export async function GET(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("u");
-
-    if (!userId) return new NextResponse("User ID manquant", { status: 400 });
+    const { userId } = getValidatedToken(request, numero);
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
-      include: { client: true }
+      include: { client: true },
     });
 
-    if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
+    if (!devis) {
+      return jsonError("Document introuvable", 404);
+    }
 
-    const clientData = await clerkClient();
-    const user = await clientData.users.getUser(userId);
-
-    const lignes = typeof devis.lignes === 'string' ? JSON.parse(devis.lignes) : (devis.lignes || []);
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const entreprise = getCompanyProfile(user);
+    const lignes =
+      typeof devis.lignes === "string" ? JSON.parse(devis.lignes) : (devis.lignes || []);
     const remiseGlobale = devis.remise || 0;
     const tvaGlobale = devis.tva || 0;
-    const totalTTC = lignes.filter((l: any) => !l.isOptional).reduce((sum: number, l: any) => {
-      const ligneTva = parseFloat(l.tva || tvaGlobale.toString()) || 0;
-      const ligneTotal = l.totalLigne || (l.quantite * l.prixUnitaire) || 0;
-      return sum + (ligneTotal * (1 + ligneTva / 100));
-    }, 0) * (1 - remiseGlobale / 100);
+    const totalTTC = lignes
+      .filter((line: any) => !line.isOptional)
+      .reduce((sum: number, line: any) => {
+        const ligneTva = Number.parseFloat(line.tva || tvaGlobale.toString()) || 0;
+        const ligneTotal = line.totalLigne || line.quantite * line.prixUnitaire || 0;
+        return sum + ligneTotal * (1 + ligneTva / 100);
+      }, 0) * (1 - remiseGlobale / 100);
 
-    const devisData = {
+    return NextResponse.json({
       numero: devis.numero,
-      client: devis.client ? devis.client.nom : "",
-      nomClient: devis.client ? devis.client.nom : "",
+      nomClient: devis.client?.nom || "",
       date: devis.date.toLocaleDateString("fr-FR"),
       statut: devis.statut,
-      lignes,
-      remise: remiseGlobale,
-      acompte: devis.acompte,
-      tva: tvaGlobale,
       totalTTC: totalTTC.toFixed(2),
       signature: devis.signature || "",
-      photos: typeof devis.photos === 'string' ? JSON.parse(devis.photos) : (devis.photos || []),
-      entrepriseInfo: {
-        nom: user.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise",
-        email: user.emailAddresses[0]?.emailAddress || "",
-        telephone: user.unsafeMetadata?.telephone as string || "",
-        adresse: user.unsafeMetadata?.adresse as string || "",
-        siret: user.unsafeMetadata?.siret as string || "",
-        rib: user.unsafeMetadata?.rib as string || "",
-        color: user.unsafeMetadata?.color as string || "#6b21a8",
-        logoUrl: user.unsafeMetadata?.logoUrl as string || "",
-        statutJuridique: user.unsafeMetadata?.statutJuridique as string || "",
-        assurance: user.unsafeMetadata?.assurance as string || "",
-        mentions: user.unsafeMetadata?.mentions as string || ""
-      }
-    };
-
-    return NextResponse.json(devisData);
+      entreprise: {
+        nom: entreprise.nom,
+        color: entreprise.color,
+        logo: entreprise.logo,
+      },
+    });
   } catch (error) {
-    console.error("Erreur GET public devis:", error);
-    return NextResponse.json({ error: "Erreur serveur", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    if (error instanceof Error) {
+      if (error.message === "MISSING_TOKEN" || error.message === "Token expired") {
+        return jsonError("Lien invalide ou expiré", 403);
+      }
+
+      if (
+        error.message === "Invalid token format" ||
+        error.message === "Invalid token signature" ||
+        error.message === "Token numero mismatch" ||
+        error.message === "Invalid token payload"
+      ) {
+        return jsonError("Lien invalide ou expiré", 403);
+      }
+    }
+
+    return internalServerError("public-devis-get", error);
   }
 }
 
@@ -72,63 +86,58 @@ export async function POST(request: Request, context: { params: Promise<{ numero
   try {
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("u");
-
-    if (!userId) return new NextResponse("User ID manquant", { status: 400 });
-
+    const { userId } = getValidatedToken(request, numero);
     const body = await request.json();
     const signature = body.signatureBase64 || body.signature;
 
+    if (typeof signature !== "string" || !signature.startsWith("data:image/")) {
+      return jsonError("Signature invalide", 400);
+    }
+
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
-      include: { client: true }
+      include: { client: true },
     });
 
-    if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
+    if (!devis) {
+      return jsonError("Document introuvable", 404);
+    }
+
+    if (devis.statut === "Accepté" || devis.signature) {
+      return jsonError("Ce devis a déjà été signé", 409);
+    }
 
     await prisma.devis.updateMany({
       where: { numero, userId },
       data: {
         statut: "Accepté",
-        signature: signature || ""
-      }
+        signature,
+      },
     });
 
-    // Send email with PDF
     try {
-      const clientData = await clerkClient();
-      const user = await clientData.users.getUser(userId);
+      const client = await clerkClient();
+      const user = await client.users.getUser(userId);
+      const entreprise = getCompanyProfile(user);
       const emailClient = devis.client?.email;
-      
-      if (emailClient && signature) {
-        const entrepriseInfo = {
-          nom: user.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "Mon Entreprise",
-          email: user.emailAddresses[0]?.emailAddress || "",
-          telephone: user.unsafeMetadata?.telephone as string || "",
-          adresse: user.unsafeMetadata?.adresse as string || "",
-          siret: user.unsafeMetadata?.siret as string || "",
-          rib: user.unsafeMetadata?.rib as string || "",
-          color: user.unsafeMetadata?.color as string || "#6b21a8",
-          logoUrl: user.unsafeMetadata?.logoUrl as string || "",
-          statutJuridique: user.unsafeMetadata?.statutJuridique as string || "",
-          assurance: user.unsafeMetadata?.assurance as string || "",
-          mentions: user.unsafeMetadata?.mentions as string || ""
-        };
 
-        const lignes = typeof devis.lignes === 'string' ? JSON.parse(devis.lignes) : devis.lignes;
+      if (emailClient) {
+        const lignes =
+          typeof devis.lignes === "string" ? JSON.parse(devis.lignes) : devis.lignes;
         const tvaGlobale = devis.tva?.toString() || "0";
         const remiseGlobale = devis.remise || 0;
-        
-        const totalHTBase = (lignes as any[]).filter(l => !l.isOptional).reduce((s, l) => s + (l.totalLigne || (l.quantite * l.prixUnitaire)), 0);
+        const totalHTBase = (lignes as any[])
+          .filter((line) => !line.isOptional)
+          .reduce((sum, line) => sum + (line.totalLigne || line.quantite * line.prixUnitaire), 0);
         const montantRemise = totalHTBase * remiseGlobale / 100;
         const totalHT = totalHTBase - montantRemise;
-        
-        const totalTTC = (lignes as any[]).filter(l => !l.isOptional).reduce((sum, l) => {
-          const tva = parseFloat(l.tva || tvaGlobale) || 0;
-          const ligneTotal = l.totalLigne || (l.quantite * l.prixUnitaire);
-          return sum + (ligneTotal * (1 + tva / 100));
-        }, 0) * (1 - remiseGlobale / 100);
+        const totalTTC = (lignes as any[])
+          .filter((line) => !line.isOptional)
+          .reduce((sum, line) => {
+            const ligneTva = Number.parseFloat(line.tva || tvaGlobale) || 0;
+            const ligneTotal = line.totalLigne || line.quantite * line.prixUnitaire;
+            return sum + ligneTotal * (1 + ligneTva / 100);
+          }, 0) * (1 - remiseGlobale / 100);
 
         const pdfBuffer = await generateDevisPDF({
           numeroDevis: devis.numero,
@@ -139,26 +148,61 @@ export async function POST(request: Request, context: { params: Promise<{ numero
             telephone: devis.client?.telephone || "",
             adresse: devis.client?.adresse || "",
           },
-          entreprise: entrepriseInfo,
+          entreprise: {
+            nom: entreprise.nom,
+            email: entreprise.email,
+            telephone: entreprise.telephone,
+            adresse: entreprise.adresse,
+            siret: entreprise.siret,
+            color: entreprise.color,
+            logo: entreprise.logo,
+            iban: entreprise.iban,
+            bic: entreprise.bic,
+            legal: entreprise.legal,
+            statut: entreprise.statut,
+            assurance: entreprise.assurance,
+            cgv: entreprise.cgv,
+          },
           lignes,
           totalHT: totalHT.toFixed(2),
           tva: tvaGlobale,
           totalTTC: totalTTC.toFixed(2),
           acompte: devis.acompte?.toString() || "",
-          remise: remiseGlobale.toString() || "",
+          remise: remiseGlobale.toString(),
           statut: "Accepté",
           signatureBase64: signature,
-          photos: typeof devis.photos === 'string' ? JSON.parse(devis.photos) : (devis.photos || []),
+          photos: typeof devis.photos === "string" ? JSON.parse(devis.photos) : (devis.photos || []),
         });
-        await sendDevisSignedEmail(emailClient, entrepriseInfo.nom, devis.numero, totalTTC.toFixed(2), pdfBuffer);
+
+        await sendDevisSignedEmail(
+          emailClient,
+          entreprise.nom,
+          devis.numero,
+          totalTTC.toFixed(2),
+          pdfBuffer,
+        );
       }
-    } catch (e) {
-      console.error("Erreur envoi email PDF:", e);
+    } catch (emailError) {
+      console.error("Erreur envoi email PDF:", emailError);
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Erreur POST public devis:", error);
-    return NextResponse.json({ error: "Erreur lors de la signature", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    if (error instanceof Error) {
+      if (error.message === "MISSING_TOKEN" || error.message === "Token expired") {
+        return jsonError("Lien invalide ou expiré", 403);
+      }
+
+      if (
+        error.message === "Invalid token format" ||
+        error.message === "Invalid token signature" ||
+        error.message === "Token numero mismatch" ||
+        error.message === "Invalid token payload"
+      ) {
+        return jsonError("Lien invalide ou expiré", 403);
+      }
+    }
+
+    return internalServerError("public-devis-post", error, "Erreur lors de la signature");
   }
 }

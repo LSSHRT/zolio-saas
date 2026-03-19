@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { internalServerError } from "@/lib/http";
 
 export async function GET() {
   try {
@@ -22,8 +23,7 @@ export async function GET() {
 
     return NextResponse.json(mapped);
   } catch (error) {
-    console.error("Erreur GET depenses:", error);
-    return NextResponse.json({ error: "Impossible de récupérer les dépenses", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("depenses-get", error, "Impossible de récupérer les dépenses");
   }
 }
 
@@ -53,7 +53,6 @@ export async function POST(request: Request) {
       categorie: depense.categorie || ""
     });
   } catch (error) {
-    console.error("Erreur POST depense:", error);
-    return NextResponse.json({ error: "Impossible d'ajouter la dépense", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return internalServerError("depenses-post", error, "Impossible d'ajouter la dépense");
   }
 }

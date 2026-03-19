@@ -2,6 +2,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Set the required environment variables before starting the app. Copy `.env.example` into `.env.local` and add the rest of your existing service credentials.
+
 First, run the development server:
 
 ```bash
@@ -15,6 +17,13 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+## Security Variables
+
+- `PUBLIC_DEVIS_LINK_SECRET`: signs public quote-signature links and must be a long random secret.
+- `CRON_SECRET`: protects the `/api/cron/prospect` endpoint for Vercel Cron calls.
+- `ADMIN_EMAIL`: optional canonical admin email used by server-side admin checks.
+- `HUNTER_API_KEY`: optional Hunter key used by prospecting; if unset, Hunter lookups are skipped.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
