@@ -16,6 +16,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/signer(.*)',
   '/sign-up(.*)',
+  '/api/system/status(.*)',
   '/api/cron/prospect(.*)',
   '/api/public/devis(.*)',
   '/api/stripe/checkout(.*)',

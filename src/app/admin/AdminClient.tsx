@@ -7,7 +7,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
-  Bot,
   CheckCircle2,
   ChevronRight,
   Clock3,
@@ -31,6 +30,7 @@ import {
   deleteUserAccount,
   grantAdminRole,
   markMailAsFailed,
+  setMaintenanceMode,
   setSystemBanner,
   toggleUserProStatus,
   updateAdminSettings,
@@ -43,6 +43,7 @@ import { AdminUserDrawer } from "./components/AdminUserDrawer";
 import type {
   AdminActivityItem,
   AdminAlertItem,
+  AdminAuditLogItem,
   AdminDashboardData,
   AdminMailItem,
   AdminSectionId,
@@ -130,6 +131,19 @@ function systemStatusClasses(status: AdminSystemStatus["status"]) {
   }
 }
 
+function auditLogLevelClasses(level: AdminAuditLogItem["level"]) {
+  switch (level) {
+    case "error":
+      return "bg-red-500/12 text-red-100 ring-red-300/18";
+    case "warning":
+      return "bg-amber-400/12 text-amber-100 ring-amber-300/18";
+    case "success":
+      return "bg-emerald-500/12 text-emerald-100 ring-emerald-300/18";
+    default:
+      return "bg-sky-500/12 text-sky-100 ring-sky-300/18";
+  }
+}
+
 function Panel({
   action,
   children,
@@ -170,8 +184,11 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   const [filterProOnly, setFilterProOnly] = useState(false);
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const [bannerText, setBannerText] = useState(data.settings.systemBanner);
+  const [maintenanceEnabled, setMaintenanceEnabled] = useState(data.settings.maintenanceEnabled);
+  const [maintenanceMessage, setMaintenanceMessage] = useState(data.settings.maintenanceMessage);
   const [geminiKey, setGeminiKey] = useState(data.settings.currentGeminiKey);
   const [savingBanner, setSavingBanner] = useState(false);
+  const [savingMaintenance, setSavingMaintenance] = useState(false);
   const [savingGeminiKey, setSavingGeminiKey] = useState(false);
   const [prospectEmail, setProspectEmail] = useState("");
   const [sendingProspect, setSendingProspect] = useState(false);
@@ -202,9 +219,19 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       revalidateOnFocus: false,
     },
   );
+  const { data: auditLogsData, mutate: mutateAuditLogs } = useSWR<AdminAuditLogItem[]>(
+    "/api/admin/logs",
+    fetcher,
+    {
+      fallbackData: data.auditLogs,
+      refreshInterval: 15000,
+      revalidateOnFocus: true,
+    },
+  );
 
   const mails = Array.isArray(mailsData) ? mailsData : data.prospectMails;
   const isCronEnabled = cronData?.value !== "false";
+  const auditLogs = Array.isArray(auditLogsData) ? auditLogsData : data.auditLogs;
 
   const sentCount = mails.filter((mail) => mail.status === "Sent").length;
   const failedCount = mails.filter((mail) => mail.status !== "Sent").length;
@@ -214,7 +241,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   const deliveryRate = totalMailCount > 0 ? Math.round((sentCount / totalMailCount) * 100) : 0;
 
   const baseAlerts = data.alerts.filter(
-    (alert) => !["failed-mails", "cron-disabled", "all-clear"].includes(alert.id),
+    (alert) => !["failed-mails", "cron-disabled", "maintenance-active", "all-clear"].includes(alert.id),
   );
   const alerts: AdminAlertItem[] = [];
 
@@ -237,6 +264,17 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       severity: "warning",
       section: "acquisition",
       ctaLabel: "Réactiver",
+    });
+  }
+
+  if (maintenanceEnabled) {
+    alerts.push({
+      id: "maintenance-active",
+      title: "Mode maintenance actif",
+      description: "Les visiteurs non admin voient actuellement l'écran de maintenance global.",
+      severity: "warning",
+      section: "systeme",
+      ctaLabel: "Vérifier le système",
     });
   }
 
@@ -273,21 +311,46 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
           };
 
   const systemStatuses: AdminSystemStatus[] = data.systemStatuses.map((status) => {
-    if (status.id !== "cron") return status;
+    if (status.id === "cron") {
+      if (!data.environment.hasCronSecret) {
+        return {
+          ...status,
+          status: "critical" as const,
+          detail: "CRON_SECRET manquant",
+        };
+      }
 
-    if (!data.environment.hasCronSecret) {
       return {
         ...status,
-        status: "critical" as const,
-        detail: "CRON_SECRET manquant",
+        status: isCronEnabled ? "healthy" : "warning",
+        detail: isCronEnabled ? "Automatisation autorisée" : "Robot désactivé par l'admin",
       };
     }
 
-    return {
-      ...status,
-      status: isCronEnabled ? "healthy" : "warning",
-      detail: isCronEnabled ? "Automatisation autorisée" : "Robot désactivé par l'admin",
-    };
+    if (status.id === "maintenance") {
+      return {
+        ...status,
+        status: maintenanceEnabled ? "warning" : "healthy",
+        detail: maintenanceEnabled
+          ? "Protection globale active pour les visiteurs non admin"
+          : "Aucune interruption publique en cours",
+        meta: maintenanceMessage || undefined,
+      };
+    }
+
+    if (status.id === "audit-log") {
+      return {
+        ...status,
+        status: auditLogs.length > 0 ? "healthy" : "inactive",
+        detail:
+          auditLogs.length > 0
+            ? "Journal d'audit persistant disponible dans le cockpit"
+            : "Aucune entrée de journal enregistrée pour le moment",
+        meta: `${auditLogs.length} entrée${auditLogs.length > 1 ? "s" : ""}`,
+      };
+    }
+
+    return status;
   });
 
   const liveKpis = data.kpis.map((kpi) => {
@@ -415,6 +478,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         ),
       );
       toast.success(user.isPro ? "Statut PRO retiré" : "Statut PRO accordé");
+      await mutateAuditLogs();
       pushActivity({
         id: `pro-${user.id}-${Date.now()}`,
         title: user.isPro ? "Statut PRO retiré" : "Statut PRO accordé",
@@ -441,6 +505,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         ),
       );
       toast.success(user.banned ? "Utilisateur débanni" : "Utilisateur banni");
+      await mutateAuditLogs();
       pushActivity({
         id: `ban-${user.id}-${Date.now()}`,
         title: user.banned ? "Compte débanni" : "Compte banni",
@@ -466,6 +531,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         setSelectedUserId(null);
       }
       toast.success("Compte supprimé");
+      await mutateAuditLogs();
       pushActivity({
         id: `delete-${user.id}-${Date.now()}`,
         title: "Compte supprimé",
@@ -502,6 +568,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       toast.success(
         user.publicMetadata.isAdmin ? "Droits admin retirés" : "Droits admin accordés",
       );
+      await mutateAuditLogs();
       pushActivity({
         id: `admin-${user.id}-${Date.now()}`,
         title: user.publicMetadata.isAdmin ? "Droits admin retirés" : "Droits admin accordés",
@@ -523,6 +590,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     try {
       await setSystemBanner(bannerText);
       toast.success(bannerText ? "Bannière système déployée" : "Bannière système supprimée");
+      await mutateAuditLogs();
       pushActivity({
         id: `banner-${Date.now()}`,
         title: bannerText ? "Bannière système mise à jour" : "Bannière système supprimée",
@@ -539,6 +607,31 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     }
   }
 
+  async function handleSaveMaintenance() {
+    setSavingMaintenance(true);
+    try {
+      await setMaintenanceMode(maintenanceEnabled, maintenanceMessage);
+      await mutateAuditLogs();
+      toast.success(
+        maintenanceEnabled ? "Mode maintenance activé" : "Mode maintenance désactivé",
+      );
+      pushActivity({
+        id: `maintenance-${Date.now()}`,
+        title: maintenanceEnabled ? "Mode maintenance activé" : "Mode maintenance désactivé",
+        description:
+          maintenanceMessage || "Aucun message de maintenance personnalisé n'est défini.",
+        timestamp: new Date().toISOString(),
+        section: "systeme",
+        kind: "system",
+      });
+    } catch (error) {
+      console.error(error);
+      toast.error("Impossible de mettre à jour le mode maintenance");
+    } finally {
+      setSavingMaintenance(false);
+    }
+  }
+
   async function handleSaveGeminiKey() {
     setSavingGeminiKey(true);
     try {
@@ -546,6 +639,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       formData.set("geminiKey", geminiKey);
       await updateAdminSettings(formData);
       toast.success("Clé Gemini sauvegardée");
+      await mutateAuditLogs();
       pushActivity({
         id: `gemini-${Date.now()}`,
         title: "Configuration Gemini mise à jour",
@@ -566,6 +660,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     try {
       await markMailAsFailed(mail.id);
       await mutateMails();
+      await mutateAuditLogs();
       toast.success("Email marqué comme échec");
       pushActivity({
         id: `mail-failed-${mail.id}-${Date.now()}`,
@@ -596,6 +691,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       setProspectMessage({ text: message, type: "success" });
       toast.success(message);
       await mutateMails();
+      await mutateAuditLogs();
       pushActivity({
         id: `cron-test-${Date.now()}`,
         title: "Test du robot exécuté",
@@ -629,6 +725,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       }
 
       await mutateCron({ value: newValue }, { revalidate: false });
+      await mutateAuditLogs();
       toast.success(newValue === "true" ? "Robot réactivé" : "Robot désactivé");
       pushActivity({
         id: `cron-toggle-${Date.now()}`,
@@ -680,6 +777,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       }
 
       await mutateMails();
+      await mutateAuditLogs();
 
       if (failCount === 0) {
         const message = `${successCount} email(s) envoyé(s) avec succès.`;
@@ -1162,6 +1260,28 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         detail: "Nouveaux comptes sur les 30 derniers jours.",
       },
     ];
+    const monetizationSignals = [
+      {
+        title: "PRO via Stripe",
+        value: `${data.revenue.stripeBackedProUsers}`,
+        detail: "Comptes PRO rattachés à un abonnement Stripe actif ou historisé.",
+      },
+      {
+        title: "PRO manuels",
+        value: `${data.revenue.manualProUsers}`,
+        detail: "Comptes PRO accordés côté admin sans souscription Stripe détectée.",
+      },
+      {
+        title: "Croissance 30j",
+        value: `${data.revenue.userGrowthDelta >= 0 ? "+" : ""}${data.revenue.userGrowthDelta}%`,
+        detail: `${data.revenue.previousPeriodUsersCount} inscriptions sur la période précédente.`,
+      },
+      {
+        title: "Adoption IA",
+        value: `${data.revenue.aiAdoptionRate}%`,
+        detail: `${data.revenue.aiActiveUsers} compte(s) ont déjà généré au moins un devis IA.`,
+      },
+    ];
 
     return (
       <div className="space-y-6">
@@ -1208,21 +1328,35 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
           </Panel>
 
           <Panel
-            title="Ce qui n’est pas encore collecté"
-            description="On assume clairement les angles morts au lieu d'afficher de faux graphes de cohorte ou de LTV."
+            title="Lecture monétisation & usage"
+            description="Un deuxième niveau de lecture pour distinguer abonnement réel, attribution manuelle et adoption produit."
           >
-            <div className="rounded-[26px] border border-dashed border-white/12 bg-white/4 p-5">
-              <div className="flex items-center gap-3">
-                <MessageSquareDashed className="h-5 w-5 text-slate-400" />
-                <h4 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">
-                  Données non branchées
-                </h4>
-              </div>
-              <p className="mt-4 text-sm leading-7 text-slate-400">
-                Pas encore de pipeline pour les cohortes, la LTV, les paiements échoués historisés
-                ou les courbes de revenu dans le temps. Le cockpit l&apos;affiche comme un manque de
-                télémétrie, pas comme une donnée réelle.
-              </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              {monetizationSignals.map((signal) => (
+                <article
+                  key={signal.title}
+                  className="rounded-[26px] border border-white/8 bg-white/4 p-5"
+                >
+                  <p className="text-sm text-slate-400">{signal.title}</p>
+                  <p className="mt-4 text-2xl font-semibold text-white">{signal.value}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-400">{signal.detail}</p>
+                </article>
+              ))}
+              <article className="rounded-[26px] border border-white/8 bg-white/4 p-5 md:col-span-2">
+                <div className="flex items-center gap-3">
+                  <MessageSquareDashed className="h-5 w-5 text-slate-400" />
+                  <h4 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">
+                    Intensité produit
+                  </h4>
+                </div>
+                <p className="mt-4 text-2xl font-semibold text-white">
+                  {data.revenue.averageAiGenerationsPerActiveUser}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-slate-400">
+                  Nombre moyen de devis IA par compte déjà actif sur l’IA. Cette carte donne une
+                  vraie lecture d’intensité produit calculée sur les usages existants.
+                </p>
+              </article>
             </div>
           </Panel>
         </div>
@@ -1469,31 +1603,113 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
           </Panel>
 
           <Panel
-            title="Capacités non branchées"
-            description="Ce cockpit montre aussi ce qui n’est pas encore implémenté ou pas encore câblé proprement."
+            title="Maintenance & journal"
+            description="Un vrai levier d’exploitation pour couper proprement l’accès public et garder une trace de ce qui s’est passé."
           >
-            <div className="space-y-3">
-              <div className="rounded-[24px] border border-dashed border-white/12 bg-white/4 p-5">
-                <div className="flex items-center gap-3">
-                  <Shield className="h-4 w-4 text-slate-300" />
-                  <div>
-                    <p className="text-sm font-medium text-white">Mode maintenance</p>
-                    <p className="mt-1 text-sm text-slate-400">
-                      Aucune implémentation backend fiable n’est branchée. On l’affiche comme capacité absente, pas comme bouton fake.
+            <div className="space-y-5">
+              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <Shield className="h-4 w-4 text-violet-200" />
+                      <p className="text-sm font-medium text-white">Mode maintenance global</p>
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-slate-400">
+                      Quand il est actif, les visiteurs non admin voient un écran de maintenance sur l’ensemble du site. Les admins gardent l’accès au cockpit.
                     </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setMaintenanceEnabled((current) => !current)}
+                    className={`w-full rounded-2xl px-4 py-3 text-sm font-semibold transition sm:w-auto ${maintenanceEnabled ? "bg-amber-400 text-slate-950 hover:bg-amber-300" : "border border-white/10 bg-white/6 text-white hover:bg-white/10"}`}
+                  >
+                    {maintenanceEnabled ? "Désactiver" : "Activer"}
+                  </button>
+                </div>
+
+                <textarea
+                  rows={4}
+                  value={maintenanceMessage}
+                  onChange={(event) => setMaintenanceMessage(event.target.value)}
+                  placeholder="Maintenance en cours. Retour estimé à 23h15..."
+                  className="mt-4 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
+                />
+
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`admin-chip ${maintenanceEnabled ? "bg-amber-400/12 text-amber-100 ring-amber-300/20" : "bg-emerald-500/12 text-emerald-100 ring-emerald-300/20"}`}>
+                      {maintenanceEnabled ? "Maintenance active" : "Site ouvert"}
+                    </span>
+                    <span className="admin-chip bg-white/8 text-slate-200 ring-white/10">
+                      Bypass admin actif
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSaveMaintenance}
+                    disabled={savingMaintenance}
+                    className="w-full rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
+                  >
+                    {savingMaintenance ? "Mise à jour..." : "Appliquer la maintenance"}
+                  </button>
                 </div>
               </div>
-              <div className="rounded-[24px] border border-dashed border-white/12 bg-white/4 p-5">
-                <div className="flex items-center gap-3">
-                  <Bot className="h-4 w-4 text-slate-300" />
-                  <div>
-                    <p className="text-sm font-medium text-white">Logs centralisés</p>
-                    <p className="mt-1 text-sm text-slate-400">
-                      Pas de pipeline de logs ou d’observabilité centralisée exposé ici pour le moment.
-                    </p>
+
+              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Activity className="h-4 w-4 text-sky-200" />
+                    <div>
+                      <p className="text-sm font-medium text-white">Journal admin centralisé</p>
+                      <p className="mt-1 text-sm text-slate-400">
+                        Actions sensibles, erreurs serveur et changements système récents.
+                      </p>
+                    </div>
                   </div>
+                  <span className="admin-chip bg-white/8 text-slate-200 ring-white/10">
+                    {auditLogs.length} entrée{auditLogs.length > 1 ? "s" : ""}
+                  </span>
                 </div>
+
+                {auditLogs.length === 0 ? (
+                  <div className="mt-4 rounded-[22px] border border-dashed border-white/12 bg-slate-950/35 px-4 py-8 text-sm text-slate-400">
+                    Aucune entrée de journal pour le moment.
+                  </div>
+                ) : (
+                  <div className="mt-4 space-y-3">
+                    {auditLogs.slice(0, 10).map((log) => (
+                      <article
+                        key={log.id}
+                        className="rounded-[22px] border border-white/8 bg-slate-950/35 p-4"
+                      >
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`admin-chip ${auditLogLevelClasses(log.level)}`}>
+                                {log.level}
+                              </span>
+                              <span className="admin-chip bg-white/8 text-slate-200 ring-white/10">
+                                {log.scope}
+                              </span>
+                              <span className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                                {log.action}
+                              </span>
+                            </div>
+                            <p className="mt-3 text-sm font-medium text-white">{log.message}</p>
+                            <p className="mt-2 text-sm text-slate-400">{log.actor}</p>
+                            {log.meta && (
+                              <p className="mt-2 font-mono text-xs text-slate-500">{log.meta}</p>
+                            )}
+                          </div>
+                          <div className="shrink-0 text-right text-xs text-slate-500">
+                            <p>{formatTimeAgo(log.createdAt)}</p>
+                            <p className="mt-1">{formatDateTime(log.createdAt)}</p>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </Panel>

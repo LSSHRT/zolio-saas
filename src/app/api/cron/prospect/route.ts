@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { currentUser } from "@clerk/nextjs/server";
 import { sendProspectEmail } from "@/lib/sendEmail";
 import { isAdminUser } from "@/lib/admin";
+import { ADMIN_SETTING_KEYS, appendAdminAuditLog } from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
+import { prisma } from "@/lib/prisma";
 
-const prisma = new PrismaClient();
 const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "";
 
 export const maxDuration = 60; // Autorise la fonction à tourner jusqu'à 60 secondes sur Vercel
@@ -104,31 +104,33 @@ async function findEmailsViaHunter() {
   return foundEmails;
 }
 
-async function isAuthorizedRequest(req: Request) {
-  const cronSecret = process.env.CRON_SECRET;
-  const authorization = req.headers.get("authorization");
-  const expectedAuthorization = cronSecret ? `Bearer ${cronSecret}` : null;
-
-  if (expectedAuthorization && authorization === expectedAuthorization) {
-    return true;
-  }
-
-  const user = await currentUser();
-  return isAdminUser(user);
-}
-
 export async function GET(req: Request) {
   try {
-    if (!(await isAuthorizedRequest(req))) {
+    const currentAdmin = await currentUser();
+    const isAdminTrigger = isAdminUser(currentAdmin);
+    const cronSecret = process.env.CRON_SECRET;
+    const authorization = req.headers.get("authorization");
+    const isCronTrigger = Boolean(cronSecret && authorization === `Bearer ${cronSecret}`);
+
+    if (!isCronTrigger && !isAdminTrigger) {
       return jsonError("Non autorisé", 403);
     }
 
     // Vérifier si le cron est activé dans les paramètres
     const cronSetting = await prisma.adminSetting.findUnique({
-      where: { key: "cron_prospect_enabled" }
+      where: { key: ADMIN_SETTING_KEYS.cronProspectEnabled }
     });
 
     if (cronSetting && cronSetting.value === "false") {
+      await appendAdminAuditLog({
+        level: "warning",
+        scope: "acquisition",
+        action: "cron.skipped",
+        actor: isAdminTrigger
+          ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
+          : "Cron Vercel",
+        message: "Le robot de prospection a été appelé alors qu'il est désactivé.",
+      });
       return NextResponse.json({ message: "Le robot de prospection est désactivé manuellement." });
     }
 
@@ -200,8 +202,28 @@ export async function GET(req: Request) {
     }
 
     if (emailsEnvoyes.length === 0) {
+      await appendAdminAuditLog({
+        level: "info",
+        scope: "acquisition",
+        action: isAdminTrigger ? "cron.test" : "cron.run",
+        actor: isAdminTrigger
+          ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
+          : "Cron Vercel",
+        message: "Le robot de prospection n'a trouvé aucun nouvel email exploitable.",
+      });
       return NextResponse.json({ message: "Aucun nouvel email valide trouvé ce tour-ci, réessai plus tard." }, { status: 200 });
     }
+
+    await appendAdminAuditLog({
+      level: "success",
+      scope: "acquisition",
+      action: isAdminTrigger ? "cron.test" : "cron.run",
+      actor: isAdminTrigger
+        ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
+        : "Cron Vercel",
+      message: `Le robot de prospection a envoyé ${emailsEnvoyes.length} email(s).`,
+      meta: emailsEnvoyes.join(", "),
+    });
 
     return NextResponse.json({ 
       message: `Robot exécuté avec succès : ${emailsEnvoyes.length} email(s) envoyé(s) !`, 

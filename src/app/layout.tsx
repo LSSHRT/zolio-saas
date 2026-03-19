@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SWRProvider } from "@/components/SWRProvider";
+import { SystemRuntimeLayer } from "@/components/SystemRuntimeLayer";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
@@ -60,6 +61,7 @@ export default function RootLayout({
             enableSystem
           >
             <SWRProvider>
+              <SystemRuntimeLayer />
               {children}
               <Toaster
                 position="bottom-center"

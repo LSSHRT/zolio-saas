@@ -2,9 +2,11 @@ import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import Stripe from "stripe";
 import { prisma } from "@/lib/prisma";
 import { getAdminEmail } from "@/lib/admin";
+import { getAdminAuditLogs, getAdminRuntimeState } from "@/lib/admin-settings";
 import type {
   AdminActivityItem,
   AdminAlertItem,
+  AdminAuditLogItem,
   AdminDashboardData,
   AdminKpi,
   AdminMailItem,
@@ -51,9 +53,13 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   const client = await clerkClient();
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const previousThirtyDaysAgo = new Date(thirtyDaysAgo);
+  previousThirtyDaysAgo.setDate(previousThirtyDaysAgo.getDate() - 30);
 
   const currentGeminiKey = readString(adminUser.publicMetadata?.customGeminiKey);
-  const currentSystemBanner = readString(adminUser.publicMetadata?.systemBanner);
+  const runtimeState = await getAdminRuntimeState();
+  const currentSystemBanner =
+    runtimeState.systemBanner || readString(adminUser.publicMetadata?.systemBanner);
 
   let totalUsersCount = 0;
   let users: AdminUserRow[] = [];
@@ -91,12 +97,20 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   }
 
   const proUsersCount = users.filter((user) => user.isPro).length;
+  const stripeBackedProUsers = users.filter((user) => Boolean(user.publicMetadata.stripeSubscriptionId)).length;
+  const manualProUsers = Math.max(proUsersCount - stripeBackedProUsers, 0);
   const recentUsersCount = users.filter((user) => {
     if (!user.createdAt) return false;
     return new Date(user.createdAt) >= thirtyDaysAgo;
   }).length;
+  const previousPeriodUsersCount = users.filter((user) => {
+    if (!user.createdAt) return false;
+    const createdAt = new Date(user.createdAt);
+    return createdAt >= previousThirtyDaysAgo && createdAt < thirtyDaysAgo;
+  }).length;
   const bannedUsersCount = users.filter((user) => user.banned).length;
   const totalAiDevis = users.reduce((sum, user) => sum + user.aiGenerations, 0);
+  const aiActiveUsers = users.filter((user) => user.aiGenerations > 0).length;
 
   let dbLatencyMs: number | null = null;
   let isCronEnabled = true;
@@ -151,6 +165,15 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
 
   const estimatedArr = Math.round(mrr * 12);
   const conversionRate = totalUsersCount > 0 ? Math.round((proUsersCount / totalUsersCount) * 100) : 0;
+  const aiAdoptionRate = totalUsersCount > 0 ? Math.round((aiActiveUsers / totalUsersCount) * 100) : 0;
+  const averageAiGenerationsPerActiveUser =
+    aiActiveUsers > 0 ? Math.round((totalAiDevis / aiActiveUsers) * 10) / 10 : 0;
+  const userGrowthDelta =
+    previousPeriodUsersCount === 0
+      ? recentUsersCount > 0
+        ? 100
+        : 0
+      : Math.round(((recentUsersCount - previousPeriodUsersCount) / previousPeriodUsersCount) * 100);
 
   const missingCriticalConfig = [
     !process.env.PUBLIC_DEVIS_LINK_SECRET && "PUBLIC_DEVIS_LINK_SECRET",
@@ -181,6 +204,17 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       severity: "warning",
       section: "acquisition",
       ctaLabel: "Réactiver le robot",
+    });
+  }
+
+  if (runtimeState.maintenanceEnabled) {
+    alerts.push({
+      id: "maintenance-active",
+      title: "Mode maintenance actif",
+      description: "Les visiteurs non admin voient actuellement l'écran de maintenance global.",
+      severity: "warning",
+      section: "systeme",
+      ctaLabel: "Voir le système",
     });
   }
 
@@ -249,6 +283,8 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     });
   }
 
+  const auditLogs: AdminAuditLogItem[] = await getAdminAuditLogs(24);
+
   const systemStatuses: AdminSystemStatus[] = [
     {
       id: "database",
@@ -311,6 +347,25 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
         ? "Accès IA disponible"
         : "Aucune clé Gemini active",
       meta: currentGeminiKey ? "Surcharge admin active" : "Configuration serveur",
+    },
+    {
+      id: "maintenance",
+      label: "Mode maintenance",
+      status: runtimeState.maintenanceEnabled ? "warning" : "healthy",
+      detail: runtimeState.maintenanceEnabled
+        ? "Protection globale active pour les visiteurs non admin"
+        : "Aucune interruption publique en cours",
+      meta: runtimeState.maintenanceMessage || undefined,
+    },
+    {
+      id: "audit-log",
+      label: "Journal admin",
+      status: auditLogs.length > 0 ? "healthy" : "inactive",
+      detail:
+        auditLogs.length > 0
+          ? "Journal d'audit persistant disponible dans le cockpit"
+          : "Aucune entrée de journal enregistrée pour le moment",
+      meta: `${auditLogs.length} entrée${auditLogs.length > 1 ? "s" : ""}`,
     },
     {
       id: "hunter",
@@ -395,11 +450,18 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       totalUsers: totalUsersCount,
       proUsers: proUsersCount,
       activeSubscriptions,
+      stripeBackedProUsers,
+      manualProUsers,
       mrr: Math.round(mrr),
       estimatedArr,
       conversionRate,
       recentUsersCount,
+      previousPeriodUsersCount,
+      userGrowthDelta,
       totalAIGenerations: totalAiDevis,
+      aiActiveUsers,
+      aiAdoptionRate,
+      averageAiGenerationsPerActiveUser,
       sourceLabel: process.env.STRIPE_SECRET_KEY
         ? "Données live Stripe"
         : "Estimation basée sur les comptes PRO",
@@ -415,6 +477,8 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     },
     settings: {
       systemBanner: currentSystemBanner,
+      maintenanceEnabled: runtimeState.maintenanceEnabled,
+      maintenanceMessage: runtimeState.maintenanceMessage,
       currentGeminiKey,
       adminEmailConfigured: Boolean(getAdminEmail()),
       customGeminiEnabled: Boolean(currentGeminiKey),
@@ -426,9 +490,10 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       hasCronSecret: Boolean(process.env.CRON_SECRET),
       hasPublicLinkSecret: Boolean(process.env.PUBLIC_DEVIS_LINK_SECRET),
       hasGemini: Boolean(process.env.GEMINI_API_KEY || currentGeminiKey),
-      hasMaintenanceMode: false,
-      hasCentralizedLogs: false,
+      hasMaintenanceMode: true,
+      hasCentralizedLogs: true,
       dbLatencyMs,
     },
+    auditLogs,
   };
 }

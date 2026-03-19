@@ -76,11 +76,18 @@ export interface AdminRevenueSnapshot {
   totalUsers: number;
   proUsers: number;
   activeSubscriptions: number;
+  stripeBackedProUsers: number;
+  manualProUsers: number;
   mrr: number;
   estimatedArr: number;
   conversionRate: number;
   recentUsersCount: number;
+  previousPeriodUsersCount: number;
+  userGrowthDelta: number;
   totalAIGenerations: number;
+  aiActiveUsers: number;
+  aiAdoptionRate: number;
+  averageAiGenerationsPerActiveUser: number;
   sourceLabel: string;
 }
 
@@ -96,6 +103,8 @@ export interface AdminAcquisitionSnapshot {
 
 export interface AdminSettingsSnapshot {
   systemBanner: string;
+  maintenanceEnabled: boolean;
+  maintenanceMessage: string;
   currentGeminiKey: string;
   adminEmailConfigured: boolean;
   customGeminiEnabled: boolean;
@@ -111,6 +120,17 @@ export interface AdminEnvironmentSnapshot {
   hasMaintenanceMode: boolean;
   hasCentralizedLogs: boolean;
   dbLatencyMs: number | null;
+}
+
+export interface AdminAuditLogItem {
+  id: string;
+  level: "info" | "success" | "warning" | "error";
+  scope: "admin" | "system" | "security" | "billing" | "acquisition";
+  action: string;
+  message: string;
+  actor: string;
+  createdAt: string;
+  meta?: string;
 }
 
 export interface AdminHeroStatus {
@@ -135,4 +155,5 @@ export interface AdminDashboardData {
   acquisition: AdminAcquisitionSnapshot;
   settings: AdminSettingsSnapshot;
   environment: AdminEnvironmentSnapshot;
+  auditLogs: AdminAuditLogItem[];
 }
