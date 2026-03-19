@@ -841,7 +841,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
 
   function renderQuickAction() {
     if (activeSection === "utilisateurs") {
-          return (
+      return (
         <button
           type="button"
           onClick={handleExportCSV}
@@ -871,14 +871,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
       );
     }
 
-    return (
-      <div className="admin-chip bg-white/8 text-white/80 ring-white/10">
-        <span className="inline-flex items-center gap-2">
-          <Activity className="h-3.5 w-3.5" />
-          {heroStatus.label}
-        </span>
-      </div>
-    );
+    return null;
   }
 
   function renderPilotage() {
