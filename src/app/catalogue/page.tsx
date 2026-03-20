@@ -1,9 +1,19 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil, Upload } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import {
+  DEFAULT_TRADE,
+  STARTER_CATEGORIES,
+  TRADE_OPTIONS,
+  getStarterCatalogForTrade,
+  getTradeDefinition,
+  type TradeKey,
+} from "@/lib/trades";
 
 interface Prestation {
   id: string;
@@ -15,88 +25,23 @@ interface Prestation {
   stock?: number;
 }
 
-const CATEGORIES = ["Préparation", "Peinture", "Sol", "Plafond", "Façade", "Décoration", "Plomberie", "Électricité", "Menuiserie", "Autre"];
-
-const SEED_CATALOG = [
-  // Préparation
-  { categorie: "Préparation", nom: "Lessivage des murs", unite: "m²", prixUnitaireHT: 5, coutMatiere: 0.5 },
-  { categorie: "Préparation", nom: "Enduit de lissage complet", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
-  { categorie: "Préparation", nom: "Dépose de papier peint", unite: "m²", prixUnitaireHT: 8, coutMatiere: 0 },
-  { categorie: "Préparation", nom: "Ponçage mécanique", unite: "m²", prixUnitaireHT: 6, coutMatiere: 0.5 },
-  { categorie: "Préparation", nom: "Impression fixante (Sous-couche)", unite: "m²", prixUnitaireHT: 7, coutMatiere: 1.5 },
-  { categorie: "Préparation", nom: "Rebouchage trous et fissures", unite: "forfait", prixUnitaireHT: 45, coutMatiere: 5 },
-  { categorie: "Préparation", nom: "Protection des sols et meubles", unite: "m²", prixUnitaireHT: 3, coutMatiere: 1 },
-  // Peinture
-  { categorie: "Peinture", nom: "Peinture acrylique mate (2 couches)", unite: "m²", prixUnitaireHT: 12, coutMatiere: 3 },
-  { categorie: "Peinture", nom: "Peinture velours (2 couches)", unite: "m²", prixUnitaireHT: 14, coutMatiere: 4 },
-  { categorie: "Peinture", nom: "Peinture satinée (2 couches)", unite: "m²", prixUnitaireHT: 15, coutMatiere: 4 },
-  { categorie: "Peinture", nom: "Peinture laque (boiseries)", unite: "ml", prixUnitaireHT: 18, coutMatiere: 5 },
-  { categorie: "Peinture", nom: "Peinture plafond sans traces", unite: "m²", prixUnitaireHT: 16, coutMatiere: 3.5 },
-  { categorie: "Peinture", nom: "Peinture radiateur", unite: "unité", prixUnitaireHT: 35, coutMatiere: 5 },
-  { categorie: "Peinture", nom: "Peinture porte (2 faces)", unite: "unité", prixUnitaireHT: 65, coutMatiere: 10 },
-  // Sol
-  { categorie: "Sol", nom: "Pose de parquet flottant", unite: "m²", prixUnitaireHT: 25, coutMatiere: 2 },
-  { categorie: "Sol", nom: "Pose de plinthes", unite: "ml", prixUnitaireHT: 8, coutMatiere: 1 },
-  { categorie: "Sol", nom: "Ragréage sol", unite: "m²", prixUnitaireHT: 12, coutMatiere: 4 },
-  { categorie: "Sol", nom: "Pose de carrelage standard (hors fourniture)", unite: "m²", prixUnitaireHT: 45, coutMatiere: 5 },
-  { categorie: "Sol", nom: "Pose de moquette", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
-  { categorie: "Sol", nom: "Pose de lino", unite: "m²", prixUnitaireHT: 14, coutMatiere: 2 },
-  { categorie: "Sol", nom: "Dépose de revêtement de sol existant", unite: "m²", prixUnitaireHT: 9, coutMatiere: 0 },
-  // Plomberie
-  { categorie: "Plomberie", nom: "Recherche de fuite", unite: "forfait", prixUnitaireHT: 150, coutMatiere: 0 },
-  { categorie: "Plomberie", nom: "Remplacement mitigeur", unite: "unité", prixUnitaireHT: 80, coutMatiere: 0 },
-  { categorie: "Plomberie", nom: "Pose de WC suspendu", unite: "unité", prixUnitaireHT: 350, coutMatiere: 20 },
-  { categorie: "Plomberie", nom: "Débouchage canalisation", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 0 },
-  { categorie: "Plomberie", nom: "Pose de chauffe-eau électrique", unite: "unité", prixUnitaireHT: 250, coutMatiere: 30 },
-  { categorie: "Plomberie", nom: "Création arrivée/évacuation d'eau", unite: "forfait", prixUnitaireHT: 180, coutMatiere: 25 },
-  // Électricité
-  { categorie: "Électricité", nom: "Création prise de courant", unite: "unité", prixUnitaireHT: 90, coutMatiere: 15 },
-  { categorie: "Électricité", nom: "Remplacement tableau électrique", unite: "forfait", prixUnitaireHT: 800, coutMatiere: 300 },
-  { categorie: "Électricité", nom: "Pose de luminaire/spot", unite: "unité", prixUnitaireHT: 45, coutMatiere: 5 },
-  { categorie: "Électricité", nom: "Tirage de ligne électrique", unite: "ml", prixUnitaireHT: 12, coutMatiere: 3 },
-  { categorie: "Électricité", nom: "Mise aux normes installation", unite: "forfait", prixUnitaireHT: 1500, coutMatiere: 400 },
-  // Menuiserie
-  { categorie: "Menuiserie", nom: "Pose porte intérieure", unite: "unité", prixUnitaireHT: 150, coutMatiere: 10 },
-  { categorie: "Menuiserie", nom: "Montage meuble standard", unite: "heure", prixUnitaireHT: 45, coutMatiere: 0 },
-  { categorie: "Menuiserie", nom: "Pose de cuisine aménagée", unite: "ml", prixUnitaireHT: 120, coutMatiere: 15 },
-  { categorie: "Menuiserie", nom: "Réglage de fenêtre", unite: "unité", prixUnitaireHT: 40, coutMatiere: 0 },
-  // Maçonnerie / Façade
-  { categorie: "Façade", nom: "Création ouverture mur porteur", unite: "forfait", prixUnitaireHT: 1200, coutMatiere: 150 },
-  { categorie: "Façade", nom: "Montage cloison placo (BA13)", unite: "m²", prixUnitaireHT: 35, coutMatiere: 12 },
-  { categorie: "Façade", nom: "Pose de faux plafond (BA13)", unite: "m²", prixUnitaireHT: 45, coutMatiere: 15 },
-  { categorie: "Façade", nom: "Isolation thermique (laine de verre)", unite: "m²", prixUnitaireHT: 25, coutMatiere: 10 },
-  { categorie: "Façade", nom: "Ravalement de façade (peinture)", unite: "m²", prixUnitaireHT: 35, coutMatiere: 8 },
-  
-  // Toiture / Couverture
-  { categorie: "Toiture", nom: "Nettoyage toiture et démoussage", unite: "m²", prixUnitaireHT: 15, coutMatiere: 2 },
-  { categorie: "Toiture", nom: "Remplacement tuile défectueuse", unite: "unité", prixUnitaireHT: 25, coutMatiere: 5 },
-  { categorie: "Toiture", nom: "Pose de gouttière zinc", unite: "ml", prixUnitaireHT: 45, coutMatiere: 15 },
-  
-  // Climatisation / Chauffage
-  { categorie: "Climatisation", nom: "Entretien annuel climatisation", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 0 },
-  { categorie: "Climatisation", nom: "Pose climatiseur réversible (Mono-split)", unite: "forfait", prixUnitaireHT: 800, coutMatiere: 150 },
-  
-  // Paysagisme / Extérieur
-  { categorie: "Paysagisme", nom: "Tonte de pelouse", unite: "heure", prixUnitaireHT: 40, coutMatiere: 5 },
-  { categorie: "Paysagisme", nom: "Taille de haie", unite: "ml", prixUnitaireHT: 12, coutMatiere: 2 },
-  { categorie: "Paysagisme", nom: "Création de terrasse bois", unite: "m²", prixUnitaireHT: 120, coutMatiere: 50 },
-
-  // Extérieur / Autre
-  { categorie: "Autre", nom: "Nettoyage fin de chantier", unite: "forfait", prixUnitaireHT: 150, coutMatiere: 10 },
-  { categorie: "Autre", nom: "Évacuation des gravats", unite: "forfait", prixUnitaireHT: 120, coutMatiere: 20 },
-  { categorie: "Autre", nom: "Déplacement / Frais kilométriques", unite: "forfait", prixUnitaireHT: 50, coutMatiere: 10 }
-];
-
 export default function CataloguePage() {
+  const { user } = useUser();
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [form, setForm] = useState({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" });
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
+  const [isImportingStarter, setIsImportingStarter] = useState(false);
+
+  const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
+  const activeTrade = companyTrade?.key ?? selectedTrade;
+  const activeTradeDefinition = getTradeDefinition(activeTrade) ?? getTradeDefinition(DEFAULT_TRADE);
+  const starterCount = getStarterCatalogForTrade(activeTrade).length;
 
   useEffect(() => {
     fetch("/api/prestations")
@@ -105,11 +50,24 @@ export default function CataloguePage() {
       .catch(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (companyTrade) {
+      setSelectedTrade(companyTrade.key);
+      setForm((current) => ({ ...current, categorie: current.categorie || "Autre" }));
+    }
+  }, [companyTrade]);
+
   const filtered = useMemo(() => prestations.filter(
     (p) => (p.nom || '').toLowerCase().includes((search || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((search || '').toLowerCase())
   ), [prestations, search]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+  const reloadPrestations = async () => {
+    const response = await fetch("/api/prestations");
+    const data = await response.json();
+    setPrestations(Array.isArray(data) ? data : []);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
@@ -129,10 +87,48 @@ export default function CataloguePage() {
       setForm({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" });
       setEditingId(null);
       setShowForm(false);
-    } catch (err) {
+    } catch {
       alert("Erreur lors de l'enregistrement");
     }
     setSaving(false);
+  };
+
+  const handleImportStarterCatalog = async () => {
+    if (!user || !activeTradeDefinition) return;
+
+    setIsImportingStarter(true);
+    try {
+      const response = await fetch("/api/onboarding/bootstrap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trade: activeTradeDefinition.key }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Impossible d'importer le starter métier");
+      }
+
+      await user.update({
+        unsafeMetadata: {
+          ...user.unsafeMetadata,
+          companyTrade: activeTradeDefinition.key,
+          onboardingCompleted: true,
+          starterCatalogImported: true,
+        },
+      });
+
+      await reloadPrestations();
+      toast.success(
+        payload.imported > 0
+          ? `${payload.imported} prestation(s) importée(s) pour ${activeTradeDefinition.label.toLowerCase()}`
+          : `Starter ${activeTradeDefinition.label.toLowerCase()} déjà présent`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Impossible d'importer le starter métier";
+      toast.error(message);
+    } finally {
+      setIsImportingStarter(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -144,32 +140,11 @@ export default function CataloguePage() {
       } else {
         alert("Erreur lors de la suppression");
       }
-    } catch (err) {
+    } catch {
       alert("Erreur lors de la suppression");
     }
   };
 
-  const handleBulkDelete = async () => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
-    setIsDeletingBulk(true);
-    let successCount = 0;
-    for (const id of Array.from(selectedIds)) {
-      try {
-        const res = await fetch(`/api/prestations/${id}`, { method: "DELETE" });
-        if (res.ok) successCount++;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    if (successCount > 0) {
-      setPrestations(prestations.filter((item: any) => !selectedIds.has(item.id)));
-      setSelectedIds(new Set());
-    }
-    setIsDeletingBulk(false);
-  };
-
-
-    
   const handleEdit = (p: Prestation) => {
     setForm({
       categorie: p.categorie,
@@ -219,7 +194,7 @@ export default function CataloguePage() {
       }
       
       setLoading(true);
-      let newItems = [];
+      const newItems: Array<{ categorie: string; nom: string; unite: string; prix: number; cout: number }> = [];
       try {
         for (let i = 1; i < lines.length; i++) {
           const columns = lines[i].split(separator).map(c => c.trim().replace(/^"|"$/g, ''));
@@ -257,41 +232,13 @@ export default function CataloguePage() {
         const data = await res.json();
         setPrestations(Array.isArray(data) ? data : []);
         alert("Importation terminée avec succès !");
-      } catch (err) {
+      } catch {
         alert("Erreur lors de l'importation du fichier.");
       }
       setLoading(false);
       e.target.value = ''; // reset input
     };
     reader.readAsText(file);
-  };
-
-  const handleSeed = async () => {
-    const qtyStr = prompt(`Combien de prestations voulez-vous importer depuis le catalogue métier ? (Max: ${SEED_CATALOG.length})`, SEED_CATALOG.length.toString());
-    if (!qtyStr) return;
-    
-    const qty = parseInt(qtyStr, 10);
-    if (isNaN(qty) || qty <= 0) return;
-    
-    const limit = Math.min(qty, SEED_CATALOG.length);
-    const itemsToImport = SEED_CATALOG.slice(0, limit);
-
-    if (!confirm(`Voulez-vous importer ces ${limit} prestation(s) métier ?`)) return;
-    setLoading(true);
-    try {
-      await fetch("/api/prestations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(itemsToImport),
-      });
-
-      const res = await fetch("/api/prestations");
-      const data = await res.json();
-      setPrestations(Array.isArray(data) ? data : []);
-    } catch (err) {
-      alert("Erreur lors de l'import");
-    }
-    setLoading(false);
   };
 
   return (
@@ -323,6 +270,54 @@ export default function CataloguePage() {
       </header>
 
       <main className="flex-1 px-6 flex flex-col gap-6">
+        <div className="rounded-[2rem] border border-violet-200/70 bg-violet-50/80 p-5 dark:border-violet-500/20 dark:bg-violet-500/10">
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
+                Starter métier
+              </p>
+              <h2 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
+                Catalogue {activeTradeDefinition?.label.toLowerCase()} prêt à l&apos;emploi
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Choisissez votre métier, importez votre base starter et enrichissez-la ensuite avec vos propres lignes.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {TRADE_OPTIONS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => setSelectedTrade(option.key)}
+                  className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                    activeTrade === option.key
+                      ? "bg-violet-600 text-white shadow-brand"
+                      : "bg-white/80 text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleImportStarterCatalog}
+                disabled={isImportingStarter}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+              >
+                <Download size={16} />
+                {isImportingStarter ? "Import..." : `Importer ${starterCount} lignes starter`}
+              </button>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {prestations.length} prestation{prestations.length > 1 ? "s" : ""} déjà enregistrée{prestations.length > 1 ? "s" : ""}
+              </span>
+            </div>
+          </div>
+        </div>
+
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" placeholder="Rechercher une prestation..." value={search} onChange={(e) => setSearch(e.target.value)}
@@ -338,7 +333,7 @@ export default function CataloguePage() {
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedIds(new Set(filtered.map((item: any) => item.id)));
+                  setSelectedIds(new Set(filtered.map((item: Prestation) => item.id)));
                 } else {
                   setSelectedIds(new Set());
                 }
@@ -350,12 +345,12 @@ export default function CataloguePage() {
 
 
         {showForm && (
-          <motion.form initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit}
+            <motion.form initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} onSubmit={handleSubmit}
             className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-5 flex flex-col gap-3 border border-slate-200 dark:border-slate-700">
             <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-1">{editingId ? "Modifier la Prestation" : "Nouvelle Prestation"}</h2>
             <select value={form.categorie} onChange={(e) => setForm({ ...form, categorie: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30">
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {STARTER_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
             <input required placeholder="Nom de la prestation" value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })}
               className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
@@ -396,11 +391,12 @@ export default function CataloguePage() {
             {!search && (
               <div className="flex flex-col sm:flex-row gap-3 mt-4">
                 <button
-                  onClick={handleSeed}
+                  onClick={handleImportStarterCatalog}
+                  disabled={isImportingStarter}
                   className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
                 >
                   <Download size={16} />
-                  Importer catalogue type (+40)
+                  {isImportingStarter ? "Import..." : `Starter ${activeTradeDefinition?.shortLabel || "métier"} (${starterCount})`}
                 </button>
                 <label className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer">
                   <Upload size={16} />

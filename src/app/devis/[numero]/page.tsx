@@ -1,44 +1,49 @@
 "use client";
 
-import { useState, useEffect, use, useRef } from "react";
+import { useState, useEffect, use, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { motion } from "framer-motion";
+import NextImage from "next/image";
 import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import {
+  DEFAULT_TRADE,
+  TRADE_OPTIONS,
+  getStarterCatalogForTrade,
+  getTradeBundlesForTrade,
+  getTradeDefinition,
+  type TradeBundle,
+  type TradeKey,
+} from "@/lib/trades";
 
 interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; isOptional?: boolean; }
 
-
-const FORFAITS = [
-  { nom: "Rénovation SDB (Complète)", lignes: [
-      { nomPrestation: "Démolition et évacuation", quantite: 1, unite: "Forfait", prixUnitaire: 500, totalLigne: 500 },
-      { nomPrestation: "Plomberie (Alimentation et évacuation)", quantite: 1, unite: "Forfait", prixUnitaire: 1200, totalLigne: 1200 },
-      { nomPrestation: "Pose carrelage mural et sol", quantite: 15, unite: "m²", prixUnitaire: 60, totalLigne: 900 },
-      { nomPrestation: "Peinture plafond (hydrofuge)", quantite: 6, unite: "m²", prixUnitaire: 35, totalLigne: 210 }
-    ]
-  },
-  { nom: "Peinture Pièce (Standard 15m²)", lignes: [
-      { nomPrestation: "Protection des sols et meubles", quantite: 1, unite: "Forfait", prixUnitaire: 150, totalLigne: 150 },
-      { nomPrestation: "Préparation des murs (enduit, ponçage)", quantite: 40, unite: "m²", prixUnitaire: 15, totalLigne: 600 },
-      { nomPrestation: "Peinture 2 couches (Murs & Plafond)", quantite: 55, unite: "m²", prixUnitaire: 25, totalLigne: 1375 }
-    ]
-  },
-  { nom: "Tableau Électrique (Mise aux normes)", lignes: [
-      { nomPrestation: "Dépose de l'ancien tableau", quantite: 1, unite: "Forfait", prixUnitaire: 200, totalLigne: 200 },
-      { nomPrestation: "Fourniture et pose tableau 3 rangées", quantite: 1, unite: "Unité", prixUnitaire: 950, totalLigne: 950 },
-      { nomPrestation: "Contrôle et test de l'installation", quantite: 1, unite: "Forfait", prixUnitaire: 150, totalLigne: 150 }
-    ]
-  }
-];
-
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prix: number; cout: number; }
+interface GeneratedAILine { designation: string; quantite: number; unite: string; prixUnitaire: number; }
+interface GenerateDevisResponse { lignes?: GeneratedAILine[]; }
+interface DevisResult { totalTTC?: string | number; emailSent?: boolean; }
+interface DevisInfo {
+  numero?: string;
+  nomClient?: string;
+  emailClient?: string;
+  statut?: string;
+  tva?: string;
+  acompte?: string;
+  remise?: string;
+  photos?: string[];
+  lignes?: LigneDevis[];
+  signingToken?: string;
+}
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
+  const { user } = useUser();
   const { numero } = use(params);
 
   const [loading, setLoading] = useState(true);
-  const [devisInfo, setDevisInfo] = useState<any>(null);
+  const [devisInfo, setDevisInfo] = useState<DevisInfo | null>(null);
   const [lignes, setLignes] = useState<LigneDevis[]>([]);
   const [tva, setTva] = useState("10");
   const [acompte, setAcompte] = useState("");
@@ -49,14 +54,23 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [showForfaits, setShowForfaits] = useState(false);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<DevisResult | null>(null);
   const [showAddPrestation, setShowAddPrestation] = useState(false);
   const [showSignModal, setShowSignModal] = useState(false);
   const [signLoading, setSignLoading] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const sigCanvas = useRef<any>(null);
+  const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
+  const [isImportingStarter, setIsImportingStarter] = useState(false);
+  const sigCanvas = useRef<{ clear: () => void; isEmpty: () => boolean; getTrimmedCanvas: () => HTMLCanvasElement } | null>(null);
+
+  const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
+  const activeTrade = companyTrade?.key ?? selectedTrade;
+  const activeTradeDefinition = getTradeDefinition(activeTrade) ?? getTradeDefinition(DEFAULT_TRADE);
+  const activeTradeMeta = activeTradeDefinition ?? getTradeDefinition(DEFAULT_TRADE)!;
+  const forfaits = useMemo(() => getTradeBundlesForTrade(activeTrade), [activeTrade]);
+  const starterCount = getStarterCatalogForTrade(activeTrade).length;
 
   useEffect(() => {
     Promise.all([
@@ -76,6 +90,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     }).catch(() => setLoading(false));
   }, [numero]);
 
+  useEffect(() => {
+    if (companyTrade) {
+      setSelectedTrade(companyTrade.key);
+    }
+  }, [companyTrade]);
+
   const totalHTBase = lignes.filter(l => !l.isOptional).reduce((s, l) => s + l.totalLigne, 0);
   const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
   const totalHT = totalHTBase - montantRemise;
@@ -92,12 +112,6 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prix, totalLigne: p.prix, tva, isOptional: false }]);
     setShowAddPrestation(false);
     setSearchPrestation("");
-  };
-
-  const updateTva = (idx: number, newTva: string) => {
-    const updated = [...lignes];
-    updated[idx].tva = newTva;
-    setLignes(updated);
   };
 
   const updateQty = (idx: number, qty: number) => {
@@ -130,6 +144,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     setLignes([...lignes, { nomPrestation: "", quantite: 1, unite: "U", prixUnitaire: 0, totalLigne: 0, tva, isOptional: false }]);
   };
 
+  const applyForfait = (forfait: TradeBundle) => {
+    const nextLignes = forfait.lignes.map((line) => ({ ...line, tva }));
+    setLignes([...lignes, ...nextLignes]);
+    setShowForfaits(false);
+  };
+
   const removeLigne = (idx: number) => setLignes(lignes.filter((_, i) => i !== idx));
 
   const toggleOptional = (idx: number) => {
@@ -147,14 +167,14 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ description: aiPrompt })
       });
-      const data = await res.json();
+      const data = (await res.json()) as GenerateDevisResponse;
       if (data.lignes && Array.isArray(data.lignes)) {
-        const newLignes = data.lignes.map((l: any) => ({
-          nomPrestation: l.designation,
-          quantite: l.quantite,
-          unite: l.unite,
-          prixUnitaire: l.prixUnitaire,
-          totalLigne: l.quantite * l.prixUnitaire,
+        const newLignes = data.lignes.map((line) => ({
+          nomPrestation: line.designation,
+          quantite: line.quantite,
+          unite: line.unite,
+          prixUnitaire: line.prixUnitaire,
+          totalLigne: line.quantite * line.prixUnitaire,
           tva: tva,
           isOptional: false
         }));
@@ -167,6 +187,46 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       alert("Erreur lors de la génération avec l'IA");
     } finally {
       setIsGeneratingAI(false);
+    }
+  };
+
+  const handleImportStarterCatalog = async () => {
+    if (!user || !activeTradeDefinition) return;
+
+    setIsImportingStarter(true);
+    try {
+      const response = await fetch("/api/onboarding/bootstrap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trade: activeTradeDefinition.key }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || "Impossible d'importer le starter métier");
+      }
+
+      await user.update({
+        unsafeMetadata: {
+          ...user.unsafeMetadata,
+          companyTrade: activeTradeDefinition.key,
+          onboardingCompleted: true,
+          starterCatalogImported: true,
+        },
+      });
+
+      const prestationsResponse = await fetch("/api/prestations");
+      const nextPrestations = await prestationsResponse.json();
+      setPrestations(Array.isArray(nextPrestations) ? nextPrestations : []);
+      toast.success(
+        payload.imported > 0
+          ? `${payload.imported} prestation(s) importée(s) pour ${activeTradeDefinition.label.toLowerCase()}`
+          : `Starter ${activeTradeDefinition.label.toLowerCase()} déjà présent`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Impossible d'importer le starter métier";
+      toast.error(message);
+    } finally {
+      setIsImportingStarter(false);
     }
   };
 
@@ -194,7 +254,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     Array.from(files).forEach((file) => {
       const reader = new FileReader();
       reader.onload = (event) => {
-        const img = new Image();
+        const img = new window.Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
           const MAX_WIDTH = 500;
@@ -233,7 +293,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         alert("Lien de signature indisponible.");
         return;
       }
-      const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
+      const signatureBase64 = sigCanvas.current!.getTrimmedCanvas().toDataURL("image/png");
       const res = await fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(devisInfo.signingToken)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -246,7 +306,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       } else {
         alert("Erreur lors de l'enregistrement de la signature");
       }
-    } catch (e) {
+    } catch {
       alert("Erreur réseau");
     } finally {
       setSignLoading(false);
@@ -340,6 +400,58 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </div>
         </div>
 
+        <div className="rounded-3xl border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+          <div className="flex flex-col gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
+                Packs métier
+              </p>
+              <h2 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                {activeTradeMeta.label} prêt à ajuster
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Réinjectez vos packs rapides métier ou importez votre starter catalogue si vous repartez d&apos;une base vide.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {TRADE_OPTIONS.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setSelectedTrade(option.key)}
+                    className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                      activeTrade === option.key
+                        ? "bg-violet-600 text-white shadow-brand"
+                        : "bg-white/80 text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setShowForfaits(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-white/80 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-100 dark:border-violet-500/20 dark:bg-white/8 dark:text-violet-200"
+              >
+                <Plus size={16} />
+                Ouvrir les packs {activeTradeMeta.shortLabel.toLowerCase()}
+              </button>
+              <button
+                type="button"
+                onClick={handleImportStarterCatalog}
+                disabled={isImportingStarter}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+              >
+                {isImportingStarter ? "Import..." : `Importer ${starterCount} lignes starter`}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Lignes du devis */}
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -359,6 +471,18 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
               </div>
               <div className="max-h-40 overflow-y-auto flex flex-col gap-1">
+                {filteredPrestations.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-6 text-center dark:border-slate-700 dark:bg-slate-800/60">
+                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                      {prestations.length === 0 ? "Aucune prestation dans votre catalogue" : "Aucune prestation trouvée"}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                      {prestations.length === 0
+                        ? "Importez le starter métier ou ajoutez une ligne libre pour continuer."
+                        : "Essayez un autre mot-clé ou utilisez une ligne libre."}
+                    </p>
+                  </div>
+                )}
                 {filteredPrestations.map((p) => (
                   <button key={p.id} onClick={() => addLigne(p)}
                     className="flex items-center gap-2 p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-lg text-left hover:bg-violet-50 transition text-sm">
@@ -426,10 +550,16 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                 <Plus size={16} /> Ligne libre
               </button>
               <button
+                onClick={() => setShowForfaits(true)}
+                className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+              >
+                <Plus size={16} /> Packs
+              </button>
+              <button
                 onClick={() => setShowAIModal(true)}
                 className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 transition dark:bg-violet-900/30 dark:border-violet-800 dark:text-violet-300"
               >
-                <Sparkles size={16} /> Avec l'IA
+                <Sparkles size={16} /> Avec l&apos;IA
               </button>
             </div>
           </div>
@@ -477,7 +607,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             <div className="flex gap-3 overflow-x-auto pb-2">
               {photos.map((p, i) => (
                 <div key={i} className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                  <img src={p} alt={`Photo ${i}`} className="w-full h-full object-cover" />
+                  <NextImage src={p} alt={`Photo ${i}`} fill unoptimized className="object-cover" />
                   <button onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow">
                     <X size={12} />
                   </button>
@@ -539,7 +669,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                 } else {
                   alert("Erreur lors de la création de la facture");
                 }
-              } catch (e) {
+    } catch {
                 alert("Erreur réseau");
               }
             }}
@@ -606,11 +736,11 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-brand-fuchsia" size={20} /> Rédiger avec l'IA</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-brand-fuchsia" size={20} /> Rédiger avec l&apos;IA</h3>
               <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>
             </div>
             <p className="text-sm text-slate-500 mb-4">
-              Décrivez les travaux à réaliser (ex: "Refaire une salle de bain de 10m2 avec douche italienne et peinture") et l'IA générera les lignes de devis pour vous.
+              Décrivez les travaux à réaliser (ex: &quot;Refaire une salle de bain de 10m2 avec douche italienne et peinture&quot;) et l&apos;IA générera les lignes de devis pour vous.
             </p>
             <textarea
               value={aiPrompt}
@@ -626,6 +756,56 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               {isGeneratingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles size={18} />}
               {isGeneratingAI ? "Génération..." : "Générer les lignes"}
             </button>
+          </motion.div>
+        </div>
+      )}
+
+      {showForfaits && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/55 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                  Packs rapides
+                </p>
+                <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
+                  {activeTradeMeta.label}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                  Ajoutez un pack métier complet, puis ajustez les quantités et options directement dans le devis.
+                </p>
+              </div>
+              <button onClick={() => setShowForfaits(false)} className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800">
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              {forfaits.map((forfait) => (
+                <button
+                  key={forfait.nom}
+                  type="button"
+                  onClick={() => applyForfait(forfait)}
+                  className="w-full rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{forfait.nom}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                        {forfait.description}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-200">
+                      {forfait.lignes.length} lignes
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </motion.div>
         </div>
       )}
