@@ -95,6 +95,32 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   );
 }
 
+export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
+  return (
+    <nav className="client-panel mt-4 hidden items-center gap-2 rounded-[1.75rem] p-2 lg:flex">
+      {CLIENT_NAV_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const isActive = active === item.key;
+
+        return (
+          <Link
+            key={item.key}
+            href={item.href}
+            className={`inline-flex items-center gap-2 rounded-[1.15rem] px-4 py-3 text-sm font-semibold transition ${
+              isActive
+                ? "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 text-white shadow-[0_22px_55px_-28px_rgba(124,58,237,0.65)]"
+                : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
+            }`}
+          >
+            <Icon size={17} />
+            {item.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 export function ClientSupportButton({ compact = false }: { compact?: boolean }) {
   return (
     <a
@@ -193,6 +219,8 @@ export function ClientSubpageShell({
             </div>
           </div>
         </header>
+
+        <ClientDesktopNav active={activeNav} />
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <section className="client-panel-strong overflow-hidden rounded-[2.25rem] px-5 py-6 sm:px-6 lg:px-7">

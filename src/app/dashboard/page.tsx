@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ClientBrandMark,
+  ClientDesktopNav,
   ClientMobileDock,
   ClientSupportButton,
 } from "@/components/client-shell";
@@ -94,6 +95,15 @@ type QuickLinkItem = {
   icon: LucideIcon;
   tone: Tone;
   tourClass?: string;
+};
+
+type ActionRailItem = {
+  href: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
+  tone: Tone;
+  badge?: string;
 };
 
 type MonthlyDatum = {
@@ -207,35 +217,6 @@ function renderSignalIcon(tone: Tone, size = 16) {
   }
 }
 
-function HeroSummaryTile({
-  detail,
-  label,
-  tone,
-  value,
-}: {
-  detail: string;
-  label: string;
-  tone: Tone;
-  value: string;
-}) {
-  const classes = toneClasses(tone);
-
-  return (
-    <div className="rounded-[1.65rem] border border-white/45 bg-white/72 p-4 shadow-[0_20px_45px_-35px_rgba(15,23,42,0.22)] dark:border-white/10 dark:bg-white/4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">{label}</p>
-          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
-        </div>
-        <div className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-          {renderSignalIcon(tone, 16)}
-        </div>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{detail}</p>
-    </div>
-  );
-}
-
 function FocusSignalCard({ signal }: { signal: DashboardSignal }) {
   const classes = toneClasses(signal.tone);
   const content = (
@@ -309,6 +290,30 @@ function QuickLinkCard({ item }: { item: QuickLinkItem }) {
           <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
         </div>
       </motion.div>
+    </Link>
+  );
+}
+
+function ActionRailCard({ item }: { item: ActionRailItem }) {
+  const classes = toneClasses(item.tone);
+  const Icon = item.icon;
+
+  return (
+    <Link href={item.href}>
+      <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/78 p-4 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-violet-300/40 dark:border-white/8 dark:bg-white/4">
+        <div className="flex items-start justify-between gap-3">
+          <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+            <Icon size={18} />
+          </div>
+          {item.badge ? (
+            <span className={`client-chip ring-1 ${classes.chip}`}>{item.badge}</span>
+          ) : null}
+        </div>
+        <div className="mt-4">
+          <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.label}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+        </div>
+      </div>
     </Link>
   );
 }
@@ -728,9 +733,81 @@ export default function DashboardPage() {
       tone: "violet",
     },
   ];
+  const actionRailItems = useMemo<ActionRailItem[]>(() => {
+    const items: ActionRailItem[] = [
+      devis.length === 0
+        ? {
+            href: "/nouveau-devis",
+            label: "Créer le premier devis",
+            description: "Lancez la première affaire pour débloquer le suivi, les relances et les stats.",
+            icon: Plus,
+            tone: "violet",
+          }
+        : {
+            href: "/nouveau-devis",
+            label: "Préparer un nouveau devis",
+            description: "Démarrez une nouvelle proposition sans repasser par d'autres écrans.",
+            icon: Plus,
+            tone: "violet",
+          },
+    ];
 
-  const primaryQuickLinks = quickLinks.slice(0, 4);
-  const secondaryQuickLinks = quickLinks.slice(4);
+    if (devisARelancer.length > 0) {
+      items.push({
+        href: "/devis",
+        label: "Relancer les devis chauds",
+        description: "Le raccourci le plus rentable aujourd'hui: rappeler les affaires ouvertes.",
+        icon: Bell,
+        tone: "rose",
+        badge: `${devisARelancer.length}`,
+      });
+    } else if (pendingQuotes.length > 0) {
+      items.push({
+        href: "/devis",
+        label: "Suivre le pipeline actif",
+        description: `${pendingQuotes.length} devis attendent encore une décision côté client.`,
+        icon: Clock3,
+        tone: "amber",
+        badge: `${pendingQuotes.length}`,
+      });
+    } else {
+      items.push({
+        href: "/clients",
+        label: "Ouvrir le carnet client",
+        description: "Retrouvez un contact, son historique et repartez immédiatement sur un nouveau devis.",
+        icon: Users,
+        tone: "slate",
+      });
+    }
+
+    if (setupIsRequired) {
+      items.push({
+        href: "#dashboard-setup",
+        label: "Finaliser le setup métier",
+        description: "Activez le starter pour retrouver vos prestations et vos packs dans tout le flux devis.",
+        icon: Sparkles,
+        tone: "violet",
+      });
+    } else if (!isPro) {
+      items.push({
+        href: "/abonnement",
+        label: "Passer en PRO",
+        description: "Déverrouillez le flux complet pour ne plus rester limité au mode d'essai.",
+        icon: ShieldCheck,
+        tone: "violet",
+      });
+    } else {
+      items.push({
+        href: "/factures",
+        label: "Vérifier les factures",
+        description: "Gardez un oeil sur ce qui est émis, encaissé ou encore à suivre.",
+        icon: FileCheck2,
+        tone: "emerald",
+      });
+    }
+
+    return items;
+  }, [devis.length, devisARelancer.length, isPro, pendingQuotes.length, setupIsRequired]);
 
   const todayFocus = useMemo<DashboardSignal>(() => {
     if (setupIsRequired) {
@@ -910,10 +987,12 @@ export default function DashboardPage() {
           </div>
         </header>
 
+        <ClientDesktopNav active="dashboard" />
+
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <motion.section
             {...sectionMotion(0)}
-            className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]"
+            className="grid gap-4 2xl:grid-cols-[minmax(0,1.38fr)_minmax(22rem,0.82fr)]"
           >
             <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
@@ -921,35 +1000,44 @@ export default function DashboardPage() {
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
 
               <div className="relative flex flex-col gap-6">
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
+                    <GreetingIcon size={15} />
+                    {todayLabel}
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
+                    <BriefcaseBusiness size={14} />
+                    {starterTrade?.shortLabel || "Métier à définir"}
+                  </div>
+                  <div className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
+                    {objectifProgress.toFixed(0)}% du cap mensuel
+                  </div>
+                </div>
+
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(17rem,0.9fr)] xl:items-start">
                   <div className="max-w-3xl">
-                    <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
-                      <GreetingIcon size={15} />
-                      {todayLabel}
-                    </div>
-                    <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
                       {greetingText}
                       {user?.firstName ? `, ${user.firstName}` : ""}.
                     </h1>
                     <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                      Un dashboard plus simple, centré sur ce qu&apos;il faut faire maintenant :
-                      préparer, suivre, encaisser, sans vous perdre dans une pile de cartes.
+                      Un cockpit plus clair sur ordinateur: vos actions utiles d&apos;abord, les chiffres ensuite, et une navigation stable pour ne plus chercher où cliquer.
                     </p>
 
-                    <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
                       {[
                         {
-                          label: "1. Préparer",
+                          label: "Préparer",
                           detail: starterTrade?.shortLabel || "Métier à définir",
                           tone: "violet",
                         },
                         {
-                          label: "2. Suivre",
+                          label: "Suivre",
                           detail: `${pendingQuotes.length} devis en attente`,
                           tone: "amber",
                         },
                         {
-                          label: "3. Encaisser",
+                          label: "Encaisser",
                           detail: `${acceptedQuotes.length} devis validés`,
                           tone: "emerald",
                         },
@@ -958,7 +1046,7 @@ export default function DashboardPage() {
                         return (
                           <div
                             key={step.label}
-                            className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
+                            className="rounded-[1.5rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
                           >
                             <div className="flex items-center justify-between gap-3">
                               <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
@@ -1023,152 +1111,148 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="w-full rounded-[1.8rem] border border-white/45 bg-white/72 p-5 shadow-[0_26px_65px_-42px_rgba(15,23,42,0.25)] dark:border-white/10 dark:bg-white/5 lg:max-w-[19rem]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                      Priorité du moment
-                    </p>
-                    <div className="mt-4">
-                      <FocusSignalCard signal={todayFocus} />
+                  <div className="space-y-3 xl:pl-2">
+                    <div className="rounded-[1.8rem] border border-white/45 bg-white/74 p-5 shadow-[0_26px_65px_-42px_rgba(15,23,42,0.25)] dark:border-white/10 dark:bg-white/5">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+                            Prochaine action
+                          </p>
+                          <p className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">{todayFocus.title}</p>
+                        </div>
+                        <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
+                          {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{todayFocus.description}</p>
+                      {todayFocus.href ? (
+                        <Link
+                          href={todayFocus.href}
+                          className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                        >
+                          Ouvrir
+                          <ChevronRight size={16} />
+                        </Link>
+                      ) : null}
                     </div>
-                    <button
-                      onClick={handleUpdateObjectif}
-                      className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                    >
-                      <Pencil size={15} />
-                      Ajuster l&apos;objectif
-                    </button>
-                  </div>
-                </div>
 
-                <div className="grid gap-3 md:grid-cols-3">
-                  <HeroSummaryTile
-                    label="Objectif du mois"
-                    value={formatCurrency(objectifActif)}
-                    detail={
-                      CA_TTC >= objectifActif
-                        ? "Cap atteint, vous pouvez viser plus haut."
-                        : `${formatCurrency(remainingToGoal)} TTC restants pour boucler le mois.`
-                    }
-                    tone={CA_TTC >= objectifActif ? "emerald" : "slate"}
-                  />
-                  <HeroSummaryTile
-                    label="CA validé"
-                    value={formatCurrency(acceptedRevenueHT)}
-                    detail={`${acceptedQuotes.length} devis signés ou acceptés alimentent déjà votre chiffre.`}
-                    tone="emerald"
-                  />
-                  <HeroSummaryTile
-                    label="Pipeline chaud"
-                    value={formatCurrency(pipelineRevenueHT)}
-                    detail={`${pendingQuotes.length} devis sont encore à transformer.`}
-                    tone="amber"
-                  />
+                    <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                      <div className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 dark:border-white/10 dark:bg-white/4">
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
+                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{formatCurrency(remainingToGoal)} restants</p>
+                      </div>
+                      <div className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 dark:border-white/10 dark:bg-white/4">
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Devis suivis</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{devis.length}</p>
+                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{conversionRate}% de conversion</p>
+                      </div>
+                      <div className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 dark:border-white/10 dark:bg-white/4">
+                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cadence</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
+                          {pendingQuotes.length > 0 ? `${pendingQuotes.length} en attente` : "Flux propre"}
+                        </p>
+                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                          {acceptedQuotes.length} affaire{acceptedQuotes.length > 1 ? "s" : ""} validée{acceptedQuotes.length > 1 ? "s" : ""}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <motion.div
-              {...sectionMotion(0.04)}
-              className="client-panel rounded-[2.2rem] p-5 sm:p-6"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Centre d&apos;action</p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    Les bons raccourcis, au bon endroit
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                    Le côté droit sert maintenant uniquement à agir, pas à re-lire les mêmes chiffres sous plusieurs formes.
-                  </p>
+            <div className="space-y-4 xl:sticky xl:top-28 xl:self-start">
+              <motion.div
+                {...sectionMotion(0.04)}
+                className="client-panel rounded-[2.2rem] p-5 sm:p-6"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Centre d&apos;action</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Les trois gestes utiles du moment
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Sur ordinateur, le rail de droite sert uniquement à agir vite. Les modules complets restent plus bas.
+                    </p>
+                  </div>
                 </div>
-                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
-                  {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
-                </span>
-              </div>
 
-              {secondarySignals.length > 0 && (
-                <div className="mt-5 space-y-3">
-                  {secondarySignals.map((signal) => (
-                    <FocusSignalCard key={signal.id} signal={signal} />
+                <div className="mt-5 grid gap-3">
+                  {actionRailItems.map((item) => (
+                    <ActionRailCard key={`${item.href}-${item.label}`} item={item} />
                   ))}
                 </div>
-              )}
 
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <Link href="/clients" className="tour-clients">
-                  <div className="client-quick-link rounded-[1.6rem] p-4 transition hover:-translate-y-0.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">Clients</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Retrouver un contact, son historique et ses coordonnées.
-                        </p>
-                      </div>
-                      <Users size={18} className="text-violet-600 dark:text-violet-200" />
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href="/catalogue" className="tour-catalogue">
-                  <div className="client-quick-link rounded-[1.6rem] p-4 transition hover:-translate-y-0.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">Catalogue</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Réutiliser vos lignes et accélérer la préparation des devis.
-                        </p>
-                      </div>
-                      <Package size={18} className="text-amber-600 dark:text-amber-200" />
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href="/parametres">
-                  <div className="client-quick-link rounded-[1.6rem] p-4 transition hover:-translate-y-0.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">Paramètres</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Logo, identité entreprise, mentions et réglages du compte.
-                        </p>
-                      </div>
-                      <Settings size={18} className="text-slate-600 dark:text-slate-200" />
-                    </div>
-                  </div>
-                </Link>
-
-                <Link href="/factures">
-                  <div className="client-quick-link rounded-[1.6rem] p-4 transition hover:-translate-y-0.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">Factures</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Vérifier ce qui a été émis, encaissé ou reste à suivre.
-                        </p>
-                      </div>
-                      <FileCheck2 size={18} className="text-slate-600 dark:text-slate-200" />
-                    </div>
-                  </div>
-                </Link>
-              </div>
-
-              <div className="mt-5 flex flex-wrap gap-3">
-                <ClientSupportButton />
-                {canAccessAdminDashboard && (
-                  <Link
-                    href="/admin"
-                    className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    onClick={handleUpdateObjectif}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
                   >
-                    <ShieldCheck size={16} />
-                    Ouvrir le cockpit admin
+                    <Pencil size={15} />
+                    Ajuster l&apos;objectif
+                  </button>
+                  <Link
+                    href="/parametres"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                  >
+                    <Settings size={15} />
+                    Paramètres
                   </Link>
+                </div>
+              </motion.div>
+
+              <motion.div
+                {...sectionMotion(0.08)}
+                className="client-panel rounded-[2.2rem] p-5 sm:p-6"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Signaux du jour</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Ce qui mérite votre attention
+                    </h2>
+                  </div>
+                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
+                    {secondarySignals.length}
+                  </span>
+                </div>
+
+                {secondarySignals.length > 0 ? (
+                  <div className="mt-5 space-y-3">
+                    {secondarySignals.map((signal) => (
+                      <FocusSignalCard key={signal.id} signal={signal} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-[1.6rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-6 dark:border-white/10 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun point secondaire bloquant</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Le cockpit reste propre. Vous pouvez vous concentrer sur la prochaine création ou le suivi client.
+                    </p>
+                  </div>
                 )}
-              </div>
-            </motion.div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <ClientSupportButton />
+                  {canAccessAdminDashboard && (
+                    <Link
+                      href="/admin"
+                      className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                    >
+                      <ShieldCheck size={16} />
+                      Ouvrir le cockpit admin
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            </div>
           </motion.section>
 
           {setupIsRequired && selectedTradeDefinition && (
             <motion.section
+              id="dashboard-setup"
               {...sectionMotion(0.08)}
               className="grid gap-4 xl:grid-cols-[1.16fr_0.84fr]"
             >
@@ -1450,40 +1534,23 @@ export default function DashboardPage() {
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Atelier quotidien</p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
                     <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      Les zones utiles, sans détour
+                      Toute la boîte à outils, rangée clairement
                     </h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Une grille stable sur desktop pour retrouver chaque zone métier sans passer par un panneau secondaire confus.
+                    </p>
                   </div>
                   <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                    2 parcours principaux
+                    {quickLinks.length} accès directs
                   </span>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {primaryQuickLinks.map((item) => (
+                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {quickLinks.map((item) => (
                     <QuickLinkCard key={item.href} item={item} />
                   ))}
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  {secondaryQuickLinks.map((item) => {
-                    const Icon = item.icon;
-                    const classes = toneClasses(item.tone);
-
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                      >
-                        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-full ring-1 ${classes.icon}`}>
-                          <Icon size={14} />
-                        </span>
-                        {item.label}
-                      </Link>
-                    );
-                  })}
                 </div>
               </motion.div>
             </div>
