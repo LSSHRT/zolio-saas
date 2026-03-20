@@ -1067,9 +1067,9 @@ export default function DashboardPage() {
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <motion.section
             {...sectionMotion(0)}
-            className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(20rem,0.8fr)]"
+            className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(20rem,0.8fr)]"
           >
-            <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
+            <div className="client-panel-strong relative self-start overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-fuchsia-500/14 blur-[80px]" />
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
@@ -1089,7 +1089,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.06fr)_minmax(19rem,0.94fr)] xl:items-start">
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start 2xl:grid-cols-[minmax(0,1.06fr)_minmax(19rem,0.94fr)]">
                   <div className="max-w-3xl">
                     <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-[3.15rem]">
                       {greetingText}
@@ -1182,7 +1182,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(18rem,0.94fr)]">
+                <div className="mt-6 space-y-4">
                   <div className="grid gap-3 sm:grid-cols-3">
                     {[
                       {
@@ -1221,7 +1221,7 @@ export default function DashboardPage() {
                     })}
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <HeroSnapshotCard
                       label="Cap restant"
                       value={formatCurrency(remainingToGoal)}
