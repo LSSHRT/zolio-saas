@@ -587,7 +587,7 @@
 
   .landing-cinematic-bg {
     isolation: isolate;
-    transform: translateX(-50%) translateZ(0);
+    transform: translateZ(0);
   }
 
   .landing-spectral-haze {
@@ -637,13 +637,13 @@
   .landing-light-beam-left {
     left: -3vw;
     background: linear-gradient(180deg, rgba(125, 211, 252, 0.22), rgba(125, 211, 252, 0));
-    transform: skewX(-16deg);
+    transform: skewX(-16deg) translateZ(0);
   }
 
   .landing-light-beam-right {
     right: -6vw;
     background: linear-gradient(180deg, rgba(251, 146, 60, 0.18), rgba(251, 146, 60, 0));
-    transform: skewX(16deg);
+    transform: skewX(16deg) translateZ(0);
   }
 
   .landing-orbit-ring {
@@ -652,7 +652,7 @@
     top: 2.5rem;
     height: min(72vw, 58rem);
     width: min(72vw, 58rem);
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateZ(0);
     border-radius: 9999px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background:
@@ -662,7 +662,6 @@
       0 0 90px rgba(94, 234, 212, 0.06),
       inset 0 0 40px rgba(255, 255, 255, 0.02);
     opacity: 0.34;
-    transform: translateZ(0);
   }
 
   .landing-orbit-ring::before,
