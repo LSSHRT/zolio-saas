@@ -9,7 +9,6 @@ import {
   CloudSun,
   FileCheck2,
   FileText,
-  Home,
   LineChart,
   MoonStar,
   Package,
@@ -29,7 +28,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
@@ -37,6 +35,7 @@ import { CallBackProps, STATUS, Step } from "react-joyride";
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { ClientBrandMark, ClientMobileDock } from "@/components/client-shell";
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
@@ -216,28 +215,6 @@ function QuickLinkCard({ item }: { item: QuickLinkItem }) {
           <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
         </div>
       </motion.div>
-    </Link>
-  );
-}
-
-function MobileNavLink({
-  active,
-  href,
-  icon: Icon,
-  label,
-}: {
-  active?: boolean;
-  href: string;
-  icon: LucideIcon;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`client-nav-link ${active ? "client-nav-link-active" : ""}`}
-    >
-      <Icon size={20} strokeWidth={active ? 2.4 : 2} />
-      <span className="text-[11px] font-semibold">{label}</span>
     </Link>
   );
 }
@@ -572,19 +549,7 @@ export default function DashboardPage() {
       <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10">
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center justify-between gap-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="relative h-11 w-11 overflow-hidden rounded-2xl ring-1 ring-white/50 dark:ring-white/10">
-                <Image src="/logo.png" alt="Zolio" fill className="object-cover" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold tracking-[0.22em] text-violet-600 dark:text-violet-200">
-                  ZOLIO
-                </p>
-                <p className="truncate text-sm text-slate-500 dark:text-slate-400">
-                  Workspace bâtiment
-                </p>
-              </div>
-            </div>
+            <ClientBrandMark />
 
             <div className="flex items-center gap-2 sm:gap-3">
               <ThemeToggle />
@@ -1180,13 +1145,7 @@ export default function DashboardPage() {
         </main>
       </div>
 
-      <nav className="client-nav-dock fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md items-center justify-between gap-2 rounded-[2rem] px-3 py-3 lg:hidden">
-        <MobileNavLink href="/dashboard" icon={Home} label="Accueil" active />
-        <MobileNavLink href="/devis" icon={FileText} label="Devis" />
-        <MobileNavLink href="/clients" icon={Users} label="Clients" />
-        <MobileNavLink href="/catalogue" icon={BriefcaseBusiness} label="Catalogue" />
-        <MobileNavLink href="/abonnement" icon={Settings} label="Pro" />
-      </nav>
+      <ClientMobileDock active="dashboard" />
     </div>
   );
 }

@@ -1,12 +1,22 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Search, CheckCircle, Clock, Trash2, Download, MessageSquareQuote, BadgeCheck } from "lucide-react";
-import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  BadgeCheck,
+  CheckCircle,
+  Clock,
+  Download,
+  FileText,
+  MessageSquareQuote,
+  Search,
+  Trash2,
+  type LucideIcon,
+} from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { ClientHeroStat, ClientSectionCard, ClientSubpageShell } from "@/components/client-shell";
 
 interface Facture {
   numero: string;
@@ -20,7 +30,7 @@ interface Facture {
   devisRef: string;
 }
 
-const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
+const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
   "Émise": { icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
   "Payée": { icon: BadgeCheck, color: "text-blue-600", bg: "bg-blue-50" },
   "En retard": { icon: Clock, color: "text-red-500", bg: "bg-red-50" },
@@ -30,8 +40,11 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function FacturesPage() {
   const { user } = useUser();
-  const { data, error, isLoading, mutate } = useSWR('/api/factures', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
-  const factures = Array.isArray(data) ? data : [];
+  const { data, isLoading, mutate } = useSWR("/api/factures", fetcher, {
+    revalidateOnFocus: false,
+    keepPreviousData: true,
+  });
+  const factures = useMemo<Facture[]>(() => (Array.isArray(data) ? data : []), [data]);
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -39,38 +52,73 @@ export default function FacturesPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
 
-  const googleReviewLink = (user?.unsafeMetadata?.companyGoogleReview as string) || (user?.publicMetadata?.companyGoogleReview as string);
+  const googleReviewLink =
+    (user?.unsafeMetadata?.companyGoogleReview as string) ||
+    (user?.publicMetadata?.companyGoogleReview as string);
 
-  const filtered = factures.filter(
-    (f) => (f.nomClient || '').toLowerCase().includes((search || '').toLowerCase()) || (f.numero || '').toLowerCase().includes((search || '').toLowerCase())
+  const isLate = (facture: Facture) => {
+    if (facture.statut === "Payée" || !facture.date) return false;
+    const parts = facture.date.split("/");
+    if (parts.length !== 3) return false;
+    const issueDate = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
+    const diffTime = Date.now() - issueDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 30;
+  };
+
+  const filtered = useMemo(
+    () =>
+      factures.filter(
+        (facture: Facture) =>
+          (facture.nomClient || "").toLowerCase().includes(search.toLowerCase()) ||
+          (facture.numero || "").toLowerCase().includes(search.toLowerCase()),
+      ),
+    [factures, search],
   );
 
-  const totalEncaisse = factures.reduce((s, f) => s + (parseFloat(f.totalTTC) || 0), 0);
+  const totalFacture = useMemo(
+    () => factures.reduce((sum: number, facture: Facture) => sum + (parseFloat(facture.totalTTC) || 0), 0),
+    [factures],
+  );
+  const totalPaid = useMemo(
+    () =>
+      factures
+        .filter((facture: Facture) => facture.statut === "Payée")
+        .reduce((sum: number, facture: Facture) => sum + (parseFloat(facture.totalTTC) || 0), 0),
+    [factures],
+  );
+  const lateInvoices = useMemo(
+    () => factures.filter((facture: Facture) => isLate(facture)).length,
+    [factures],
+  );
+  const paidInvoices = useMemo(
+    () => factures.filter((facture: Facture) => facture.statut === "Payée").length,
+    [factures],
+  );
 
   const handleDelete = async (numero: string) => {
     if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) return;
-    
+
     setDeleting(numero);
     try {
-      const res = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
-      if (res.ok) {
-        mutate(factures.filter((f: Facture) => f.numero !== numero), false);
+      const response = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
+      if (response.ok) {
+        mutate(factures.filter((facture: Facture) => facture.numero !== numero), false);
         toast.success("Facture supprimée");
       } else {
         toast.error("Erreur lors de la suppression de la facture");
       }
-    } catch (e) {
+    } catch {
       toast.error("Erreur réseau");
     } finally {
       setDeleting(null);
     }
   };
 
-  
-  const formatCSVField = (field: any) => {
+  const formatCSVField = (field: string | number) => {
     const stringField = String(field || "");
     if (stringField.includes(";") || stringField.includes("\"") || stringField.includes("\n")) {
-      return `"${stringField.replace(/"/g, '""')}"`;
+      return `"${stringField.replace(/"/g, "\"\"")}"`;
     }
     return stringField;
   };
@@ -82,19 +130,18 @@ export default function FacturesPage() {
 
   const handleExportCSV = () => {
     const headers = ["Numéro", "Date", "Client", "Email", "Total HT", "TVA", "Total TTC", "Statut"];
-    const rows = factures.map((f: Facture) => [
-      formatCSVField(f.numero),
-      formatCSVField(f.date),
-      formatCSVField(f.nomClient),
-      formatCSVField(f.emailClient),
-      formatNumberForExcel(f.totalHT),
-      formatNumberForExcel(f.tva),
-      formatNumberForExcel(f.totalTTC),
-      formatCSVField(f.statut)
+    const rows = factures.map((facture: Facture) => [
+      formatCSVField(facture.numero),
+      formatCSVField(facture.date),
+      formatCSVField(facture.nomClient),
+      formatCSVField(facture.emailClient),
+      formatNumberForExcel(facture.totalHT),
+      formatNumberForExcel(facture.tva),
+      formatNumberForExcel(facture.totalTTC),
+      formatCSVField(facture.statut),
     ]);
-    const csvContent = [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
-    // Add BOM for Excel UTF-8 compatibility
-    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = [headers.join(";"), ...rows.map((row) => row.join(";"))].join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -105,21 +152,29 @@ export default function FacturesPage() {
   };
 
   const handleExportURSSAF = () => {
-    // Livre des recettes URSSAF format
-    const headers = ["Date d'encaissement", "Référence de la pièce justificative", "Nom du client", "Nature de la prestation", "Montant encaissé", "Mode de règlement"];
-    const facturesEncaissees = factures.filter((f: Facture) => f.statut === "Payée" || f.statut === "Émise" || parseFloat(f.totalTTC) > 0); 
-    
-    const rows = facturesEncaissees.map((f: Facture) => [
-      formatCSVField(f.date),
-      formatCSVField(f.numero),
-      formatCSVField(f.nomClient),
+    const headers = [
+      "Date d'encaissement",
+      "Référence de la pièce justificative",
+      "Nom du client",
+      "Nature de la prestation",
+      "Montant encaissé",
+      "Mode de règlement",
+    ];
+    const facturesEncaissees = factures.filter(
+      (facture: Facture) =>
+        facture.statut === "Payée" || facture.statut === "Émise" || parseFloat(facture.totalTTC) > 0,
+    );
+
+    const rows = facturesEncaissees.map((facture: Facture) => [
+      formatCSVField(facture.date),
+      formatCSVField(facture.numero),
+      formatCSVField(facture.nomClient),
       "Vente / Prestation de service",
-      formatNumberForExcel(f.totalTTC),
-      "Virement / Chèque / Espèces"
+      formatNumberForExcel(facture.totalTTC),
+      "Virement / Chèque / Espèces",
     ]);
-    const csvContent = [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
-    // Add BOM for Excel UTF-8 compatibility
-    const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const csvContent = [headers.join(";"), ...rows.map((row) => row.join(";"))].join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -131,33 +186,42 @@ export default function FacturesPage() {
 
   const handleBulkDelete = async () => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
+
     setIsDeletingBulk(true);
     let successCount = 0;
+
     for (const id of Array.from(selectedIds)) {
       try {
-        const res = await fetch(`/api/factures/${id}`, { method: "DELETE" });
-        if (res.ok) successCount++;
-      } catch (e) {
-        console.error(e);
+        const response = await fetch(`/api/factures/${id}`, { method: "DELETE" });
+        if (response.ok) successCount += 1;
+      } catch (err) {
+        console.error(err);
       }
     }
+
     if (successCount > 0) {
-      mutate(factures.filter((item: any) => !selectedIds.has(item.numero)), false);
+      mutate(factures.filter((facture: Facture) => !selectedIds.has(facture.numero)), false);
       setSelectedIds(new Set());
     }
+
     setIsDeletingBulk(false);
   };
 
   const handleMarkAsPaid = async (numero: string) => {
     setMarkingPaid(numero);
     try {
-      const res = await fetch(`/api/factures/${numero}`, {
+      const response = await fetch(`/api/factures/${numero}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut: "Payée" }),
       });
-      if (res.ok) {
-        mutate(factures.map((f: Facture) => f.numero === numero ? { ...f, statut: "Payée" } : f), false);
+      if (response.ok) {
+        mutate(
+          factures.map((facture: Facture) =>
+            facture.numero === numero ? { ...facture, statut: "Payée" } : facture,
+          ),
+          false,
+        );
         toast.success("Facture marquée comme payée !");
       } else {
         toast.error("Erreur lors de la mise à jour");
@@ -169,76 +233,102 @@ export default function FacturesPage() {
     }
   };
 
-  const handleRelance = (f: Facture) => {
-    const sujet = encodeURIComponent(`Relance de paiement : Facture ${f.numero}`);
-    const corps = encodeURIComponent(`Bonjour ${f.nomClient},\n\nSauf erreur de notre part, nous n'avons pas encore reçu le règlement de la facture ${f.numero} émise le ${f.date}, d'un montant de ${f.totalTTC}€.\n\nVous trouverez les coordonnées bancaires sur la facture pour effectuer le virement.\n\nNous vous remercions de bien vouloir faire le nécessaire dans les meilleurs délais.\n\nCordialement.`);
-    window.location.href = `mailto:${f.emailClient}?subject=${sujet}&body=${corps}`;
+  const handleRelance = (facture: Facture) => {
+    const subject = encodeURIComponent(`Relance de paiement : Facture ${facture.numero}`);
+    const body = encodeURIComponent(
+      `Bonjour ${facture.nomClient},\n\nSauf erreur de notre part, nous n'avons pas encore reçu le règlement de la facture ${facture.numero} émise le ${facture.date}, d'un montant de ${facture.totalTTC}€.\n\nVous trouverez les coordonnées bancaires sur la facture pour effectuer le virement.\n\nNous vous remercions de bien vouloir faire le nécessaire dans les meilleurs délais.\n\nCordialement.`,
+    );
+    window.location.href = `mailto:${facture.emailClient}?subject=${subject}&body=${body}`;
   };
 
-  const handleReviewRequest = (f: Facture) => {
+  const handleReviewRequest = (facture: Facture) => {
     if (!googleReviewLink) {
       toast.error("Veuillez d'abord configurer votre lien Google My Business dans les Paramètres.");
       return;
     }
-    const sujet = encodeURIComponent(`Votre avis compte pour nous !`);
-    const corps = encodeURIComponent(`Bonjour ${f.nomClient},\n\nNous vous remercions pour votre confiance et espérons que vous êtes satisfait de notre intervention.\n\nPourriez-vous prendre 1 minute pour nous laisser un avis sur Google ? Cela nous aide énormément : \n${googleReviewLink}\n\nMerci d'avance et à bientôt !\n\nCordialement.`);
-    window.location.href = `mailto:${f.emailClient}?subject=${sujet}&body=${corps}`;
+    const subject = encodeURIComponent("Votre avis compte pour nous !");
+    const body = encodeURIComponent(
+      `Bonjour ${facture.nomClient},\n\nNous vous remercions pour votre confiance et espérons que vous êtes satisfait de notre intervention.\n\nPourriez-vous prendre 1 minute pour nous laisser un avis sur Google ? Cela nous aide énormément : \n${googleReviewLink}\n\nMerci d'avance et à bientôt !\n\nCordialement.`,
+    );
+    window.location.href = `mailto:${facture.emailClient}?subject=${subject}&body=${body}`;
   };
 
-
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
-      {/* Header */}
-      <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
-        <Link href="/dashboard">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <ArrowLeft size={20} />
-          </motion.div>
-        </Link>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Factures</h1>
-      
-        <div className="flex gap-2">
-          <button onClick={handleExportURSSAF} className="flex items-center gap-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 dark:hover:bg-slate-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+    <ClientSubpageShell
+      title="Mes factures"
+      description="Suivez votre facturation, vos encaissements et vos relances dans un cockpit plus lisible, plus dense et pensé pour une vraie consultation terrain."
+      activeNav="factures"
+      eyebrow="Suivi de trésorerie"
+      actions={
+        <>
+          <button
+            type="button"
+            onClick={handleExportURSSAF}
+            className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+          >
             <FileText size={16} />
-            <span className="hidden sm:inline">Livre Recettes URSSAF</span>
+            Livre URSSAF
           </button>
-          <button onClick={handleExportCSV} className="flex items-center gap-2 bg-gradient-zolio hover:opacity-90 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors">
+          <button
+            type="button"
+            onClick={handleExportCSV}
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand"
+          >
             <Download size={16} />
-            <span className="hidden sm:inline">Export Comptable</span>
+            Export comptable
           </button>
+        </>
+      }
+      summary={
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <ClientHeroStat
+            label="Facturé"
+            value={`${totalFacture.toFixed(0)}€`}
+            detail={`${factures.length} facture${factures.length > 1 ? "s" : ""} émises`}
+            tone="emerald"
+          />
+          <ClientHeroStat
+            label="Encaissé"
+            value={`${totalPaid.toFixed(0)}€`}
+            detail={`${paidInvoices} facture${paidInvoices > 1 ? "s" : ""} réglée${paidInvoices > 1 ? "s" : ""}`}
+            tone="violet"
+          />
+          <ClientHeroStat
+            label="En retard"
+            value={String(lateInvoices)}
+            detail="À relancer en priorité"
+            tone="rose"
+          />
+          <ClientHeroStat
+            label="Vue active"
+            value={String(filtered.length)}
+            detail="Factures actuellement affichées"
+            tone="slate"
+          />
         </div>
-      </header>
-
-      <main className="flex-1 px-6 flex flex-col gap-6">
-        {/* Stats rapide */}
-        <div className="flex gap-3">
-          <div className="flex-[2] bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white">
-            <p className="text-white/70 text-xs font-medium">Chiffre d'Affaires Facturé</p>
-            <p className="text-2xl font-bold mt-1">{totalEncaisse.toFixed(0)}€</p>
-          </div>
-          <div className="flex-1 bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col justify-center">
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">Factures</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{factures.length}</p>
-          </div>
-        </div>
-
-        {/* Search */}
+      }
+    >
+      <ClientSectionCard className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input type="text" placeholder="Rechercher par client ou n° facture..." value={search} onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500" />
+          <input
+            type="text"
+            placeholder="Rechercher par client ou n° facture..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+          />
         </div>
 
-        {/* Bulk Actions */}
-        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4">
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
-            <input 
-              type="checkbox" 
-              className="w-4 h-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
+            <input
+              type="checkbox"
+              className="h-4 w-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedIds(new Set(filtered.map((item: any) => item.numero)));
+                  setSelectedIds(new Set(filtered.map((facture: Facture) => facture.numero)));
                 } else {
                   setSelectedIds(new Set());
                 }
@@ -246,133 +336,185 @@ export default function FacturesPage() {
             />
             Sélectionner tout ({filtered.length})
           </label>
+
+          {selectedIds.size > 0 ? (
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={isDeletingBulk}
+              className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+            >
+              <Trash2 size={15} />
+              {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
+            </button>
+          ) : (
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Exportez vos données ou relancez vos règlements depuis cette vue.
+            </span>
+          )}
         </div>
+      </ClientSectionCard>
 
-
-        {/* Liste factures */}
+      <ClientSectionCard>
         {loading && (
           <div className="flex flex-col gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 animate-pulse">
-                <div className="flex items-start justify-between mb-2">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="animate-pulse rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
+              >
+                <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                    <div className="h-12 w-12 rounded-2xl bg-slate-200 dark:bg-slate-700" />
                     <div>
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32 mb-1.5" />
-                      <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                      <div className="mb-2 h-4 w-32 rounded bg-slate-200 dark:bg-slate-700" />
+                      <div className="h-3 w-24 rounded bg-slate-100 dark:bg-slate-700" />
                     </div>
                   </div>
-                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-16" />
+                  <div className="h-6 w-20 rounded bg-slate-200 dark:bg-slate-700" />
                 </div>
-                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="h-6 bg-slate-100 dark:bg-slate-700 rounded w-20" />
-                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="h-8 w-24 rounded bg-slate-100 dark:bg-slate-700" />
+                  <div className="h-8 w-20 rounded bg-slate-100 dark:bg-slate-700" />
                 </div>
               </div>
             ))}
           </div>
         )}
+
         {!loading && (
-          filtered.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
-              <FileText size={48} strokeWidth={1} />
-              <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-3">
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} factures</p>
-            {filtered.map((f, i) => {
-              const isLate = () => {
-                if (f.statut === "Payée") return false;
-                if (!f.date) return false;
-                const parts = f.date.split('/');
-                if (parts.length !== 3) return false;
-                const dateEmission = new Date(`${parts[2]}-${parts[1]}-${parts[0]}T12:00:00`);
-                const diffTime = Date.now() - dateEmission.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                return diffDays > 30;
-              };
-              
-              const late = isLate();
-              const displayStatut = f.statut === "Payée" ? "Payée" : (late ? "En retard" : f.statut);
-              const config = statutConfig[displayStatut] || statutConfig["Émise"];
-              const Icon = config.icon;
-              return (
-                <motion.div
-                  key={f.numero || i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: Math.min(i * 0.03, 0.15) }}
-                  className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800"
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">
-                        {(f.nomClient || '').charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900 dark:text-white text-sm">{f.nomClient}</p>
-                        <p className="text-xs text-slate-400">{f.numero} · {f.date}</p>
-                      </div>
-                    </div>
-                    <div className={`${config.bg} ${config.color} px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1`}>
-                      <Icon size={12} /> {f.statut}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                    <div>
-                      <p className="text-[10px] text-slate-400">Réf Devis</p>
-                      <p className="text-sm font-semibold text-slate-700">{f.devisRef || "-"}</p>
-                    </div>
-                    <div className="flex items-center gap-4 text-right">
-                      {f.statut === "Payée" ? (
-                        <button
-                          onClick={() => handleReviewRequest(f)}
-                          className="text-blue-500 hover:text-blue-600 p-2 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center justify-center"
-                          title="Demander un avis Google"
+          <>
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
+                <FileText size={48} strokeWidth={1} />
+                <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {filtered.length} facture{filtered.length > 1 ? "s" : ""}
+                </p>
+
+                {filtered.map((facture: Facture, index: number) => {
+                  const late = isLate(facture);
+                  const displayStatut =
+                    facture.statut === "Payée" ? "Payée" : late ? "En retard" : facture.statut;
+                  const config = statutConfig[displayStatut] || statutConfig["Émise"];
+                  const Icon = config.icon;
+
+                  return (
+                    <motion.div
+                      key={facture.numero || index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(index * 0.03, 0.15) }}
+                      className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 font-bold text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-300">
+                            {(facture.nomClient || "").charAt(0).toUpperCase()}
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                              {facture.nomClient}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                              {facture.numero} · {facture.date}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div
+                          className={`${config.bg} ${config.color} inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold`}
                         >
-                          <MessageSquareQuote size={16} />
-                        </button>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => handleMarkAsPaid(f.numero)}
-                            disabled={markingPaid === f.numero}
-                            className="text-blue-500 hover:text-blue-600 p-2 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors flex items-center justify-center disabled:opacity-50"
-                            title="Marquer comme payée"
-                          >
-                            <BadgeCheck size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleRelance(f)}
-                            className="text-amber-500 hover:text-amber-600 p-2 bg-amber-50 hover:bg-amber-100 rounded-full transition-colors flex items-center justify-center"
-                            title="Relancer le client"
-                          >
-                            <Clock size={16} />
-                          </button>
-                        </>
-                      )}
-                      <div>
-                        <p className="text-[10px] text-slate-400">Total TTC</p>
-                        <p className="text-lg font-bold text-slate-900 dark:text-white">{f.totalTTC}€</p>
+                          <Icon size={12} />
+                          {displayStatut}
+                        </div>
                       </div>
-                      <button
-                        onClick={() => handleDelete(f.numero)}
-                        disabled={deleting === f.numero}
-                        className="text-red-400 hover:text-red-600 p-2 bg-red-50 hover:bg-red-100 rounded-full transition-colors disabled:opacity-50"
-                        title="Supprimer la facture"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-          )
+
+                      <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200/70 bg-white/70 p-4 text-sm dark:border-white/8 dark:bg-slate-950/20 md:grid-cols-3">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                            Réf devis
+                          </p>
+                          <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
+                            {facture.devisRef || "-"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                            Total HT
+                          </p>
+                          <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
+                            {facture.totalHT}€
+                          </p>
+                        </div>
+                        <div className="md:text-right">
+                          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                            Total TTC
+                          </p>
+                          <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
+                            {facture.totalTTC}€
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap items-center gap-2">
+                        {facture.statut === "Payée" ? (
+                          <button
+                            type="button"
+                            onClick={() => handleReviewRequest(facture)}
+                            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                            title="Demander un avis Google"
+                          >
+                            <MessageSquareQuote size={15} />
+                            Demander un avis
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleMarkAsPaid(facture.numero)}
+                              disabled={markingPaid === facture.numero}
+                              className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
+                              title="Marquer comme payée"
+                            >
+                              <BadgeCheck size={15} />
+                              {markingPaid === facture.numero ? "..." : "Marquer payée"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleRelance(facture)}
+                              className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                              title="Relancer le client"
+                            >
+                              <Clock size={15} />
+                              Relancer
+                            </button>
+                          </>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(facture.numero)}
+                          disabled={deleting === facture.numero}
+                          className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:opacity-50 dark:border-rose-400/20 dark:bg-transparent dark:text-rose-300"
+                          title="Supprimer la facture"
+                        >
+                          <Trash2 size={15} />
+                          {deleting === facture.numero ? "Suppression..." : "Supprimer"}
+                        </button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
-      </main>
-    </div>
+      </ClientSectionCard>
+    </ClientSubpageShell>
   );
 }

@@ -1,11 +1,29 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, FileText, Clock, CheckCircle, XCircle, Search, Send, Pencil, Trash2, Check, X, Copy , LayoutGrid, List, Mail, PenTool, Eye } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Search,
+  Pencil,
+  Trash2,
+  Check,
+  X,
+  LayoutGrid,
+  List,
+  Mail,
+  PenTool,
+  Eye,
+  CopyPlus,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ClientHeroStat, ClientSectionCard, ClientSubpageShell } from "@/components/client-shell";
 
 interface Devis {
   numero: string;
@@ -21,7 +39,7 @@ interface Devis {
   lu_le?: string;
 }
 
-const statutConfig: Record<string, { icon: any; color: string; bg: string }> = {
+const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
   "En attente": { icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
   "En attente (Modifié)": { icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
   "Accepté": { icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -32,8 +50,8 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DevisPage() {
   const router = useRouter();
-  const { data, error, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
-  const devis = Array.isArray(data) ? data : [];
+  const { data, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
+  const devis = useMemo<Devis[]>(() => (Array.isArray(data) ? data : []), [data]);
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -85,7 +103,7 @@ export default function DevisPage() {
       }
     }
     if (successCount > 0) {
-      mutate(devis.filter((item: any) => !selectedIds.has(item.numero)), false);
+      mutate(devis.filter((item: Devis) => !selectedIds.has(item.numero)), false);
       setSelectedIds(new Set());
     }
     setIsDeletingBulk(false);
@@ -128,78 +146,62 @@ export default function DevisPage() {
   const isEnAttente = (statut: string) =>
     statut === "En attente" || statut === "En attente (Modifié)";
 
-  const filtered = devis.filter(
-    (d) => (d.nomClient || '').toLowerCase().includes((search || '').toLowerCase()) || (d.numero || '').toLowerCase().includes((search || '').toLowerCase())
+  const filtered = useMemo(
+    () =>
+      devis.filter(
+        (d) =>
+          (d.nomClient || "").toLowerCase().includes(search.toLowerCase()) ||
+          (d.numero || "").toLowerCase().includes(search.toLowerCase()),
+      ),
+    [devis, search],
   );
 
   const totalMois = devis.reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
   const totalValide = devis.filter((d) => d.statut === "Accepté").reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
   const totalAttente = devis.filter((d) => isEnAttente(d.statut)).reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
+  const totalAcceptes = devis.filter((d) => d.statut === "Accepté").length;
+  const totalEnAttente = devis.filter((d) => isEnAttente(d.statut)).length;
 
   return (
-    <div className="flex flex-col min-h-screen pb-8 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
-      <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] rounded-full bg-gradient-to-br from-violet-400/12 to-fuchsia-400/8 dark:from-violet-500/20 dark:to-fuchsia-600/10 blur-[80px] -z-10 pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-gradient-to-tr from-fuchsia-400/8 to-orange-400/6 dark:from-fuchsia-600/15 dark:to-orange-500/5 blur-[100px] -z-10 pointer-events-none"></div>
-
-      {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/80 dark:bg-[#0c0a1d]/80 border-b border-violet-100/50 dark:border-violet-500/10 transition-all flex items-center gap-4 p-6 pt-12 sm:pt-10">
-        <Link href="/dashboard">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <ArrowLeft size={20} />
-          </motion.div>
-        </Link>
-                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Mes Devis</h1>
-        <div className="flex-1" />
-        <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
-          <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-brand-violet dark:text-white' : 'text-slate-400'}`}>
-            <List size={16} />
-          </button>
-          <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-brand-violet dark:text-white' : 'text-slate-400'}`}>
-            <LayoutGrid size={16} />
-          </button>
+    <ClientSubpageShell
+      title="Mes devis"
+      description="Pilotez vos propositions, vos signatures et vos relances dans un espace plus clair, plus dense et plus mobile-friendly."
+      activeNav="devis"
+      eyebrow="Pipeline commercial"
+      actions={
+        <>
+          <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+            <button onClick={() => setViewMode("list")} className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-brand-violet dark:text-white' : 'text-slate-400'}`}>
+              <List size={16} />
+            </button>
+            <button onClick={() => setViewMode("kanban")} className={`p-1.5 rounded-md ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-brand-violet dark:text-white' : 'text-slate-400'}`}>
+              <LayoutGrid size={16} />
+            </button>
+          </div>
+          <Link href="/nouveau-devis">
+            <motion.button whileTap={{ scale: 0.98 }}
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
+              <FileText size={16} /> Nouveau devis
+            </motion.button>
+          </Link>
+        </>
+      }
+      summary={
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <ClientHeroStat label="CA validé" value={`${totalValide.toFixed(0)}€`} detail={`${totalAcceptes} devis acceptés`} tone="emerald" />
+          <ClientHeroStat label="En attente" value={`${totalAttente.toFixed(0)}€`} detail={`${totalEnAttente} signature${totalEnAttente > 1 ? "s" : ""} à convertir`} tone="amber" />
+          <ClientHeroStat label="Total TTC" value={`${totalMois.toFixed(0)}€`} detail="Vision globale du portefeuille devis" tone="violet" />
+          <ClientHeroStat label="Volume" value={String(filtered.length)} detail={`${viewMode === "list" ? "Vue liste" : "Vue kanban"} active`} tone="slate" />
         </div>
-        <Link href="/nouveau-devis">
-          <motion.button whileTap={{ scale: 0.9 }}
-            className="px-4 py-2 bg-gradient-zolio text-white text-sm font-semibold rounded-xl shadow-brand flex items-center gap-2">
-            <FileText size={16} /> Nouveau
-          </motion.button>
-        </Link>
-      </header>
-
-      <main className="flex-1 px-6 flex flex-col gap-6">
-        {/* Stats rapide */}
-        <div className="flex gap-3">
-          <div className="flex-1 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-white">
-            <p className="text-white/70 text-xs font-medium">✓ CA Validé</p>
-            <p className="text-2xl font-bold mt-1">{totalValide.toFixed(0)}€</p>
-          </div>
-          <div className="flex-1 bg-gradient-to-br from-amber-400 to-amber-500 rounded-2xl p-4 text-white">
-            <p className="text-white/70 text-xs font-medium">⏳ En attente</p>
-            <p className="text-2xl font-bold mt-1">{totalAttente.toFixed(0)}€</p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <div className="flex-1 bg-gradient-zolio rounded-2xl p-4 text-white">
-            <p className="text-white/70 text-xs font-medium">Total TTC (tous devis)</p>
-            <p className="text-2xl font-bold mt-1">{totalMois.toFixed(0)}€</p>
-          </div>
-          <div className="flex-1 bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">Devis émis</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white mt-1">{devis.length}</p>
-          </div>
-        </div>
-
-        {/* Search */}
+      }
+    >
+      <ClientSectionCard className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input type="text" placeholder="Rechercher par client ou n° devis..." value={search} onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500" />
         </div>
-
-        {/* Bulk Actions */}
-        <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4">
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input 
               type="checkbox" 
@@ -207,7 +209,7 @@ export default function DevisPage() {
               checked={filtered.length > 0 && selectedIds.size === filtered.length}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedIds(new Set(filtered.map((item: any) => item.numero)));
+                  setSelectedIds(new Set(filtered.map((item: Devis) => item.numero)));
                 } else {
                   setSelectedIds(new Set());
                 }
@@ -215,10 +217,25 @@ export default function DevisPage() {
             />
             Sélectionner tout ({filtered.length})
           </label>
+          {selectedIds.size > 0 ? (
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              disabled={isDeletingBulk}
+              className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+            >
+              <Trash2 size={15} />
+              {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
+            </button>
+          ) : (
+            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              {devis.length} devis suivis
+            </span>
+          )}
         </div>
+      </ClientSectionCard>
 
-
-        {/* Skeleton loading */}
+      <ClientSectionCard>
         {loading && (
           <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
@@ -304,6 +321,14 @@ export default function DevisPage() {
                            <Link href={`/devis/${d.numero}`} className="flex-1">
                              <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">Ouvrir</button>
                            </Link>
+                           <button
+                             onClick={() => handleDuplicate(d.numero)}
+                             disabled={duplicating === d.numero}
+                             className="py-1.5 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition disabled:opacity-50"
+                             title="Dupliquer"
+                           >
+                             <CopyPlus size={14} />
+                           </button>
                            {pending && (
                              <button onClick={() => handleCopySignLink(d.numero)} className="flex-1 py-1.5 bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 text-xs font-bold rounded-lg hover:bg-violet-200 dark:hover:bg-violet-800 transition flex items-center justify-center gap-1 border border-violet-200 dark:border-violet-700">
                                <PenTool size={12}/> Lien signature
@@ -427,6 +452,14 @@ export default function DevisPage() {
                         <Pencil size={14} /> Modifier
                       </motion.button>
                     </Link>
+                    <motion.button
+                      whileTap={{ scale: 0.96 }}
+                      onClick={() => handleDuplicate(d.numero)}
+                      disabled={duplicating === d.numero}
+                      className="py-2.5 px-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-slate-100 transition disabled:opacity-50"
+                    >
+                      <CopyPlus size={14} /> {duplicating === d.numero ? "..." : "Dupliquer"}
+                    </motion.button>
                     {pending && (
                       <motion.button whileTap={{ scale: 0.96 }}
                         onClick={() => handleCopySignLink(d.numero)}
@@ -447,7 +480,7 @@ export default function DevisPage() {
           </div>
           )
         )}
-      </main>
-    </div>
+      </ClientSectionCard>
+    </ClientSubpageShell>
   );
 }
