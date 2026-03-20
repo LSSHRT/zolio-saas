@@ -340,7 +340,7 @@ const LandingCinematicBackdrop = () => {
 
       <div className="landing-lens-grid" />
 
-      <div className="landing-float-token hidden lg:block">
+      <div className="landing-float-token hidden 2xl:block">
         <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/70">Signal terrain</p>
         <p className="mt-3 text-lg font-semibold text-white">Cockpit chantier en direct</p>
         <div className="mt-4 grid grid-cols-3 gap-2">
@@ -353,23 +353,14 @@ const LandingCinematicBackdrop = () => {
         </div>
       </div>
 
-      <div className="landing-float-token landing-float-token-secondary hidden xl:block">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-orange-100/70">Mise en scène</p>
-        <div className="mt-4 space-y-2">
-          <div className="landing-token-line w-[88%]" />
-          <div className="landing-token-line landing-token-line-hot w-[72%]" />
-          <div className="landing-token-line w-[94%]" />
-        </div>
-      </div>
     </div>
   );
 };
 
 const HeroSceneAccent = () => {
   return (
-    <div className="pointer-events-none absolute inset-[-12%] -z-10 hidden xl:block" aria-hidden="true">
+    <div className="pointer-events-none absolute inset-[-8%] -z-10 hidden 2xl:block" aria-hidden="true">
       <div className="landing-hero-orbit landing-hero-orbit-a" />
-      <div className="landing-hero-orbit landing-hero-orbit-b" />
       <div className="landing-hero-floor" />
 
       <div className="landing-hero-data-card landing-hero-data-card-a">
@@ -378,19 +369,6 @@ const HeroSceneAccent = () => {
         <p className="mt-1 text-sm text-neutral-400">administratif / semaine</p>
       </div>
 
-      <div className="landing-hero-data-card landing-hero-data-card-b">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/60">Flux signature</p>
-        <div className="mt-3 flex items-end gap-3">
-          <p className="text-2xl font-semibold tracking-tight text-white">Instantané</p>
-          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200">
-            prêt
-          </span>
-        </div>
-        <div className="mt-4 flex gap-2">
-          <div className="landing-token-line w-16" />
-          <div className="landing-token-line landing-token-line-hot w-10" />
-        </div>
-      </div>
     </div>
   );
 };
@@ -410,18 +388,6 @@ export default function LandingPage() {
       <LandingCinematicBackdrop />
       <div className="fixed inset-0 z-[-4] bg-[radial-gradient(ellipse_76%_76%_at_50%_-12%,rgba(139,92,246,0.26),rgba(0,0,0,0))]" />
       <div className="landing-grid-overlay fixed inset-0 z-[-3] pointer-events-none" />
-      <div
-        className="fixed inset-0 z-[-2] opacity-[0.07] pointer-events-none mix-blend-overlay"
-        style={{
-          backgroundImage:
-            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.78%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")',
-        }}
-      />
-      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden mix-blend-screen">
-        <div className={`absolute left-[-12%] top-[-10%] h-[42vh] w-[42vw] rounded-full bg-violet-600/28 blur-[110px] ${prefersReducedMotion ? "" : "animate-landing-drift"}`} />
-        <div className="absolute right-[-12%] top-[12%] h-[46vh] w-[38vw] rounded-full bg-fuchsia-600/18 blur-[112px]" />
-        <div className="absolute bottom-[-18%] left-[18%] h-[32vh] w-[42vw] rounded-full bg-orange-500/12 blur-[120px]" />
-      </div>
 
       <div className="relative z-10">
         {/* Navigation */}
@@ -487,14 +453,14 @@ export default function LandingPage() {
 
         {/* Hero Section */}
         <section className="relative overflow-hidden pb-24 pt-[8.5rem] sm:pt-[9.5rem] lg:pb-32 lg:pt-[11rem]">
+          <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div className={`absolute left-[-10%] top-[-4%] h-[32rem] w-[32rem] rounded-full bg-violet-600/20 blur-[90px] ${prefersReducedMotion ? "" : "animate-landing-drift"}`} />
+            <div className="absolute right-[-10%] top-[10%] h-[28rem] w-[28rem] rounded-full bg-fuchsia-600/14 blur-[92px]" />
+            <div className="absolute bottom-[-20%] left-[24%] h-[18rem] w-[24rem] rounded-full bg-orange-500/10 blur-[88px]" />
+          </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid gap-10 xl:grid-cols-[1.04fr_0.96fr] xl:items-center">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="text-center xl:text-left"
-              >
+              <div className="text-center xl:text-left">
                 <div className="flex justify-center xl:justify-start">
                   <SectionEyebrow>Zolio 2026 • l&apos;OS métier pour le bâtiment</SectionEyebrow>
                 </div>
@@ -584,18 +550,13 @@ export default function LandingPage() {
                     <ChevronDown className="h-4 w-4" />
                   </a>
                 </div>
-              </motion.div>
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.85, delay: 0.1, ease: "easeOut" }}
-                className="relative"
-              >
+              <div className="relative">
                 <HeroSceneAccent />
                 <div className="landing-panel-strong relative overflow-hidden rounded-[36px] p-4 sm:p-6">
-                  <div className="absolute right-[-15%] top-[-10%] h-40 w-40 rounded-full bg-violet-500/20 blur-[90px]" />
-                  <div className="absolute bottom-[-18%] left-[-8%] h-32 w-32 rounded-full bg-orange-500/16 blur-[80px]" />
+                  <div className="absolute right-[-10%] top-[-8%] h-32 w-32 rounded-full bg-violet-500/14 blur-[70px]" />
+                  <div className="absolute bottom-[-12%] left-[-4%] h-24 w-24 rounded-full bg-orange-500/12 blur-[62px]" />
 
                   <div className="relative flex items-center justify-between border-b border-white/8 pb-4">
                     <div>
@@ -643,10 +604,10 @@ export default function LandingPage() {
                     </div>
 
                     <div className="grid gap-4">
-                      {heroSignals.map((signal, index) => (
+                      {heroSignals.map((signal) => (
                         <div
                           key={signal.label}
-                          className={`landing-panel rounded-[28px] p-5 ${index === 0 && !prefersReducedMotion ? "animate-landing-float" : ""}`}
+                          className="landing-panel rounded-[28px] p-5"
                         >
                           <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">{signal.label}</p>
                           <p className="mt-3 text-2xl font-semibold text-white">{signal.value}</p>
@@ -657,15 +618,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="absolute -left-2 top-10 hidden rounded-[24px] border border-violet-400/20 bg-[#05050A]/80 px-4 py-3 shadow-2xl backdrop-blur-xl md:block xl:-left-12">
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-violet-200/70">Vue métier</p>
-                  <p className="mt-2 text-sm font-semibold text-white">Clair sur mobile, dense sur desktop.</p>
-                </div>
-                <div className="absolute -bottom-4 right-0 hidden rounded-[24px] border border-orange-400/20 bg-[#05050A]/80 px-4 py-3 shadow-2xl backdrop-blur-xl md:block xl:-right-8">
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-orange-200/70">Sans rupture</p>
-                  <p className="mt-2 text-sm font-semibold text-white">Le client signe, toi tu avances.</p>
-                </div>
-              </motion.div>
+              </div>
             </div>
           </div>
 
