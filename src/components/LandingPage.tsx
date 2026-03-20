@@ -31,6 +31,7 @@ import {
   HardHat
 } from "lucide-react";
 import Image from "next/image";
+import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
 // Typographie Cinétique
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
@@ -362,6 +363,12 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const supportHref = getSupportHref({
+    subject: "Démo accompagnée Zolio",
+    message:
+      "Bonjour, je souhaite une démo rapide de Zolio et être accompagné pour configurer mon premier devis.",
+  });
+  const supportIsExternal = isExternalSupportHref(supportHref);
 
   return (
     <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
@@ -480,6 +487,25 @@ export default function LandingPage() {
                   >
                     Voir la démo
                   </a>
+                  <a
+                    href={supportHref}
+                    target={supportIsExternal ? "_blank" : undefined}
+                    rel={supportIsExternal ? "noreferrer" : undefined}
+                    className="flex items-center justify-center rounded-full border border-violet-400/20 bg-violet-500/10 px-8 py-4 text-lg font-semibold text-violet-100 transition-all hover:border-violet-300/40 hover:bg-violet-500/16"
+                  >
+                    Parler au support
+                  </a>
+                </div>
+
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
+                  <span className="landing-chip">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-300" />
+                    Mise en route offerte
+                  </span>
+                  <span className="landing-chip">
+                    <Sparkles className="h-4 w-4 text-fuchsia-300" />
+                    Premier devis accompagné
+                  </span>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
@@ -1312,8 +1338,8 @@ export default function LandingPage() {
                   
                   <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-8"></div>
                   
-                  <ul className="space-y-5 mb-10">
-                    {['Devis et factures illimités', 'Catalogue de prix intégré', 'Signature électronique', 'Support prioritaire 7j/7'].map((feature, idx) => (
+                  <ul className="space-y-5 mb-8">
+                    {['Devis et factures illimités', 'Catalogue de prix intégré', 'Signature électronique', 'Premier devis accompagné si besoin', 'Support direct et réactif'].map((feature, idx) => (
                       <motion.li 
                         key={idx} 
                         initial={{ opacity: 0, x: -10 }}
@@ -1342,6 +1368,24 @@ export default function LandingPage() {
                       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                     </span>
                   </Link>
+
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-violet-200">
+                      Lancement assisté
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-neutral-300">
+                      On vous aide à configurer votre activité, votre starter métier et votre premier devis si vous ne voulez pas démarrer seul.
+                    </p>
+                    <a
+                      href={supportHref}
+                      target={supportIsExternal ? "_blank" : undefined}
+                      rel={supportIsExternal ? "noreferrer" : undefined}
+                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-white transition hover:text-violet-200"
+                    >
+                      Parler à l&apos;équipe
+                      <ArrowRight className="h-4 w-4" />
+                    </a>
+                  </div>
                 </div>
               </SpotlightCard>
             </motion.div>

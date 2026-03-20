@@ -13,6 +13,7 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
 
 export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin";
 type ClientTone = "violet" | "emerald" | "amber" | "rose" | "slate";
@@ -30,21 +31,8 @@ const CLIENT_NAV_ITEMS: Array<{
   { href: "/calepin", icon: StickyNote, key: "calepin", label: "Calepin" },
 ] as const;
 
-const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP?.trim() || "";
-const SUPPORT_EMAIL = "contact@zolio.site";
-
-function buildSupportHref() {
-  if (!SUPPORT_WHATSAPP) {
-    return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Support Zolio")}`;
-  }
-
-  const phone = SUPPORT_WHATSAPP.replace(/[^\d]/g, "");
-  const text = encodeURIComponent("Bonjour, j'ai besoin d'aide sur Zolio.");
-  return `https://wa.me/${phone}?text=${text}`;
-}
-
-const SUPPORT_HREF = buildSupportHref();
-const SUPPORT_IS_EXTERNAL = SUPPORT_HREF.startsWith("http");
+const SUPPORT_HREF = getSupportHref();
+const SUPPORT_IS_EXTERNAL = isExternalSupportHref(SUPPORT_HREF);
 
 function toneClasses(tone: ClientTone) {
   switch (tone) {
@@ -119,7 +107,7 @@ export function ClientSupportButton({ compact = false }: { compact?: boolean }) 
     >
       <LifeBuoy size={compact ? 16 : 17} />
       <span className={compact ? "hidden sm:inline" : ""}>
-        {compact ? "Support" : SUPPORT_WHATSAPP ? "Support WhatsApp" : "Support email"}
+        {compact ? "Support" : getSupportLabel()}
       </span>
     </a>
   );

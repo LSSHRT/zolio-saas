@@ -1,15 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowLeft, CheckCircle2, Zap, Shield, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Shield, Sparkles, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
 export default function AbonnementPage() {
   const [loading, setLoading] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
 
   const price = isAnnual ? 19 : 29;
+  const supportHref = getSupportHref({
+    subject: "Accompagnement Zolio Pro",
+    message:
+      "Bonjour, je souhaite être accompagné pour activer Zolio Pro et configurer mon premier devis.",
+  });
+  const supportIsExternal = isExternalSupportHref(supportHref);
 
   const handleSubscribe = async () => {
     setLoading(true);
@@ -53,10 +60,10 @@ export default function AbonnementPage() {
             <Sparkles size={12} /> Zolio Pro
           </motion.div>
           <motion.h1 initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="text-3xl font-bold text-white mb-3">
-            Gagnez 5h par<br />semaine.
+            Passez en mode pro,<br />pas en mode usine à gaz.
           </motion.h1>
           <motion.p initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-300 text-sm px-4">
-            Passez à la vitesse supérieure. Devis illimités, PDF pros, et facturation simplifiée.
+            Devis illimités, signature, facture et accompagnement pour configurer votre premier flux sans perdre vos soirées.
           </motion.p>
         </div>
 
@@ -83,8 +90,29 @@ export default function AbonnementPage() {
             disabled={loading}
             className="w-full py-4 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold text-sm shadow-xl shadow-slate-900/20 dark:shadow-slate-100/20 flex items-center justify-center gap-2 mb-6"
           >
-            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>S'abonner à Zolio Pro <Zap size={16} className="text-yellow-400" /></>}
+            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>S&apos;abonner à Zolio Pro <Zap size={16} className="text-yellow-400" /></>}
           </motion.button>
+
+          <a
+            href={supportHref}
+            target={supportIsExternal ? "_blank" : undefined}
+            rel={supportIsExternal ? "noreferrer" : undefined}
+            className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:hover:border-violet-500/40 dark:hover:text-white"
+          >
+            Être accompagné par le support
+            <ArrowRight size={16} />
+          </a>
+
+          <div className="mb-6 rounded-2xl border border-violet-100 bg-violet-50/70 p-4 text-left dark:border-violet-500/20 dark:bg-violet-500/10">
+            <p className="text-[11px] font-bold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
+              Mise en route offerte
+            </p>
+            <div className="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <p>Premier devis accompagné si besoin.</p>
+              <p>Catalogue métier prêt à l&apos;emploi pour démarrer plus vite.</p>
+              <p>Configuration entreprise, logo et coordonnées en quelques minutes.</p>
+            </div>
+          </div>
 
           <div className="flex flex-col gap-3">
             {[
@@ -95,7 +123,7 @@ export default function AbonnementPage() {
               "Tracking de lecture, Relances & Avis Google",
               "Personnalisation (Logo) & Export comptable",
               "Catalogue de prestations avec gestion de stocks",
-              "Support client prioritaire"
+              "Premier devis accompagné si besoin"
             ].map((feature, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
@@ -108,8 +136,12 @@ export default function AbonnementPage() {
         </motion.div>
 
         {/* Security / Trust */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-8 flex items-center justify-center gap-2 text-slate-400 text-xs font-medium pb-4">
-          <Shield size={14} /> Paiement 100% sécurisé via Stripe
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-8 flex flex-wrap items-center justify-center gap-3 text-slate-400 text-xs font-medium pb-4">
+          <span className="inline-flex items-center gap-2">
+            <Shield size={14} /> Paiement 100% sécurisé via Stripe
+          </span>
+          <span className="rounded-full border border-white/10 px-3 py-1">Sans engagement</span>
+          <span className="rounded-full border border-white/10 px-3 py-1">Activation rapide</span>
         </motion.div>
       </main>
     </div>

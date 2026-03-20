@@ -48,6 +48,35 @@ const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
+function buildSigningLink(numero: string, signingToken?: string) {
+  if (!signingToken || typeof window === "undefined") {
+    return null;
+  }
+
+  return `${window.location.origin}/signer/${numero}?token=${encodeURIComponent(signingToken)}`;
+}
+
+function buildFollowUpMailTo(devis: Devis) {
+  const subject = encodeURIComponent(`Relance : Devis #${devis.numero}`);
+  const signingLink = buildSigningLink(devis.numero, devis.signingToken);
+  const body = encodeURIComponent(
+    [
+      `Bonjour ${devis.nomClient},`,
+      "",
+      `Sauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${devis.numero} d'un montant de ${devis.totalTTC}€.`,
+      signingLink ? `Vous pouvez le consulter et le signer ici : ${signingLink}` : "",
+      "",
+      "Restant à votre disposition pour toute question.",
+      "",
+      "Cordialement,",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  );
+
+  return `mailto:${devis.emailClient || ""}?subject=${subject}&body=${body}`;
+}
+
 export default function DevisPage() {
   const router = useRouter();
   const { data, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
@@ -309,9 +338,7 @@ export default function DevisPage() {
                             <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
                             <button onClick={(e) => {
                               e.preventDefault();
-                              const subject = encodeURIComponent(`Relance : Devis #${d.numero}`);
-                              const body = encodeURIComponent(`Bonjour ${d.nomClient},\n\nSauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${d.numero} d'un montant de ${d.totalTTC}€.\n\nRestant à votre disposition pour toute question.\n\nCordialement,`);
-                              window.location.href = `mailto:${d.emailClient || ''}?subject=${subject}&body=${body}`;
+                              window.location.href = buildFollowUpMailTo(d);
                             }} className="py-1.5 px-2 bg-violet-50 dark:bg-violet-500/10 text-brand-violet text-xs font-semibold rounded-lg hover:bg-violet-100 dark:bg-violet-900/30 transition" title="Relancer par email">
                               <Mail size={14}/>
                             </button>
@@ -433,9 +460,7 @@ export default function DevisPage() {
                           whileTap={{ scale: 0.96 }}
                           onClick={(e) => {
                             e.preventDefault();
-                            const subject = encodeURIComponent(`Relance : Devis #${d.numero}`);
-                            const body = encodeURIComponent(`Bonjour ${d.nomClient},\n\nSauf erreur de notre part, nous n'avons pas eu de retour concernant le devis #${d.numero} d'un montant de ${d.totalTTC}€.\n\nRestant à votre disposition pour toute question.\n\nCordialement,`);
-                            window.location.href = `mailto:${d.emailClient || ''}?subject=${subject}&body=${body}`;
+                            window.location.href = buildFollowUpMailTo(d);
                           }}
                           className="flex-1 py-2.5 bg-violet-50 dark:bg-violet-500/10 border border-violet-200 text-brand-violet font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-violet-100 hover:border-violet-400 transition"
                         >
