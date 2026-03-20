@@ -996,16 +996,11 @@ export default function DashboardPage() {
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10">
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 md:hidden">
             <div className="flex items-center justify-between gap-3">
-              <div className="sm:hidden">
-                <ClientBrandMark showLabel={false} />
-              </div>
-              <div className="hidden sm:block">
-                <ClientBrandMark />
-              </div>
+              <ClientBrandMark showLabel={false} />
 
-              <div className="flex items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2">
                 <ThemeToggle />
                 <DashboardNotificationsMenu
                   dashboardSignals={dashboardSignals}
@@ -1019,7 +1014,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:hidden">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
               <ClientSupportButton />
               {canAccessAdminDashboard && (
                 <Link
@@ -1038,13 +1033,22 @@ export default function DashboardPage() {
                 Paramètres
               </Link>
             </div>
+          </div>
 
-            <div className="hidden items-center gap-2 sm:flex sm:gap-3">
+          <div className="hidden items-center justify-between gap-6 md:flex">
+            <div className="flex min-w-0 items-center gap-4">
+              <ClientBrandMark />
+              <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                Cockpit client
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-2 lg:gap-3">
               <ClientSupportButton compact />
               {canAccessAdminDashboard && (
                 <Link
                   href="/admin"
-                  className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                  className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
                 >
                   <ShieldCheck size={17} />
                   <span>Admin</span>
@@ -1052,11 +1056,21 @@ export default function DashboardPage() {
               )}
               <Link
                 href="/parametres"
-                className="tour-parametres inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-                aria-label="Paramètres"
+                className="tour-parametres inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
               >
-                <Settings size={20} />
+                <Settings size={16} />
+                Paramètres
               </Link>
+              <ThemeToggle />
+              <DashboardNotificationsMenu
+                dashboardSignals={dashboardSignals}
+                onToggle={() => setShowNotifications((value) => !value)}
+                onClose={() => setShowNotifications(false)}
+                showNotifications={showNotifications}
+              />
+              <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
+                {isLoaded ? <UserButton /> : <User size={18} />}
+              </div>
             </div>
           </div>
         </header>
