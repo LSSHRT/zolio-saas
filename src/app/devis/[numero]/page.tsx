@@ -3,6 +3,7 @@
 import { useState, useEffect, use, useRef, useMemo } from "react";
 import dynamic from "next/dynamic";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import NextImage from "next/image";
 import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles } from "lucide-react";
@@ -41,6 +42,9 @@ interface DevisInfo {
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
   const { user } = useUser();
   const { numero } = use(params);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [loading, setLoading] = useState(true);
   const [devisInfo, setDevisInfo] = useState<DevisInfo | null>(null);
@@ -64,6 +68,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const sigCanvas = useRef<{ clear: () => void; isEmpty: () => boolean; getTrimmedCanvas: () => HTMLCanvasElement } | null>(null);
+  const creationToastHandled = useRef(false);
 
   const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
   const activeTrade = companyTrade?.key ?? selectedTrade;
@@ -95,6 +100,34 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       setSelectedTrade(companyTrade.key);
     }
   }, [companyTrade]);
+
+  useEffect(() => {
+    const created = searchParams.get("created");
+    if (!created || creationToastHandled.current) {
+      return;
+    }
+
+    creationToastHandled.current = true;
+    const reason = searchParams.get("reason");
+
+    if (created === "saved") {
+      toast.success("Devis créé. Aucun email n’a été envoyé.");
+    } else if (created === "sent") {
+      toast.success("Devis créé et email envoyé au client.");
+    } else if (created === "send_skipped") {
+      if (reason === "missing_client_email") {
+        toast.success("Devis créé, mais aucun email client n’est renseigné.");
+      } else if (reason === "smtp_not_configured") {
+        toast.success("Devis créé, mais l’envoi email n’est pas configuré.");
+      } else if (reason === "send_failed") {
+        toast.success("Devis créé, mais l’email n’a pas pu être envoyé.");
+      } else {
+        toast.success("Devis créé, mais l’email a été ignoré.");
+      }
+    }
+
+    router.replace(pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
 
   const totalHTBase = lignes.filter(l => !l.isOptional).reduce((s, l) => s + l.totalLigne, 0);
   const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;

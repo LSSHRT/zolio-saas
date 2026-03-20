@@ -1,36 +1,101 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Plus, Search, Package, Send, X, Trash2, Lock, Zap, Camera, Sparkles } from "lucide-react";
-import NextImage from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { FileText, Rocket } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { ClientHeroStat, ClientSubpageShell } from "@/components/client-shell";
 import {
   DEFAULT_TRADE,
-  TRADE_OPTIONS,
   getStarterCatalogForTrade,
   getTradeBundlesForTrade,
   getTradeDefinition,
-  type TradeBundle,
   type TradeKey,
 } from "@/lib/trades";
+import { AIAssistant } from "./components/AIAssistant";
+import { ClientSelector } from "./components/ClientSelector";
+import { LineEditor } from "./components/LineEditor";
+import { SummaryRail } from "./components/SummaryRail";
+import type {
+  Client,
+  CreateDevisMode,
+  DevisResult,
+  GenerateDevisResponse,
+  LigneDevis,
+  Prestation,
+  QuickClientForm,
+} from "./types";
 
-interface Client { id: string; nom: string; email: string; telephone: string; adresse: string; dateAjout: string; }
-interface Prestation { id: string; categorie: string; nom: string; unite: string; prix: number; cout: number; }
-interface LigneDevis { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number; tva?: string; isOptional?: boolean; }
-interface GeneratedAILine { designation: string; quantite: number; unite: string; prixUnitaire: number; }
-interface GenerateDevisResponse { lignes?: GeneratedAILine[]; }
-interface DevisResult { numero?: string; totalTTC?: string | number; }
+const TRIAL_QUOTE_LIMIT = 3;
 
+const EMPTY_CLIENT_FORM: QuickClientForm = {
+  nom: "",
+  email: "",
+  telephone: "",
+  adresse: "",
+};
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value || 0);
+}
+
+function buildCreationQuery(mode: CreateDevisMode, result: DevisResult) {
+  const params = new URLSearchParams();
+
+  if (mode === "save") {
+    params.set("created", "saved");
+    return params.toString();
+  }
+
+  if (result.emailSent) {
+    params.set("created", "sent");
+    return params.toString();
+  }
+
+  params.set("created", "send_skipped");
+  if (result.emailSkippedReason) {
+    params.set("reason", result.emailSkippedReason);
+  }
+
+  return params.toString();
+}
+
+function compressImage(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const image = new window.Image();
+      image.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxWidth = 500;
+        const scale = maxWidth / image.width;
+        canvas.width = maxWidth;
+        canvas.height = image.height * scale;
+        const context = canvas.getContext("2d");
+        context?.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.4));
+      };
+      image.onerror = () => reject(new Error("Impossible de charger l'image"));
+      image.src = event.target?.result as string;
+    };
+    reader.onerror = () => reject(new Error("Impossible de lire le fichier"));
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function NouveauDevisPage() {
+  const router = useRouter();
   const { user, isLoaded } = useUser();
-  const [step, setStep] = useState(1);
+
   const [clients, setClients] = useState<Client[]>([]);
   const [prestations, setPrestations] = useState<Prestation[]>([]);
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState("");
   const [lignes, setLignes] = useState<LigneDevis[]>([]);
   const [tva, setTva] = useState("10");
   const [acompte, setAcompte] = useState("");
@@ -38,50 +103,30 @@ export default function NouveauDevisPage() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [searchClient, setSearchClient] = useState("");
   const [searchPrestation, setSearchPrestation] = useState("");
-  const [showForfaits, setShowForfaits] = useState(false);
   const [showAIModal, setShowAIModal] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [devisResult, setDevisResult] = useState<DevisResult | null>(null);
-
-  const [isPro, setIsPro] = useState(true); // Défaut true pour éviter le flash
+  const [submitMode, setSubmitMode] = useState<CreateDevisMode | null>(null);
+  const [isPro, setIsPro] = useState(true);
   const [checkingPro, setCheckingPro] = useState(true);
   const [devisCount, setDevisCount] = useState<number | null>(null);
-  const [isLoadingClients, setIsLoadingClients] = useState(true);
+  const [isBooting, setIsBooting] = useState(true);
   const [isAddingClient, setIsAddingClient] = useState(false);
+  const [showNewClient, setShowNewClient] = useState(false);
+  const [newClient, setNewClient] = useState<QuickClientForm>(EMPTY_CLIENT_FORM);
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
 
-  // Formulaire nouveau client rapide
-  const [showNewClient, setShowNewClient] = useState(false);
-  const [newClient, setNewClient] = useState({ nom: "", email: "", telephone: "", adresse: "" });
-
   const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
   const activeTrade = companyTrade?.key ?? selectedTrade;
-  const activeTradeDefinition = getTradeDefinition(activeTrade) ?? getTradeDefinition(DEFAULT_TRADE);
-  const forfaits = useMemo(() => getTradeBundlesForTrade(activeTrade), [activeTrade]);
+  const activeTradeDefinition = getTradeDefinition(activeTrade) ?? getTradeDefinition(DEFAULT_TRADE)!;
+  const tradeBundles = useMemo(() => getTradeBundlesForTrade(activeTrade), [activeTrade]);
   const starterCount = getStarterCatalogForTrade(activeTrade).length;
 
-  useEffect(() => {
-    // Vérifier l'abonnement via Clerk publicMetadata
-    if (isLoaded) {
-      if (user?.publicMetadata?.isPro === true) {
-        setIsPro(true);
-      } else {
-        setIsPro(false);
-      }
-      setCheckingPro(false);
-    }
-
-    fetch("/api/clients").then((r) => r.json()).then((d) => {
-      setClients(Array.isArray(d) ? d : []);
-      setIsLoadingClients(false);
-    }).catch(() => setIsLoadingClients(false));
-    fetch("/api/prestations").then((r) => r.json()).then((d) => setPrestations(Array.isArray(d) ? d : []));
-    fetch("/api/devis").then((r) => r.json()).then((d) => setDevisCount(Array.isArray(d) ? d.length : 0));
-  }, [isLoaded, user]);
+  const selectedClient = useMemo(
+    () => clients.find((client) => client.id === selectedClientId) ?? null,
+    [clients, selectedClientId],
+  );
 
   useEffect(() => {
     if (companyTrade) {
@@ -89,69 +134,232 @@ export default function NouveauDevisPage() {
     }
   }, [companyTrade]);
 
-  const totalHTBase = lignes.filter(l => !l.isOptional).reduce((s, l) => s + l.totalLigne, 0);
-  const montantRemise = totalHTBase * (parseFloat(remise) || 0) / 100;
-  const totalHT = totalHTBase - montantRemise;
-  // TTC est calculé en fonction de la TVA de chaque ligne ou de la TVA globale
-  const totalTTC = lignes.filter(l => !l.isOptional).reduce((sum, l) => sum + (l.totalLigne * (1 + parseFloat(l.tva || tva) / 100)), 0) * (1 - (parseFloat(remise) || 0) / 100);
+  useEffect(() => {
+    if (isLoaded) {
+      setIsPro(user?.publicMetadata?.isPro === true);
+      setCheckingPro(false);
+    }
+  }, [isLoaded, user]);
 
-  const margeEstimee = lignes.filter(l => !l.isOptional).reduce((sum, l) => {
-    const p = prestations.find(prest => prest.nom === l.nomPrestation);
-    const coutUnitaire = p ? (p.cout || 0) : 0;
-    return sum + ((l.prixUnitaire - coutUnitaire) * l.quantite);
-  }, 0) - montantRemise;
+  useEffect(() => {
+    let cancelled = false;
 
-  const addLigne = (p: Prestation) => {
-    setLignes([...lignes, { nomPrestation: p.nom, quantite: 1, unite: p.unite, prixUnitaire: p.prix, totalLigne: p.prix, tva, isOptional: false }]);
+    const load = async () => {
+      setIsBooting(true);
+
+      try {
+        const [clientsResponse, prestationsResponse, devisResponse] = await Promise.all([
+          fetch("/api/clients"),
+          fetch("/api/prestations"),
+          fetch("/api/devis"),
+        ]);
+
+        const [clientsPayload, prestationsPayload, devisPayload] = await Promise.all([
+          clientsResponse.json(),
+          prestationsResponse.json(),
+          devisResponse.json(),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        setClients(Array.isArray(clientsPayload) ? clientsPayload : []);
+        setPrestations(Array.isArray(prestationsPayload) ? prestationsPayload : []);
+        setDevisCount(Array.isArray(devisPayload) ? devisPayload.length : 0);
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Erreur de chargement du cockpit devis", error);
+          toast.error("Impossible de charger toutes les données du devis.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsBooting(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredClients = useMemo(() => {
+    const search = searchClient.trim().toLowerCase();
+    if (!search) {
+      return clients;
+    }
+
+    return clients.filter((client) =>
+      [client.nom, client.email, client.telephone].some((value) =>
+        (value || "").toLowerCase().includes(search),
+      ),
+    );
+  }, [clients, searchClient]);
+
+  const filteredPrestations = useMemo(() => {
+    const search = searchPrestation.trim().toLowerCase();
+    if (!search) {
+      return prestations;
+    }
+
+    return prestations.filter((prestation) =>
+      [prestation.nom, prestation.categorie].some((value) =>
+        (value || "").toLowerCase().includes(search),
+      ),
+    );
+  }, [prestations, searchPrestation]);
+
+  const totalHTBase = lignes
+    .filter((ligne) => !ligne.isOptional)
+    .reduce((sum, ligne) => sum + ligne.totalLigne, 0);
+  const discountAmount = totalHTBase * (Number.parseFloat(remise) || 0) / 100;
+  const totalHT = totalHTBase - discountAmount;
+  const totalTTC =
+    lignes
+      .filter((ligne) => !ligne.isOptional)
+      .reduce((sum, ligne) => sum + ligne.totalLigne * (1 + Number.parseFloat(ligne.tva || tva) / 100), 0) *
+    (1 - (Number.parseFloat(remise) || 0) / 100);
+  const totalTVA = totalTTC - totalHT;
+  const marginEstimate =
+    lignes
+      .filter((ligne) => !ligne.isOptional)
+      .reduce((sum, ligne) => {
+        const prestation = prestations.find((item) => item.nom === ligne.nomPrestation);
+        const unitCost = prestation?.cout || 0;
+        return sum + (ligne.prixUnitaire - unitCost) * ligne.quantite;
+      }, 0) - discountAmount;
+
+  const hasClient = Boolean(selectedClient);
+  const hasLines = lignes.length > 0;
+  const optionalCount = lignes.filter((ligne) => ligne.isOptional).length;
+  const remainingTrialQuotes = !isPro && devisCount !== null ? Math.max(TRIAL_QUOTE_LIMIT - devisCount, 0) : null;
+  const trialLocked = !checkingPro && !isPro && devisCount !== null && devisCount >= TRIAL_QUOTE_LIMIT;
+  const canEdit = hasClient && !trialLocked;
+  const canSubmit = hasClient && hasLines && !trialLocked;
+  const emailHint = selectedClient && !selectedClient.email
+    ? "Ce client n’a pas d’email. Le devis sera bien créé, mais l’envoi sera naturellement ignoré."
+    : null;
+
+  const addLineFromPrestation = (prestation: Prestation) => {
+    setLignes((current) => [
+      ...current,
+      {
+        nomPrestation: prestation.nom,
+        quantite: 1,
+        unite: prestation.unite,
+        prixUnitaire: prestation.prix,
+        totalLigne: prestation.prix,
+        tva,
+        isOptional: false,
+      },
+    ]);
     setSearchPrestation("");
   };
 
-  const updateTva = (idx: number, newTva: string) => {
-    const updated = [...lignes];
-    updated[idx].tva = newTva;
-    setLignes(updated);
+  const addFreeLine = () => {
+    setLignes((current) => [
+      ...current,
+      {
+        nomPrestation: "",
+        quantite: 1,
+        unite: "U",
+        prixUnitaire: 0,
+        totalLigne: 0,
+        tva,
+        isOptional: false,
+      },
+    ]);
   };
 
-  const updateQty = (idx: number, qty: number) => {
-    const updated = [...lignes];
-    updated[idx].quantite = qty;
-    updated[idx].totalLigne = qty * updated[idx].prixUnitaire;
-    setLignes(updated);
+  const applyBundle = (bundle: { lignes: LigneDevis[] }) => {
+    setLignes((current) => [
+      ...current,
+      ...bundle.lignes.map((line) => ({
+        ...line,
+        tva,
+        isOptional: false,
+      })),
+    ]);
   };
 
-  const updateNom = (idx: number, nom: string) => {
-    const updated = [...lignes];
-    updated[idx].nomPrestation = nom;
-    // Auto-complétion du prix si trouvé dans le catalogue
-    const found = prestations.find(p => p.nom === nom);
-    if (found) {
-      updated[idx].prixUnitaire = found.prix;
-      updated[idx].unite = found.unite;
-      updated[idx].totalLigne = updated[idx].quantite * found.prix;
-    }
-    setLignes(updated);
+  const updateLineTva = (index: number, nextTva: string) => {
+    setLignes((current) =>
+      current.map((ligne, lineIndex) =>
+        lineIndex === index ? { ...ligne, tva: nextTva } : ligne,
+      ),
+    );
   };
 
-  const updatePrix = (idx: number, prix: number) => {
-    const updated = [...lignes];
-    updated[idx].prixUnitaire = prix;
-    updated[idx].totalLigne = updated[idx].quantite * prix;
-    setLignes(updated);
+  const updateLineQty = (index: number, nextQty: number) => {
+    setLignes((current) =>
+      current.map((ligne, lineIndex) =>
+        lineIndex === index
+          ? {
+              ...ligne,
+              quantite: nextQty,
+              totalLigne: nextQty * ligne.prixUnitaire,
+            }
+          : ligne,
+      ),
+    );
   };
 
-  const addLigneLibre = () => {
-    setLignes([...lignes, { nomPrestation: "", quantite: 1, unite: "U", prixUnitaire: 0, totalLigne: 0, tva, isOptional: false }]);
+  const updateLineName = (index: number, nextName: string) => {
+    setLignes((current) =>
+      current.map((ligne, lineIndex) => {
+        if (lineIndex !== index) {
+          return ligne;
+        }
+
+        const found = prestations.find((prestation) => prestation.nom === nextName);
+        if (!found) {
+          return { ...ligne, nomPrestation: nextName };
+        }
+
+        return {
+          ...ligne,
+          nomPrestation: found.nom,
+          unite: found.unite,
+          prixUnitaire: found.prix,
+          totalLigne: ligne.quantite * found.prix,
+        };
+      }),
+    );
   };
 
-  
-  const applyForfait = (forfait: TradeBundle) => {
-    const newLignes = forfait.lignes.map((line) => ({ ...line, tva }));
-    setLignes([...lignes, ...newLignes]);
-    setShowForfaits(false);
+  const updateLinePrice = (index: number, nextPrice: number) => {
+    setLignes((current) =>
+      current.map((ligne, lineIndex) =>
+        lineIndex === index
+          ? {
+              ...ligne,
+              prixUnitaire: nextPrice,
+              totalLigne: ligne.quantite * nextPrice,
+            }
+          : ligne,
+      ),
+    );
+  };
+
+  const toggleLineOptional = (index: number) => {
+    setLignes((current) =>
+      current.map((ligne, lineIndex) =>
+        lineIndex === index ? { ...ligne, isOptional: !ligne.isOptional } : ligne,
+      ),
+    );
+  };
+
+  const removeLine = (index: number) => {
+    setLignes((current) => current.filter((_, lineIndex) => lineIndex !== index));
   };
 
   const handleImportStarterCatalog = async () => {
-    if (!user || !activeTradeDefinition) return;
+    if (!user || !activeTradeDefinition) {
+      return;
+    }
 
     setIsImportingStarter(true);
     try {
@@ -160,6 +368,7 @@ export default function NouveauDevisPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ trade: activeTradeDefinition.key }),
       });
+
       const payload = await response.json();
       if (!response.ok) {
         throw new Error(payload.error || "Impossible d'importer le starter métier");
@@ -177,6 +386,7 @@ export default function NouveauDevisPage() {
       const prestationsResponse = await fetch("/api/prestations");
       const nextPrestations = await prestationsResponse.json();
       setPrestations(Array.isArray(nextPrestations) ? nextPrestations : []);
+
       toast.success(
         payload.imported > 0
           ? `${payload.imported} prestation(s) importée(s) pour ${activeTradeDefinition.label.toLowerCase()}`
@@ -191,676 +401,291 @@ export default function NouveauDevisPage() {
   };
 
   const generateWithAI = async () => {
-    if (!aiPrompt.trim()) return;
+    if (!aiPrompt.trim()) {
+      return;
+    }
+
     setIsGeneratingAI(true);
     try {
-      const res = await fetch("/api/ai/generate-devis", {
+      const response = await fetch("/api/ai/generate-devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description: aiPrompt })
+        body: JSON.stringify({ description: aiPrompt }),
       });
-      const data = (await res.json()) as GenerateDevisResponse;
-      if (data.lignes && Array.isArray(data.lignes)) {
-        const newLignes = data.lignes.map((line) => ({
-          nomPrestation: line.designation,
-          quantite: line.quantite,
-          unite: line.unite,
-          prixUnitaire: line.prixUnitaire,
-          totalLigne: line.quantite * line.prixUnitaire,
-          tva: tva,
-          isOptional: false
-        }));
-        setLignes([...lignes, ...newLignes]);
-        setShowAIModal(false);
-        setAiPrompt("");
+      const payload = (await response.json()) as GenerateDevisResponse;
+
+      if (!response.ok) {
+        throw new Error("Impossible de générer les lignes IA");
       }
+
+      if (payload.lignes && Array.isArray(payload.lignes)) {
+        setLignes((current) => [
+          ...current,
+          ...payload.lignes!.map((line) => ({
+            nomPrestation: line.designation,
+            quantite: line.quantite,
+            unite: line.unite,
+            prixUnitaire: line.prixUnitaire,
+            totalLigne: line.quantite * line.prixUnitaire,
+            tva,
+            isOptional: false,
+          })),
+        ]);
+      }
+
+      setShowAIModal(false);
+      setAiPrompt("");
+      toast.success("Les lignes IA ont été ajoutées au devis.");
     } catch (error) {
       console.error("Erreur IA", error);
-      alert("Erreur lors de la génération avec l'IA");
+      toast.error("Erreur lors de la génération avec l’IA.");
     } finally {
       setIsGeneratingAI(false);
     }
   };
 
-  const toggleOptional = (idx: number) => {
-    const newLignes = [...lignes];
-    newLignes[idx].isOptional = !newLignes[idx].isOptional;
-    setLignes(newLignes);
-  };
+  const handleCreateClient = async () => {
+    if (!newClient.nom.trim()) {
+      toast.error("Le nom du client est obligatoire.");
+      return;
+    }
 
-  const removeLigne = (idx: number) => {
-    setLignes(lignes.filter((_, i) => i !== idx));
-  };
-
-  const handleNewClient = async () => {
     setIsAddingClient(true);
     try {
-      const res = await fetch("/api/clients", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(newClient) });
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || "Erreur serveur");
+      const response = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newClient),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Erreur lors de la création du client");
       }
-      const c = await res.json();
-      setClients([...clients, c]);
-      setSelectedClient(c);
+
+      setClients((current) => [payload, ...current]);
+      setSelectedClientId(payload.id);
       setShowNewClient(false);
-      setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
+      setSearchClient("");
+      setNewClient(EMPTY_CLIENT_FORM);
+      toast.success("Client ajouté et prêt pour le devis.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erreur lors de la création du client";
-      alert(message);
+      toast.error(message);
     } finally {
       setIsAddingClient(false);
     }
   };
 
-  const handleSend = async () => {
-    if (!selectedClient || lignes.length === 0) return;
-    setSending(true);
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? []);
+    if (files.length === 0) {
+      return;
+    }
+
     try {
-      const res = await fetch("/api/devis", {
+      const compressedPhotos = await Promise.all(files.map((file) => compressImage(file)));
+      setPhotos((current) => [...current, ...compressedPhotos]);
+      toast.success(`${compressedPhotos.length} photo(s) ajoutée(s) au devis.`);
+    } catch (error) {
+      console.error("Erreur de compression photo", error);
+      toast.error("Impossible d’ajouter ces photos.");
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+  const handleCreate = async (mode: CreateDevisMode) => {
+    if (!selectedClient) {
+      toast.error("Choisissez un client avant de créer le devis.");
+      return;
+    }
+
+    if (lignes.length === 0) {
+      toast.error("Ajoutez au moins une ligne au devis.");
+      return;
+    }
+
+    setSubmitMode(mode);
+
+    try {
+      const response = await fetch("/api/devis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clientId: selectedClient.id, client: selectedClient.nom, lignes, tva, acompte, remise, photos }),
+        body: JSON.stringify({
+          clientId: selectedClient.id,
+          client: selectedClient.nom,
+          lignes,
+          tva,
+          acompte,
+          remise,
+          photos,
+          sendNow: mode === "send",
+        }),
       });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || "Erreur serveur");
-      setDevisResult(result);
-      setSuccess(true);
+
+      const payload = (await response.json()) as DevisResult & { error?: string };
+      if (!response.ok || !payload.numero) {
+        throw new Error(payload.error || "Impossible de créer le devis");
+      }
+
+      router.push(`/devis/${payload.numero}?${buildCreationQuery(mode, payload)}`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      alert("Erreur lors de la création du devis: " + message);
+      const message = error instanceof Error ? error.message : "Erreur lors de la création du devis";
+      toast.error(message);
+      setSubmitMode(null);
     }
-    setSending(false);
   };
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-    
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new window.Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 500;
-          const scaleSize = MAX_WIDTH / img.width;
-          canvas.width = MAX_WIDTH;
-          canvas.height = img.height * scaleSize;
-          const ctx = canvas.getContext("2d");
-          ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-          const base64 = canvas.toDataURL("image/jpeg", 0.4); // forte compression
-          setPhotos(prev => [...prev, base64]);
-        };
-        img.src = event.target?.result as string;
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const filteredClients = clients.filter((c) => (c.nom || '').toLowerCase().includes((searchClient || '').toLowerCase()));
-  const filteredPrestations = prestations.filter((p) => (p.nom || '').toLowerCase().includes((searchPrestation || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((searchPrestation || '').toLowerCase()));
-
-  if (success) {
-    return (
-      <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
-          className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-          <Check size={48} className="text-emerald-600" />
-        </motion.div>
-        <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="text-2xl font-bold text-slate-900 dark:text-white mb-2 text-center">Devis créé ! 🎉</motion.h1>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
-          className="text-slate-500 dark:text-slate-400 text-center text-sm mb-2">
-          {devisResult?.numero} — {devisResult?.totalTTC}€ TTC
-        </motion.p>
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
-          className="text-slate-400 text-center text-xs mb-8">
-          Enregistré avec succès
-        </motion.p>
-        <Link href="/dashboard">
-          <motion.button whileTap={{ scale: 0.96 }} className="px-8 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg">
-            Retour à l&apos;accueil
-          </motion.button>
-        </Link>
-      </div>
-    );
-  }
-
-  // Paywall
-  if (!checkingPro && !isPro && devisCount !== null && devisCount >= 3) {
-    return (
-      <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
-        <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
-          <Link href="/dashboard">
-            <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
-              <ArrowLeft size={20} />
-            </motion.div>
-          </Link>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">Nouveau Devis</h1>
-        </header>
-        
-        <main className="flex-1 px-6 flex flex-col items-center justify-center text-center -mt-10">
-          <div className="w-24 h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full flex items-center justify-center mb-6 relative">
-            <Lock size={32} className="text-slate-400" />
-            <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-violet-100 rounded-full border-4 border-white flex items-center justify-center">
-              <Zap size={16} className="text-brand-violet" />
-            </div>
-          </div>
-          
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-3">Fonctionnalité Premium</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8 px-4 leading-relaxed">
-            Vous avez atteint la limite de 1 devis d&apos;essai. Passez à la version Zolio Pro pour créer des devis illimités.
-          </p>
-
-          <Link href="/abonnement" className="w-full">
-            <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-gradient-zolio text-white font-bold rounded-xl shadow-brand-lg">
-              Découvrir Zolio Pro
-            </motion.button>
-          </Link>
-        </main>
-      </div>
-    );
-  }
 
   return (
-    <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
-      {/* Header */}
-      <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
-        <Link href="/dashboard">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <ArrowLeft size={20} />
-          </motion.div>
+    <ClientSubpageShell
+      title="Nouveau devis"
+      description="Un cockpit 1 page orienté vitesse: client d’abord, chiffrage ensuite, IA en renfort seulement quand elle fait gagner du temps."
+      activeNav="devis"
+      eyebrow="Cockpit devis"
+      actions={
+        <Link
+          href="/devis"
+          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-violet-400/40 dark:hover:text-white"
+        >
+          <FileText size={16} />
+          Mes devis
         </Link>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Nouveau Devis</h1>
-      </header>
-
-      {/* Progress bar */}
-      <div className="px-6 mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          {[1, 2, 3].map((s) => (
-            <div key={s} className="flex items-center flex-1 gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all
-                ${step >= s ? "bg-gradient-zolio text-white shadow-md shadow-brand" : "bg-slate-100 dark:bg-slate-800 text-slate-400"}`}>
-                {step > s ? <Check size={14} /> : s}
-              </div>
-              {s < 3 && <div className={`flex-1 h-1 rounded-full transition-all ${step > s ? "bg-gradient-zolio" : "bg-slate-100 dark:bg-slate-800"}`} />}
-            </div>
-          ))}
+      }
+      summary={
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <ClientHeroStat
+            label="Client"
+            value={selectedClient ? "OK" : "0"}
+            detail={selectedClient ? selectedClient.nom : "À sélectionner"}
+            tone={selectedClient ? "emerald" : "slate"}
+          />
+          <ClientHeroStat
+            label="Lignes"
+            value={String(lignes.length)}
+            detail={`${optionalCount} option${optionalCount > 1 ? "s" : ""} • flow inline`}
+            tone="violet"
+          />
+          <ClientHeroStat
+            label="Total TTC"
+            value={formatCurrency(totalTTC)}
+            detail={`Marge estimée ${formatCurrency(marginEstimate)}`}
+            tone="amber"
+          />
+          <ClientHeroStat
+            label={isPro ? "Mode" : "Essai"}
+            value={isPro ? "PRO" : String(remainingTrialQuotes ?? 0)}
+            detail={
+              isPro
+                ? "Création illimitée active"
+                : remainingTrialQuotes !== null
+                  ? "devis d’essai restants"
+                  : "vérification en cours"
+            }
+            tone={trialLocked ? "rose" : "slate"}
+          />
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-          {step === 1 ? "Sélectionner un client" : step === 2 ? "Ajouter des prestations" : "Valider et envoyer"}
-        </p>
-      </div>
-
-      {/* Step content */}
-      <main className="flex-1 px-6 overflow-y-auto">
-        <AnimatePresence mode="wait" custom={step}>
-          {/* STEP 1: Client */}
-          {step === 1 && (
-            <motion.div key="step1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
-              {selectedClient ? (
-                <div className="bg-violet-50 dark:bg-violet-500/10 border border-violet-200 rounded-2xl p-4 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
-                  <div className="w-10 h-10 rounded-full bg-gradient-zolio text-white flex items-center justify-center font-bold text-sm">{(selectedClient.nom || '').charAt(0)}</div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient.nom}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient.email}</p>
-                  </div>
-                  <button onClick={() => setSelectedClient(null)} className="text-slate-400"><X size={18} /></button>
-                </div>
-              ) : (
-                <>
-                  <div className="relative">
-                    <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input type="text" placeholder="Rechercher un client..." value={searchClient} onChange={(e) => setSearchClient(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-                  </div>
-                  <motion.button whileTap={{ scale: 0.96 }} onClick={() => setShowNewClient(true)}
-                    className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 text-slate-500 dark:text-slate-400 text-sm">
-                    <Plus size={18} /> Créer un nouveau client
-                  </motion.button>
-
-                  {showNewClient && (
-                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 flex flex-col gap-2 border border-slate-200 dark:border-slate-700">
-                      <input required placeholder="Nom" value={newClient.nom} onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-                      <input required type="email" placeholder="Email" value={newClient.email} onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-                      <input placeholder="Téléphone" value={newClient.telephone} onChange={(e) => setNewClient({ ...newClient, telephone: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-                      <input placeholder="Adresse" value={newClient.adresse} onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
-                        className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-                      <div className="flex gap-2 mt-1">
-                        <button onClick={() => setShowNewClient(false)} className="flex-1 py-2 text-sm text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl">Annuler</button>
-                        <motion.button whileTap={{ scale: 0.96 }} onClick={handleNewClient} disabled={isAddingClient}
-                          className="flex-1 py-2 text-sm text-white bg-gradient-zolio rounded-xl font-semibold disabled:opacity-70 flex justify-center items-center">
-                          {isAddingClient ? (
-                            <span className="flex items-center gap-2">
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                              Ajout...
-                            </span>
-                          ) : "Ajouter"}
-                        </motion.button>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {isLoadingClients ? (
-                    <div className="flex flex-col items-center justify-center py-8">
-                      <div className="w-8 h-8 border-4 border-violet-200 border-t-brand-violet rounded-full animate-spin"></div>
-                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">Chargement de vos clients...</p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      {filteredClients.length === 0 && searchClient === "" && !showNewClient && (
-                        <p className="text-center text-sm text-slate-400 py-4">Aucun client. Commencez par en créer un !</p>
-                      )}
-                      {filteredClients.length === 0 && searchClient !== "" && (
-                        <p className="text-center text-sm text-slate-400 py-4">Aucun client trouvé pour &quot;{searchClient}&quot;.</p>
-                      )}
-                      {filteredClients.map((c) => (
-                        <motion.button key={c.id} whileTap={{ scale: 0.97 }} onClick={() => setSelectedClient(c)}
-                          className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl text-left hover:bg-slate-50 dark:bg-slate-800 transition">
-                          <div className="w-9 h-9 rounded-full bg-slate-200 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs">{(c.nom || '').charAt(0)}</div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-slate-900 dark:text-white text-sm truncate">{c.nom}</p>
-                            <p className="text-xs text-slate-400 truncate">{c.email}</p>
-                          </div>
-                        </motion.button>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </motion.div>
-          )}
-
-          {/* STEP 2: Prestations */}
-          {step === 2 && (
-            <motion.div key="step2" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-4">
-              {activeTradeDefinition && (
-                <div className="rounded-3xl border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
-                        Setup métier
-                      </p>
-                      <h2 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
-                        {activeTradeDefinition.label} prêt à chiffrer
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        {prestations.length === 0
-                          ? "Importez votre starter catalogue pour retrouver vos prix récurrents et créer votre premier devis plus vite."
-                          : "Vos packs rapides et vos prestations suivent désormais le même langage métier."}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-wrap gap-2">
-                      {TRADE_OPTIONS.map((option) => (
-                        <button
-                          key={option.key}
-                          type="button"
-                          onClick={() => setSelectedTrade(option.key)}
-                          className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
-                            activeTrade === option.key
-                              ? "bg-violet-600 text-white shadow-brand"
-                              : "bg-white/80 text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10"
-                          }`}
-                        >
-                          {option.label}
-                        </button>
-                      ))}
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={handleImportStarterCatalog}
-                        disabled={isImportingStarter}
-                        className="inline-flex items-center gap-2 rounded-full bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
-                      >
-                        {isImportingStarter ? "Import..." : `Importer ${starterCount} lignes starter`}
-                      </button>
-                      <Link
-                        href="/catalogue"
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                      >
-                        Ouvrir le catalogue
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Search prestations */}
-              <div className="relative">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input type="text" placeholder="Rechercher une prestation..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-              </div>
-              <div className="flex gap-2 w-full mt-2">
-                <button
-                  onClick={() => setShowForfaits(true)}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"
-                >
-                  <Package size={18} /> Packs {activeTradeDefinition?.shortLabel || "métier"}
-                </button>
-                <button
-                  onClick={() => setShowAIModal(true)}
-                  className="flex-1 flex items-center justify-center gap-2 py-3 bg-violet-50 dark:bg-violet-500/10 border border-violet-200 text-violet-700 font-semibold rounded-xl hover:bg-violet-100 dark:bg-violet-900/30 transition dark:bg-violet-900/30 dark:border-violet-800 dark:text-violet-300"
-                >
-                  <Sparkles size={18} /> Rédiger avec l&apos;IA
-                </button>
-              </div>
-
-
-              {/* Liste des prestations disponibles */}
-              <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-                {filteredPrestations.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-6 text-center dark:border-slate-700 dark:bg-slate-800/60">
-                    <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                      {prestations.length === 0 ? "Aucune prestation dans votre catalogue" : "Aucune prestation trouvée"}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                      {prestations.length === 0
-                        ? "Importez le starter métier ou ajoutez une ligne libre pour continuer immédiatement."
-                        : "Essayez un autre mot-clé ou ajoutez une ligne libre."}
-                    </p>
-                  </div>
-                )}
-                {filteredPrestations.map((p) => (
-                  <motion.button key={p.id} whileTap={{ scale: 0.97 }} onClick={() => addLigne(p)}
-                    className="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-left hover:bg-violet-50 dark:bg-violet-500/10 hover:border-violet-200 transition">
-                    <Plus size={16} className="text-brand-fuchsia shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{p.nom}</p>
-                      <p className="text-[10px] text-slate-400">{p.categorie}</p>
-                    </div>
-                    <span className="text-sm font-bold text-slate-700">{p.prix}€/{p.unite}</span>
-                  </motion.button>
-                ))}
-              </div>
-
-              {/* Lignes ajoutées */}
-              {lignes.length > 0 && (
-                <div className="mt-4">
-                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">Lignes du devis ({lignes.length})</p>
-                  
-                  <datalist id="prestations-list">
-                    {prestations.map(p => <option key={p.id} value={p.nom} />)}
-                  </datalist>
-
-                  <div className="flex flex-col gap-2">
-                    {lignes.map((l, i) => (
-                      <div key={i} className="bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-3">
-                        <div className="flex-1 min-w-[200px] flex flex-col">
-                          <input 
-                            type="text" 
-                            list="prestations-list"
-                            value={l.nomPrestation}
-                            onChange={(e) => updateNom(i, e.target.value)}
-                            placeholder="Nom de la prestation..."
-                            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
-                          />
-                          <div className="flex items-center gap-2 mt-1">
-                            <input 
-                              type="number" 
-                              value={l.prixUnitaire} 
-                              onChange={(e) => updatePrix(i, parseFloat(e.target.value) || 0)}
-                              className="w-20 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded p-1 text-slate-600 dark:text-slate-400"
-                            />
-                            <span className="text-[10px] text-slate-400">€ / {l.unite}</span>
-                          </div>
-                        </div>
-                        <input type="number" min="1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
-                          className="w-16 text-center py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm" />
-                        <select value={l.tva || tva} onChange={(e) => updateTva(i, e.target.value)} className="w-16 text-center py-1 px-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs focus:ring-2 focus:ring-violet-500">
-                            <option value="0">0%</option>
-                            <option value="5.5">5.5%</option>
-                            <option value="10">10%</option>
-                            <option value="20">20%</option>
-                          </select>
-                          <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
-                            <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-brand-violet focus:ring-violet-500" />
-                            Option
-                          </label>
-                          <span className="text-sm font-bold text-slate-800 dark:text-slate-200 w-16 text-right">{(l.totalLigne || 0).toFixed(0)}€</span>
-                        <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600 p-1"><Trash2 size={16} /></button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <button
-                onClick={addLigneLibre}
-                className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-slate-300 text-slate-500 font-medium rounded-xl hover:bg-slate-50 transition dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
-              >
-                <Plus size={18} /> Ajouter une ligne libre
-              </button>
-            </motion.div>
-          )}
-
-          {/* STEP 3: Récapitulatif */}
-          {step === 3 && (
-            <motion.div key="step3" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-5">
-              {/* Client */}
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-2">Client</p>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-zolio text-white flex items-center justify-center font-bold text-sm">{(selectedClient?.nom || '').charAt(0)}</div>
-                  <div>
-                    <p className="font-semibold text-slate-900 dark:text-white text-sm">{selectedClient?.nom}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{selectedClient?.email}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Lignes */}
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-800">
-                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-3">Prestations</p>
-                {lignes.map((l, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-slate-100 dark:border-slate-800 last:border-b-0">
-                    <div>
-                      <p className="text-sm text-slate-800 dark:text-slate-200">
-                        {l.nomPrestation} {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-1">Optionnel</span>}
-                      </p>
-                      <p className="text-[10px] text-slate-400">{l.quantite} {l.unite} × {l.prixUnitaire}€</p>
-                    </div>
-                    <p className="font-bold text-sm text-slate-800 dark:text-slate-200">{(l.totalLigne || 0).toFixed(2)}€</p>
-                  </div>
-                ))}
-              </div>
-
-              
-              {/* TVA */}
-              <div className="flex items-center gap-3 mt-4">
-                <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Taux TVA :</label>
-                <select value={tva} onChange={(e) => setTva(e.target.value)}
-                  className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-                  <option value="0">0% (Auto-entrepreneur)</option>
-                  <option value="5.5">5.5% (Rénovation)</option>
-                  <option value="10">10% (Intermédiaire)</option>
-                  <option value="20">20% (Standard)</option>
-                </select>
-              </div>
-
-              {/* Remise */}
-              <div className="flex items-center gap-3 mt-4">
-                <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Remise globale (%) :</label>
-                <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
-                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
-              </div>
-
-              {/* Acompte */}
-              <div className="flex items-center gap-3 mt-4 mb-4">
-                <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Acompte à la signature (%) :</label>
-                <input type="number" placeholder="0" value={acompte} onChange={(e) => setAcompte(e.target.value)}
-                  className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
-              </div>
-
-
-              {/* Photos */}
-              <div className="mt-6 mb-6">
-                <div className="flex items-center justify-between mb-3">
-                  <label className="text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center gap-2">
-                    <Camera size={16} /> Photos du chantier (Annexe)
-                  </label>
-                  <label className="text-xs bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300 px-3 py-1.5 rounded-lg cursor-pointer font-medium hover:bg-violet-200 transition-colors">
-                    + Ajouter
-                    <input type="file" multiple accept="image/*" className="hidden" onChange={handleFileUpload} />
-                  </label>
-                </div>
-                {photos.length > 0 && (
-                  <div className="flex gap-3 overflow-x-auto pb-2">
-                    {photos.map((p, i) => (
-                      <div key={i} className="relative w-20 h-20 shrink-0 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                        <NextImage src={p} alt={`Photo ${i}`} fill unoptimized className="object-cover" />
-                        <button onClick={() => setPhotos(photos.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 shadow">
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Totaux */}
-              <div className="bg-gradient-zolio rounded-2xl p-5 text-white">
-                <div className="flex justify-between mb-2">
-                  <span className="text-white/70 text-sm">Total HT</span>
-                  <span className="font-semibold">{totalHT.toFixed(2)}€</span>
-                </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-white/70 text-sm">TVA ({tva}%)</span>
-                  <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
-                </div>
-                <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
-                <div className="flex justify-between items-center">
-                  <span className="font-bold text-lg">Total TTC</span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs bg-emerald-500/20 text-emerald-100 px-2 py-1 rounded-md" title="Estimation de votre marge nette">
-                      Marge est. : {margeEstimee.toFixed(2)}€
-                    </span>
-                    <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </main>
-
-      {/* Bottom Action Bar */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
-        {step > 1 && (
-          <motion.button whileTap={{ scale: 0.96 }} onClick={() => setStep(step - 1)}
-            className="px-6 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 font-semibold rounded-xl flex items-center gap-2 text-sm">
-            <ArrowLeft size={16} /> Retour
-          </motion.button>
-        )}
-        <div className="flex-1" />
-        {step < 3 ? (
-          <motion.button whileTap={{ scale: 0.96 }}
-            onClick={() => setStep(step + 1)}
-            disabled={(step === 1 && !selectedClient) || (step === 2 && lignes.length === 0)}
-            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand flex items-center gap-2 text-sm disabled:opacity-40">
-            Suivant <ArrowRight size={16} />
-          </motion.button>
-        ) : (
-          <motion.button whileTap={{ scale: 0.96 }} onClick={handleSend} disabled={sending}
-            className="px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand flex items-center gap-2 text-sm disabled:opacity-40">
-            {sending ? "Envoi..." : <>Créer le devis <Send size={16} /></>}
-          </motion.button>
-        )}
-      </div>
-      {/* Modale IA */}
-      <AnimatePresence>
-        {showAIModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-brand-fuchsia" size={20} /> Rédiger avec l&apos;IA</h3>
-                <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>
-              </div>
-              <p className="text-sm text-slate-500 mb-4">
-                Décrivez les travaux à réaliser (ex: &quot;Refaire une salle de bain de 10m2 avec douche italienne et peinture&quot;) et l&apos;IA générera les lignes de devis pour vous.
-              </p>
-              <textarea
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
-                placeholder="Décrivez votre chantier..."
-                className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4 resize-none"
-              />
-              <button
-                onClick={generateWithAI}
-                disabled={isGeneratingAI || !aiPrompt.trim()}
-                className="w-full py-3 bg-gradient-zolio text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition"
-              >
-                {isGeneratingAI ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles size={18} />}
-                {isGeneratingAI ? "Génération..." : "Générer les lignes"}
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showForfaits && activeTradeDefinition && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/55 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
-            >
-              <div className="flex items-start justify-between gap-4">
+      }
+    >
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="space-y-6">
+          {!isBooting && trialLocked ? (
+            <div className="rounded-[2rem] border border-rose-300/40 bg-rose-500/10 px-5 py-5 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
+              <div className="flex items-start gap-3">
+                <Rocket size={18} className="mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
-                    Packs rapides
-                  </p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
-                    {activeTradeDefinition.label}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                    Ajoutez un pack métier complet en un clic, puis ajustez les quantités si besoin.
+                  <p className="font-semibold">Votre essai a atteint sa limite de création</p>
+                  <p className="mt-2 leading-6 opacity-80">
+                    Le cockpit reste disponible pour préparer le devis, mais les actions finales sont bloquées tant que vous n’êtes pas passé en Pro.
                   </p>
                 </div>
-                <button onClick={() => setShowForfaits(false)} className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800">
-                  <X size={18} />
-                </button>
               </div>
+            </div>
+          ) : null}
 
-              <div className="mt-5 space-y-3">
-                {forfaits.map((forfait) => (
-                  <button
-                    key={forfait.nom}
-                    type="button"
-                    onClick={() => applyForfait(forfait)}
-                    className="w-full rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{forfait.nom}</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                          {forfait.description}
-                        </p>
-                      </div>
-                      <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-200">
-                        {forfait.lignes.length} lignes
-                      </span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+          <ClientSelector
+            filteredClients={filteredClients}
+            isCreating={isAddingClient}
+            isLoading={isBooting}
+            newClient={newClient}
+            onClearSelection={() => setSelectedClientId("")}
+            onCreateClient={handleCreateClient}
+            onNewClientChange={(field, value) =>
+              setNewClient((current) => ({ ...current, [field]: value }))
+            }
+            onSearchChange={setSearchClient}
+            onSelectClient={(client) => setSelectedClientId(client.id)}
+            searchValue={searchClient}
+            selectedClient={selectedClient}
+            showNewClient={showNewClient}
+            onToggleNewClient={() => setShowNewClient((current) => !current)}
+          />
 
-    </div>
+          <LineEditor
+            activeTrade={activeTrade}
+            activeTradeDefinition={activeTradeDefinition}
+            canEdit={canEdit}
+            filteredPrestations={filteredPrestations}
+            hasClient={hasClient}
+            isImportingStarter={isImportingStarter}
+            lignes={lignes}
+            onAddFreeLine={addFreeLine}
+            onAddPrestation={addLineFromPrestation}
+            onApplyBundle={applyBundle}
+            onImportStarter={handleImportStarterCatalog}
+            onOpenAI={() => setShowAIModal(true)}
+            onRemoveLine={removeLine}
+            onSearchChange={setSearchPrestation}
+            onSelectTrade={setSelectedTrade}
+            onToggleOptional={toggleLineOptional}
+            onUpdateNom={updateLineName}
+            onUpdatePrix={updateLinePrice}
+            onUpdateQty={updateLineQty}
+            onUpdateTva={updateLineTva}
+            prestationSearch={searchPrestation}
+            prestations={prestations}
+            starterCount={starterCount}
+            tradeBundles={tradeBundles}
+          />
+        </div>
+
+        <SummaryRail
+          acompte={acompte}
+          canSubmit={canSubmit}
+          emailHint={emailHint}
+          hasLines={hasLines}
+          isPro={isPro}
+          mode={submitMode}
+          onAcompteChange={setAcompte}
+          onCreateAndSend={() => void handleCreate("send")}
+          onFileUpload={handleFileUpload}
+          onRemiseChange={setRemise}
+          onRemovePhoto={(index) =>
+            setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))
+          }
+          onSaveOnly={() => void handleCreate("save")}
+          onTvaChange={setTva}
+          photos={photos}
+          remainingTrialQuotes={remainingTrialQuotes}
+          remise={remise}
+          selectedClient={selectedClient}
+          totalHT={totalHT}
+          totalTTC={totalTTC}
+          totalTVA={totalTVA}
+          trialLocked={trialLocked}
+          tva={tva}
+          marginEstimate={marginEstimate}
+        />
+      </div>
+
+      <AIAssistant
+        isGenerating={isGeneratingAI}
+        onClose={() => setShowAIModal(false)}
+        onGenerate={() => void generateWithAI()}
+        onPromptChange={setAiPrompt}
+        open={showAIModal}
+        prompt={aiPrompt}
+      />
+    </ClientSubpageShell>
   );
 }
