@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Package, Search, X, Trash2, Copy, Download, Pencil, Upload } from "lucide-react";
 import Link from "next/link";
@@ -26,6 +27,9 @@ interface Prestation {
 }
 
 export default function CataloguePage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useUser();
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +60,15 @@ export default function CataloguePage() {
       setForm((current) => ({ ...current, categorie: current.categorie || "Autre" }));
     }
   }, [companyTrade]);
+
+  useEffect(() => {
+    if (searchParams.get("created") !== "1") {
+      return;
+    }
+
+    toast.success("Prestation ajoutée au catalogue.");
+    router.replace(pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
 
   const filtered = useMemo(() => prestations.filter(
     (p) => (p.nom || '').toLowerCase().includes((search || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((search || '').toLowerCase())
@@ -260,13 +273,26 @@ export default function CataloguePage() {
           <Upload size={18} />
           <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} />
         </label>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => { setShowForm(!showForm); if(showForm) setEditingId(null); setForm({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" }); }}
-          className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-brand"
-        >
-          {showForm ? <X size={20} /> : <Plus size={20} />}
-        </motion.button>
+        {showForm ? (
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => {
+              setShowForm(false);
+              setEditingId(null);
+              setForm({ categorie: "Peinture", nom: "", unite: "m²", prix: "", cout: "", stock: "" });
+            }}
+            className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300"
+          >
+            <X size={20} />
+          </motion.button>
+        ) : (
+          <Link
+            href="/catalogue/nouveau"
+            className="w-10 h-10 bg-gradient-zolio rounded-full flex items-center justify-center text-white shadow-brand"
+          >
+            <Plus size={20} />
+          </Link>
+        )}
       </header>
 
       <main className="flex-1 px-6 flex flex-col gap-6">

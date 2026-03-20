@@ -42,10 +42,10 @@ export function ClientSelector({
               Client
             </p>
             <h2 className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
-              Choisissez le bon contact avant de chiffrer
+              Étape 1. Choisissez le bon contact
             </h2>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              Tout le cockpit reste visible, mais le devis s’accélère vraiment une fois le client choisi.
+              Une fois le client lié, le parcours déverrouille le chiffrage et vous évite de revenir en arrière.
             </p>
           </div>
 

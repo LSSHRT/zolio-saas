@@ -11,6 +11,7 @@ type SummaryRailProps = {
   hasLines: boolean;
   isPro: boolean;
   mode: CreateDevisMode | null;
+  showActions?: boolean;
   onAcompteChange: (value: string) => void;
   onCreateAndSend: () => void;
   onFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -22,6 +23,7 @@ type SummaryRailProps = {
   remainingTrialQuotes: number | null;
   remise: string;
   selectedClient: Client | null;
+  sticky?: boolean;
   totalHT: number;
   totalTTC: number;
   totalTVA: number;
@@ -44,6 +46,7 @@ export function SummaryRail({
   hasLines,
   isPro,
   mode,
+  showActions = true,
   onAcompteChange,
   onCreateAndSend,
   onFileUpload,
@@ -55,6 +58,7 @@ export function SummaryRail({
   remainingTrialQuotes,
   remise,
   selectedClient,
+  sticky = true,
   totalHT,
   totalTTC,
   totalTVA,
@@ -66,7 +70,7 @@ export function SummaryRail({
   const sendBusy = mode === "send";
 
   return (
-    <div className="space-y-5 xl:sticky xl:top-28 xl:self-start">
+    <div className={sticky ? "space-y-5 xl:sticky xl:top-28 xl:self-start" : "space-y-5"}>
       <ClientSectionCard>
         <div className="flex flex-col gap-5">
           <div className="flex items-start justify-between gap-4">
@@ -253,7 +257,7 @@ export function SummaryRail({
             </div>
           ) : null}
 
-          {!trialLocked ? (
+          {!trialLocked && showActions ? (
             <div className="space-y-3">
               <button
                 type="button"

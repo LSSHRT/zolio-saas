@@ -100,10 +100,10 @@ export function LineEditor({
               </p>
             </div>
             <h2 className="text-xl font-semibold text-slate-950 dark:text-white">
-              Outils métier et lignes de devis dans la même page
+              Étape 2. Composez le devis
             </h2>
             <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-              Packs rapides, starter catalogue, recherche libre et édition inline: tout reste ici, sans changer d’écran.
+              Packs rapides, starter catalogue, recherche libre et lignes éditables: tout est regroupé dans l’étape de chiffrage.
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export function LineEditor({
                   Lignes du devis
                 </p>
                 <h3 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
-                  Édition inline, sans passer par un wizard
+                  Les lignes qui feront le devis final
                 </h3>
               </div>
               <span className="inline-flex items-center rounded-full bg-slate-900/6 px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">

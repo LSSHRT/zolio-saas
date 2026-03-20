@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -18,6 +20,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { ClientHeroStat, ClientSectionCard, ClientSubpageShell } from "@/components/client-shell";
 
 interface Client {
@@ -49,6 +52,9 @@ interface HistoryFacture {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ClientsPage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const { data, isLoading, mutate } = useSWR("/api/clients", fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
@@ -65,6 +71,15 @@ export default function ClientsPage() {
   const [historyClient, setHistoryClient] = useState<Client | null>(null);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get("created") !== "1") {
+      return;
+    }
+
+    toast.success("Client créé.");
+    router.replace(pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
 
   const filtered = useMemo(
     () =>
@@ -273,20 +288,13 @@ export default function ClientsPage() {
             <Upload size={16} />
             {isImporting ? "Import..." : "Importer CSV"}
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              if (showForm) {
-                resetForm();
-              } else {
-                setShowForm(true);
-              }
-            }}
+          <Link
+            href="/clients/nouveau"
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand"
           >
-            {showForm ? <X size={16} /> : <Plus size={16} />}
-            {showForm ? "Fermer" : "Nouveau client"}
-          </button>
+            <Plus size={16} />
+            Nouveau client
+          </Link>
         </>
       }
       summary={

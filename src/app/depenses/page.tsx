@@ -1,120 +1,99 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import useSWR from "swr";
-import { Plus, Trash2, Search, ArrowLeft, Receipt, Calendar, CreditCard, Tag } from "lucide-react";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import useSWR from "swr";
+import { motion } from "framer-motion";
+import { ArrowLeft, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface Depense {
-  id: string;
+  categorie: string;
   date: string;
   description: string;
-  montantTTC: number;
-  tvaDeductible: number;
-  categorie: string;
+  id: string;
+  montant: number;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DepensesPage() {
-  const { data: depenses, error, mutate } = useSWR<Depense[]>("/api/depenses", fetcher, { revalidateOnFocus: false, keepPreviousData: true });
-  const { data: factures } = useSWR<any[]>("/api/factures", fetcher, { revalidateOnFocus: false, keepPreviousData: true });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    date: "",
-    description: "",
-    montantTTC: "",
-    tvaDeductible: "",
-    categorie: "Achats Matériaux"
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data, error, mutate } = useSWR<Depense[]>("/api/depenses", fetcher, {
+    revalidateOnFocus: false,
+    keepPreviousData: true,
   });
-
-  useEffect(() => {
-    setFormData(prev => ({ ...prev, date: new Date().toISOString().split('T')[0] }));
-  }, []);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const depenses = useMemo<Depense[]>(() => (Array.isArray(data) ? data : []), [data]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const categories = [
-    "Achats Matériaux",
-    "Sous-traitance",
-    "Outillage & Équipement",
-    "Véhicule & Carburant",
-    "Assurances",
-    "Frais Bancaires",
-    "Repas & Déplacements",
-    "Autre"
-  ];
+  useEffect(() => {
+    if (searchParams.get("created") !== "1") {
+      return;
+    }
 
-  const filteredDepenses = (Array.isArray(depenses) ? depenses : []).filter((d) =>
-    (d.description || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
-    (d.categorie || '').toLowerCase().includes((searchTerm || '').toLowerCase())
+    toast.success("Dépense enregistrée.");
+    router.replace(pathname, { scroll: false });
+  }, [pathname, router, searchParams]);
+
+  const filteredDepenses = useMemo(
+    () =>
+      depenses.filter(
+        (depense) =>
+          (depense.description || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (depense.categorie || "").toLowerCase().includes(searchTerm.toLowerCase()),
+      ),
+    [depenses, searchTerm],
   );
 
-  const totalTTC = filteredDepenses.reduce((acc, d) => acc + d.montantTTC, 0);
-  const totalTVA = filteredDepenses.reduce((acc, d) => acc + d.tvaDeductible, 0);
-  const totalHT = totalTTC - totalTVA;
-  
-  const facturesArray = Array.isArray(factures) ? factures : [];
-  const tvaCollectee = facturesArray.reduce((acc, f) => acc + ((parseFloat(f.totalTTC) || 0) - (parseFloat(f.totalHT) || 0)), 0);
-  const tvaAPayer = tvaCollectee - totalTVA;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch("/api/depenses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          montantTTC: parseFloat(formData.montantTTC),
-          tvaDeductible: parseFloat(formData.tvaDeductible || "0")
-        }),
-      });
-
-      if (!response.ok) throw new Error("Erreur lors de l'ajout");
-
-      await mutate();
-      setShowForm(false);
-      setFormData({
-        date: new Date().toISOString().split('T')[0],
-        description: "",
-        montantTTC: "",
-        tvaDeductible: "",
-        categorie: "Achats Matériaux"
-      });
-    } catch (error) {
-      alert("Erreur lors de l'enregistrement de la dépense");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const totalDepenses = useMemo(
+    () => filteredDepenses.reduce((sum, depense) => sum + depense.montant, 0),
+    [filteredDepenses],
+  );
+  const categoriesCount = useMemo(
+    () => new Set(filteredDepenses.map((depense) => depense.categorie || "Autre")).size,
+    [filteredDepenses],
+  );
+  const thisMonthCount = useMemo(() => {
+    const now = new Date();
+    return filteredDepenses.filter((depense) => {
+      const depenseDate = new Date(depense.date);
+      return depenseDate.getMonth() === now.getMonth() && depenseDate.getFullYear() === now.getFullYear();
+    }).length;
+  }, [filteredDepenses]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Voulez-vous vraiment supprimer cette dépense ?")) return;
-    setDeletingId(id);
+    if (!window.confirm("Voulez-vous vraiment supprimer cette dépense ?")) {
+      return;
+    }
 
+    setDeletingId(id);
     try {
       const response = await fetch(`/api/depenses/${id}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Erreur de suppression");
+      if (!response.ok) {
+        throw new Error("Erreur de suppression");
+      }
       await mutate();
+      toast.success("Dépense supprimée.");
     } catch (error) {
-      alert("Impossible de supprimer la dépense.");
+      console.error(error);
+      toast.error("Impossible de supprimer la dépense.");
     } finally {
       setDeletingId(null);
     }
   };
 
-  if (error) return <div className="p-4 text-red-500">Erreur de chargement.</div>;
+  if (error) {
+    return <div className="p-4 text-red-500">Erreur de chargement.</div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm p-4 md:p-8 space-y-6">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
-      {/* Header */}
+      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none" />
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/dashboard" className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
@@ -124,177 +103,91 @@ export default function DepensesPage() {
             <Receipt className="text-brand-fuchsia" /> Dépenses & Achats
           </h1>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
+
+        <Link
+          href="/depenses/nouveau"
           className="bg-gradient-zolio hover:opacity-90 text-white p-2 md:px-4 md:py-2 rounded-full md:rounded-xl shadow-sm flex items-center gap-2 transition-all"
         >
-          {showForm ? <ArrowLeft size={20} /> : <Plus size={20} />}
-          <span className="hidden md:block">{showForm ? "Retour" : "Nouvelle Dépense"}</span>
-        </button>
+          <Plus size={20} />
+          <span className="hidden md:block">Nouvelle dépense</span>
+        </Link>
       </div>
 
-      <AnimatePresence mode="wait">
-        {showForm ? (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="bg-white dark:bg-slate-800 rounded-[1.5rem] p-6 shadow-sm border border-slate-100 dark:border-slate-700"
-          >
-            <h2 className="text-lg font-bold mb-4 text-slate-800 dark:text-white">Ajouter une dépense</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
-                    <Calendar size={16} /> Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white"
-                    value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
-                    <Tag size={16} /> Catégorie
-                  </label>
-                  <select
-                    required
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white"
-                    value={formData.categorie}
-                    onChange={(e) => setFormData({ ...formData, categorie: e.target.value })}
-                  >
-                    {categories.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description / Fournisseur</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ex: Matériaux Leroy Merlin, Carburant Total..."
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white"
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-2">
-                    <CreditCard size={16} /> Montant TTC (€)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white"
-                    value={formData.montantTTC}
-                    onChange={(e) => setFormData({ ...formData, montantTTC: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">TVA Déductible (€) (Optionnel)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-full p-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white"
-                    value={formData.tvaDeductible}
-                    onChange={(e) => setFormData({ ...formData, tvaDeductible: e.target.value })}
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-gradient-zolio hover:opacity-90 text-white font-bold py-3 rounded-xl mt-4 disabled:opacity-50"
-              >
-                {isSubmitting ? "Enregistrement..." : "Enregistrer la dépense"}
-              </button>
-            </form>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="space-y-6"
-          >
-            {/* Statistiques rapides */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Total TTC</p>
-                <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{totalTTC.toFixed(2)} €</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Total HT</p>
-                <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{totalHT.toFixed(2)} €</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <p className="text-xs text-slate-500 dark:text-slate-400">TVA Récupérable</p>
-                <p className="text-lg font-bold text-emerald-600 font-mono">{totalTVA.toFixed(2)} €</p>
-              </div>
-            </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Total TTC</p>
+          <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{totalDepenses.toFixed(2)} €</p>
+        </div>
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Ce mois-ci</p>
+          <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{thisMonthCount}</p>
+        </div>
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400">Catégories</p>
+          <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{categoriesCount}</p>
+        </div>
+      </div>
 
-            {/* Barre de recherche */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
-              <input
-                type="text"
-                placeholder="Rechercher une dépense..."
-                className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-violet-500 outline-none dark:text-white"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+        <input
+          type="text"
+          placeholder="Rechercher une dépense..."
+          className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-violet-500 outline-none dark:text-white"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+      </div>
 
-            {/* Liste des dépenses */}
-            {!depenses ? (
-              <div className="animate-pulse space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-20 bg-slate-200 dark:bg-slate-800 rounded-xl"></div>
-                ))}
+      {!data ? (
+        <div className="animate-pulse space-y-4">
+          {[1, 2, 3].map((item) => (
+            <div key={item} className="h-20 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          ))}
+        </div>
+      ) : filteredDepenses.length === 0 ? (
+        <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
+          <Receipt className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
+          <p className="text-slate-500 dark:text-slate-400">Aucune dépense trouvée.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredDepenses.map((depense) => (
+            <motion.div
+              key={depense.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center hover:shadow-md transition-shadow group"
+            >
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                    <Tag size={12} />
+                    {depense.categorie || "Autre"}
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {new Date(depense.date).toLocaleDateString("fr-FR")}
+                  </span>
+                </div>
+                <p className="font-medium text-slate-800 dark:text-white">{depense.description}</p>
               </div>
-            ) : filteredDepenses.length === 0 ? (
-              <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                <Receipt className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
-                <p className="text-slate-500 dark:text-slate-400">Aucune dépense trouvée.</p>
+
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="font-bold text-slate-900 dark:text-white font-mono">{depense.montant.toFixed(2)} €</p>
+                </div>
+                <button
+                  onClick={() => void handleDelete(depense.id)}
+                  disabled={deletingId === depense.id}
+                  className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredDepenses.map((depense) => (
-                  <div key={depense.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center hover:shadow-md transition-shadow group">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">
-                          {depense.categorie}
-                        </span>
-                        <span className="text-xs text-slate-400">{new Date(depense.date).toLocaleDateString('fr-FR')}</span>
-                      </div>
-                      <p className="font-medium text-slate-800 dark:text-white">{depense.description}</p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-right">
-                        <p className="font-bold text-slate-900 dark:text-white font-mono">{depense.montantTTC.toFixed(2)} €</p>
-                        {depense.tvaDeductible > 0 && (
-                          <p className="text-[10px] text-emerald-600">TVA: {depense.tvaDeductible.toFixed(2)}€</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => handleDelete(depense.id)}
-                        disabled={deletingId === depense.id}
-                        className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

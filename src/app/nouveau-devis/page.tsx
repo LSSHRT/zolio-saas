@@ -3,10 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Rocket } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight, FileText, Rocket, Save, Send } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { ClientHeroStat, ClientSubpageShell } from "@/components/client-shell";
+import {
+  CreationWizardFooter,
+  CreationWizardPanel,
+  CreationWizardShell,
+  type CreationWizardStep,
+} from "@/components/client-creation-wizard";
 import {
   DEFAULT_TRADE,
   getStarterCatalogForTrade,
@@ -30,20 +36,27 @@ import type {
 
 const TRIAL_QUOTE_LIMIT = 3;
 
+const WIZARD_STEPS: CreationWizardStep[] = [
+  {
+    title: "Client",
+    description: "Choisissez le bon contact ou créez-le directement ici.",
+  },
+  {
+    title: "Chiffrage",
+    description: "Packs métier, catalogue, lignes libres et IA en renfort.",
+  },
+  {
+    title: "Validation",
+    description: "TVA, remise, acompte, photos et choix d’envoi final.",
+  },
+];
+
 const EMPTY_CLIENT_FORM: QuickClientForm = {
   nom: "",
   email: "",
   telephone: "",
   adresse: "",
 };
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-}
 
 function buildCreationQuery(mode: CreateDevisMode, result: DevisResult) {
   const params = new URLSearchParams();
@@ -93,6 +106,7 @@ export default function NouveauDevisPage() {
   const router = useRouter();
   const { user, isLoaded } = useUser();
 
+  const [step, setStep] = useState(0);
   const [clients, setClients] = useState<Client[]>([]);
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [selectedClientId, setSelectedClientId] = useState("");
@@ -169,7 +183,7 @@ export default function NouveauDevisPage() {
         setDevisCount(Array.isArray(devisPayload) ? devisPayload.length : 0);
       } catch (error) {
         if (!cancelled) {
-          console.error("Erreur de chargement du cockpit devis", error);
+          console.error("Erreur de chargement du wizard devis", error);
           toast.error("Impossible de charger toutes les données du devis.");
         }
       } finally {
@@ -215,7 +229,7 @@ export default function NouveauDevisPage() {
   const totalHTBase = lignes
     .filter((ligne) => !ligne.isOptional)
     .reduce((sum, ligne) => sum + ligne.totalLigne, 0);
-  const discountAmount = totalHTBase * (Number.parseFloat(remise) || 0) / 100;
+  const discountAmount = (totalHTBase * (Number.parseFloat(remise) || 0)) / 100;
   const totalHT = totalHTBase - discountAmount;
   const totalTTC =
     lignes
@@ -234,14 +248,14 @@ export default function NouveauDevisPage() {
 
   const hasClient = Boolean(selectedClient);
   const hasLines = lignes.length > 0;
-  const optionalCount = lignes.filter((ligne) => ligne.isOptional).length;
   const remainingTrialQuotes = !isPro && devisCount !== null ? Math.max(TRIAL_QUOTE_LIMIT - devisCount, 0) : null;
   const trialLocked = !checkingPro && !isPro && devisCount !== null && devisCount >= TRIAL_QUOTE_LIMIT;
   const canEdit = hasClient && !trialLocked;
   const canSubmit = hasClient && hasLines && !trialLocked;
-  const emailHint = selectedClient && !selectedClient.email
-    ? "Ce client n’a pas d’email. Le devis sera bien créé, mais l’envoi sera naturellement ignoré."
-    : null;
+  const emailHint =
+    selectedClient && !selectedClient.email
+      ? "Ce client n’a pas d’email. Le devis sera bien créé, mais l’envoi sera naturellement ignoré."
+      : null;
 
   const addLineFromPrestation = (prestation: Prestation) => {
     setLignes((current) => [
@@ -287,9 +301,7 @@ export default function NouveauDevisPage() {
 
   const updateLineTva = (index: number, nextTva: string) => {
     setLignes((current) =>
-      current.map((ligne, lineIndex) =>
-        lineIndex === index ? { ...ligne, tva: nextTva } : ligne,
-      ),
+      current.map((ligne, lineIndex) => (lineIndex === index ? { ...ligne, tva: nextTva } : ligne)),
     );
   };
 
@@ -537,145 +549,213 @@ export default function NouveauDevisPage() {
     }
   };
 
+  const canContinue = step === 0 ? hasClient : step === 1 ? hasLines : canSubmit;
+
+  const handleNextStep = () => {
+    if (step === 0 && !hasClient) {
+      toast.error("Choisissez ou créez un client avant de continuer.");
+      return;
+    }
+
+    if (step === 1 && !hasLines) {
+      toast.error("Ajoutez au moins une ligne ou un pack avant de continuer.");
+      return;
+    }
+
+    setStep((current) => Math.min(current + 1, WIZARD_STEPS.length - 1));
+  };
+
   return (
-    <ClientSubpageShell
+    <CreationWizardShell
+      backHref="/devis"
+      currentStep={step}
+      description="Retour à un vrai parcours guidé: client d’abord, chiffrage ensuite, validation à la fin. Plus lisible sur téléphone, plus net sur ordinateur."
+      eyebrow="Wizard devis"
+      steps={WIZARD_STEPS}
       title="Nouveau devis"
-      description="Un cockpit 1 page orienté vitesse: client d’abord, chiffrage ensuite, IA en renfort seulement quand elle fait gagner du temps."
-      activeNav="devis"
-      eyebrow="Cockpit devis"
-      actions={
-        <Link
-          href="/devis"
-          className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-violet-400/40 dark:hover:text-white"
-        >
-          <FileText size={16} />
-          Mes devis
-        </Link>
-      }
-      summary={
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <ClientHeroStat
-            label="Client"
-            value={selectedClient ? "OK" : "0"}
-            detail={selectedClient ? selectedClient.nom : "À sélectionner"}
-            tone={selectedClient ? "emerald" : "slate"}
-          />
-          <ClientHeroStat
-            label="Lignes"
-            value={String(lignes.length)}
-            detail={`${optionalCount} option${optionalCount > 1 ? "s" : ""} • flow inline`}
-            tone="violet"
-          />
-          <ClientHeroStat
-            label="Total TTC"
-            value={formatCurrency(totalTTC)}
-            detail={`Marge estimée ${formatCurrency(marginEstimate)}`}
-            tone="amber"
-          />
-          <ClientHeroStat
-            label={isPro ? "Mode" : "Essai"}
-            value={isPro ? "PRO" : String(remainingTrialQuotes ?? 0)}
-            detail={
-              isPro
-                ? "Création illimitée active"
-                : remainingTrialQuotes !== null
-                  ? "devis d’essai restants"
-                  : "vérification en cours"
-            }
-            tone={trialLocked ? "rose" : "slate"}
-          />
-        </div>
+      footer={
+        <CreationWizardFooter>
+          <div className="text-sm text-slate-500 dark:text-slate-400">
+            Étape {step + 1} sur {WIZARD_STEPS.length}
+            {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={() => setStep((current) => Math.max(current - 1, 0))}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+              >
+                Précédent
+              </button>
+            ) : (
+              <Link
+                href="/devis"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+              >
+                <FileText size={16} />
+                Mes devis
+              </Link>
+            )}
+
+            {step < WIZARD_STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                disabled={!canContinue || trialLocked}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {step === 0 ? "Continuer vers le chiffrage" : "Continuer vers la validation"}
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => void handleCreate("save")}
+                  disabled={!canSubmit || submitMode !== null}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                >
+                  <Save size={16} />
+                  {submitMode === "save" ? "Enregistrement..." : "Enregistrer le devis"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleCreate("send")}
+                  disabled={!canSubmit || submitMode !== null}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <Send size={16} />
+                  {submitMode === "send" ? "Création + envoi..." : "Créer et envoyer"}
+                </button>
+              </>
+            )}
+          </div>
+        </CreationWizardFooter>
       }
     >
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_390px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
-        <div className="space-y-6">
-          {!isBooting && trialLocked ? (
-            <div className="rounded-[2rem] border border-rose-300/40 bg-rose-500/10 px-5 py-5 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
-              <div className="flex items-start gap-3">
-                <Rocket size={18} className="mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-semibold">Votre essai a atteint sa limite de création</p>
-                  <p className="mt-2 leading-6 opacity-80">
-                    Le cockpit reste disponible pour préparer le devis, mais les actions finales sont bloquées tant que vous n’êtes pas passé en Pro.
-                  </p>
-                </div>
+      <div className="space-y-6">
+        {!isBooting && trialLocked ? (
+          <CreationWizardPanel>
+            <div className="flex items-start gap-3 rounded-[1.5rem] border border-rose-300/40 bg-rose-500/10 px-4 py-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
+              <Rocket size={18} className="mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold">Votre essai a atteint sa limite de création</p>
+                <p className="mt-2 leading-6 opacity-80">
+                  Le parcours reste consultable pour préparer le devis, mais les actions finales sont bloquées tant que vous n’êtes pas passé en Pro.
+                </p>
               </div>
             </div>
+          </CreationWizardPanel>
+        ) : null}
+
+        <AnimatePresence mode="wait" initial={false}>
+          {step === 0 ? (
+            <motion.div
+              key="step-client"
+              initial={{ opacity: 0, x: 32 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -32 }}
+              transition={{ duration: 0.24 }}
+            >
+              <ClientSelector
+                filteredClients={filteredClients}
+                isCreating={isAddingClient}
+                isLoading={isBooting}
+                newClient={newClient}
+                onClearSelection={() => setSelectedClientId("")}
+                onCreateClient={handleCreateClient}
+                onNewClientChange={(field, value) =>
+                  setNewClient((current) => ({ ...current, [field]: value }))
+                }
+                onSearchChange={setSearchClient}
+                onSelectClient={(client) => setSelectedClientId(client.id)}
+                onToggleNewClient={() => setShowNewClient((current) => !current)}
+                searchValue={searchClient}
+                selectedClient={selectedClient}
+                showNewClient={showNewClient}
+              />
+            </motion.div>
           ) : null}
 
-          <ClientSelector
-            filteredClients={filteredClients}
-            isCreating={isAddingClient}
-            isLoading={isBooting}
-            newClient={newClient}
-            onClearSelection={() => setSelectedClientId("")}
-            onCreateClient={handleCreateClient}
-            onNewClientChange={(field, value) =>
-              setNewClient((current) => ({ ...current, [field]: value }))
-            }
-            onSearchChange={setSearchClient}
-            onSelectClient={(client) => setSelectedClientId(client.id)}
-            searchValue={searchClient}
-            selectedClient={selectedClient}
-            showNewClient={showNewClient}
-            onToggleNewClient={() => setShowNewClient((current) => !current)}
-          />
+          {step === 1 ? (
+            <motion.div
+              key="step-chiffrage"
+              initial={{ opacity: 0, x: 32 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -32 }}
+              transition={{ duration: 0.24 }}
+            >
+              <LineEditor
+                activeTrade={activeTrade}
+                activeTradeDefinition={activeTradeDefinition}
+                canEdit={canEdit}
+                filteredPrestations={filteredPrestations}
+                hasClient={hasClient}
+                isImportingStarter={isImportingStarter}
+                lignes={lignes}
+                onAddFreeLine={addFreeLine}
+                onAddPrestation={addLineFromPrestation}
+                onApplyBundle={applyBundle}
+                onImportStarter={handleImportStarterCatalog}
+                onOpenAI={() => setShowAIModal(true)}
+                onRemoveLine={removeLine}
+                onSearchChange={setSearchPrestation}
+                onSelectTrade={setSelectedTrade}
+                onToggleOptional={toggleLineOptional}
+                onUpdateNom={updateLineName}
+                onUpdatePrix={updateLinePrice}
+                onUpdateQty={updateLineQty}
+                onUpdateTva={updateLineTva}
+                prestationSearch={searchPrestation}
+                prestations={prestations}
+                starterCount={starterCount}
+                tradeBundles={tradeBundles}
+              />
+            </motion.div>
+          ) : null}
 
-          <LineEditor
-            activeTrade={activeTrade}
-            activeTradeDefinition={activeTradeDefinition}
-            canEdit={canEdit}
-            filteredPrestations={filteredPrestations}
-            hasClient={hasClient}
-            isImportingStarter={isImportingStarter}
-            lignes={lignes}
-            onAddFreeLine={addFreeLine}
-            onAddPrestation={addLineFromPrestation}
-            onApplyBundle={applyBundle}
-            onImportStarter={handleImportStarterCatalog}
-            onOpenAI={() => setShowAIModal(true)}
-            onRemoveLine={removeLine}
-            onSearchChange={setSearchPrestation}
-            onSelectTrade={setSelectedTrade}
-            onToggleOptional={toggleLineOptional}
-            onUpdateNom={updateLineName}
-            onUpdatePrix={updateLinePrice}
-            onUpdateQty={updateLineQty}
-            onUpdateTva={updateLineTva}
-            prestationSearch={searchPrestation}
-            prestations={prestations}
-            starterCount={starterCount}
-            tradeBundles={tradeBundles}
-          />
-        </div>
-
-        <SummaryRail
-          acompte={acompte}
-          canSubmit={canSubmit}
-          emailHint={emailHint}
-          hasLines={hasLines}
-          isPro={isPro}
-          mode={submitMode}
-          onAcompteChange={setAcompte}
-          onCreateAndSend={() => void handleCreate("send")}
-          onFileUpload={handleFileUpload}
-          onRemiseChange={setRemise}
-          onRemovePhoto={(index) =>
-            setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))
-          }
-          onSaveOnly={() => void handleCreate("save")}
-          onTvaChange={setTva}
-          photos={photos}
-          remainingTrialQuotes={remainingTrialQuotes}
-          remise={remise}
-          selectedClient={selectedClient}
-          totalHT={totalHT}
-          totalTTC={totalTTC}
-          totalTVA={totalTVA}
-          trialLocked={trialLocked}
-          tva={tva}
-          marginEstimate={marginEstimate}
-        />
+          {step === 2 ? (
+            <motion.div
+              key="step-validation"
+              initial={{ opacity: 0, x: 32 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -32 }}
+              transition={{ duration: 0.24 }}
+            >
+              <SummaryRail
+                acompte={acompte}
+                canSubmit={canSubmit}
+                emailHint={emailHint}
+                hasLines={hasLines}
+                isPro={isPro}
+                mode={submitMode}
+                onAcompteChange={setAcompte}
+                onCreateAndSend={() => void handleCreate("send")}
+                onFileUpload={handleFileUpload}
+                onRemiseChange={setRemise}
+                onRemovePhoto={(index) =>
+                  setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))
+                }
+                onSaveOnly={() => void handleCreate("save")}
+                onTvaChange={setTva}
+                photos={photos}
+                remainingTrialQuotes={remainingTrialQuotes}
+                remise={remise}
+                selectedClient={selectedClient}
+                showActions={false}
+                sticky={false}
+                totalHT={totalHT}
+                totalTTC={totalTTC}
+                totalTVA={totalTVA}
+                trialLocked={trialLocked}
+                tva={tva}
+                marginEstimate={marginEstimate}
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
       </div>
 
       <AIAssistant
@@ -686,6 +766,6 @@ export default function NouveauDevisPage() {
         open={showAIModal}
         prompt={aiPrompt}
       />
-    </ClientSubpageShell>
+    </CreationWizardShell>
   );
 }
