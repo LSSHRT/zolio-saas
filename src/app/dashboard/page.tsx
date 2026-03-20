@@ -30,12 +30,25 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CallBackProps, STATUS, Step } from "react-joyride";
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ClientBrandMark, ClientMobileDock } from "@/components/client-shell";
+import {
+  ClientBrandMark,
+  ClientMobileDock,
+  ClientSupportButton,
+} from "@/components/client-shell";
+import {
+  DEFAULT_TRADE,
+  TRADE_OPTIONS,
+  getStarterCatalogForTrade,
+  getTradeDefinition,
+  type TradeDefinition,
+  type TradeKey,
+} from "@/lib/trades";
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
@@ -58,6 +71,10 @@ type DevisItem = {
 
 type AdminViewerData = {
   isAdmin?: boolean;
+};
+
+type CatalogItem = {
+  id: string;
 };
 
 type Tone = "violet" | "emerald" | "amber" | "rose" | "slate";
@@ -85,6 +102,14 @@ type MonthlyDatum = {
 };
 
 const MONTH_NAMES = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+
+function readStringMetadata(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function readBooleanMetadata(value: unknown) {
+  return value === true;
+}
 
 function parseDevisDate(dateStr?: string): Date {
   if (dateStr && dateStr.includes("/")) {
@@ -219,6 +244,31 @@ function QuickLinkCard({ item }: { item: QuickLinkItem }) {
   );
 }
 
+function TradeOptionCard({
+  active,
+  onSelect,
+  option,
+}: {
+  active: boolean;
+  onSelect: (key: TradeKey) => void;
+  option: TradeDefinition;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(option.key)}
+      className={`rounded-[1.45rem] border px-4 py-4 text-left transition ${
+        active
+          ? "border-violet-400/50 bg-violet-500/12 shadow-[0_18px_45px_-32px_rgba(124,58,237,0.8)]"
+          : "border-slate-200/70 bg-white/75 hover:border-violet-300/50 hover:bg-violet-500/6 dark:border-white/8 dark:bg-white/4"
+      }`}
+    >
+      <p className="text-sm font-semibold text-slate-950 dark:text-white">{option.label}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{option.summary}</p>
+    </button>
+  );
+}
+
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { data, isLoading } = useSWR<DevisItem[]>("/api/devis", fetcher, {
@@ -229,12 +279,45 @@ export default function DashboardPage() {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });
+  const { data: prestationsData, mutate: mutatePrestations } = useSWR<CatalogItem[]>(
+    isLoaded ? "/api/prestations" : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      keepPreviousData: true,
+    },
+  );
 
   const devis = useMemo(() => (Array.isArray(data) ? data : []), [data]);
+  const catalogueItems = useMemo(() => (Array.isArray(prestationsData) ? prestationsData : []), [prestationsData]);
   const loading = isLoading && !data;
   const canAccessAdminDashboard =
     user?.publicMetadata?.isAdmin === true || adminViewerData?.isAdmin === true;
   const isPro = user?.publicMetadata?.isPro === true;
+  const companyTrade = readStringMetadata(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
+  const starterCatalogImported = readBooleanMetadata(
+    user?.unsafeMetadata?.starterCatalogImported || user?.publicMetadata?.starterCatalogImported,
+  );
+  const onboardingCompleted = readBooleanMetadata(
+    user?.unsafeMetadata?.onboardingCompleted || user?.publicMetadata?.onboardingCompleted,
+  );
+  const starterCatalogCount = catalogueItems.length;
+  const starterTrade = getTradeDefinition(companyTrade) ?? getTradeDefinition(DEFAULT_TRADE);
+  const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
+  const [isBootstrappingTrade, setIsBootstrappingTrade] = useState(false);
+
+  useEffect(() => {
+    const nextTrade = getTradeDefinition(companyTrade)?.key;
+    if (nextTrade) {
+      setSelectedTrade(nextTrade);
+    }
+  }, [companyTrade]);
+
+  const selectedTradeDefinition =
+    getTradeDefinition(selectedTrade) ?? getTradeDefinition(DEFAULT_TRADE);
+  const selectedStarterCount = getStarterCatalogForTrade(selectedTrade).length;
+  const setupIsRequired =
+    isLoaded && (!companyTrade || !starterCatalogImported || !onboardingCompleted || starterCatalogCount === 0);
 
   const objectifMensuel = Number(user?.unsafeMetadata?.objectifMensuel);
   const objectifInitial =
@@ -249,6 +332,45 @@ export default function DashboardPage() {
   });
   const [currentHour] = useState(() => new Date().getHours());
   const [todayMs] = useState(() => Date.now());
+
+  const handleBootstrapTrade = async () => {
+    if (!user || !selectedTradeDefinition) return;
+
+    setIsBootstrappingTrade(true);
+    try {
+      const response = await fetch("/api/onboarding/bootstrap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trade: selectedTradeDefinition.key }),
+      });
+      const payload = await response.json();
+
+      if (!response.ok) {
+        throw new Error(payload.error || "Impossible d'importer le starter métier");
+      }
+
+      await user.update({
+        unsafeMetadata: {
+          ...user.unsafeMetadata,
+          companyTrade: selectedTradeDefinition.key,
+          onboardingCompleted: true,
+          starterCatalogImported: true,
+        },
+      });
+
+      await mutatePrestations();
+      toast.success(
+        payload.imported > 0
+          ? `${payload.imported} prestation(s) ${selectedTradeDefinition.shortLabel.toLowerCase()} importée(s)`
+          : `Starter ${selectedTradeDefinition.shortLabel.toLowerCase()} déjà en place`,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Impossible d'importer le starter métier";
+      toast.error(message);
+    } finally {
+      setIsBootstrappingTrade(false);
+    }
+  };
 
   const handleUpdateObjectif = async () => {
     const newVal = prompt(
@@ -413,6 +535,15 @@ export default function DashboardPage() {
   const dashboardSignals = useMemo<DashboardSignal[]>(() => {
     const signals: DashboardSignal[] = [];
 
+    if (setupIsRequired) {
+      signals.push({
+        id: "setup",
+        title: "Starter métier à activer",
+        description: "Choisissez votre métier et importez le catalogue de départ pour aller plus vite.",
+        tone: "violet",
+      });
+    }
+
     if (devis.length === 0) {
       signals.push({
         id: "empty",
@@ -470,7 +601,16 @@ export default function DashboardPage() {
     }
 
     return signals.slice(0, 4);
-  }, [CA_TTC, devis.length, devisARelancer.length, isPro, objectifActif, pendingQuotes.length, pipelineRevenueHT]);
+  }, [
+    CA_TTC,
+    devis.length,
+    devisARelancer.length,
+    isPro,
+    objectifActif,
+    pendingQuotes.length,
+    pipelineRevenueHT,
+    setupIsRequired,
+  ]);
 
   const quickLinks: QuickLinkItem[] = [
     {
@@ -553,6 +693,7 @@ export default function DashboardPage() {
 
             <div className="flex items-center gap-2 sm:gap-3">
               <ThemeToggle />
+              <ClientSupportButton compact />
               {canAccessAdminDashboard && (
                 <Link
                   href="/admin"
@@ -664,6 +805,9 @@ export default function DashboardPage() {
                       <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
                         {isPro ? "Mode PRO actif" : "Mode Starter"}
                       </span>
+                      <span className="client-chip bg-emerald-500/12 text-emerald-700 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20">
+                        {starterTrade?.shortLabel || "Métier à définir"}
+                      </span>
                       <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
                         {devis.length} devis suivis
                       </span>
@@ -730,19 +874,31 @@ export default function DashboardPage() {
                         </Link>
                       )}
 
-                      {canAccessAdminDashboard && (
-                        <Link href="/admin">
-                          <div className="client-panel flex items-start justify-between rounded-[1.55rem] px-4 py-4 transition hover:-translate-y-0.5">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-950 dark:text-white">Passer en mode pilotage</p>
-                              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                Ouvrez le cockpit admin pour suivre l&apos;activité globale.
-                              </p>
+                      <div className="grid gap-3">
+                        {canAccessAdminDashboard && (
+                          <Link href="/admin">
+                            <div className="client-panel flex items-start justify-between rounded-[1.55rem] px-4 py-4 transition hover:-translate-y-0.5">
+                              <div>
+                                <p className="text-sm font-semibold text-slate-950 dark:text-white">Passer en mode pilotage</p>
+                                <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                  Ouvrez le cockpit admin pour suivre l&apos;activité globale.
+                                </p>
+                              </div>
+                              <ShieldCheck size={18} className="mt-1 text-violet-600 dark:text-violet-200" />
                             </div>
-                            <ShieldCheck size={18} className="mt-1 text-violet-600 dark:text-violet-200" />
+                          </Link>
+                        )}
+
+                        <div className="client-panel flex items-start justify-between rounded-[1.55rem] px-4 py-4">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Support réactif</p>
+                            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                              Besoin d&apos;aide sur un devis ou un réglage ? Le support reste accessible sans quitter votre flux.
+                            </p>
                           </div>
-                        </Link>
-                      )}
+                          <Sparkles size={18} className="mt-1 text-violet-600 dark:text-violet-200" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -868,6 +1024,89 @@ export default function DashboardPage() {
               </motion.div>
             </div>
           </motion.section>
+
+          {setupIsRequired && selectedTradeDefinition && (
+            <motion.section
+              {...sectionMotion(0.09)}
+              className="grid gap-4 xl:grid-cols-[1.16fr_0.84fr]"
+            >
+              <div className="client-panel rounded-[2rem] p-5 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Setup métier</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Préparez Zolio pour votre activité
+                    </h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Choisissez votre métier, importez votre starter catalogue et partez avec des packs adaptés au terrain.
+                    </p>
+                  </div>
+                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                    {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} déjà en base
+                  </span>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  {TRADE_OPTIONS.map((option) => (
+                    <TradeOptionCard
+                      key={option.key}
+                      option={option}
+                      active={selectedTrade === option.key}
+                      onSelect={setSelectedTrade}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="client-panel rounded-[2rem] p-5 sm:p-6">
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Plan d&apos;attaque</p>
+                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                  {selectedTradeDefinition.label} prêt en quelques secondes
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  {selectedTradeDefinition.pitch}
+                </p>
+
+                <div className="mt-5 grid gap-3">
+                  <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedStarterCount} prestations starter</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Base prête pour accélérer vos devis et retrouver vos prix récurrents.
+                    </p>
+                  </div>
+                  <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Packs rapides métier</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Les forfaits rapides sur les devis utilisent ensuite le même vocabulaire métier.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleBootstrapTrade}
+                    disabled={isBootstrappingTrade}
+                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+                  >
+                    {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
+                  </button>
+                  <Link
+                    href="/parametres"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                  >
+                    Finaliser mes paramètres
+                  </Link>
+                  <Link
+                    href="/nouveau-devis"
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                  >
+                    Passer au premier devis
+                  </Link>
+                </div>
+              </div>
+            </motion.section>
+          )}
 
           <motion.section
             {...sectionMotion(0.1)}

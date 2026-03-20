@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
+import { buildPrestationCreateData, mapPrestationForClient } from "@/lib/prestations";
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -12,25 +13,32 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const { id } = resolvedParams;
 
     const body = await request.json();
-    const { nom, description, unite, prix, cout, stock } = body;
+    const updatePayload = buildPrestationCreateData(userId, body);
 
     const prestation = await prisma.prestation.updateMany({
       where: { id, userId },
       data: {
-        nom,
-        description: description || "",
-        unite: unite || "",
-        prix: parseFloat(prix),
-        cout: parseFloat(cout || 0),
-        stock: parseInt(stock || 0)
-      }
+        nom: updatePayload.nom,
+        description: updatePayload.description,
+        unite: updatePayload.unite,
+        prix: updatePayload.prix,
+        cout: updatePayload.cout,
+        stock: updatePayload.stock,
+      },
     });
 
     if (prestation.count === 0) {
-       return new NextResponse("Prestation non trouvée", { status: 404 });
+      return new NextResponse("Prestation non trouvée", { status: 404 });
     }
 
-    return NextResponse.json({ success: true });
+    const updatedPrestation = await prisma.prestation.findFirst({
+      where: { id, userId },
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: updatedPrestation ? mapPrestationForClient(updatedPrestation) : null,
+    });
   } catch (error) {
     return internalServerError("prestation-put", error, "Impossible de modifier la prestation");
   }
@@ -45,7 +53,7 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     const { id } = resolvedParams;
 
     await prisma.prestation.deleteMany({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     return NextResponse.json({ success: true });

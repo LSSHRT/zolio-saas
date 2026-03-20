@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   FileText,
   Home,
+  LifeBuoy,
   Receipt,
   StickyNote,
   Users,
@@ -28,6 +29,22 @@ const CLIENT_NAV_ITEMS: Array<{
   { href: "/factures", icon: Receipt, key: "factures", label: "Factures" },
   { href: "/calepin", icon: StickyNote, key: "calepin", label: "Calepin" },
 ] as const;
+
+const SUPPORT_WHATSAPP = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP?.trim() || "";
+const SUPPORT_EMAIL = "contact@zolio.site";
+
+function buildSupportHref() {
+  if (!SUPPORT_WHATSAPP) {
+    return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Support Zolio")}`;
+  }
+
+  const phone = SUPPORT_WHATSAPP.replace(/[^\d]/g, "");
+  const text = encodeURIComponent("Bonjour, j'ai besoin d'aide sur Zolio.");
+  return `https://wa.me/${phone}?text=${text}`;
+}
+
+const SUPPORT_HREF = buildSupportHref();
+const SUPPORT_IS_EXTERNAL = SUPPORT_HREF.startsWith("http");
 
 function toneClasses(tone: ClientTone) {
   switch (tone) {
@@ -87,6 +104,24 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         );
       })}
     </nav>
+  );
+}
+
+export function ClientSupportButton({ compact = false }: { compact?: boolean }) {
+  return (
+    <a
+      href={SUPPORT_HREF}
+      target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
+      rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
+      className={`inline-flex items-center justify-center gap-2 rounded-full border border-slate-200/80 bg-white/80 text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white ${
+        compact ? "h-11 px-3 text-sm font-semibold sm:px-4" : "px-4 py-2.5 text-sm font-semibold"
+      }`}
+    >
+      <LifeBuoy size={compact ? 16 : 17} />
+      <span className={compact ? "hidden sm:inline" : ""}>
+        {compact ? "Support" : SUPPORT_WHATSAPP ? "Support WhatsApp" : "Support email"}
+      </span>
+    </a>
   );
 }
 
@@ -164,7 +199,10 @@ export function ClientSubpageShell({
               <ClientBrandMark />
             </div>
 
-            {actions ? <div className="flex flex-wrap items-center gap-2 md:justify-end">{actions}</div> : null}
+            <div className="flex flex-wrap items-center gap-2 md:justify-end">
+              <ClientSupportButton compact />
+              {actions}
+            </div>
           </div>
         </header>
 
