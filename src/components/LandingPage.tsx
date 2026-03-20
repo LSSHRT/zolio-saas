@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import {
   motion,
   AnimatePresence,
+  useScroll,
+  useTransform,
   useReducedMotion,
 } from "framer-motion";
 import Link from "next/link";
@@ -38,10 +40,26 @@ import Image from "next/image";
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 420], [0, 28]);
+  const stretch = useTransform(scrollY, [0, 260], [1, 1.06]);
+
+  if (shouldReduceMotion) {
+    return (
+      <h1 className={`font-extrabold tracking-tighter ${className}`}>
+        {text}
+      </h1>
+    );
+  }
+
   return (
-    <h1 className={`font-extrabold tracking-tighter ${className}`}>
+    <motion.h1
+      style={{ y, scaleX: stretch, transformOrigin: "left center" }}
+      className={`font-extrabold tracking-tighter ${className}`}
+    >
       {text}
-    </h1>
+    </motion.h1>
   );
 };
 
