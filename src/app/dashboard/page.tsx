@@ -1002,6 +1002,13 @@ export default function DashboardPage() {
 
               <div className="flex items-center gap-2">
                 <ThemeToggle />
+                <Link
+                  href="/parametres"
+                  className="tour-parametres inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+                  aria-label="Paramètres"
+                >
+                  <Settings size={20} />
+                </Link>
                 <DashboardNotificationsMenu
                   dashboardSignals={dashboardSignals}
                   onToggle={() => setShowNotifications((value) => !value)}
@@ -1012,26 +1019,6 @@ export default function DashboardPage() {
                   {isLoaded ? <UserButton /> : <User size={18} />}
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              <ClientSupportButton />
-              {canAccessAdminDashboard && (
-                <Link
-                  href="/admin"
-                  className="inline-flex h-11 items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                >
-                  <ShieldCheck size={16} />
-                  Admin
-                </Link>
-              )}
-              <Link
-                href="/parametres"
-                className="tour-parametres inline-flex h-11 items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-              >
-                <Settings size={16} />
-                Paramètres
-              </Link>
             </div>
           </div>
 
