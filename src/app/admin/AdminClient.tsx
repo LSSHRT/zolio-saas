@@ -226,9 +226,11 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState | null>(null);
   const [confirmPending, setConfirmPending] = useState(false);
   const [activityFeed, setActivityFeed] = useState(data.activity);
+  const shouldLoadAcquisitionData = activeSection === "acquisition";
+  const shouldLoadSystemData = activeSection === "systeme";
 
   const { data: mailsData, mutate: mutateMails } = useSWR<AdminMailItem[]>(
-    "/api/admin/mail",
+    shouldLoadAcquisitionData ? "/api/admin/mail" : null,
     fetcher,
     {
       keepPreviousData: true,
@@ -236,20 +238,26 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     },
   );
   const { data: cronData, mutate: mutateCron } = useSWR<{ value: string | null }>(
-    "/api/admin/settings?key=cron_prospect_enabled",
+    shouldLoadAcquisitionData || shouldLoadSystemData
+      ? "/api/admin/settings?key=cron_prospect_enabled"
+      : null,
     fetcher,
     {
       fallbackData: { value: data.acquisition.isCronEnabled ? "true" : "false" },
       revalidateOnFocus: false,
+      revalidateOnMount: false,
+      revalidateIfStale: false,
     },
   );
   const { data: auditLogsData, mutate: mutateAuditLogs } = useSWR<AdminAuditLogItem[]>(
-    "/api/admin/logs",
+    shouldLoadSystemData ? "/api/admin/logs" : null,
     fetcher,
     {
       fallbackData: data.auditLogs,
-      refreshInterval: 15000,
-      revalidateOnFocus: true,
+      refreshInterval: shouldLoadSystemData ? 15000 : 0,
+      revalidateOnFocus: shouldLoadSystemData,
+      revalidateOnMount: false,
+      revalidateIfStale: false,
     },
   );
 

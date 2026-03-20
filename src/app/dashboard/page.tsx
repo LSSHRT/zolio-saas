@@ -42,6 +42,7 @@ import {
   ClientMobileDock,
   ClientSupportButton,
 } from "@/components/client-shell";
+import type { ClientDashboardMonthlyDatum, ClientDashboardSummary } from "@/lib/client-dashboard";
 import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
@@ -57,25 +58,6 @@ const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ss
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   return response.json();
-};
-
-type DevisItem = {
-  numero: string;
-  client: string;
-  nomClient: string;
-  emailClient: string;
-  date: string;
-  statut: string;
-  totalHT: string;
-  totalTTC: string;
-};
-
-type AdminViewerData = {
-  isAdmin?: boolean;
-};
-
-type CatalogItem = {
-  id: string;
 };
 
 type Tone = "violet" | "emerald" | "amber" | "rose" | "slate";
@@ -105,13 +87,6 @@ type ActionRailItem = {
   tone: Tone;
   badge?: string;
 };
-
-type MonthlyDatum = {
-  name: string;
-  CA: number;
-};
-
-const MONTH_NAMES = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
 
 function readStringMetadata(value: unknown) {
   return typeof value === "string" ? value : "";
@@ -444,28 +419,18 @@ function TradeOptionCard({
 
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
-  const { data, isLoading } = useSWR<DevisItem[]>("/api/devis", fetcher, {
-    revalidateOnFocus: false,
-    keepPreviousData: true,
-  });
-  const { data: adminViewerData } = useSWR<AdminViewerData>(isLoaded ? "/api/admin/me" : null, fetcher, {
-    revalidateOnFocus: false,
-    keepPreviousData: true,
-  });
-  const { data: prestationsData, mutate: mutatePrestations } = useSWR<CatalogItem[]>(
-    isLoaded ? "/api/prestations" : null,
+  const { data: dashboardData, isLoading, mutate: mutateDashboard } = useSWR<ClientDashboardSummary>(
+    "/api/dashboard/summary",
     fetcher,
     {
       revalidateOnFocus: false,
       keepPreviousData: true,
+      dedupingInterval: 15000,
     },
   );
 
-  const devis = useMemo(() => (Array.isArray(data) ? data : []), [data]);
-  const catalogueItems = useMemo(() => (Array.isArray(prestationsData) ? prestationsData : []), [prestationsData]);
-  const loading = isLoading && !data;
-  const canAccessAdminDashboard =
-    user?.publicMetadata?.isAdmin === true || adminViewerData?.isAdmin === true;
+  const loading = isLoading && !dashboardData;
+  const canAccessAdminDashboard = user?.publicMetadata?.isAdmin === true;
   const isPro = user?.publicMetadata?.isPro === true;
   const companyTrade = readStringMetadata(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
   const starterCatalogImported = readBooleanMetadata(
@@ -474,7 +439,7 @@ export default function DashboardPage() {
   const onboardingCompleted = readBooleanMetadata(
     user?.unsafeMetadata?.onboardingCompleted || user?.publicMetadata?.onboardingCompleted,
   );
-  const starterCatalogCount = catalogueItems.length;
+  const starterCatalogCount = dashboardData?.starterCatalogCount ?? 0;
   const starterTrade = getTradeDefinition(companyTrade) ?? getTradeDefinition(DEFAULT_TRADE);
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isBootstrappingTrade, setIsBootstrappingTrade] = useState(false);
@@ -504,7 +469,6 @@ export default function DashboardPage() {
     return !localStorage.getItem("zolio_has_seen_tour");
   });
   const [currentHour] = useState(() => new Date().getHours());
-  const [todayMs] = useState(() => Date.now());
 
   const handleBootstrapTrade = async () => {
     if (!user || !selectedTradeDefinition) return;
@@ -531,7 +495,7 @@ export default function DashboardPage() {
         },
       });
 
-      await mutatePrestations();
+      await mutateDashboard();
       toast.success(
         payload.imported > 0
           ? `${payload.imported} prestation(s) ${selectedTradeDefinition.shortLabel.toLowerCase()} importée(s)`
@@ -614,81 +578,20 @@ export default function DashboardPage() {
     },
   ];
 
-  const CA_HT = useMemo(
-    () => devis.reduce((sum, item) => sum + (Number.parseFloat(item.totalHT) || 0), 0),
-    [devis],
-  );
-  const CA_TTC = useMemo(
-    () => devis.reduce((sum, item) => sum + (Number.parseFloat(item.totalTTC) || 0), 0),
-    [devis],
-  );
-  const acceptedQuotes = useMemo(
-    () => devis.filter((item) => item.statut === "Accepté"),
-    [devis],
-  );
-  const pendingQuotes = useMemo(
-    () =>
-      devis.filter(
-        (item) => item.statut === "En attente" || item.statut === "En attente (Modifié)",
-      ),
-    [devis],
-  );
-  const acceptedRevenueHT = useMemo(
-    () =>
-      acceptedQuotes.reduce((sum, item) => sum + (Number.parseFloat(item.totalHT) || 0), 0),
-    [acceptedQuotes],
-  );
-  const pipelineRevenueHT = useMemo(
-    () =>
-      pendingQuotes.reduce((sum, item) => sum + (Number.parseFloat(item.totalHT) || 0), 0),
-    [pendingQuotes],
-  );
-  const conversionRate = devis.length > 0 ? Math.round((acceptedQuotes.length / devis.length) * 100) : 0;
-  const averageTicket = devis.length > 0 ? CA_TTC / devis.length : 0;
+  const totalQuotes = dashboardData?.totalQuotes ?? 0;
+  const CA_HT = dashboardData?.totalHT ?? 0;
+  const CA_TTC = dashboardData?.totalTTC ?? 0;
+  const acceptedQuotesCount = dashboardData?.acceptedCount ?? 0;
+  const pendingQuotesCount = dashboardData?.pendingCount ?? 0;
+  const acceptedRevenueHT = dashboardData?.acceptedRevenueHT ?? 0;
+  const pipelineRevenueHT = dashboardData?.pipelineRevenueHT ?? 0;
+  const conversionRate = dashboardData?.conversionRate ?? 0;
+  const averageTicket = dashboardData?.averageTicket ?? 0;
   const objectifProgress = objectifActif > 0 ? Math.min((CA_TTC / objectifActif) * 100, 100) : 0;
   const remainingToGoal = Math.max(objectifActif - CA_TTC, 0);
-  const devisRecents = useMemo(() => devis.slice(0, 4), [devis]);
-
-  const devisARelancer = useMemo(
-    () =>
-      devis
-        .filter((item) => {
-          if (item.statut === "Accepté" || item.statut === "Refusé") return false;
-          const dateObj = parseDevisDate(item.date);
-          const diffTime = Math.abs(todayMs - dateObj.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          return diffDays > 7;
-        })
-        .slice(0, 4),
-    [devis, todayMs],
-  );
-
-  const monthlyData = useMemo<MonthlyDatum[]>(() => {
-    const months = Array.from({ length: 6 }).map((_, index) => {
-      const date = new Date();
-      date.setMonth(date.getMonth() - (5 - index));
-      return {
-        name: MONTH_NAMES[date.getMonth()],
-        month: date.getMonth(),
-        year: date.getFullYear(),
-        CA: 0,
-      };
-    });
-
-    acceptedQuotes.forEach((item) => {
-      const parsedDate = parseDevisDate(item.date);
-      const targetMonth = months.find(
-        (month) =>
-          month.month === parsedDate.getMonth() && month.year === parsedDate.getFullYear(),
-      );
-
-      if (targetMonth) {
-        targetMonth.CA += Number.parseFloat(item.totalHT) || 0;
-      }
-    });
-
-    return months.map(({ name, CA }) => ({ name, CA }));
-  }, [acceptedQuotes]);
+  const devisRecents = dashboardData?.recentQuotes ?? [];
+  const devisARelancer = dashboardData?.followUpQuotes ?? [];
+  const monthlyData: ClientDashboardMonthlyDatum[] = dashboardData?.monthlyData ?? [];
 
   let greetingText = "Bonjour";
   let GreetingIcon = CloudSun;
@@ -718,7 +621,7 @@ export default function DashboardPage() {
       });
     }
 
-    if (devis.length === 0) {
+    if (totalQuotes === 0) {
       signals.push({
         id: "empty",
         title: "Premier devis à lancer",
@@ -738,10 +641,10 @@ export default function DashboardPage() {
       });
     }
 
-    if (pendingQuotes.length > 0) {
+    if (pendingQuotesCount > 0) {
       signals.push({
         id: "pipeline",
-        title: `${pendingQuotes.length} devis dans le pipe`,
+        title: `${pendingQuotesCount} devis dans le pipe`,
         description: `${formatCurrency(pipelineRevenueHT)} HT encore en attente de validation.`,
         href: "/devis",
         tone: "amber",
@@ -777,11 +680,11 @@ export default function DashboardPage() {
     return signals.slice(0, 4);
   }, [
     CA_TTC,
-    devis.length,
+    totalQuotes,
     devisARelancer.length,
     isPro,
     objectifActif,
-    pendingQuotes.length,
+    pendingQuotesCount,
     pipelineRevenueHT,
     setupIsRequired,
   ]);
@@ -834,7 +737,7 @@ export default function DashboardPage() {
   ];
   const actionRailItems = useMemo<ActionRailItem[]>(() => {
     const items: ActionRailItem[] = [
-      devis.length === 0
+      totalQuotes === 0
         ? {
             href: "/nouveau-devis",
             label: "Créer le premier devis",
@@ -860,14 +763,14 @@ export default function DashboardPage() {
         tone: "rose",
         badge: `${devisARelancer.length}`,
       });
-    } else if (pendingQuotes.length > 0) {
+    } else if (pendingQuotesCount > 0) {
       items.push({
         href: "/devis",
         label: "Suivre le pipeline actif",
-        description: `${pendingQuotes.length} devis attendent encore une décision côté client.`,
+        description: `${pendingQuotesCount} devis attendent encore une décision côté client.`,
         icon: Clock3,
         tone: "amber",
-        badge: `${pendingQuotes.length}`,
+        badge: `${pendingQuotesCount}`,
       });
     } else {
       items.push({
@@ -906,7 +809,7 @@ export default function DashboardPage() {
     }
 
     return items;
-  }, [devis.length, devisARelancer.length, isPro, pendingQuotes.length, setupIsRequired]);
+  }, [totalQuotes, devisARelancer.length, isPro, pendingQuotesCount, setupIsRequired]);
 
   const todayFocus = useMemo<DashboardSignal>(() => {
     if (setupIsRequired) {
@@ -918,7 +821,7 @@ export default function DashboardPage() {
       };
     }
 
-    if (devis.length === 0) {
+    if (totalQuotes === 0) {
       return {
         id: "empty-focus",
         title: "Créer le premier devis",
@@ -938,7 +841,7 @@ export default function DashboardPage() {
       };
     }
 
-    if (pendingQuotes.length > 0) {
+    if (pendingQuotesCount > 0) {
       return {
         id: "pipeline-focus",
         title: "Pipeline chaud à suivre",
@@ -964,7 +867,7 @@ export default function DashboardPage() {
       description: "Votre dashboard est propre. Vous pouvez vous concentrer sur le prochain devis ou le suivi client.",
       tone: "emerald",
     };
-  }, [devis.length, devisARelancer.length, isPro, pendingQuotes.length, pipelineRevenueHT, setupIsRequired]);
+  }, [totalQuotes, devisARelancer.length, isPro, pendingQuotesCount, pipelineRevenueHT, setupIsRequired]);
   const secondarySignals = dashboardSignals.filter((signal) => signal.title !== todayFocus.title).slice(0, 2);
 
   return (
@@ -972,27 +875,29 @@ export default function DashboardPage() {
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      <Joyride
-        steps={steps}
-        run={runTour}
-        continuous
-        showSkipButton
-        showProgress
-        callback={handleJoyrideCallback}
-        styles={{
-          options: {
-            primaryColor: "#7c3aed",
-            zIndex: 1000,
-          },
-        }}
-        locale={{
-          back: "Précédent",
-          close: "Fermer",
-          last: "Terminer",
-          next: "Suivant",
-          skip: "Passer",
-        }}
-      />
+      {runTour ? (
+        <Joyride
+          steps={steps}
+          run={runTour}
+          continuous
+          showSkipButton
+          showProgress
+          callback={handleJoyrideCallback}
+          styles={{
+            options: {
+              primaryColor: "#7c3aed",
+              zIndex: 1000,
+            },
+          }}
+          locale={{
+            back: "Précédent",
+            close: "Fermer",
+            last: "Terminer",
+            next: "Suivant",
+            skip: "Passer",
+          }}
+        />
+      ) : null}
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10">
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
@@ -1192,12 +1097,12 @@ export default function DashboardPage() {
                       },
                       {
                         label: "Suivre",
-                        detail: `${pendingQuotes.length} devis en attente`,
+                        detail: `${pendingQuotesCount} devis en attente`,
                         tone: "amber",
                       },
                       {
                         label: "Encaisser",
-                        detail: `${acceptedQuotes.length} devis validés`,
+                        detail: `${acceptedQuotesCount} devis validés`,
                         tone: "emerald",
                       },
                     ].map((step) => {
@@ -1375,7 +1280,7 @@ export default function DashboardPage() {
                   </h2>
                 </div>
                 <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                  {devis.length} devis monitorés
+                  {totalQuotes} devis monitorés
                 </span>
               </div>
 
@@ -1383,14 +1288,14 @@ export default function DashboardPage() {
                 <MetricCard
                   label="CA validé"
                   value={formatCurrency(acceptedRevenueHT)}
-                  detail={`${acceptedQuotes.length} devis acceptés`}
+                  detail={`${acceptedQuotesCount} devis acceptés`}
                   tone="emerald"
                   icon={TrendingUp}
                 />
                 <MetricCard
                   label="Pipeline"
                   value={formatCurrency(pipelineRevenueHT)}
-                  detail={`${pendingQuotes.length} devis en attente`}
+                  detail={`${pendingQuotesCount} devis en attente`}
                   tone="amber"
                   icon={Clock3}
                 />
@@ -1480,7 +1385,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Validé HT</p>
                     <span className="text-xs text-emerald-600 dark:text-emerald-300">
-                      {acceptedQuotes.length} signé{acceptedQuotes.length > 1 ? "s" : ""}
+                      {acceptedQuotesCount} signé{acceptedQuotesCount > 1 ? "s" : ""}
                     </span>
                   </div>
                   <p className="mt-3 text-2xl font-semibold text-emerald-700 dark:text-emerald-200">
@@ -1491,7 +1396,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">En attente HT</p>
                     <span className="text-xs text-amber-600 dark:text-amber-300">
-                      {pendingQuotes.length} à convertir
+                      {pendingQuotesCount} à convertir
                     </span>
                   </div>
                   <p className="mt-3 text-2xl font-semibold text-amber-700 dark:text-amber-200">
@@ -1594,7 +1499,7 @@ export default function DashboardPage() {
                                   </p>
                                 </div>
                                 <p className="text-sm font-semibold text-slate-950 dark:text-white">
-                                  {formatCurrency(Number.parseFloat(item.totalTTC) || 0)}
+                                  {formatCurrency(item.totalTTC || 0)}
                                 </p>
                               </div>
                               <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
@@ -1703,7 +1608,7 @@ export default function DashboardPage() {
                               {item.nomClient}
                             </p>
                             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                              {item.numero} · {item.date}
+                              {item.numero} · {formatDateLabel(item.date)}
                             </p>
                           </div>
                         </div>
@@ -1715,7 +1620,7 @@ export default function DashboardPage() {
                         <div>
                           <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Montant TTC</p>
                           <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
-                            {formatCurrency(Number.parseFloat(item.totalTTC) || 0)}
+                            {formatCurrency(item.totalTTC || 0)}
                           </p>
                         </div>
                         <span className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-200">

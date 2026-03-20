@@ -140,53 +140,143 @@ function getDatabaseHealth(provider: string, latencyMs: number | null) {
   };
 }
 
-export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<AdminDashboardData> {
+async function loadAdminUsers() {
   const client = await clerkClient();
+  const [totalUsersCount, userList] = await Promise.all([
+    client.users.getCount(),
+    client.users.getUserList({ limit: 500, orderBy: "-created_at" }),
+  ]);
+
+  const users: AdminUserRow[] = userList.data.map((user) => {
+    const metadata = user.publicMetadata || {};
+    const stripeSubscriptionId = readNullableString(metadata.stripeSubscriptionId);
+    const isPro = readBoolean(metadata.isPro);
+
+    return {
+      id: user.id,
+      name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Sans nom",
+      email: user.emailAddresses[0]?.emailAddress || "Aucun email",
+      createdAt: toIsoString(user.createdAt),
+      lastSignInAt: toIsoString(user.lastSignInAt),
+      imageUrl: user.imageUrl,
+      banned: user.banned,
+      isPro,
+      aiGenerations: readNumber(metadata.aiDevisCount),
+      publicMetadata: {
+        aiDevisCount: readNumber(metadata.aiDevisCount),
+        stripeSubscriptionId,
+        isPro: readBoolean(metadata.isPro),
+        isAdmin: readBoolean(metadata.isAdmin),
+        parrainCode: readNullableString(metadata.parrainCode),
+      },
+    };
+  });
+
+  return { totalUsersCount, users };
+}
+
+async function measureDatabaseLatency() {
+  const startedAt = Date.now();
+  await prisma.$queryRaw`SELECT 1`;
+  return Date.now() - startedAt;
+}
+
+async function loadAcquisitionSnapshot() {
+  const [cronSetting, totalProspectMails, statusGroups, sourceGroups, rawMails] = await Promise.all([
+    prisma.adminSetting.findUnique({ where: { key: "cron_prospect_enabled" } }),
+    prisma.prospectMail.count(),
+    prisma.prospectMail.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
+    prisma.prospectMail.groupBy({
+      by: ["source"],
+      _count: { _all: true },
+    }),
+    prisma.prospectMail.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 24,
+    }),
+  ]);
+
+  return {
+    isCronEnabled: cronSetting?.value !== "false",
+    totalMailCount: totalProspectMails,
+    sentCount: getStatusCount(statusGroups, "Sent"),
+    failedCount: getStatusCount(statusGroups, "Failed"),
+    queuedCount: getStatusCount(statusGroups, "Queued"),
+    manualCount: getManualCount(sourceGroups),
+    prospectMails: serializeProspectMails(rawMails),
+  };
+}
+
+async function loadStripeSnapshot() {
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return {
+      activeSubscriptions: 0,
+      mrr: 0,
+    };
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+    apiVersion: "2023-10-16" as Stripe.LatestApiVersion,
+  });
+  const subscriptions = await stripe.subscriptions.list({ status: "active", limit: 100 });
+  const mrr = subscriptions.data.reduce((sum, subscription) => {
+    const plan = subscription.items.data[0]?.plan;
+    if (!plan?.amount) return sum;
+
+    let amount = plan.amount / 100;
+    if (plan.interval === "year") amount /= 12;
+    return sum + amount;
+  }, 0);
+
+  return {
+    activeSubscriptions: subscriptions.data.length,
+    mrr,
+  };
+}
+
+export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<AdminDashboardData> {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const previousThirtyDaysAgo = new Date(thirtyDaysAgo);
   previousThirtyDaysAgo.setDate(previousThirtyDaysAgo.getDate() - 30);
 
   const currentGeminiKey = readString(adminUser.publicMetadata?.customGeminiKey);
-  const runtimeState = await getAdminRuntimeState();
   const prospectingRuntime = getProspectingRuntime();
   const dbProvider = detectDatabaseProvider(process.env.DATABASE_URL);
+
+  const [
+    runtimeStateResult,
+    usersResult,
+    dbLatencyResult,
+    acquisitionResult,
+    stripeResult,
+    auditLogsResult,
+  ] = await Promise.allSettled([
+    getAdminRuntimeState(),
+    loadAdminUsers(),
+    measureDatabaseLatency(),
+    loadAcquisitionSnapshot(),
+    loadStripeSnapshot(),
+    getAdminAuditLogs(24),
+  ]);
+
+  const runtimeState =
+    runtimeStateResult.status === "fulfilled"
+      ? runtimeStateResult.value
+      : { systemBanner: "", maintenanceEnabled: false, maintenanceMessage: "" };
   const currentSystemBanner =
     runtimeState.systemBanner || readString(adminUser.publicMetadata?.systemBanner);
 
   let totalUsersCount = 0;
   let users: AdminUserRow[] = [];
-
-  try {
-    totalUsersCount = await client.users.getCount();
-    const res = await client.users.getUserList({ limit: 500, orderBy: "-created_at" });
-
-    users = res.data.map((user) => {
-      const metadata = user.publicMetadata || {};
-      const stripeSubscriptionId = readNullableString(metadata.stripeSubscriptionId);
-      const isPro = readBoolean(metadata.isPro);
-
-      return {
-        id: user.id,
-        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Sans nom",
-        email: user.emailAddresses[0]?.emailAddress || "Aucun email",
-        createdAt: toIsoString(user.createdAt),
-        lastSignInAt: toIsoString(user.lastSignInAt),
-        imageUrl: user.imageUrl,
-        banned: user.banned,
-        isPro,
-        aiGenerations: readNumber(metadata.aiDevisCount),
-        publicMetadata: {
-          aiDevisCount: readNumber(metadata.aiDevisCount),
-          stripeSubscriptionId,
-          isPro: readBoolean(metadata.isPro),
-          isAdmin: readBoolean(metadata.isAdmin),
-          parrainCode: readNullableString(metadata.parrainCode),
-        },
-      };
-    });
-  } catch (error) {
-    console.error("admin-dashboard: unable to load Clerk users", error);
+  if (usersResult.status === "fulfilled") {
+    totalUsersCount = usersResult.value.totalUsersCount;
+    users = usersResult.value.users;
+  } else {
+    console.error("admin-dashboard: unable to load Clerk users", usersResult.reason);
   }
 
   const proUsersCount = users.filter((user) => user.isPro).length;
@@ -216,42 +306,23 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   let manualCount = 0;
   let automatedCount = 0;
   let totalMailCount = 0;
-
-  try {
-    const dbStartedAt = Date.now();
-    await prisma.$queryRaw`SELECT 1`;
-    dbLatencyMs = Date.now() - dbStartedAt;
-  } catch (error) {
-    console.error("admin-dashboard: unable to ping Prisma", error);
+  if (dbLatencyResult.status === "fulfilled") {
+    dbLatencyMs = dbLatencyResult.value;
+  } else {
+    console.error("admin-dashboard: unable to ping Prisma", dbLatencyResult.reason);
   }
 
-  try {
-    const [cronSetting, totalProspectMails, statusGroups, sourceGroups, rawMails] = await Promise.all([
-      prisma.adminSetting.findUnique({ where: { key: "cron_prospect_enabled" } }),
-      prisma.prospectMail.count(),
-      prisma.prospectMail.groupBy({
-        by: ["status"],
-        _count: { _all: true },
-      }),
-      prisma.prospectMail.groupBy({
-        by: ["source"],
-        _count: { _all: true },
-      }),
-      prisma.prospectMail.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 24,
-      }),
-    ]);
-    isCronEnabled = cronSetting?.value !== "false";
-    totalMailCount = totalProspectMails;
-    sentCount = getStatusCount(statusGroups, "Sent");
-    failedCount = getStatusCount(statusGroups, "Failed");
-    queuedCount = getStatusCount(statusGroups, "Queued");
-    manualCount = getManualCount(sourceGroups);
+  if (acquisitionResult.status === "fulfilled") {
+    isCronEnabled = acquisitionResult.value.isCronEnabled;
+    totalMailCount = acquisitionResult.value.totalMailCount;
+    sentCount = acquisitionResult.value.sentCount;
+    failedCount = acquisitionResult.value.failedCount;
+    queuedCount = acquisitionResult.value.queuedCount;
+    manualCount = acquisitionResult.value.manualCount;
     automatedCount = Math.max(totalMailCount - manualCount, 0);
-    prospectMails = serializeProspectMails(rawMails);
-  } catch (error) {
-    console.error("admin-dashboard: unable to load Prisma data", error);
+    prospectMails = acquisitionResult.value.prospectMails;
+  } else {
+    console.error("admin-dashboard: unable to load Prisma data", acquisitionResult.reason);
   }
 
   const attemptedCount = sentCount + failedCount;
@@ -260,25 +331,11 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
 
   let activeSubscriptions = 0;
   let mrr = 0;
-
-  if (process.env.STRIPE_SECRET_KEY) {
-    try {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-        apiVersion: "2023-10-16" as Stripe.LatestApiVersion,
-      });
-      const subscriptions = await stripe.subscriptions.list({ status: "active", limit: 100 });
-      activeSubscriptions = subscriptions.data.length;
-      mrr = subscriptions.data.reduce((sum, subscription) => {
-        const plan = subscription.items.data[0]?.plan;
-        if (!plan?.amount) return sum;
-
-        let amount = plan.amount / 100;
-        if (plan.interval === "year") amount /= 12;
-        return sum + amount;
-      }, 0);
-    } catch (error) {
-      console.error("admin-dashboard: unable to load Stripe data", error);
-    }
+  if (stripeResult.status === "fulfilled") {
+    activeSubscriptions = stripeResult.value.activeSubscriptions;
+    mrr = stripeResult.value.mrr;
+  } else {
+    console.error("admin-dashboard: unable to load Stripe data", stripeResult.reason);
   }
 
   if (mrr === 0 && proUsersCount > 0) {
@@ -423,7 +480,8 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     });
   }
 
-  const auditLogs: AdminAuditLogItem[] = await getAdminAuditLogs(24);
+  const auditLogs: AdminAuditLogItem[] =
+    auditLogsResult.status === "fulfilled" ? auditLogsResult.value : [];
 
   const systemStatuses: AdminSystemStatus[] = [
     {
