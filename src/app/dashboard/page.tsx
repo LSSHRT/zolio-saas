@@ -1023,7 +1023,7 @@ export default function DashboardPage() {
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <motion.section
             {...sectionMotion(0)}
-            className="grid gap-4 2xl:grid-cols-[minmax(0,1.38fr)_minmax(22rem,0.82fr)]"
+            className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(20rem,0.8fr)]"
           >
             <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
@@ -1045,53 +1045,15 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(19rem,0.92fr)] xl:items-start">
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.06fr)_minmax(19rem,0.94fr)] xl:items-start">
                   <div className="max-w-3xl">
-                    <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-[3.15rem]">
                       {greetingText}
                       {user?.firstName ? `, ${user.firstName}` : ""}.
                     </h1>
-                    <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                      Votre bureau chantier sur ordinateur: préparer un devis, suivre ce qui attend et voir où vous en êtes, sans avoir l&apos;impression de traverser un labyrinthe.
+                    <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+                      Depuis l&apos;ordinateur, tout doit tenir en une lecture: créer, relancer, encaisser, puis repartir sans chercher dans dix cartes différentes.
                     </p>
-
-                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                      {[
-                        {
-                          label: "Préparer",
-                          detail: starterTrade?.shortLabel || "Métier à définir",
-                          tone: "violet",
-                        },
-                        {
-                          label: "Suivre",
-                          detail: `${pendingQuotes.length} devis en attente`,
-                          tone: "amber",
-                        },
-                        {
-                          label: "Encaisser",
-                          detail: `${acceptedQuotes.length} devis validés`,
-                          tone: "emerald",
-                        },
-                      ].map((step) => {
-                        const classes = toneClasses(step.tone as Tone);
-                        return (
-                          <div
-                            key={step.label}
-                            className="rounded-[1.5rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
-                                {step.label}
-                              </p>
-                              <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-                                {step.tone === "emerald" ? <Wallet size={14} /> : step.tone === "amber" ? <Clock3 size={14} /> : <FileText size={14} />}
-                              </span>
-                            </div>
-                            <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">{step.detail}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
 
                     <div className="mt-6 flex flex-wrap gap-3">
                       <Link href="/nouveau-devis" className="tour-nouveau-devis">
@@ -1140,6 +1102,44 @@ export default function DashboardPage() {
                         </Link>
                       )}
                     </div>
+
+                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                      {[
+                        {
+                          label: "Préparer",
+                          detail: starterTrade?.shortLabel || "Métier à définir",
+                          tone: "violet",
+                        },
+                        {
+                          label: "Suivre",
+                          detail: `${pendingQuotes.length} devis en attente`,
+                          tone: "amber",
+                        },
+                        {
+                          label: "Encaisser",
+                          detail: `${acceptedQuotes.length} devis validés`,
+                          tone: "emerald",
+                        },
+                      ].map((step) => {
+                        const classes = toneClasses(step.tone as Tone);
+                        return (
+                          <div
+                            key={step.label}
+                            className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
+                                {step.label}
+                              </p>
+                              <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+                                {step.tone === "emerald" ? <Wallet size={14} /> : step.tone === "amber" ? <Clock3 size={14} /> : <FileText size={14} />}
+                              </span>
+                            </div>
+                            <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">{step.detail}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   <div className="xl:pl-2">
@@ -1147,7 +1147,7 @@ export default function DashboardPage() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                            Pulse du jour
+                            Focus du jour
                           </p>
                           <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
                             {todayFocus.title}
@@ -1173,41 +1173,62 @@ export default function DashboardPage() {
                       ) : null}
 
                       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                        <HeroSnapshotCard
-                          label="Cap du mois"
-                          value={formatCurrency(remainingToGoal)}
-                          detail={`${objectifProgress.toFixed(0)}% atteint • ${formatCurrency(objectifActif)} visés`}
-                          tone="violet"
-                          icon={Target}
-                        />
-                        <HeroSnapshotCard
-                          label="Pipeline"
-                          value={pendingQuotes.length > 0 ? `${pendingQuotes.length} à suivre` : "Flux propre"}
-                          detail={
-                            pendingQuotes.length > 0
-                              ? `${formatCurrency(pipelineRevenueHT)} HT encore en jeu`
-                              : `${acceptedQuotes.length} affaire${acceptedQuotes.length > 1 ? "s" : ""} validée${acceptedQuotes.length > 1 ? "s" : ""}`
-                          }
-                          tone="amber"
-                          icon={Clock3}
-                        />
-                        <HeroSnapshotCard
-                          label="Conversion"
-                          value={`${conversionRate}%`}
-                          detail={`${devis.length} devis suivis sur le cockpit`}
-                          tone="emerald"
-                          icon={FileCheck2}
-                        />
-                        <HeroSnapshotCard
-                          label="Validé"
-                          value={formatCurrency(acceptedRevenueHT)}
-                          detail={`${acceptedQuotes.length} devis signés ou acceptés`}
-                          tone="emerald"
-                          icon={TrendingUp}
-                        />
+                        <div className="rounded-[1.3rem] border border-white/45 bg-white/62 px-4 py-4 dark:border-white/10 dark:bg-white/4">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                            Cap restant
+                          </p>
+                          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                            {formatCurrency(remainingToGoal)}
+                          </p>
+                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                            {objectifProgress.toFixed(0)}% du cap mensuel atteint
+                          </p>
+                        </div>
+                        <div className="rounded-[1.3rem] border border-white/45 bg-white/62 px-4 py-4 dark:border-white/10 dark:bg-white/4">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                            Relances
+                          </p>
+                          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                            {devisARelancer.length}
+                          </p>
+                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                            client{devisARelancer.length > 1 ? "s" : ""} à relancer cette semaine
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
+                </div>
+
+                <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <HeroSnapshotCard
+                    label="Cap restant"
+                    value={formatCurrency(remainingToGoal)}
+                    detail={`${objectifProgress.toFixed(0)}% atteint • ${formatCurrency(objectifActif)} visés`}
+                    tone="violet"
+                    icon={Target}
+                  />
+                  <HeroSnapshotCard
+                    label="CA validé"
+                    value={formatCurrency(acceptedRevenueHT)}
+                    detail={`${acceptedQuotes.length} devis signés ou acceptés`}
+                    tone="emerald"
+                    icon={TrendingUp}
+                  />
+                  <HeroSnapshotCard
+                    label="Pipeline"
+                    value={formatCurrency(pipelineRevenueHT)}
+                    detail={`${pendingQuotes.length} devis encore à suivre`}
+                    tone="amber"
+                    icon={Clock3}
+                  />
+                  <HeroSnapshotCard
+                    label="Conversion"
+                    value={`${conversionRate}%`}
+                    detail={`${devis.length} devis suivis dans le cockpit`}
+                    tone="violet"
+                    icon={FileCheck2}
+                  />
                 </div>
               </div>
             </div>
