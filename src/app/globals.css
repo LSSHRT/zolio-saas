@@ -427,10 +427,11 @@
   .landing-shell {
     position: relative;
     background:
-      radial-gradient(circle at top left, rgba(124, 58, 237, 0.28), transparent 22%),
-      radial-gradient(circle at 88% 8%, rgba(217, 70, 239, 0.22), transparent 20%),
-      radial-gradient(circle at 50% 120%, rgba(249, 115, 22, 0.12), transparent 26%),
-      linear-gradient(180deg, #05030d 0%, #090513 42%, #0b0817 100%);
+      radial-gradient(circle at 12% 8%, rgba(80, 164, 255, 0.18), transparent 18%),
+      radial-gradient(circle at 84% 10%, rgba(217, 70, 239, 0.2), transparent 18%),
+      radial-gradient(circle at 52% -4%, rgba(250, 204, 21, 0.08), transparent 20%),
+      radial-gradient(circle at 50% 118%, rgba(249, 115, 22, 0.12), transparent 24%),
+      linear-gradient(180deg, #03040b 0%, #070913 36%, #06070f 100%);
     color: #f8fafc;
     overflow: hidden;
   }
@@ -447,6 +448,7 @@
   .landing-panel {
     border: 1px solid rgba(255, 255, 255, 0.09);
     background:
+      radial-gradient(circle at top right, rgba(94, 234, 212, 0.06), transparent 28%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
       rgba(8, 10, 20, 0.76);
     box-shadow:
@@ -459,6 +461,7 @@
   .landing-panel-strong {
     border: 1px solid rgba(255, 255, 255, 0.1);
     background:
+      radial-gradient(circle at 12% 12%, rgba(56, 189, 248, 0.08), transparent 18%),
       radial-gradient(circle at top right, rgba(124, 58, 237, 0.2), transparent 28%),
       radial-gradient(circle at bottom left, rgba(249, 115, 22, 0.12), transparent 24%),
       linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 22%),
@@ -580,6 +583,233 @@
     background:
       linear-gradient(180deg, rgba(124, 58, 237, 0.16), rgba(217, 70, 239, 0.06)),
       rgba(255, 255, 255, 0.04);
+  }
+
+  .landing-cinematic-bg {
+    isolation: isolate;
+  }
+
+  .landing-spectral-haze {
+    position: absolute;
+    border-radius: 9999px;
+    mix-blend-mode: screen;
+    filter: blur(120px);
+    opacity: 0.55;
+  }
+
+  .landing-spectral-haze-a {
+    left: -8%;
+    top: -6%;
+    height: 34rem;
+    width: 34rem;
+    background: radial-gradient(circle, rgba(88, 169, 255, 0.26) 0%, rgba(88, 169, 255, 0.1) 36%, transparent 72%);
+  }
+
+  .landing-spectral-haze-b {
+    right: -8%;
+    top: 8%;
+    height: 38rem;
+    width: 38rem;
+    background: radial-gradient(circle, rgba(217, 70, 239, 0.24) 0%, rgba(217, 70, 239, 0.09) 34%, transparent 72%);
+  }
+
+  .landing-spectral-haze-c {
+    left: 22%;
+    top: 34%;
+    height: 28rem;
+    width: 28rem;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.22) 0%, rgba(249, 115, 22, 0.08) 30%, transparent 74%);
+  }
+
+  .landing-light-beam {
+    position: absolute;
+    top: -18vh;
+    height: 140vh;
+    width: 26vw;
+    opacity: 0.16;
+    filter: blur(16px);
+  }
+
+  .landing-light-beam-left {
+    left: -3vw;
+    background: linear-gradient(180deg, rgba(125, 211, 252, 0.22), rgba(125, 211, 252, 0));
+    transform: skewX(-16deg);
+  }
+
+  .landing-light-beam-right {
+    right: -6vw;
+    background: linear-gradient(180deg, rgba(251, 146, 60, 0.18), rgba(251, 146, 60, 0));
+    transform: skewX(16deg);
+  }
+
+  .landing-orbit-ring {
+    position: absolute;
+    left: 50%;
+    top: 2.5rem;
+    height: min(72vw, 58rem);
+    width: min(72vw, 58rem);
+    transform: translateX(-50%);
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 54%),
+      radial-gradient(circle at center, rgba(94, 234, 212, 0.05), transparent 66%);
+    box-shadow:
+      0 0 120px rgba(94, 234, 212, 0.08),
+      inset 0 0 60px rgba(255, 255, 255, 0.02);
+    opacity: 0.5;
+  }
+
+  .landing-orbit-ring::before,
+  .landing-orbit-ring::after {
+    content: "";
+    position: absolute;
+    border-radius: inherit;
+    inset: 12%;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  .landing-orbit-ring::after {
+    inset: 24%;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.04);
+  }
+
+  .landing-orbit-ring-secondary {
+    top: 12rem;
+    height: min(58vw, 44rem);
+    width: min(58vw, 44rem);
+    opacity: 0.32;
+  }
+
+  .landing-lens-grid {
+    position: absolute;
+    left: 50%;
+    bottom: -32vh;
+    height: 72vh;
+    width: 140vw;
+    transform: translateX(-50%) perspective(1500px) rotateX(78deg);
+    transform-style: preserve-3d;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.12;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 74%);
+  }
+
+  .landing-float-token {
+    position: absolute;
+    right: 6%;
+    top: 18%;
+    width: min(17rem, 28vw);
+    border-radius: 1.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+      rgba(7, 10, 20, 0.72);
+    box-shadow:
+      0 28px 80px -40px rgba(0, 0, 0, 0.82),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1rem;
+  }
+
+  .landing-float-token-secondary {
+    left: 5%;
+    right: auto;
+    top: auto;
+    bottom: 18%;
+    width: min(14rem, 22vw);
+  }
+
+  .landing-token-line {
+    height: 0.45rem;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, rgba(125, 211, 252, 0.82), rgba(255, 255, 255, 0.08));
+    box-shadow: 0 0 24px rgba(125, 211, 252, 0.12);
+  }
+
+  .landing-token-line-hot {
+    background: linear-gradient(90deg, rgba(251, 146, 60, 0.88), rgba(255, 255, 255, 0.08));
+    box-shadow: 0 0 24px rgba(251, 146, 60, 0.16);
+  }
+
+  .landing-hero-orbit {
+    position: absolute;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      inset 0 0 40px rgba(255, 255, 255, 0.02),
+      0 0 80px rgba(124, 58, 237, 0.12);
+  }
+
+  .landing-hero-orbit-a {
+    inset: 2% 2% 6% 2%;
+    background: radial-gradient(circle at center, rgba(124, 58, 237, 0.1), transparent 58%);
+  }
+
+  .landing-hero-orbit-b {
+    inset: 12% 10% 14% 10%;
+    border-style: dashed;
+    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.05), transparent 64%);
+    opacity: 0.7;
+  }
+
+  .landing-hero-floor {
+    position: absolute;
+    left: -8%;
+    right: -8%;
+    bottom: -8%;
+    height: 34%;
+    transform: perspective(1200px) rotateX(78deg);
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9), transparent 84%);
+    opacity: 0.18;
+  }
+
+  .landing-hero-data-card {
+    position: absolute;
+    border-radius: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+      rgba(5, 8, 18, 0.76);
+    box-shadow:
+      0 24px 70px -34px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    padding: 1rem 1.1rem;
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+  }
+
+  .landing-hero-data-card-a {
+    right: -6%;
+    top: 6%;
+    width: 13rem;
+  }
+
+  .landing-hero-data-card-b {
+    left: -7%;
+    bottom: 10%;
+    width: 14.5rem;
+  }
+
+  @media (max-width: 1023px) {
+    .landing-light-beam,
+    .landing-orbit-ring,
+    .landing-float-token {
+      opacity: 0.3;
+    }
+
+    .landing-lens-grid {
+      width: 180vw;
+      background-size: 52px 52px;
+    }
   }
 }
 

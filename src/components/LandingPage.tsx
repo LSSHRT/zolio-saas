@@ -1,5 +1,13 @@
 import React, { useState, useRef } from "react";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+  useMotionValue,
+  useSpring,
+  type MotionValue,
+} from "framer-motion";
 import Link from "next/link";
 import {
   Lock,
@@ -361,8 +369,129 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
   );
 };
 
+const LandingCinematicBackdrop = ({
+  pointerX,
+  pointerY,
+  scrollYProgress,
+}: {
+  pointerX: MotionValue<number>;
+  pointerY: MotionValue<number>;
+  scrollYProgress: MotionValue<number>;
+}) => {
+  const hazeSlowX = useTransform(pointerX, [-1, 1], [-56, 56]);
+  const hazeSlowY = useTransform(pointerY, [-1, 1], [-34, 34]);
+  const hazeFastX = useTransform(pointerX, [-1, 1], [92, -92]);
+  const hazeFastY = useTransform(pointerY, [-1, 1], [70, -70]);
+  const beamLift = useTransform(scrollYProgress, [0, 1], [0, -220]);
+  const orbitDrift = useTransform(scrollYProgress, [0, 1], [0, 130]);
+  const orbitRotate = useTransform(scrollYProgress, [0, 1], [0, 42]);
+  const orbitRotateReverse = useTransform(scrollYProgress, [0, 1], [0, -34]);
+  const gridLift = useTransform(scrollYProgress, [0, 1], [0, -110]);
+
+  return (
+    <div className="landing-cinematic-bg fixed inset-0 z-[-5] overflow-hidden pointer-events-none" aria-hidden="true">
+      <motion.div className="landing-spectral-haze landing-spectral-haze-a" style={{ x: hazeSlowX, y: hazeSlowY }} />
+      <motion.div className="landing-spectral-haze landing-spectral-haze-b" style={{ x: hazeFastX, y: hazeFastY }} />
+      <motion.div className="landing-spectral-haze landing-spectral-haze-c" style={{ x: hazeSlowX, y: beamLift }} />
+
+      <motion.div className="landing-light-beam landing-light-beam-left" style={{ x: hazeFastX, y: beamLift }} />
+      <motion.div className="landing-light-beam landing-light-beam-right" style={{ x: hazeSlowX, y: beamLift }} />
+
+      <motion.div className="landing-orbit-ring" style={{ x: hazeSlowX, y: orbitDrift, rotate: orbitRotate }} />
+      <motion.div
+        className="landing-orbit-ring landing-orbit-ring-secondary"
+        style={{ x: hazeFastX, y: hazeSlowY, rotate: orbitRotateReverse }}
+      />
+
+      <motion.div className="landing-lens-grid" style={{ x: hazeSlowX, y: gridLift }} />
+
+      <motion.div
+        className="landing-float-token hidden lg:block"
+        style={{ x: hazeFastX, y: hazeSlowY }}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/70">Signal terrain</p>
+        <p className="mt-3 text-lg font-semibold text-white">Cockpit chantier en direct</p>
+        <div className="mt-4 grid grid-cols-3 gap-2">
+          {[74, 46, 88].map((value, index) => (
+            <div key={index} className="rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">Flux</p>
+              <p className="mt-1 text-sm font-semibold text-white">{value}%</p>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      <motion.div
+        className="landing-float-token landing-float-token-secondary hidden xl:block"
+        style={{ x: hazeSlowX, y: hazeFastY }}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-orange-100/70">Mise en scène</p>
+        <div className="mt-4 space-y-2">
+          <div className="landing-token-line w-[88%]" />
+          <div className="landing-token-line landing-token-line-hot w-[72%]" />
+          <div className="landing-token-line w-[94%]" />
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
+const HeroSceneAccent = ({
+  pointerX,
+  pointerY,
+  scrollYProgress,
+}: {
+  pointerX: MotionValue<number>;
+  pointerY: MotionValue<number>;
+  scrollYProgress: MotionValue<number>;
+}) => {
+  const orbitX = useTransform(pointerX, [-1, 1], [-34, 34]);
+  const orbitY = useTransform(pointerY, [-1, 1], [-20, 20]);
+  const floorY = useTransform(scrollYProgress, [0, 1], [0, -90]);
+  const orbitRotate = useTransform(scrollYProgress, [0, 1], [0, 28]);
+  const orbitRotateReverse = useTransform(scrollYProgress, [0, 1], [0, -22]);
+  const cardX = useTransform(pointerX, [-1, 1], [18, -18]);
+  const cardY = useTransform(pointerY, [-1, 1], [12, -12]);
+
+  return (
+    <div className="pointer-events-none absolute inset-[-12%] -z-10 hidden xl:block" aria-hidden="true">
+      <motion.div className="landing-hero-orbit landing-hero-orbit-a" style={{ x: orbitX, y: orbitY, rotate: orbitRotate }} />
+      <motion.div
+        className="landing-hero-orbit landing-hero-orbit-b"
+        style={{ x: cardX, y: cardY, rotate: orbitRotateReverse }}
+      />
+      <motion.div className="landing-hero-floor" style={{ y: floorY }} />
+
+      <motion.div className="landing-hero-data-card landing-hero-data-card-a" style={{ x: cardX, y: orbitY }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-violet-100/60">Temps gagné</p>
+        <p className="mt-3 text-3xl font-semibold tracking-tight text-white">-4h</p>
+        <p className="mt-1 text-sm text-neutral-400">administratif / semaine</p>
+      </motion.div>
+
+      <motion.div className="landing-hero-data-card landing-hero-data-card-b" style={{ x: orbitX, y: cardY }}>
+        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/60">Flux signature</p>
+        <div className="mt-3 flex items-end gap-3">
+          <p className="text-2xl font-semibold tracking-tight text-white">Instantané</p>
+          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200">
+            prêt
+          </span>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <div className="landing-token-line w-16" />
+          <div className="landing-token-line landing-token-line-hot w-10" />
+        </div>
+      </motion.div>
+    </div>
+  );
+};
+
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const rawPointerX = useMotionValue(0);
+  const rawPointerY = useMotionValue(0);
+  const pointerX = useSpring(rawPointerX, { stiffness: 58, damping: 18, mass: 0.6 });
+  const pointerY = useSpring(rawPointerY, { stiffness: 58, damping: 18, mass: 0.6 });
+  const { scrollYProgress } = useScroll();
   const supportHref = getSupportHref({
     subject: "Démo accompagnée Zolio",
     message:
@@ -370,8 +499,27 @@ export default function LandingPage() {
   });
   const supportIsExternal = isExternalSupportHref(supportHref);
 
+  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "touch") return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const normalizedX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+    const normalizedY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+    rawPointerX.set(normalizedX);
+    rawPointerY.set(normalizedY);
+  };
+
+  const handlePointerLeave = () => {
+    rawPointerX.set(0);
+    rawPointerY.set(0);
+  };
+
   return (
-    <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
+    <div
+      className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+    >
+      <LandingCinematicBackdrop pointerX={pointerX} pointerY={pointerY} scrollYProgress={scrollYProgress} />
       <div className="fixed inset-0 z-[-4] bg-[radial-gradient(ellipse_76%_76%_at_50%_-12%,rgba(139,92,246,0.26),rgba(0,0,0,0))]" />
       <div className="landing-grid-overlay fixed inset-0 z-[-3] pointer-events-none" />
       <div
@@ -556,6 +704,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.85, delay: 0.1, ease: "easeOut" }}
                 className="relative"
               >
+                <HeroSceneAccent pointerX={pointerX} pointerY={pointerY} scrollYProgress={scrollYProgress} />
                 <div className="landing-panel-strong relative overflow-hidden rounded-[36px] p-4 sm:p-6">
                   <div className="absolute right-[-15%] top-[-10%] h-40 w-40 rounded-full bg-violet-500/20 blur-[90px]" />
                   <div className="absolute bottom-[-18%] left-[-8%] h-32 w-32 rounded-full bg-orange-500/16 blur-[80px]" />
