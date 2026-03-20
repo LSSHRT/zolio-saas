@@ -100,6 +100,23 @@ const SectionEyebrow = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
+const LandingStage = ({
+  children,
+  className = "",
+  id,
+  tone = "violet",
+}: {
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+  tone?: "violet" | "warm" | "neutral" | "band";
+}) => (
+  <section id={id} className={`landing-stage landing-stage-${tone} ${className}`}>
+    <div className="landing-stage-bridge" />
+    {children}
+  </section>
+);
+
 // Spotlight Card Bento Box
 const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
   const divRef = useRef<HTMLDivElement>(null);
@@ -152,7 +169,7 @@ const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode
 // Section de Défilement Horizontal (Responsive & Native)
 const HorizontalScrollCarousel = () => {
   return (
-    <section className="relative py-24 bg-white/[0.02] overflow-hidden">
+    <LandingStage className="relative overflow-hidden py-24" tone="neutral">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <h2 className="text-3xl sm:text-5xl font-bold text-white text-center">
           Comment ça marche ? <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient-x">En 3 étapes</span>
@@ -308,7 +325,7 @@ const HorizontalScrollCarousel = () => {
           scrollbar-width: none;
         }
       `}} />
-    </section>
+    </LandingStage>
   );
 };
 
@@ -497,6 +514,13 @@ export default function LandingPage() {
                       </div>
                     );
                   })}
+                </div>
+
+                <div className="mt-8 flex justify-center xl:justify-start">
+                  <a href="#demo" className="landing-scroll-cue">
+                    <span>Descendre dans la démo</span>
+                    <ChevronDown className="h-4 w-4" />
+                  </a>
                 </div>
               </motion.div>
 
@@ -839,7 +863,7 @@ export default function LandingPage() {
         </section>
 
         {/* Avant/Après Section */}
-        <section className="py-32 relative z-10">
+        <LandingStage className="relative z-10 -mt-6 py-32 sm:-mt-10" tone="violet">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -949,14 +973,14 @@ export default function LandingPage() {
               </motion.div>
             </div>
           </div>
-        </section>
+        </LandingStage>
 
         {/* Horizontal Scroll Section */}
         <HorizontalScrollCarousel />
 
         
         {/* Metrics Banner Section */}
-        <section className="py-16 bg-white/[0.02] border-y border-white/5 relative overflow-hidden -mt-8 z-20">
+        <LandingStage className="relative z-20 -mt-8 overflow-hidden py-16" tone="band">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-violet-900/10 via-black to-orange-900/10 opacity-60"></div>
           
@@ -980,10 +1004,10 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent"></div>
-        </section>
+        </LandingStage>
 
         {/* Trustpilot Reviews Section */}
-        <section className="py-32 bg-transparent relative" id="testimonials">
+        <LandingStage className="relative py-32" id="testimonials" tone="neutral">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-16 flex flex-col items-center text-center">
               <SectionEyebrow>Preuve sociale</SectionEyebrow>
@@ -1063,10 +1087,10 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </LandingStage>
 
         {/* Bento Box Features Section */}
-        <section id="features" className="py-32 bg-transparent relative">
+        <LandingStage id="features" className="relative py-32" tone="violet">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
@@ -1223,11 +1247,11 @@ export default function LandingPage() {
               </SpotlightCard>
             </div>
           </div>
-        </section>
+        </LandingStage>
 
         
         {/* Pricing Section - 2026 Design */}
-        <section id="pricing" className="py-32 bg-transparent relative">
+        <LandingStage id="pricing" className="relative py-32" tone="warm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
               <motion.div
@@ -1322,10 +1346,10 @@ export default function LandingPage() {
               </SpotlightCard>
             </motion.div>
           </div>
-        </section>
+        </LandingStage>
 
         {/* FAQ Section */}
-        <section id="faq" className="py-32 bg-transparent relative">
+        <LandingStage id="faq" className="relative py-32" tone="neutral">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <div className="flex justify-center">
@@ -1353,9 +1377,9 @@ export default function LandingPage() {
               />
             </div>
           </div>
-        </section>
+        </LandingStage>
 
-        <section className="pb-24 pt-8">
+        <LandingStage className="pb-24 pt-8" tone="warm">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="landing-panel-strong relative overflow-hidden rounded-[38px] p-8 sm:p-10 lg:p-14">
               <div className="absolute right-[-10%] top-[-8%] h-44 w-44 rounded-full bg-violet-500/18 blur-[90px]" />
@@ -1396,7 +1420,7 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        </section>
+        </LandingStage>
 
         {/* Footer */}
         <footer className="border-t border-white/10 bg-transparent pt-20 pb-10">
