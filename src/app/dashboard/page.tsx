@@ -349,6 +349,74 @@ function HeroSnapshotCard({
   );
 }
 
+function DashboardNotificationsMenu({
+  dashboardSignals,
+  onToggle,
+  onClose,
+  showNotifications,
+}: {
+  dashboardSignals: DashboardSignal[];
+  onToggle: () => void;
+  onClose: () => void;
+  showNotifications: boolean;
+}) {
+  return (
+    <div className="relative">
+      <button
+        onClick={onToggle}
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+        aria-label="Notifications"
+      >
+        <Bell size={20} />
+        {dashboardSignals.length > 0 && (
+          <span className="absolute right-2 top-2 inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400" />
+        )}
+      </button>
+
+      {showNotifications && (
+        <div className="client-panel absolute right-0 top-14 z-50 w-[min(92vw,24rem)] rounded-[1.75rem] p-4 shadow-2xl">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-slate-950 dark:text-white">Attention du jour</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Les points qui méritent un coup d&apos;œil.
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-3">
+            {dashboardSignals.map((signal) => {
+              const classes = toneClasses(signal.tone);
+              const content = (
+                <div className="rounded-[1.4rem] border border-slate-200/70 bg-white/70 p-3 dark:border-white/8 dark:bg-white/4">
+                  <div className="flex items-start gap-3">
+                    <div className={`mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+                      {renderSignalIcon(signal.tone)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {signal.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+
+              return signal.href ? (
+                <Link key={signal.id} href={signal.href} onClick={onClose}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={signal.id}>{content}</div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TradeOptionCard({
   active,
   onSelect,
@@ -928,11 +996,50 @@ export default function DashboardPage() {
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10">
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <ClientBrandMark />
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="sm:hidden">
+                <ClientBrandMark showLabel={false} />
+              </div>
+              <div className="hidden sm:block">
+                <ClientBrandMark />
+              </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              <ThemeToggle />
+              <div className="flex items-center gap-2 sm:gap-3">
+                <ThemeToggle />
+                <DashboardNotificationsMenu
+                  dashboardSignals={dashboardSignals}
+                  onToggle={() => setShowNotifications((value) => !value)}
+                  onClose={() => setShowNotifications(false)}
+                  showNotifications={showNotifications}
+                />
+                <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
+                  {isLoaded ? <UserButton /> : <User size={18} />}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:hidden">
+              <ClientSupportButton />
+              {canAccessAdminDashboard && (
+                <Link
+                  href="/admin"
+                  className="inline-flex h-11 items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                >
+                  <ShieldCheck size={16} />
+                  Admin
+                </Link>
+              )}
+              <Link
+                href="/parametres"
+                className="tour-parametres inline-flex h-11 items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+              >
+                <Settings size={16} />
+                Paramètres
+              </Link>
+            </div>
+
+            <div className="hidden items-center gap-2 sm:flex sm:gap-3">
               <ClientSupportButton compact />
               {canAccessAdminDashboard && (
                 <Link
@@ -940,7 +1047,7 @@ export default function DashboardPage() {
                   className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
                 >
                   <ShieldCheck size={17} />
-                  <span className="hidden sm:inline">Admin</span>
+                  <span>Admin</span>
                 </Link>
               )}
               <Link
@@ -950,70 +1057,6 @@ export default function DashboardPage() {
               >
                 <Settings size={20} />
               </Link>
-              <div className="relative">
-                <button
-                  onClick={() => setShowNotifications((value) => !value)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-                  aria-label="Notifications"
-                >
-                  <Bell size={20} />
-                  {dashboardSignals.length > 0 && (
-                    <span className="absolute right-2 top-2 inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400" />
-                  )}
-                </button>
-
-                {showNotifications && (
-                  <div className="client-panel absolute right-0 top-14 z-50 w-[min(92vw,24rem)] rounded-[1.75rem] p-4 shadow-2xl">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">Attention du jour</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Les points qui méritent un coup d&apos;œil.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="mt-4 space-y-3">
-                      {dashboardSignals.map((signal) => {
-                        const classes = toneClasses(signal.tone);
-                        const content = (
-                          <div className="rounded-[1.4rem] border border-slate-200/70 bg-white/70 p-3 dark:border-white/8 dark:bg-white/4">
-                            <div className="flex items-start gap-3">
-                              <div className={`mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-                                {signal.tone === "rose" ? (
-                                  <TriangleAlert size={16} />
-                                ) : signal.tone === "emerald" ? (
-                                  <TrendingUp size={16} />
-                                ) : signal.tone === "amber" ? (
-                                  <Clock3 size={16} />
-                                ) : (
-                                  <Sparkles size={16} />
-                                )}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
-                                <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                  {signal.description}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-
-                        return signal.href ? (
-                          <Link key={signal.id} href={signal.href} onClick={() => setShowNotifications(false)}>
-                            {content}
-                          </Link>
-                        ) : (
-                          <div key={signal.id}>{content}</div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-              <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
-                {isLoaded ? <UserButton /> : <User size={18} />}
-              </div>
             </div>
           </div>
         </header>
