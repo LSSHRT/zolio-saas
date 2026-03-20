@@ -318,6 +318,37 @@ function ActionRailCard({ item }: { item: ActionRailItem }) {
   );
 }
 
+function HeroSnapshotCard({
+  detail,
+  icon: Icon,
+  label,
+  tone,
+  value,
+}: {
+  detail: string;
+  icon: LucideIcon;
+  label: string;
+  tone: Tone;
+  value: string;
+}) {
+  const classes = toneClasses(tone);
+
+  return (
+    <div className="rounded-[1.35rem] border border-white/45 bg-white/66 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.22)] dark:border-white/10 dark:bg-white/4">
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+          {label}
+        </p>
+        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+          <Icon size={15} />
+        </span>
+      </div>
+      <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{detail}</p>
+    </div>
+  );
+}
+
 function TradeOptionCard({
   active,
   onSelect,
@@ -1014,14 +1045,14 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(17rem,0.9fr)] xl:items-start">
+                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.08fr)_minmax(19rem,0.92fr)] xl:items-start">
                   <div className="max-w-3xl">
                     <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
                       {greetingText}
                       {user?.firstName ? `, ${user.firstName}` : ""}.
                     </h1>
                     <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                      Un cockpit plus clair sur ordinateur: vos actions utiles d&apos;abord, les chiffres ensuite, et une navigation stable pour ne plus chercher où cliquer.
+                      Votre bureau chantier sur ordinateur: préparer un devis, suivre ce qui attend et voir où vous en êtes, sans avoir l&apos;impression de traverser un labyrinthe.
                     </p>
 
                     <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -1111,50 +1142,69 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 xl:pl-2">
-                    <div className="rounded-[1.8rem] border border-white/45 bg-white/74 p-5 shadow-[0_26px_65px_-42px_rgba(15,23,42,0.25)] dark:border-white/10 dark:bg-white/5">
+                  <div className="xl:pl-2">
+                    <div className="rounded-[1.95rem] border border-white/50 bg-[linear-gradient(160deg,rgba(255,255,255,0.12),rgba(255,255,255,0.05))] p-5 shadow-[0_30px_70px_-44px_rgba(15,23,42,0.34)] dark:border-white/10 dark:bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))]">
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                            Prochaine action
+                            Pulse du jour
                           </p>
-                          <p className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">{todayFocus.title}</p>
+                          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                            {todayFocus.title}
+                          </p>
                         </div>
                         <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
                           {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
                         </span>
                       </div>
-                      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{todayFocus.description}</p>
+
+                      <p className="mt-3 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {todayFocus.description}
+                      </p>
+
                       {todayFocus.href ? (
                         <Link
                           href={todayFocus.href}
-                          className="mt-4 inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                          className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
                         >
-                          Ouvrir
+                          Ouvrir l&apos;action
                           <ChevronRight size={16} />
                         </Link>
                       ) : null}
-                    </div>
 
-                    <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                      <div className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 dark:border-white/10 dark:bg-white/4">
-                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
-                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{formatCurrency(remainingToGoal)} restants</p>
-                      </div>
-                      <div className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 dark:border-white/10 dark:bg-white/4">
-                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Devis suivis</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{devis.length}</p>
-                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{conversionRate}% de conversion</p>
-                      </div>
-                      <div className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 dark:border-white/10 dark:bg-white/4">
-                        <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cadence</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
-                          {pendingQuotes.length > 0 ? `${pendingQuotes.length} en attente` : "Flux propre"}
-                        </p>
-                        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                          {acceptedQuotes.length} affaire{acceptedQuotes.length > 1 ? "s" : ""} validée{acceptedQuotes.length > 1 ? "s" : ""}
-                        </p>
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        <HeroSnapshotCard
+                          label="Cap du mois"
+                          value={formatCurrency(remainingToGoal)}
+                          detail={`${objectifProgress.toFixed(0)}% atteint • ${formatCurrency(objectifActif)} visés`}
+                          tone="violet"
+                          icon={Target}
+                        />
+                        <HeroSnapshotCard
+                          label="Pipeline"
+                          value={pendingQuotes.length > 0 ? `${pendingQuotes.length} à suivre` : "Flux propre"}
+                          detail={
+                            pendingQuotes.length > 0
+                              ? `${formatCurrency(pipelineRevenueHT)} HT encore en jeu`
+                              : `${acceptedQuotes.length} affaire${acceptedQuotes.length > 1 ? "s" : ""} validée${acceptedQuotes.length > 1 ? "s" : ""}`
+                          }
+                          tone="amber"
+                          icon={Clock3}
+                        />
+                        <HeroSnapshotCard
+                          label="Conversion"
+                          value={`${conversionRate}%`}
+                          detail={`${devis.length} devis suivis sur le cockpit`}
+                          tone="emerald"
+                          icon={FileCheck2}
+                        />
+                        <HeroSnapshotCard
+                          label="Validé"
+                          value={formatCurrency(acceptedRevenueHT)}
+                          detail={`${acceptedQuotes.length} devis signés ou acceptés`}
+                          tone="emerald"
+                          icon={TrendingUp}
+                        />
                       </div>
                     </div>
                   </div>
@@ -1171,10 +1221,10 @@ export default function DashboardPage() {
                   <div>
                     <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Centre d&apos;action</p>
                     <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      Les trois gestes utiles du moment
+                      Agir sans fouiller
                     </h2>
                     <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Sur ordinateur, le rail de droite sert uniquement à agir vite. Les modules complets restent plus bas.
+                      Ce rail reste volontairement court: les raccourcis utiles maintenant, le reste plus bas dans la page.
                     </p>
                   </div>
                 </div>
