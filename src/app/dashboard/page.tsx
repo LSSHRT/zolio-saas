@@ -3,7 +3,6 @@
 import {
   Bell,
   BriefcaseBusiness,
-  CalendarDays,
   ChevronRight,
   Clock3,
   CloudSun,
@@ -14,7 +13,6 @@ import {
   Package,
   Pencil,
   Plus,
-  Receipt,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -24,7 +22,6 @@ import {
   TriangleAlert,
   User,
   Users,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -77,15 +74,6 @@ type QuickLinkItem = {
   icon: LucideIcon;
   tone: Tone;
   tourClass?: string;
-};
-
-type ActionRailItem = {
-  href: string;
-  label: string;
-  description: string;
-  icon: LucideIcon;
-  tone: Tone;
-  badge?: string;
 };
 
 function readStringMetadata(value: unknown) {
@@ -269,60 +257,6 @@ function QuickLinkCard({ item }: { item: QuickLinkItem }) {
   );
 }
 
-function ActionRailCard({ item }: { item: ActionRailItem }) {
-  const classes = toneClasses(item.tone);
-  const Icon = item.icon;
-
-  return (
-    <Link href={item.href}>
-      <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/78 p-4 shadow-[0_22px_48px_-36px_rgba(15,23,42,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-violet-300/40 dark:border-white/8 dark:bg-white/4">
-        <div className="flex items-start justify-between gap-3">
-          <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-            <Icon size={18} />
-          </div>
-          {item.badge ? (
-            <span className={`client-chip ring-1 ${classes.chip}`}>{item.badge}</span>
-          ) : null}
-        </div>
-        <div className="mt-4">
-          <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.label}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-function HeroSnapshotCard({
-  detail,
-  icon: Icon,
-  label,
-  tone,
-  value,
-}: {
-  detail: string;
-  icon: LucideIcon;
-  label: string;
-  tone: Tone;
-  value: string;
-}) {
-  const classes = toneClasses(tone);
-
-  return (
-    <div className="rounded-[1.35rem] border border-white/45 bg-white/66 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.22)] dark:border-white/10 dark:bg-white/4">
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-          {label}
-        </p>
-        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-          <Icon size={15} />
-        </span>
-      </div>
-      <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{detail}</p>
-    </div>
-  );
-}
 
 function DashboardNotificationsMenu({
   dashboardSignals,
@@ -579,7 +513,6 @@ export default function DashboardPage() {
   ];
 
   const totalQuotes = dashboardData?.totalQuotes ?? 0;
-  const CA_HT = dashboardData?.totalHT ?? 0;
   const CA_TTC = dashboardData?.totalTTC ?? 0;
   const acceptedQuotesCount = dashboardData?.acceptedCount ?? 0;
   const pendingQuotesCount = dashboardData?.pendingCount ?? 0;
@@ -699,6 +632,13 @@ export default function DashboardPage() {
       tourClass: "tour-clients",
     },
     {
+      href: "/factures",
+      label: "Factures",
+      description: "Suivez les factures émises et le statut de paiement.",
+      icon: FileCheck2,
+      tone: "slate",
+    },
+    {
       href: "/catalogue",
       label: "Catalogue",
       description: "Prestations et matériaux réutilisables dans vos devis.",
@@ -707,109 +647,21 @@ export default function DashboardPage() {
       tourClass: "tour-catalogue",
     },
     {
-      href: "/planning",
-      label: "Planning",
-      description: "Gardez une vue claire sur vos chantiers à venir.",
-      icon: CalendarDays,
-      tone: "emerald",
-    },
-    {
-      href: "/factures",
-      label: "Factures",
-      description: "Suivez les factures émises et le statut de paiement.",
-      icon: FileCheck2,
-      tone: "slate",
-    },
-    {
-      href: "/depenses",
-      label: "Dépenses",
-      description: "Centralisez vos achats, frais et justificatifs.",
-      icon: Receipt,
-      tone: "rose",
-    },
-    {
       href: "/calepin",
       label: "Calepin",
       description: "Capturez vos notes chantier sans sortir du flux.",
       icon: BriefcaseBusiness,
       tone: "violet",
     },
+    {
+      href: "/parametres",
+      label: "Paramètres",
+      description: "Logo, identité entreprise et réglages du compte.",
+      icon: Settings,
+      tone: "slate",
+      tourClass: "tour-parametres",
+    },
   ];
-  const actionRailItems = useMemo<ActionRailItem[]>(() => {
-    const items: ActionRailItem[] = [
-      totalQuotes === 0
-        ? {
-            href: "/nouveau-devis",
-            label: "Créer le premier devis",
-            description: "Lancez la première affaire pour débloquer le suivi, les relances et les stats.",
-            icon: Plus,
-            tone: "violet",
-          }
-        : {
-            href: "/nouveau-devis",
-            label: "Préparer un nouveau devis",
-            description: "Démarrez une nouvelle proposition sans repasser par d'autres écrans.",
-            icon: Plus,
-            tone: "violet",
-          },
-    ];
-
-    if (devisARelancer.length > 0) {
-      items.push({
-        href: "/devis",
-        label: "Relancer les devis chauds",
-        description: "Le raccourci le plus rentable aujourd'hui: rappeler les affaires ouvertes.",
-        icon: Bell,
-        tone: "rose",
-        badge: `${devisARelancer.length}`,
-      });
-    } else if (pendingQuotesCount > 0) {
-      items.push({
-        href: "/devis",
-        label: "Suivre le pipeline actif",
-        description: `${pendingQuotesCount} devis attendent encore une décision côté client.`,
-        icon: Clock3,
-        tone: "amber",
-        badge: `${pendingQuotesCount}`,
-      });
-    } else {
-      items.push({
-        href: "/clients",
-        label: "Ouvrir le carnet client",
-        description: "Retrouvez un contact, son historique et repartez immédiatement sur un nouveau devis.",
-        icon: Users,
-        tone: "slate",
-      });
-    }
-
-    if (setupIsRequired) {
-      items.push({
-        href: "#dashboard-setup",
-        label: "Finaliser le setup métier",
-        description: "Activez le starter pour retrouver vos prestations et vos packs dans tout le flux devis.",
-        icon: Sparkles,
-        tone: "violet",
-      });
-    } else if (!isPro) {
-      items.push({
-        href: "/abonnement",
-        label: "Passer en PRO",
-        description: "Déverrouillez le flux complet pour ne plus rester limité au mode d'essai.",
-        icon: ShieldCheck,
-        tone: "violet",
-      });
-    } else {
-      items.push({
-        href: "/factures",
-        label: "Vérifier les factures",
-        description: "Gardez un oeil sur ce qui est émis, encaissé ou encore à suivre.",
-        icon: FileCheck2,
-        tone: "emerald",
-      });
-    }
-
-    return items;
-  }, [totalQuotes, devisARelancer.length, isPro, pendingQuotesCount, setupIsRequired]);
 
   const todayFocus = useMemo<DashboardSignal>(() => {
     if (setupIsRequired) {
@@ -972,14 +824,14 @@ export default function DashboardPage() {
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <motion.section
             {...sectionMotion(0)}
-            className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(20rem,0.8fr)]"
+            className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.72fr)]"
           >
-            <div className="client-panel-strong relative self-start overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
+            <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-fuchsia-500/14 blur-[80px]" />
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
 
-              <div className="relative flex flex-col gap-6">
+              <div className="relative max-w-3xl">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
                     <GreetingIcon size={15} />
@@ -989,345 +841,64 @@ export default function DashboardPage() {
                     <BriefcaseBusiness size={14} />
                     {starterTrade?.shortLabel || "Métier à définir"}
                   </div>
-                  <div className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
-                    {objectifProgress.toFixed(0)}% du cap mensuel
-                  </div>
                 </div>
 
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start 2xl:grid-cols-[minmax(0,1.06fr)_minmax(19rem,0.94fr)]">
-                  <div className="max-w-3xl">
-                    <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-[3.15rem]">
-                      {greetingText}
-                      {user?.firstName ? `, ${user.firstName}` : ""}.
-                    </h1>
-                    <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                      Depuis l&apos;ordinateur, tout doit tenir en une lecture: créer, relancer, encaisser, puis repartir sans chercher dans dix cartes différentes.
-                    </p>
-
-                    <div className="mt-6 flex flex-wrap gap-3">
-                      <Link href="/nouveau-devis" className="tour-nouveau-devis">
-                        <motion.div
-                          whileTap={{ scale: 0.98 }}
-                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-[0_22px_60px_-30px_rgba(124,58,237,0.65)]"
-                        >
-                          <Plus size={17} />
-                          Nouveau devis
-                        </motion.div>
-                      </Link>
-
-                      <Link
-                        href="/devis"
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                      >
-                        <FileText size={17} />
-                        Ouvrir mes devis
-                      </Link>
-
-                      {isPro ? (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const response = await fetch("/api/stripe/portal", { method: "POST" });
-                              const payload = await response.json();
-                              if (payload.url) {
-                                window.location.href = payload.url;
-                              }
-                            } catch {
-                              // Silent fail to preserve the dashboard flow.
-                            }
-                          }}
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                        >
-                          <Wallet size={17} />
-                          Gérer l&apos;abonnement
-                        </button>
-                      ) : (
-                        <Link
-                          href="/abonnement"
-                          className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-5 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                        >
-                          <Sparkles size={17} />
-                          Passer en PRO
-                        </Link>
-                      )}
-                    </div>
-
-                  </div>
-
-                  <div className="xl:pl-2">
-                    <div className="rounded-[1.95rem] border border-white/50 bg-[linear-gradient(160deg,rgba(255,255,255,0.12),rgba(255,255,255,0.05))] p-5 shadow-[0_30px_70px_-44px_rgba(15,23,42,0.34)] dark:border-white/10 dark:bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.03))]">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                            Focus du jour
-                          </p>
-                          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                            {todayFocus.title}
-                          </p>
-                        </div>
-                        <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
-                          {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
-                        </span>
-                      </div>
-
-                      <p className="mt-3 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        {todayFocus.description}
-                      </p>
-
-                      {todayFocus.href ? (
-                        <Link
-                          href={todayFocus.href}
-                          className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                        >
-                          Ouvrir l&apos;action
-                          <ChevronRight size={16} />
-                        </Link>
-                      ) : null}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    {[
-                      {
-                        label: "Préparer",
-                        detail: starterTrade?.shortLabel || "Métier à définir",
-                        tone: "violet",
-                      },
-                      {
-                        label: "Suivre",
-                        detail: `${pendingQuotesCount} devis en attente`,
-                        tone: "amber",
-                      },
-                      {
-                        label: "Encaisser",
-                        detail: `${acceptedQuotesCount} devis validés`,
-                        tone: "emerald",
-                      },
-                    ].map((step) => {
-                      const classes = toneClasses(step.tone as Tone);
-                      return (
-                        <div
-                          key={`workflow-${step.label}`}
-                          className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
-                              {step.label}
-                            </p>
-                            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-                              {step.tone === "emerald" ? <Wallet size={14} /> : step.tone === "amber" ? <Clock3 size={14} /> : <FileText size={14} />}
-                            </span>
-                          </div>
-                          <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">{step.detail}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <HeroSnapshotCard
-                      label="Cap restant"
-                      value={formatCurrency(remainingToGoal)}
-                      detail={`${objectifProgress.toFixed(0)}% atteint • ${formatCurrency(objectifActif)} visés`}
-                      tone="violet"
-                      icon={Target}
-                    />
-                    <HeroSnapshotCard
-                      label="Relances"
-                      value={String(devisARelancer.length)}
-                      detail={`client${devisARelancer.length > 1 ? "s" : ""} à relancer cette semaine`}
-                      tone="amber"
-                      icon={Bell}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="xl:self-start">
-              <motion.div
-                {...sectionMotion(0.04)}
-                className="client-panel rounded-[2.2rem] p-5 sm:p-6"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Centre d&apos;action</p>
-                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      Agir sans fouiller
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Ce rail reste volontairement court: les raccourcis utiles maintenant, le reste plus bas dans la page.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-3">
-                  {actionRailItems.map((item) => (
-                    <ActionRailCard key={`${item.href}-${item.label}`} item={item} />
-                  ))}
-                </div>
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    onClick={handleUpdateObjectif}
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                  >
-                    <Pencil size={15} />
-                    Ajuster l&apos;objectif
-                  </button>
-                  <Link
-                    href="/parametres"
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                  >
-                    <Settings size={15} />
-                    Paramètres
-                  </Link>
-                </div>
-              </motion.div>
-            </div>
-          </motion.section>
-
-          {setupIsRequired && selectedTradeDefinition && (
-            <motion.section
-              id="dashboard-setup"
-              {...sectionMotion(0.08)}
-              className="grid gap-4 xl:grid-cols-[1.16fr_0.84fr]"
-            >
-              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Starter métier</p>
-                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      Branchez votre activité une fois, travaillez plus vite ensuite
-                    </h2>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Le dashboard vous pousse ce setup ici pour qu&apos;il ne pollue plus le reste de la page. Une fois activé, vous retrouvez vos prestations au bon endroit dans tout le flux devis.
-                    </p>
-                  </div>
-                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                    {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} déjà en base
-                  </span>
-                </div>
-
-                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  {TRADE_OPTIONS.map((option) => (
-                    <TradeOptionCard
-                      key={option.key}
-                      option={option}
-                      active={selectedTrade === option.key}
-                      onSelect={setSelectedTrade}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Feuille de route</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  {selectedTradeDefinition.label} prêt à démarrer
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  {selectedTradeDefinition.pitch}
+                <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-[3.15rem]">
+                  {greetingText}
+                  {user?.firstName ? `, ${user.firstName}` : ""}.
+                </h1>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+                  Un accueil plus simple: l’action utile maintenant, les chiffres ensuite, puis les modules plus bas sans vous perdre dans des cartes répétées.
                 </p>
 
-                <div className="mt-5 grid gap-3">
-                  <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedStarterCount} prestations starter</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Une base claire pour commencer sans re-saisir vos lignes les plus fréquentes.
-                    </p>
-                  </div>
-                  <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Packs rapides métier</p>
-                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Les libellés, familles et raccourcis restent cohérents ensuite dans tout Zolio.
-                    </p>
-                  </div>
-                </div>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link href="/nouveau-devis" className="tour-nouveau-devis">
+                    <motion.div
+                      whileTap={{ scale: 0.98 }}
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-[0_22px_60px_-30px_rgba(124,58,237,0.65)]"
+                    >
+                      <Plus size={17} />
+                      Nouveau devis
+                    </motion.div>
+                  </Link>
 
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button
-                    type="button"
-                    onClick={handleBootstrapTrade}
-                    disabled={isBootstrappingTrade}
-                    className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
-                  >
-                    {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
-                  </button>
                   <Link
-                    href="/parametres"
+                    href="/devis"
                     className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
                   >
-                    Finaliser mes paramètres
+                    <FileText size={17} />
+                    Ouvrir mes devis
                   </Link>
                 </div>
-              </div>
-            </motion.section>
-          )}
-
-          <motion.section
-            {...sectionMotion(0.1)}
-            className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(19rem,0.92fr)] xl:items-start"
-          >
-            <div className="space-y-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Vue d&apos;ensemble</p>
-                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    Les chiffres à lire sans détour
-                  </h2>
-                </div>
-                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                  {totalQuotes} devis monitorés
-                </span>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <MetricCard
-                  label="CA validé"
-                  value={formatCurrency(acceptedRevenueHT)}
-                  detail={`${acceptedQuotesCount} devis acceptés`}
-                  tone="emerald"
-                  icon={TrendingUp}
-                />
-                <MetricCard
-                  label="Pipeline"
-                  value={formatCurrency(pipelineRevenueHT)}
-                  detail={`${pendingQuotesCount} devis en attente`}
-                  tone="amber"
-                  icon={Clock3}
-                />
-                <MetricCard
-                  label="Relances"
-                  value={String(devisARelancer.length)}
-                  detail="Clients à relancer cette semaine"
-                  tone="rose"
-                  icon={Bell}
-                />
-                <MetricCard
-                  label="Ticket moyen"
-                  value={formatCurrency(averageTicket)}
-                  detail={`${conversionRate}% de conversion sur les devis suivis`}
-                  tone="violet"
-                  icon={LineChart}
-                />
               </div>
             </div>
 
             <div className="client-panel rounded-[2.2rem] p-5 sm:p-6 xl:self-start">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Signaux du jour</p>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Focus du jour</p>
                   <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    Ce qui mérite votre attention
+                    {todayFocus.title}
                   </h2>
                 </div>
                 <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
-                  {secondarySignals.length}
+                  {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
                 </span>
               </div>
+
+              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                {todayFocus.description}
+              </p>
+
+              {todayFocus.href ? (
+                <Link
+                  href={todayFocus.href}
+                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                >
+                  Ouvrir l&apos;action
+                  <ChevronRight size={16} />
+                </Link>
+              ) : null}
 
               {secondarySignals.length > 0 ? (
                 <div className="mt-5 space-y-3">
@@ -1336,303 +907,404 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <div className="mt-5 rounded-[1.6rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-6 dark:border-white/10 dark:bg-white/4">
-                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun point secondaire bloquant</p>
+                <div className="mt-5 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                    Le cockpit reste propre. Vous pouvez vous concentrer sur la prochaine création ou le suivi client.
+                    Le cockpit reste simple: un seul focus principal pour avancer sans dispersion.
                   </p>
                 </div>
               )}
+            </div>
+          </motion.section>
 
-              <div className="mt-5 flex flex-wrap gap-3">
-                <ClientSupportButton />
-                {canAccessAdminDashboard && (
-                  <Link
-                    href="/admin"
-                    className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                  >
-                    <ShieldCheck size={16} />
-                    Ouvrir le cockpit admin
-                  </Link>
-                )}
+          <motion.section
+            {...sectionMotion(0.08)}
+            className="client-panel rounded-[2.15rem] p-5 sm:p-6"
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                  Les chiffres à lire sans détour
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Une seule ligne KPI, sans doublon avec le hero.
+                </p>
               </div>
+              <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                {totalQuotes} devis monitorés
+              </span>
+            </div>
+
+            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <MetricCard
+                label="CA validé"
+                value={formatCurrency(acceptedRevenueHT)}
+                detail={`${acceptedQuotesCount} devis acceptés`}
+                tone="emerald"
+                icon={TrendingUp}
+              />
+              <MetricCard
+                label="Pipeline"
+                value={formatCurrency(pipelineRevenueHT)}
+                detail={`${pendingQuotesCount} devis en attente`}
+                tone="amber"
+                icon={Clock3}
+              />
+              <MetricCard
+                label="Relances"
+                value={String(devisARelancer.length)}
+                detail="Clients à relancer cette semaine"
+                tone="rose"
+                icon={Bell}
+              />
+              <MetricCard
+                label="Ticket moyen"
+                value={formatCurrency(averageTicket)}
+                detail={`${conversionRate}% de conversion sur les devis suivis`}
+                tone="violet"
+                icon={LineChart}
+              />
             </div>
           </motion.section>
 
           <motion.section
             {...sectionMotion(0.16)}
-            className="grid gap-4 xl:grid-cols-[1.12fr_0.88fr]"
+            className="space-y-4"
           >
-            <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage semaine</p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    Vision chiffre d&apos;affaires
-                  </h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                    Une seule zone pour lire la tendance, votre progression mensuelle et ce qu&apos;il reste à transformer.
-                  </p>
-                </div>
-                <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/80 px-4 py-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-white/4">
-                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Progression</p>
-                  <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{objectifProgress.toFixed(0)}%</p>
-                </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage & modules</p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                  Le reste du cockpit, rangé plus bas
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Ici seulement: progression, relances détaillées, setup métier et accès aux modules.
+                </p>
               </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.55rem] border border-emerald-200/70 bg-emerald-50/80 p-4 dark:border-emerald-400/12 dark:bg-emerald-500/8">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Validé HT</p>
-                    <span className="text-xs text-emerald-600 dark:text-emerald-300">
-                      {acceptedQuotesCount} signé{acceptedQuotesCount > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-2xl font-semibold text-emerald-700 dark:text-emerald-200">
-                    {formatCurrency(acceptedRevenueHT)}
-                  </p>
-                </div>
-                <div className="rounded-[1.55rem] border border-amber-200/70 bg-amber-50/80 p-4 dark:border-amber-400/12 dark:bg-amber-500/8">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-amber-700 dark:text-amber-300">En attente HT</p>
-                    <span className="text-xs text-amber-600 dark:text-amber-300">
-                      {pendingQuotesCount} à convertir
-                    </span>
-                  </div>
-                  <p className="mt-3 text-2xl font-semibold text-amber-700 dark:text-amber-200">
-                    {formatCurrency(pipelineRevenueHT)}
-                  </p>
-                </div>
-                <div className="rounded-[1.55rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Reste à faire</p>
-                    <Target size={16} className="text-violet-600 dark:text-violet-200" />
-                  </div>
-                  <p className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">
-                    {formatCurrency(remainingToGoal)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
-                <div
-                  className="h-3 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
-                  style={{ width: `${objectifProgress}%` }}
-                />
-              </div>
-
-              <div className="mt-3 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
-                <span>{formatCurrency(CA_TTC)} encaissable / produit</span>
-                <span>{formatCurrency(objectifActif)} cible</span>
-              </div>
-
-              <div className="mt-5 h-64 w-full overflow-hidden rounded-[1.9rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
-                {loading ? (
-                  <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-                    Chargement du graphique…
-                  </div>
-                ) : (
-                  <DashboardChart monthlyData={monthlyData} />
-                )}
-              </div>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Total HT</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_HT)}</p>
-                </div>
-                <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Total TTC</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
-                </div>
-                <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Taux de gain</p>
-                  <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{conversionRate}%</p>
-                </div>
-              </div>
+              <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                {quickLinks.length} modules clés
+              </span>
             </div>
 
-            <div className="space-y-4">
-              <motion.div
-                {...sectionMotion(0.18)}
-                className="client-panel rounded-[2.1rem] p-5 sm:p-6"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
-                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      À traiter sans tarder
-                    </h2>
+            <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr] xl:items-start">
+              <div className="space-y-4">
+                {setupIsRequired && selectedTradeDefinition && (
+                  <div
+                    id="dashboard-setup-panel"
+                    className="client-panel rounded-[2.1rem] p-5 sm:p-6"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Starter métier</p>
+                        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                          Branchez votre activité une fois
+                        </h2>
+                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          Ce setup reste ici pour ne plus concurrencer l’action du jour en haut de page.
+                        </p>
+                      </div>
+                      <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                        {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} déjà en base
+                      </span>
+                    </div>
+
+                    <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                      {TRADE_OPTIONS.map((option) => (
+                        <TradeOptionCard
+                          key={option.key}
+                          option={option}
+                          active={selectedTrade === option.key}
+                          onSelect={setSelectedTrade}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
+                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDefinition.label} prêt à démarrer</p>
+                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          {selectedTradeDefinition.pitch} {selectedStarterCount} prestations starter seront injectées dans le catalogue.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleBootstrapTrade}
+                          disabled={isBootstrappingTrade}
+                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+                        >
+                          {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
+                        </button>
+                        <Link
+                          href="/parametres"
+                          className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                        >
+                          Finaliser mes paramètres
+                        </Link>
+                      </div>
+                    </div>
                   </div>
-                  <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
-                    {devisARelancer.length}
-                  </span>
+                )}
+
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage semaine</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        Vision chiffre d&apos;affaires
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Le cap mensuel n’apparaît plus qu’ici, avec la progression et la tendance.
+                      </p>
+                    </div>
+                    <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/80 px-4 py-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-white/4">
+                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Progression</p>
+                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{objectifProgress.toFixed(0)}%</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cap restant</p>
+                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
+                    </div>
+                    <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Total TTC</p>
+                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
+                    </div>
+                    <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
+                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+                    <div
+                      className="h-3 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
+                      style={{ width: `${objectifProgress}%` }}
+                    />
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
+                    <span>{formatCurrency(CA_TTC)} encaissable / produit</span>
+                    <button
+                      onClick={handleUpdateObjectif}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      <Pencil size={14} />
+                      Ajuster l&apos;objectif
+                    </button>
+                  </div>
+
+                  <div className="mt-5 h-64 w-full overflow-hidden rounded-[1.9rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
+                    {loading ? (
+                      <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
+                        Chargement du graphique…
+                      </div>
+                    ) : (
+                      <DashboardChart monthlyData={monthlyData} />
+                    )}
+                  </div>
                 </div>
 
-                {devisARelancer.length === 0 ? (
-                  <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
-                    <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-300/30 dark:text-emerald-300 dark:ring-emerald-400/20">
-                      <FileCheck2 size={22} />
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        Les affaires les plus récentes
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Une lecture plus simple : client, statut, montant, puis ouverture directe.
+                      </p>
                     </div>
-                    <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Aucun devis âgé de plus de 7 jours n&apos;attend une relance pour le moment.
-                    </p>
+                    <Link
+                      href="/devis"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition hover:text-violet-800 dark:text-violet-200 dark:hover:text-white"
+                    >
+                      Voir tous les devis
+                      <ChevronRight size={16} />
+                    </Link>
                   </div>
-                ) : (
-                  <div className="mt-5 space-y-3">
-                    {devisARelancer.map((item) => (
-                      <Link href={`/devis/${item.numero}`} key={item.numero}>
-                        <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 transition hover:-translate-y-0.5 dark:border-rose-400/12 dark:bg-rose-500/8">
-                          <div className="flex items-start gap-3">
-                            <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-rose-600 ring-1 ring-rose-200/80 dark:bg-white/10 dark:text-rose-200 dark:ring-white/10">
-                              <Bell size={17} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-3">
+
+                  {loading ? (
+                    <div className="mt-5 space-y-3">
+                      {[1, 2, 3].map((item) => (
+                        <div
+                          key={item}
+                          className="animate-shimmer rounded-[1.6rem] border border-slate-200/70 bg-white/70 p-4 dark:border-white/8 dark:bg-white/4"
+                        >
+                          <div className="h-4 w-1/3 rounded bg-slate-100/90 dark:bg-white/10" />
+                          <div className="mt-3 h-3 w-1/2 rounded bg-slate-100/70 dark:bg-white/10" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : devisRecents.length === 0 ? (
+                    <div className="mt-5 rounded-[1.7rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-10 text-center dark:border-white/10 dark:bg-white/4">
+                      <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-violet-500/10 text-violet-600 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                        <Sparkles size={24} />
+                      </div>
+                      <p className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">
+                        Le cockpit attend votre premier devis
+                      </p>
+                      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Lancez votre première création pour alimenter le suivi d&apos;activité, les relances et les statistiques.
+                      </p>
+                      <Link href="/nouveau-devis" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand">
+                        <Plus size={16} />
+                        Créer mon premier devis
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="mt-5 grid gap-3 xl:grid-cols-2">
+                      {devisRecents.map((item) => (
+                        <Link href={`/devis/${item.numero}`} key={item.numero}>
+                          <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:border-violet-300/50 dark:border-white/8 dark:bg-white/4">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-start gap-3">
+                                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                                  <LineChart size={18} />
+                                </div>
                                 <div className="min-w-0">
                                   <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
                                     {item.nomClient}
                                   </p>
-                                  <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
+                                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                                     {item.numero} · {formatDateLabel(item.date)}
                                   </p>
                                 </div>
-                                <p className="text-sm font-semibold text-slate-950 dark:text-white">
+                              </div>
+                              <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
+                                {item.statut}
+                              </span>
+                            </div>
+                            <div className="mt-5 flex items-end justify-between gap-3">
+                              <div>
+                                <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Montant TTC</p>
+                                <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
                                   {formatCurrency(item.totalTTC || 0)}
                                 </p>
                               </div>
-                              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                En attente depuis plus de 7 jours. Un rappel rapide peut faire la différence.
-                              </p>
+                              <span className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-200">
+                                Ouvrir
+                                <ChevronRight size={16} />
+                              </span>
                             </div>
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        À traiter sans tarder
+                      </h2>
+                    </div>
+                    <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
+                      {devisARelancer.length}
+                    </span>
+                  </div>
+
+                  {devisARelancer.length === 0 ? (
+                    <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
+                      <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-300/30 dark:text-emerald-300 dark:ring-emerald-400/20">
+                        <FileCheck2 size={22} />
+                      </div>
+                      <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Aucun devis âgé de plus de 7 jours n&apos;attend une relance pour le moment.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-5 space-y-3">
+                      {devisARelancer.map((item) => (
+                        <Link href={`/devis/${item.numero}`} key={item.numero}>
+                          <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 transition hover:-translate-y-0.5 dark:border-rose-400/12 dark:bg-rose-500/8">
+                            <div className="flex items-start gap-3">
+                              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-rose-600 ring-1 ring-rose-200/80 dark:bg-white/10 dark:text-rose-200 dark:ring-white/10">
+                                <Bell size={17} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                      {item.nomClient}
+                                    </p>
+                                    <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
+                                      {item.numero} · {formatDateLabel(item.date)}
+                                    </p>
+                                  </div>
+                                  <p className="text-sm font-semibold text-slate-950 dark:text-white">
+                                    {formatCurrency(item.totalTTC || 0)}
+                                  </p>
+                                </div>
+                                <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                  En attente depuis plus de 7 jours. Un rappel rapide peut faire la différence.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        Les outils utiles, plus bas et mieux rangés
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Les accès `Clients`, `Factures`, `Calepin` et `Paramètres` restent visibles, mais ne prennent plus la priorité sur l’accueil.
+                      </p>
+                    </div>
+                    <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                      {quickLinks.length} accès directs
+                    </span>
+                  </div>
+
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    {quickLinks.map((item) => (
+                      <QuickLinkCard key={item.href} item={item} />
                     ))}
                   </div>
-                )}
-              </motion.div>
 
-              <motion.div
-                {...sectionMotion(0.2)}
-                className="client-panel rounded-[2.1rem] p-5 sm:p-6"
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
-                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      Toute la boîte à outils, rangée clairement
-                    </h2>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Une grille stable sur desktop pour retrouver chaque zone métier sans passer par un panneau secondaire confus.
-                    </p>
+                  <div className="mt-5 flex flex-wrap gap-3">
+                    <ClientSupportButton />
+                    {!isPro && (
+                      <Link
+                        href="/abonnement"
+                        className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                      >
+                        <Sparkles size={16} />
+                        Passer en PRO
+                      </Link>
+                    )}
+                    {canAccessAdminDashboard && (
+                      <Link
+                        href="/admin"
+                        className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                      >
+                        <ShieldCheck size={16} />
+                        Ouvrir le cockpit admin
+                      </Link>
+                    )}
                   </div>
-                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                    {quickLinks.length} accès directs
-                  </span>
                 </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {quickLinks.map((item) => (
-                    <QuickLinkCard key={item.href} item={item} />
-                  ))}
-                </div>
-              </motion.div>
+              </div>
             </div>
-          </motion.section>
-
-          <motion.section
-            {...sectionMotion(0.22)}
-            className="client-panel rounded-[2.1rem] p-5 sm:p-6"
-          >
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
-                <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  Les affaires les plus récentes
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Une lecture plus simple : client, statut, montant, puis ouverture directe.
-                </p>
-              </div>
-              <Link
-                href="/devis"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition hover:text-violet-800 dark:text-violet-200 dark:hover:text-white"
-              >
-                Voir tous les devis
-                <ChevronRight size={16} />
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="mt-5 space-y-3">
-                {[1, 2, 3].map((item) => (
-                  <div
-                    key={item}
-                    className="animate-shimmer rounded-[1.6rem] border border-slate-200/70 bg-white/70 p-4 dark:border-white/8 dark:bg-white/4"
-                  >
-                    <div className="h-4 w-1/3 rounded bg-slate-100/90 dark:bg-white/10" />
-                    <div className="mt-3 h-3 w-1/2 rounded bg-slate-100/70 dark:bg-white/10" />
-                  </div>
-                ))}
-              </div>
-            ) : devisRecents.length === 0 ? (
-              <div className="mt-5 rounded-[1.7rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-10 text-center dark:border-white/10 dark:bg-white/4">
-                <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-violet-500/10 text-violet-600 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
-                  <Sparkles size={24} />
-                </div>
-                <p className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">
-                  Le cockpit attend votre premier devis
-                </p>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Lancez votre première création pour alimenter le suivi d&apos;activité, les relances et les statistiques.
-                </p>
-                <Link href="/nouveau-devis" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand">
-                  <Plus size={16} />
-                  Créer mon premier devis
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-5 grid gap-3 xl:grid-cols-2">
-                {devisRecents.map((item) => (
-                  <Link href={`/devis/${item.numero}`} key={item.numero}>
-                    <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:border-violet-300/50 dark:border-white/8 dark:bg-white/4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
-                          <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
-                            <LineChart size={18} />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                              {item.nomClient}
-                            </p>
-                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                              {item.numero} · {formatDateLabel(item.date)}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
-                          {item.statut}
-                        </span>
-                      </div>
-                      <div className="mt-5 flex items-end justify-between gap-3">
-                        <div>
-                          <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Montant TTC</p>
-                          <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
-                            {formatCurrency(item.totalTTC || 0)}
-                          </p>
-                        </div>
-                        <span className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-200">
-                          Ouvrir
-                          <ChevronRight size={16} />
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
           </motion.section>
         </main>
       </div>
