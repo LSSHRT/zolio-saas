@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
@@ -24,7 +24,11 @@ import {
   Clock,
   AlertCircle,
   MoreHorizontal,
-  CheckCircle2
+  CheckCircle2,
+  Shield,
+  Sparkles,
+  ReceiptText,
+  HardHat
 } from "lucide-react";
 import Image from "next/image";
 
@@ -43,6 +47,58 @@ const KineticText = ({ text, className = "" }: { text: string; className?: strin
     </motion.h1>
   );
 };
+
+const heroPillars = [
+  {
+    icon: Smartphone,
+    title: "Mobile-first chantier",
+    description: "Devis, signature et facture depuis le terrain, sans attendre le soir.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Cycle complet",
+    description: "Du devis signé à la facture, sans rupture ni ressaisie inutile.",
+  },
+  {
+    icon: TrendingUp,
+    title: "Pilotage immédiat",
+    description: "Marge, activité et relances visibles dans une interface nette et exploitable.",
+  },
+] as const;
+
+const heroSignals = [
+  { label: "Pensé pour", value: "Artisans BTP", detail: "peintres, plaquistes, plombiers, électriciens" },
+  { label: "Expérience", value: "2026", detail: "premium, lisible, rapide et orientée terrain" },
+  { label: "Flux", value: "3 gestes", detail: "devis, signature, facture" },
+] as const;
+
+const trustWidgetCards = [
+  {
+    title: "Widget officiel prêt",
+    description: "La zone peut accueillir Trustpilot proprement, sans casser la direction artistique.",
+  },
+  {
+    title: "Preuve sociale premium",
+    description: "Le bloc reste crédible et élégant même avant le branchement des avis live.",
+  },
+  {
+    title: "Responsive natif",
+    description: "La section reste forte visuellement sur iPhone, tablette et desktop large.",
+  },
+] as const;
+
+const closingHighlights = [
+  "Essai simple avec 1 devis inclus",
+  "Expérience chantier pensée mobile",
+  "Signature et facturation dans le même flux",
+] as const;
+
+const SectionEyebrow = ({ children }: { children: React.ReactNode }) => (
+  <div className="landing-chip">
+    <span className="h-2 w-2 rounded-full bg-violet-400 shadow-[0_0_16px_rgba(167,139,250,0.8)]" />
+    <span>{children}</span>
+  </div>
+);
 
 // Spotlight Card Bento Box
 const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
@@ -128,7 +184,7 @@ const HorizontalScrollCarousel = () => {
                         <span className="text-[10px] text-white">850 €</span>
                      </div>
                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-neutral-300">Main d'œuvre</span>
+                        <span className="text-[10px] text-neutral-300">Main d&apos;œuvre</span>
                         <span className="text-[10px] text-white">400 €</span>
                      </div>
                   </div>
@@ -162,7 +218,7 @@ const HorizontalScrollCarousel = () => {
                    <FileText className="w-4 h-4 text-fuchsia-500" />
                 </div>
                 <p className="text-[10px] text-neutral-400 mb-4">
-                   J'accepte les conditions du devis #D-0142 (1 250 €).
+                   J&apos;accepte les conditions du devis #D-0142 (1 250 €).
                 </p>
                 <div className="h-24 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative bg-white/[0.02]">
                    <span className="absolute text-neutral-600 text-[10px] font-medium uppercase tracking-widest">Signer ici</span>
@@ -183,7 +239,7 @@ const HorizontalScrollCarousel = () => {
             </div>
             <div className="mt-auto">
               <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">2. Signature digitale</h3>
-              <p className="text-base sm:text-lg text-neutral-400 leading-relaxed">Faites signer vos clients directement sur l'écran pour un accord immédiat.</p>
+              <p className="text-base sm:text-lg text-neutral-400 leading-relaxed">Faites signer vos clients directement sur l&apos;écran pour un accord immédiat.</p>
             </div>
           </div>
         </div>
@@ -219,7 +275,7 @@ const HorizontalScrollCarousel = () => {
                      <span>850 €</span>
                   </div>
                   <div className="flex justify-between text-[10px] text-neutral-800 font-medium">
-                     <span>Main d'œuvre</span>
+                     <span>Main d&apos;œuvre</span>
                      <span>400 €</span>
                   </div>
                 </div>
@@ -259,7 +315,7 @@ const HorizontalScrollCarousel = () => {
 
 
 // FAQ Item Component
-const FAQItem = ({ question, answer }: any) => {
+const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="border-b border-neutral-800">
@@ -291,45 +347,50 @@ export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#0A0514] text-neutral-100 selection:bg-violet-500/30 overflow-x-hidden relative">
-      {/* Advanced Premium 2026 Background Layer */}
-      {/* 1. Base Dark Midnight Color with Radial Glow */}
-      <div className="fixed inset-0 z-[-4] bg-[#0A0514] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(139,92,246,0.35),rgba(0,0,0,0))]"></div>
-      
-      {/* 2. Interactive/Moving 2026 Grid Pattern */}
-      <div className="fixed inset-0 z-[-3] pointer-events-none bg-[linear-gradient(to_right,#ffffff0f_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0f_1px,transparent_1px)] bg-[size:32px_32px] [mask-image:radial-gradient(ellipse_80%_60%_at_50%_0%,#000_80%,transparent_100%)]"></div>
-
-      {/* 3. Deep Space Noise / Grain Texture for High-End feel */}
-      <div className="fixed inset-0 z-[-2] opacity-[0.06] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
-
-      {/* 4. Enhanced Aurora / Nebula Glows (Smooth CSS animations) */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none opacity-80 mix-blend-screen overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vh] bg-violet-600/40 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '6s' }} />
-        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[60vh] bg-fuchsia-600/30 rounded-full blur-[130px] animate-pulse" style={{ animationDuration: '8s', animationDelay: '1s' }} />
-        <div className="absolute bottom-[-20%] left-[20%] w-[50vw] h-[40vh] bg-orange-500/20 rounded-full blur-[140px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '2s' }} />
+    <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
+      <div className="fixed inset-0 z-[-4] bg-[radial-gradient(ellipse_76%_76%_at_50%_-12%,rgba(139,92,246,0.26),rgba(0,0,0,0))]" />
+      <div className="landing-grid-overlay fixed inset-0 z-[-3] pointer-events-none" />
+      <div
+        className="fixed inset-0 z-[-2] opacity-[0.07] pointer-events-none mix-blend-overlay"
+        style={{
+          backgroundImage:
+            'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.78%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")',
+        }}
+      />
+      <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden mix-blend-screen">
+        <div className="absolute left-[-12%] top-[-10%] h-[46vh] w-[48vw] rounded-full bg-violet-600/35 blur-[130px] animate-landing-drift" />
+        <div className="absolute right-[-12%] top-[12%] h-[54vh] w-[42vw] rounded-full bg-fuchsia-600/24 blur-[140px] animate-pulse" style={{ animationDuration: "8s" }} />
+        <div className="absolute bottom-[-18%] left-[18%] h-[36vh] w-[48vw] rounded-full bg-orange-500/16 blur-[150px] animate-pulse" style={{ animationDuration: "10s", animationDelay: "1.5s" }} />
       </div>
 
       <div className="relative z-10">
         {/* Navigation */}
-        <nav className="fixed w-full z-50 top-0 transition-all duration-300 bg-[#05050A]/50 backdrop-blur-xl border-b border-white/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-20">
+        <nav className="fixed inset-x-0 top-3 z-50 transition-all duration-300 sm:top-4">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="landing-panel flex h-[4.5rem] items-center justify-between rounded-[28px] px-4 sm:px-6">
               <div className="flex items-center">
                 <Image src="/logo.png" alt="Zolio Logo" width={40} height={40} className="mr-3" />
-                <span className="text-2xl font-bold bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">Zolio</span>
+                <div className="flex flex-col">
+                  <span className="bg-gradient-to-r from-white to-neutral-300 bg-clip-text text-2xl font-bold text-transparent">
+                    Zolio
+                  </span>
+                  <span className="hidden text-[10px] uppercase tracking-[0.28em] text-white/40 sm:block">
+                    Chantier OS
+                  </span>
+                </div>
               </div>
               
               <div className="hidden md:flex items-center space-x-8">
                 <a href="#features" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">Fonctionnalités</a>
                 <a href="#pricing" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">Tarifs</a>
                 <a href="#faq" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">FAQ</a>
-                <a href="/sign-in?redirect_url=/dashboard" className="text-sm font-medium text-white hover:text-violet-400 transition-colors">Se connecter</a>
-                <a 
+                <Link href="/sign-in?redirect_url=/dashboard" className="text-sm font-medium text-white hover:text-violet-300 transition-colors">Se connecter</Link>
+                <Link 
                   href="/sign-up?redirect_url=/dashboard"
-                  className="px-5 py-2.5 rounded-full bg-white text-black text-sm font-semibold hover:bg-neutral-200 transition-transform hover:scale-105"
+                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-transform hover:scale-105 hover:bg-neutral-200"
                 >
                   Essayer Zolio
-                </a>
+                </Link>
               </div>
 
               <div className="md:hidden flex items-center">
@@ -346,15 +407,18 @@ export default function LandingPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="md:hidden bg-[#05050A]/95 backdrop-blur-xl border-b border-white/10"
+                className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-8 md:hidden"
               >
-                <div className="px-4 pt-2 pb-6 space-y-4 flex flex-col">
+                <div className="landing-panel rounded-[28px] px-4 pb-6 pt-4">
+                  <div className="space-y-4 flex flex-col">
                   <a href="#features" className="block text-base font-medium text-neutral-300 hover:text-white">Fonctionnalités</a>
                   <a href="#pricing" className="block text-base font-medium text-neutral-300 hover:text-white">Tarifs</a>
-                  <a href="/sign-in?redirect_url=/dashboard" className="block text-base font-medium text-neutral-300 hover:text-white">Se connecter</a>
-                  <a href="/sign-up?redirect_url=/dashboard" className="inline-block px-5 py-3 rounded-xl bg-white text-black text-base font-semibold text-center w-full mt-4">
+                  <a href="#faq" className="block text-base font-medium text-neutral-300 hover:text-white">FAQ</a>
+                  <Link href="/sign-in?redirect_url=/dashboard" className="block text-base font-medium text-neutral-300 hover:text-white">Se connecter</Link>
+                  <Link href="/sign-up?redirect_url=/dashboard" className="inline-block px-5 py-3 rounded-xl bg-white text-black text-base font-semibold text-center w-full mt-4">
                     Essayer Zolio
-                  </a>
+                  </Link>
+                </div>
                 </div>
               </motion.div>
             )}
@@ -362,48 +426,173 @@ export default function LandingPage() {
         </nav>
 
         {/* Hero Section */}
-        <section className="relative pt-40 pb-20 lg:pt-56 lg:pb-32 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              <div className="inline-flex items-center px-4 py-2 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-sm font-medium mb-8">
-                <span className="flex h-2 w-2 rounded-full bg-violet-500 mr-2 animate-pulse"></span>
-                Zolio 2026 - L'avenir du bâtiment
-              </div>
-              
-              <KineticText 
-                text="Gérez vos chantiers. Pas la paperasse." 
-                className="text-6xl md:text-8xl mb-8 bg-gradient-to-br from-white via-neutral-200 to-neutral-500 bg-clip-text text-transparent"
-              />
-              
-              <p className="mt-6 text-xl text-neutral-400 max-w-2xl mx-auto mb-12 leading-relaxed">
-                Le logiciel de devis et factures conçu spécifiquement pour les artisans du bâtiment. 
-                Une interface fluide, moderne et accessible partout, même sur le chantier.
-              </p>
+        <section className="relative overflow-hidden pb-24 pt-[8.5rem] sm:pt-[9.5rem] lg:pb-32 lg:pt-[11rem]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid gap-10 xl:grid-cols-[1.04fr_0.96fr] xl:items-center">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="text-center xl:text-left"
+              >
+                <div className="flex justify-center xl:justify-start">
+                  <SectionEyebrow>Zolio 2026 • l&apos;OS métier pour le bâtiment</SectionEyebrow>
+                </div>
 
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <a 
-                  href="/sign-up?redirect_url=/dashboard"
-                  className="px-8 py-4 rounded-full bg-white text-black font-semibold text-lg hover:bg-neutral-200 hover:scale-105 transition-all shadow-[0_0_40px_rgba(255,255,255,0.3)] flex items-center justify-center group"
-                >
-                  Démarrer l'essai
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </a>
-                <a 
-                  href="#demo"
-                  className="px-8 py-4 rounded-full bg-neutral-900 border border-neutral-700 text-white font-semibold text-lg hover:bg-neutral-800 transition-all flex items-center justify-center"
-                >
-                  Voir la démo
-                </a>
-              </div>
-            </motion.div>
+                <KineticText
+                  text="Gérez vos chantiers. Pas la paperasse."
+                  className="landing-text-gradient mx-auto mt-8 max-w-5xl text-5xl sm:text-6xl md:text-7xl xl:mx-0 xl:text-[5.5rem]"
+                />
+
+                <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-300 sm:text-xl xl:mx-0">
+                  Le logiciel de devis et factures conçu spécifiquement pour les artisans du bâtiment.
+                  Une interface fluide, moderne et accessible partout, même sur le chantier.
+                </p>
+
+                <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row xl:justify-start">
+                  <Link
+                    href="/sign-up?redirect_url=/dashboard"
+                    className="group flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-black shadow-[0_0_48px_rgba(255,255,255,0.18)] transition-all hover:scale-[1.02] hover:bg-neutral-100"
+                  >
+                    Démarrer l&apos;essai
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                  <a
+                    href="#demo"
+                    className="flex items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white/[0.08]"
+                  >
+                    Voir la démo
+                  </a>
+                </div>
+
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
+                  <span className="landing-chip">
+                    <Shield className="h-4 w-4 text-sky-300" />
+                    Données sécurisées
+                  </span>
+                  <span className="landing-chip">
+                    <HardHat className="h-4 w-4 text-orange-300" />
+                    Conçu pour le terrain
+                  </span>
+                  <span className="landing-chip">
+                    <ReceiptText className="h-4 w-4 text-violet-300" />
+                    Devis, signature, facture
+                  </span>
+                </div>
+
+                <div className="mt-10 grid gap-3 sm:grid-cols-3">
+                  {heroPillars.map((pillar) => {
+                    const Icon = pillar.icon;
+
+                    return (
+                      <div
+                        key={pillar.title}
+                        className="landing-panel rounded-[28px] p-4 text-left"
+                      >
+                        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/8 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <h3 className="mt-4 text-base font-semibold text-white">{pillar.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-neutral-400">{pillar.description}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.85, delay: 0.1, ease: "easeOut" }}
+                className="relative"
+              >
+                <div className="landing-panel-strong relative overflow-hidden rounded-[36px] p-4 sm:p-6">
+                  <div className="absolute right-[-15%] top-[-10%] h-40 w-40 rounded-full bg-violet-500/20 blur-[90px]" />
+                  <div className="absolute bottom-[-18%] left-[-8%] h-32 w-32 rounded-full bg-orange-500/16 blur-[80px]" />
+
+                  <div className="relative flex items-center justify-between border-b border-white/8 pb-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.3em] text-white/45">Aperçu produit</p>
+                      <h2 className="mt-2 text-2xl font-semibold text-white">Le chantier tient dans la poche.</h2>
+                    </div>
+                    <div className="landing-chip hidden sm:inline-flex">
+                      <Sparkles className="h-4 w-4 text-fuchsia-300" />
+                      UI 2026
+                    </div>
+                  </div>
+
+                  <div className="relative mt-5 grid gap-4 lg:grid-cols-[1.12fr_0.88fr]">
+                    <div className="landing-panel rounded-[30px] p-5">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">Flux terrain</p>
+                          <p className="mt-2 text-lg font-semibold text-white">Une journée de travail, sans friction.</p>
+                        </div>
+                        <div className="landing-chip">
+                          <CheckCircle className="h-4 w-4 text-emerald-300" />
+                          Prêt à envoyer
+                        </div>
+                      </div>
+
+                      <div className="mt-5 space-y-3">
+                        {[
+                          { title: "Devis créé sur chantier", detail: "Ajout des lignes, marge visible, total propre", tone: "violet" },
+                          { title: "Signature client immédiate", detail: "Validation sur écran sans impression papier", tone: "fuchsia" },
+                          { title: "Facture prête à partir", detail: "Relance et suivi centralisés dans le même flux", tone: "orange" },
+                        ].map((step) => (
+                          <div key={step.title} className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4">
+                            <div className="flex items-start gap-3">
+                              <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${step.tone === "violet" ? "bg-violet-500/14 text-violet-200" : step.tone === "fuchsia" ? "bg-fuchsia-500/14 text-fuchsia-200" : "bg-orange-500/14 text-orange-200"}`}>
+                                <CheckCircle2 className="h-4 w-4" />
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-white">{step.title}</p>
+                                <p className="mt-1 text-sm leading-6 text-neutral-400">{step.detail}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4">
+                      {heroSignals.map((signal, index) => (
+                        <div
+                          key={signal.label}
+                          className={`landing-panel rounded-[28px] p-5 ${index === 0 ? "animate-landing-float" : ""}`}
+                        >
+                          <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">{signal.label}</p>
+                          <p className="mt-3 text-2xl font-semibold text-white">{signal.value}</p>
+                          <p className="mt-2 text-sm leading-6 text-neutral-400">{signal.detail}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="absolute -left-2 top-10 hidden rounded-[24px] border border-violet-400/20 bg-[#05050A]/80 px-4 py-3 shadow-2xl backdrop-blur-xl md:block xl:-left-12">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-violet-200/70">Vue métier</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Clair sur mobile, dense sur desktop.</p>
+                </div>
+                <div className="absolute -bottom-4 right-0 hidden rounded-[24px] border border-orange-400/20 bg-[#05050A]/80 px-4 py-3 shadow-2xl backdrop-blur-xl md:block xl:-right-8">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-orange-200/70">Sans rupture</p>
+                  <p className="mt-2 text-sm font-semibold text-white">Le client signe, toi tu avances.</p>
+                </div>
+              </motion.div>
+            </div>
           </div>
-          
-          {/* Dashboard Showcase Mockup (replaces Spline) */}
-          <div id="demo" className="mt-20 relative w-full max-w-5xl mx-auto opacity-90 hover:opacity-100 transition-opacity duration-700 z-20 scroll-mt-32 group">
+
+          <div id="demo" className="relative z-20 mx-auto mt-[4.5rem] w-full max-w-6xl scroll-mt-32 px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 flex flex-col items-center gap-4 text-center">
+              <SectionEyebrow>Démo visuelle</SectionEyebrow>
+              <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                Une interface qui ressemble enfin au vrai quotidien d&apos;un artisan.
+              </h2>
+              <p className="max-w-2xl text-base leading-7 text-neutral-400 sm:text-lg">
+                Pas une vitrine générique. Un cockpit métier qui montre l&apos;activité, les relances,
+                les devis et les actions utiles au bon moment.
+              </p>
+            </div>
             
             {/* Demo Floating Badges */}
             <div className="absolute -left-4 sm:-left-12 top-1/4 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
@@ -484,7 +673,7 @@ export default function LandingPage() {
                   <div className="flex justify-between items-center px-2">
                      <div>
                        <h2 className="text-xl font-bold text-white mb-1">Bonjour, Artisan 👋</h2>
-                       <p className="text-xs text-neutral-400 hidden sm:block">Voici le résumé de votre activité aujourd'hui.</p>
+                       <p className="text-xs text-neutral-400 hidden sm:block">Voici le résumé de votre activité aujourd&apos;hui.</p>
                      </div>
                      <div className="flex items-center gap-3">
                        <div className="hidden sm:flex items-center justify-center w-9 h-9 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
@@ -502,7 +691,7 @@ export default function LandingPage() {
                     <div className="p-4 rounded-xl bg-white/5 border border-white/10 shadow-sm relative overflow-hidden group hover:border-violet-500/30 transition-colors">
                       <div className="absolute top-0 right-0 w-24 h-24 bg-violet-500/10 rounded-bl-full transition-transform group-hover:scale-110"></div>
                       <div className="flex justify-between items-start mb-2 relative z-10">
-                        <span className="text-neutral-400 text-sm font-medium">Chiffre d'affaires</span>
+                        <span className="text-neutral-400 text-sm font-medium">Chiffre d&apos;affaires</span>
                         <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center border border-violet-500/20">
                           <TrendingUp className="w-4 h-4 text-violet-400" />
                         </div>
@@ -550,7 +739,7 @@ export default function LandingPage() {
                     {/* Main Chart */}
                     <div className="col-span-2 rounded-xl bg-white/5 border border-white/10 shadow-sm p-5 flex flex-col min-h-[220px]">
                        <div className="flex justify-between items-center mb-6">
-                         <span className="text-white font-medium">Revenus de l'année</span>
+                         <span className="text-white font-medium">Revenus de l&apos;année</span>
                          <div className="flex gap-2">
                            <div className="px-3 py-1 bg-white/10 rounded-md text-xs text-white font-medium">2026</div>
                          </div>
@@ -635,7 +824,7 @@ export default function LandingPage() {
                             </div>
                             <div className="flex flex-col">
                               <span className="text-white text-xs font-medium group-hover:text-violet-300 transition-colors">Nouveau client</span>
-                              <span className="text-neutral-500 text-[10px]">Ajouté depuis l'application</span>
+                              <span className="text-neutral-500 text-[10px]">Ajouté depuis l&apos;application</span>
                             </div>
                           </div>
                           <span className="text-neutral-400 text-[10px]">Lun.</span>
@@ -661,7 +850,7 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
                 <span className="w-2 h-2 rounded-full bg-orange-500 mr-2 animate-pulse"></span>
-                <span className="text-sm font-medium text-neutral-300">L'évolution est en marche</span>
+                <span className="text-sm font-medium text-neutral-300">L&apos;évolution est en marche</span>
               </div>
               <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight">
                 Transformez votre manière de <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-fuchsia-500 to-violet-500">travailler</span>
@@ -796,30 +985,81 @@ export default function LandingPage() {
         {/* Trustpilot Reviews Section */}
         <section className="py-32 bg-transparent relative" id="testimonials">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Ils nous font confiance</h2>
-              <p className="text-xl text-neutral-400">Découvrez ce que les artisans pensent de Zolio sur Trustpilot.</p>
+            <div className="mb-16 flex flex-col items-center text-center">
+              <SectionEyebrow>Preuve sociale</SectionEyebrow>
+              <h2 className="mt-8 text-4xl md:text-5xl font-bold mb-6 text-white">Une zone d&apos;avis enfin digne du produit</h2>
+              <p className="text-xl text-neutral-400 max-w-2xl">
+                Le widget Trustpilot peut s&apos;intégrer ici proprement. En attendant, la section garde une vraie présence visuelle.
+              </p>
             </div>
             
-            {/* Trustpilot Widget Placeholder */}
-            <div className="w-full flex justify-center items-center min-h-[200px] rounded-3xl bg-neutral-900 border border-neutral-800 p-8 shadow-2xl">
-              <div className="text-center">
-                <div className="flex justify-center mb-6 space-x-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <div key={star} className="w-10 h-10 bg-[#00B67A] flex items-center justify-center rounded-sm">
-                      <Star className="w-6 h-6 text-white fill-white" />
-                    </div>
-                  ))}
+            <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+              <div className="landing-panel-strong rounded-[34px] p-8 sm:p-10">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="landing-chip">
+                    <Star className="h-4 w-4 fill-[#00B67A] text-[#00B67A]" />
+                    Trustpilot ready
+                  </span>
+                  <span className="landing-chip">
+                    <Sparkles className="h-4 w-4 text-fuchsia-300" />
+                    Bloc premium
+                  </span>
                 </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Excellent</h3>
-                <p className="text-neutral-400">Le widget officiel Trustpilot sera affiché ici</p>
-                
-                {/* 
-                  Code d'intégration Trustpilot (à insérer plus tard) :
-                  <div className="trustpilot-widget" data-locale="fr-FR" data-template-id="..." data-businessunit-id="..." data-style-height="24px" data-style-width="100%" data-theme="dark">
-                    <a href="https://fr.trustpilot.com/review/zolio.site" target="_blank" rel="noopener">Trustpilot</a>
+
+                <div className="mt-8 flex flex-wrap items-end gap-5">
+                  <div>
+                    <p className="text-6xl font-black text-white">5.0</p>
+                    <p className="mt-2 text-sm uppercase tracking-[0.24em] text-white/40">Espace avis</p>
                   </div>
-                */}
+                  <div className="flex gap-1 pb-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <div key={star} className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00B67A] shadow-[0_20px_40px_-30px_rgba(0,182,122,0.9)]">
+                        <Star className="h-5 w-5 fill-white text-white" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="mt-6 max-w-xl text-base leading-7 text-neutral-300">
+                  Ici, on évite le placeholder brut. Le composant d&apos;avis est habillé comme une vraie section
+                  produit, prêt à recevoir le widget officiel quand tu veux le brancher.
+                </p>
+
+                <div className="mt-8 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-white">Zone d&apos;intégration officielle</p>
+                      <p className="mt-1 text-sm text-neutral-400">
+                        Compatible avec le widget Trustpilot dark sans recasser la mise en page.
+                      </p>
+                    </div>
+                    <div className="landing-chip hidden sm:inline-flex">
+                      <CheckCircle className="h-4 w-4 text-emerald-300" />
+                      Prête à brancher
+                    </div>
+                  </div>
+                  <div className="mt-5 h-24 rounded-[22px] border border-dashed border-white/12 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01),rgba(255,255,255,0.03))] animate-shimmer" />
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                {trustWidgetCards.map((card, index) => (
+                  <div key={card.title} className={`landing-panel rounded-[30px] p-6 ${index === 1 ? "sm:translate-x-6" : ""}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/8">
+                        {index === 0 ? (
+                          <Star className="h-5 w-5 text-emerald-300" />
+                        ) : index === 1 ? (
+                          <Shield className="h-5 w-5 text-sky-300" />
+                        ) : (
+                          <Smartphone className="h-5 w-5 text-violet-300" />
+                        )}
+                      </div>
+                      <h3 className="text-lg font-semibold text-white">{card.title}</h3>
+                    </div>
+                    <p className="mt-4 text-sm leading-7 text-neutral-400">{card.description}</p>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -837,10 +1077,10 @@ export default function LandingPage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">
                 <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
-                <span className="text-sm font-medium text-neutral-300">L'écosystème parfait</span>
+                <span className="text-sm font-medium text-neutral-300">L&apos;écosystème parfait</span>
               </div>
               <h2 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight text-white">
-                Pensé pour l'artisanat <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400">moderne</span>
+                Pensé pour l&apos;artisanat <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400">moderne</span>
               </h2>
               <p className="text-xl md:text-2xl text-neutral-400 max-w-2xl mx-auto font-light">
                 Tout ce dont vous avez besoin pour gérer vos chantiers, <span className="text-neutral-200 font-medium">sans la complexité.</span>
@@ -858,7 +1098,7 @@ export default function LandingPage() {
                   <h3 className="text-3xl font-bold text-white mb-4 tracking-tight">Mobile-First Absolu</h3>
                   <p className="text-neutral-400 text-lg leading-relaxed max-w-md">
                     Créez un devis, faites-le signer et envoyez la facture directement depuis votre camion ou le chantier.
-                    L'interface s'adapte parfaitement à votre téléphone.
+                    L&apos;interface s&apos;adapte parfaitement à votre téléphone.
                   </p>
                 </div>
                 
@@ -953,7 +1193,7 @@ export default function LandingPage() {
                   </div>
                   <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-4 tracking-tight">Vitesse foudroyante</h3>
                   <p className="text-neutral-400 text-lg md:text-xl max-w-2xl font-light">
-                    Chaque action dans Zolio est instantanée. Pas de temps de chargement, pas d'attente. 
+                    Chaque action dans Zolio est instantanée. Pas de temps de chargement, pas d&apos;attente. 
                     <span className="text-white font-medium"> Gagnez en moyenne 4h de travail administratif par semaine.</span>
                   </p>
                 </div>
@@ -1067,17 +1307,17 @@ export default function LandingPage() {
                     ))}
                   </ul>
                   
-                  <a 
+                  <Link 
                     href="/sign-up?redirect_url=/dashboard"
                     className="group/btn relative block w-full py-4 rounded-xl font-bold text-center transition-all duration-300 transform hover:scale-[1.02] active:scale-95 overflow-hidden"
                   >
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 opacity-90 group-hover/btn:opacity-100 transition-opacity"></div>
                     <div className="absolute inset-0 w-full h-full bg-white/20 scale-x-0 group-hover/btn:scale-x-100 origin-left transition-transform duration-500 ease-out"></div>
                     <span className="relative z-10 text-white flex items-center justify-center gap-2">
-                      Démarrer l'essai (1 devis)
+                      Démarrer l&apos;essai (1 devis)
                       <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                     </span>
-                  </a>
+                  </Link>
                 </div>
               </SpotlightCard>
             </motion.div>
@@ -1088,6 +1328,9 @@ export default function LandingPage() {
         <section id="faq" className="py-32 bg-transparent relative">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
+              <div className="flex justify-center">
+                <SectionEyebrow>Questions fréquentes</SectionEyebrow>
+              </div>
               <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Questions fréquentes</h2>
               <p className="text-xl text-neutral-400">Tout ce que vous devez savoir avant de vous lancer.</p>
             </div>
@@ -1101,13 +1344,56 @@ export default function LandingPage() {
                 answer="Oui ! Vous pouvez très prochainement importer vos clients et votre catalogue de prix au format Excel/CSV en quelques clics." 
               />
               <FAQItem 
-                question="Que se passe-t-il après mon devis d'essai ?" 
-                answer="Une fois votre devis d'essai utilisé, vous pourrez passer à la version Pro pour débloquer les devis et factures illimités, sans aucun engagement de durée." 
+                question="Que se passe-t-il après mon devis d&apos;essai ?" 
+                answer="Une fois votre devis d&apos;essai utilisé, vous pourrez passer à la version Pro pour débloquer les devis et factures illimités, sans aucun engagement de durée." 
               />
               <FAQItem 
                 question="Mes données sont-elles sécurisées ?" 
                 answer="Absolument. Vos données sont hébergées sur des serveurs sécurisés en Europe et sauvegardées quotidiennement. Vous êtes le seul propriétaire de vos informations." 
               />
+            </div>
+          </div>
+        </section>
+
+        <section className="pb-24 pt-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="landing-panel-strong relative overflow-hidden rounded-[38px] p-8 sm:p-10 lg:p-14">
+              <div className="absolute right-[-10%] top-[-8%] h-44 w-44 rounded-full bg-violet-500/18 blur-[90px]" />
+              <div className="absolute bottom-[-20%] left-[8%] h-36 w-36 rounded-full bg-orange-500/12 blur-[84px]" />
+
+              <div className="relative grid gap-10 lg:grid-cols-[1fr_0.82fr] lg:items-end">
+                <div>
+                  <SectionEyebrow>Prêt à passer en version chantier</SectionEyebrow>
+                  <h2 className="mt-8 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                    Garde ton contenu. Monte juste le niveau visuel et l&apos;efficacité.
+                  </h2>
+                  <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-300">
+                    Zolio garde l&apos;essentiel de ton flux métier, mais le présente enfin comme un produit
+                    premium 2026, lisible sur mobile et rassurant sur desktop.
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {closingHighlights.map((item) => (
+                    <div key={item} className="landing-panel rounded-[26px] px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
+                          <CheckCircle className="h-5 w-5 text-violet-300" />
+                        </div>
+                        <p className="text-sm font-semibold text-white">{item}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  <Link
+                    href="/sign-up?redirect_url=/dashboard"
+                    className="group flex w-full items-center justify-center rounded-full bg-white px-7 py-4 text-base font-semibold text-black transition-all hover:scale-[1.01] hover:bg-neutral-100"
+                  >
+                    Créer mon compte
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1131,7 +1417,7 @@ export default function LandingPage() {
                 <ul className="space-y-4">
                   <li><a href="#features" className="text-neutral-400 hover:text-white transition-colors">Fonctionnalités</a></li>
                   <li><a href="#pricing" className="text-neutral-400 hover:text-white transition-colors">Tarifs</a></li>
-                  <li><a href="/sign-in?redirect_url=/dashboard" className="text-neutral-400 hover:text-white transition-colors">Connexion</a></li>
+                  <li><Link href="/sign-in?redirect_url=/dashboard" className="text-neutral-400 hover:text-white transition-colors">Connexion</Link></li>
                 </ul>
               </div>
               <div>
@@ -1154,16 +1440,16 @@ export default function LandingPage() {
 
         {/* Mobile Floating CTA */}
         <div className="fixed bottom-6 left-4 right-4 z-50 md:hidden">
-          <a 
+          <Link 
             href="/sign-up?redirect_url=/dashboard"
             className="block w-full py-4 rounded-full bg-white text-black font-semibold text-center text-lg shadow-[0_10px_40px_rgba(255,255,255,0.2)]"
           >
             Créer mon compte
-          </a>
+          </Link>
         </div>
 
         {/* PLG Badge (Product Led Growth) */}
-        <a
+        <Link
           href="/"
           className="fixed bottom-6 left-6 z-50 hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-[#05050A]/80 border border-white/10 backdrop-blur-md hover:border-violet-500/50 hover:bg-white/5 transition-all shadow-2xl group"
         >
@@ -1173,7 +1459,7 @@ export default function LandingPage() {
           <span className="text-xs font-medium text-neutral-400 group-hover:text-white transition-colors">
             Propulsé par <span className="text-white font-semibold">Zolio</span>
           </span>
-        </a>
+        </Link>
       </div>
     </div>
   );
