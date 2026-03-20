@@ -1160,43 +1160,6 @@ export default function DashboardPage() {
                       )}
                     </div>
 
-                    <div className="mt-6 grid gap-3 sm:grid-cols-3">
-                      {[
-                        {
-                          label: "Préparer",
-                          detail: starterTrade?.shortLabel || "Métier à définir",
-                          tone: "violet",
-                        },
-                        {
-                          label: "Suivre",
-                          detail: `${pendingQuotes.length} devis en attente`,
-                          tone: "amber",
-                        },
-                        {
-                          label: "Encaisser",
-                          detail: `${acceptedQuotes.length} devis validés`,
-                          tone: "emerald",
-                        },
-                      ].map((step) => {
-                        const classes = toneClasses(step.tone as Tone);
-                        return (
-                          <div
-                            key={step.label}
-                            className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
-                                {step.label}
-                              </p>
-                              <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-                                {step.tone === "emerald" ? <Wallet size={14} /> : step.tone === "amber" ? <Clock3 size={14} /> : <FileText size={14} />}
-                              </span>
-                            </div>
-                            <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">{step.detail}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
 
                   <div className="xl:pl-2">
@@ -1228,64 +1191,65 @@ export default function DashboardPage() {
                           <ChevronRight size={16} />
                         </Link>
                       ) : null}
-
-                      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-[1.3rem] border border-white/45 bg-white/62 px-4 py-4 dark:border-white/10 dark:bg-white/4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                            Cap restant
-                          </p>
-                          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                            {formatCurrency(remainingToGoal)}
-                          </p>
-                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                            {objectifProgress.toFixed(0)}% du cap mensuel atteint
-                          </p>
-                        </div>
-                        <div className="rounded-[1.3rem] border border-white/45 bg-white/62 px-4 py-4 dark:border-white/10 dark:bg-white/4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                            Relances
-                          </p>
-                          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                            {devisARelancer.length}
-                          </p>
-                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                            client{devisARelancer.length > 1 ? "s" : ""} à relancer cette semaine
-                          </p>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <HeroSnapshotCard
-                    label="Cap restant"
-                    value={formatCurrency(remainingToGoal)}
-                    detail={`${objectifProgress.toFixed(0)}% atteint • ${formatCurrency(objectifActif)} visés`}
-                    tone="violet"
-                    icon={Target}
-                  />
-                  <HeroSnapshotCard
-                    label="CA validé"
-                    value={formatCurrency(acceptedRevenueHT)}
-                    detail={`${acceptedQuotes.length} devis signés ou acceptés`}
-                    tone="emerald"
-                    icon={TrendingUp}
-                  />
-                  <HeroSnapshotCard
-                    label="Pipeline"
-                    value={formatCurrency(pipelineRevenueHT)}
-                    detail={`${pendingQuotes.length} devis encore à suivre`}
-                    tone="amber"
-                    icon={Clock3}
-                  />
-                  <HeroSnapshotCard
-                    label="Conversion"
-                    value={`${conversionRate}%`}
-                    detail={`${devis.length} devis suivis dans le cockpit`}
-                    tone="violet"
-                    icon={FileCheck2}
-                  />
+                <div className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(18rem,0.94fr)]">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {[
+                      {
+                        label: "Préparer",
+                        detail: starterTrade?.shortLabel || "Métier à définir",
+                        tone: "violet",
+                      },
+                      {
+                        label: "Suivre",
+                        detail: `${pendingQuotes.length} devis en attente`,
+                        tone: "amber",
+                      },
+                      {
+                        label: "Encaisser",
+                        detail: `${acceptedQuotes.length} devis validés`,
+                        tone: "emerald",
+                      },
+                    ].map((step) => {
+                      const classes = toneClasses(step.tone as Tone);
+                      return (
+                        <div
+                          key={`workflow-${step.label}`}
+                          className="rounded-[1.45rem] border border-white/45 bg-white/72 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/10 dark:bg-white/4"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">
+                              {step.label}
+                            </p>
+                            <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+                              {step.tone === "emerald" ? <Wallet size={14} /> : step.tone === "amber" ? <Clock3 size={14} /> : <FileText size={14} />}
+                            </span>
+                          </div>
+                          <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">{step.detail}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                    <HeroSnapshotCard
+                      label="Cap restant"
+                      value={formatCurrency(remainingToGoal)}
+                      detail={`${objectifProgress.toFixed(0)}% atteint • ${formatCurrency(objectifActif)} visés`}
+                      tone="violet"
+                      icon={Target}
+                    />
+                    <HeroSnapshotCard
+                      label="Relances"
+                      value={String(devisARelancer.length)}
+                      detail={`client${devisARelancer.length > 1 ? "s" : ""} à relancer cette semaine`}
+                      tone="amber"
+                      icon={Bell}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
