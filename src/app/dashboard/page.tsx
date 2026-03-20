@@ -1241,7 +1241,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="space-y-4 xl:sticky xl:top-28 xl:self-start">
+            <div className="xl:self-start">
               <motion.div
                 {...sectionMotion(0.04)}
                 className="client-panel rounded-[2.2rem] p-5 sm:p-6"
@@ -1279,51 +1279,6 @@ export default function DashboardPage() {
                     <Settings size={15} />
                     Paramètres
                   </Link>
-                </div>
-              </motion.div>
-
-              <motion.div
-                {...sectionMotion(0.08)}
-                className="client-panel rounded-[2.2rem] p-5 sm:p-6"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Signaux du jour</p>
-                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                      Ce qui mérite votre attention
-                    </h2>
-                  </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
-                    {secondarySignals.length}
-                  </span>
-                </div>
-
-                {secondarySignals.length > 0 ? (
-                  <div className="mt-5 space-y-3">
-                    {secondarySignals.map((signal) => (
-                      <FocusSignalCard key={signal.id} signal={signal} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="mt-5 rounded-[1.6rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-6 dark:border-white/10 dark:bg-white/4">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun point secondaire bloquant</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Le cockpit reste propre. Vous pouvez vous concentrer sur la prochaine création ou le suivi client.
-                    </p>
-                  </div>
-                )}
-
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <ClientSupportButton />
-                  {canAccessAdminDashboard && (
-                    <Link
-                      href="/admin"
-                      className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                    >
-                      <ShieldCheck size={16} />
-                      Ouvrir le cockpit admin
-                    </Link>
-                  )}
                 </div>
               </motion.div>
             </div>
@@ -1407,48 +1362,95 @@ export default function DashboardPage() {
             </motion.section>
           )}
 
-          <motion.section {...sectionMotion(0.1)} className="space-y-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Vue d&apos;ensemble</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  Les chiffres à lire sans détour
-                </h2>
+          <motion.section
+            {...sectionMotion(0.1)}
+            className="grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(19rem,0.92fr)] xl:items-start"
+          >
+            <div className="space-y-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Vue d&apos;ensemble</p>
+                  <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                    Les chiffres à lire sans détour
+                  </h2>
+                </div>
+                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                  {devis.length} devis monitorés
+                </span>
               </div>
-              <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                {devis.length} devis monitorés
-              </span>
+
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                <MetricCard
+                  label="CA validé"
+                  value={formatCurrency(acceptedRevenueHT)}
+                  detail={`${acceptedQuotes.length} devis acceptés`}
+                  tone="emerald"
+                  icon={TrendingUp}
+                />
+                <MetricCard
+                  label="Pipeline"
+                  value={formatCurrency(pipelineRevenueHT)}
+                  detail={`${pendingQuotes.length} devis en attente`}
+                  tone="amber"
+                  icon={Clock3}
+                />
+                <MetricCard
+                  label="Relances"
+                  value={String(devisARelancer.length)}
+                  detail="Clients à relancer cette semaine"
+                  tone="rose"
+                  icon={Bell}
+                />
+                <MetricCard
+                  label="Ticket moyen"
+                  value={formatCurrency(averageTicket)}
+                  detail={`${conversionRate}% de conversion sur les devis suivis`}
+                  tone="violet"
+                  icon={LineChart}
+                />
+              </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <MetricCard
-                label="CA validé"
-                value={formatCurrency(acceptedRevenueHT)}
-                detail={`${acceptedQuotes.length} devis acceptés`}
-                tone="emerald"
-                icon={TrendingUp}
-              />
-              <MetricCard
-                label="Pipeline"
-                value={formatCurrency(pipelineRevenueHT)}
-                detail={`${pendingQuotes.length} devis en attente`}
-                tone="amber"
-                icon={Clock3}
-              />
-              <MetricCard
-                label="Relances"
-                value={String(devisARelancer.length)}
-                detail="Clients à relancer cette semaine"
-                tone="rose"
-                icon={Bell}
-              />
-              <MetricCard
-                label="Ticket moyen"
-                value={formatCurrency(averageTicket)}
-                detail={`${conversionRate}% de conversion sur les devis suivis`}
-                tone="violet"
-                icon={LineChart}
-              />
+            <div className="client-panel rounded-[2.2rem] p-5 sm:p-6 xl:self-start">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Signaux du jour</p>
+                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                    Ce qui mérite votre attention
+                  </h2>
+                </div>
+                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
+                  {secondarySignals.length}
+                </span>
+              </div>
+
+              {secondarySignals.length > 0 ? (
+                <div className="mt-5 space-y-3">
+                  {secondarySignals.map((signal) => (
+                    <FocusSignalCard key={signal.id} signal={signal} />
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-[1.6rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-6 dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun point secondaire bloquant</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Le cockpit reste propre. Vous pouvez vous concentrer sur la prochaine création ou le suivi client.
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <ClientSupportButton />
+                {canAccessAdminDashboard && (
+                  <Link
+                    href="/admin"
+                    className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                  >
+                    <ShieldCheck size={16} />
+                    Ouvrir le cockpit admin
+                  </Link>
+                )}
+              </div>
             </div>
           </motion.section>
 
