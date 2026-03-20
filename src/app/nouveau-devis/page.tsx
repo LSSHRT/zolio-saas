@@ -575,24 +575,24 @@ export default function NouveauDevisPage() {
       title="Nouveau devis"
       footer={
         <CreationWizardFooter>
-          <div className="text-sm text-slate-500 dark:text-slate-400">
+          <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
             Étape {step + 1} sur {WIZARD_STEPS.length}
             {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             {step > 0 ? (
               <button
                 type="button"
                 onClick={() => setStep((current) => Math.max(current - 1, 0))}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 sm:w-auto"
               >
                 Précédent
               </button>
             ) : (
               <Link
                 href="/devis"
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 sm:w-auto"
               >
                 <FileText size={16} />
                 Mes devis
@@ -604,7 +604,7 @@ export default function NouveauDevisPage() {
                 type="button"
                 onClick={handleNextStep}
                 disabled={!canContinue || trialLocked}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 {step === 0 ? "Continuer vers le chiffrage" : "Continuer vers la validation"}
                 <ArrowRight size={16} />
@@ -615,7 +615,7 @@ export default function NouveauDevisPage() {
                   type="button"
                   onClick={() => void handleCreate("save")}
                   disabled={!canSubmit || submitMode !== null}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 sm:w-auto"
                 >
                   <Save size={16} />
                   {submitMode === "save" ? "Enregistrement..." : "Enregistrer le devis"}
@@ -624,7 +624,7 @@ export default function NouveauDevisPage() {
                   type="button"
                   onClick={() => void handleCreate("send")}
                   disabled={!canSubmit || submitMode !== null}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                 >
                   <Send size={16} />
                   {submitMode === "send" ? "Création + envoi..." : "Créer et envoyer"}

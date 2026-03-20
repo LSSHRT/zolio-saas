@@ -80,16 +80,16 @@ export default function NouvellePrestationPage() {
       title="Nouvelle prestation"
       footer={
         <CreationWizardFooter>
-          <div className="text-sm text-slate-500 dark:text-slate-400">
+          <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
             Étape {step + 1} sur {STEPS.length}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             {step > 0 ? (
               <button
                 type="button"
                 onClick={() => setStep(0)}
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 sm:w-auto"
               >
                 Précédent
               </button>
@@ -106,7 +106,7 @@ export default function NouvellePrestationPage() {
                   setStep(1);
                 }}
                 disabled={!canContinue}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 Continuer
                 <ArrowRight size={16} />
@@ -116,7 +116,7 @@ export default function NouvellePrestationPage() {
                 type="button"
                 onClick={() => void handleSubmit()}
                 disabled={saving || !canSubmit}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
               >
                 <Save size={16} />
                 {saving ? "Création..." : "Ajouter au catalogue"}

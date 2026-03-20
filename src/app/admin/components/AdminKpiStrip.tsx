@@ -30,7 +30,7 @@ export function AdminKpiStrip({ items }: { items: AdminKpi[] }) {
   } as const;
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-5">
       {items.map((item) => {
         const Icon = iconMap[item.id as keyof typeof iconMap] ?? TrendingUp;
 
@@ -41,12 +41,12 @@ export function AdminKpiStrip({ items }: { items: AdminKpi[] }) {
           >
             <p className="text-[11px] uppercase tracking-[0.28em] text-slate-400">{item.label}</p>
             <div className="mt-4 flex items-end justify-between gap-4">
-              <p className="text-3xl font-semibold tracking-tight text-white">{item.value}</p>
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/6 text-white ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
+              <p className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">{item.value}</p>
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-white/6 text-white ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:h-10 sm:w-10">
                 <Icon className="h-5 w-5 text-white/90" strokeWidth={2.2} />
               </div>
             </div>
-            <p className="mt-4 text-sm text-slate-300">{item.hint}</p>
+            <p className="mt-3 text-xs leading-5 text-slate-300 sm:mt-4 sm:text-sm">{item.hint}</p>
           </article>
         );
       })}

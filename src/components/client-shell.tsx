@@ -77,7 +77,7 @@ export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
 
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   return (
-    <nav className="client-nav-dock fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-md items-center justify-between gap-2 rounded-[2rem] px-3 py-3 lg:hidden">
+    <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-sm items-center justify-between gap-1.5 rounded-[1.75rem] px-2.5 py-2.5 lg:hidden">
       {CLIENT_NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         return (
@@ -182,6 +182,7 @@ export function ClientSubpageShell({
   children,
   description,
   eyebrow = "Espace client",
+  showMobileDock = true,
   summary,
   title,
 }: {
@@ -191,17 +192,33 @@ export function ClientSubpageShell({
   children: ReactNode;
   description: string;
   eyebrow?: string;
+  showMobileDock?: boolean;
   summary?: ReactNode;
   title: string;
 }) {
   return (
-    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
+    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-24 text-slate-950 dark:text-white sm:pb-28">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10">
-        <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-24 pt-3 sm:px-6 sm:pb-28 sm:pt-4 lg:px-8 lg:pb-10">
+        <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
+          <div className="flex items-center justify-between gap-3 md:hidden">
+            <div className="flex min-w-0 items-center gap-3">
+              <Link
+                href={backHref}
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+                aria-label="Retour"
+              >
+                <ArrowLeft size={18} />
+              </Link>
+              <ClientBrandMark showLabel={false} />
+            </div>
+
+            {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+          </div>
+
+          <div className="hidden flex-col gap-4 md:flex md:flex-row md:items-center md:justify-between">
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href={backHref}
@@ -247,7 +264,7 @@ export function ClientSubpageShell({
         </main>
       </div>
 
-      <ClientMobileDock active={activeNav} />
+      {showMobileDock ? <ClientMobileDock active={activeNav} /> : null}
     </div>
   );
 }

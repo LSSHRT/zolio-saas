@@ -27,7 +27,7 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { CallBackProps, STATUS, Step } from "react-joyride";
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
@@ -254,6 +254,76 @@ function QuickLinkCard({ item }: { item: QuickLinkItem }) {
         </div>
       </motion.div>
     </Link>
+  );
+}
+
+function CompactMetricCard({
+  detail,
+  icon: Icon,
+  label,
+  tone,
+  value,
+}: {
+  detail: string;
+  icon: LucideIcon;
+  label: string;
+  tone: Tone;
+  value: string;
+}) {
+  const classes = toneClasses(tone);
+
+  return (
+    <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/75 p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-white/4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">{label}</p>
+          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
+        </div>
+        <div className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+          <Icon size={18} />
+        </div>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{detail}</p>
+    </div>
+  );
+}
+
+function MobileDisclosureSection({
+  badge,
+  children,
+  defaultOpen = false,
+  description,
+  title,
+}: {
+  badge?: ReactNode;
+  children: ReactNode;
+  defaultOpen?: boolean;
+  description?: string;
+  title: string;
+}) {
+  return (
+    <details
+      open={defaultOpen}
+      className="client-panel group overflow-hidden rounded-[1.8rem] md:hidden"
+    >
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 [&::-webkit-details-marker]:hidden">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-slate-950 dark:text-white">{title}</p>
+          {description ? (
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-3">
+          {badge ? (
+            <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+              {badge}
+            </span>
+          ) : null}
+          <ChevronRight className="h-4 w-4 text-slate-400 transition group-open:rotate-90" />
+        </div>
+      </summary>
+      <div className="border-t border-slate-200/70 px-4 py-4 dark:border-white/8">{children}</div>
+    </details>
   );
 }
 
@@ -822,9 +892,327 @@ export default function DashboardPage() {
         <ClientDesktopNav active="dashboard" />
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
+          <div className="space-y-4 md:hidden">
+            <motion.section
+              {...sectionMotion(0)}
+              className="client-panel-strong relative overflow-hidden rounded-[2rem] px-4 py-5"
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
+              <div className="relative">
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
+                    <GreetingIcon size={14} />
+                    {todayLabel}
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
+                    <BriefcaseBusiness size={13} />
+                    {starterTrade?.shortLabel || "Métier"}
+                  </div>
+                </div>
+
+                <p className="mt-4 text-[11px] uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+                  Aujourd&apos;hui
+                </p>
+                <h1 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                  {greetingText}
+                  {user?.firstName ? `, ${user.firstName}` : ""}.
+                </h1>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Le cockpit mobile va droit au but: une action utile, puis vos chiffres clés.
+                </p>
+
+                <div className="mt-4">
+                  <FocusSignalCard signal={todayFocus} />
+                </div>
+
+                {secondarySignals.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {secondarySignals.map((signal) => (
+                      <span
+                        key={signal.id}
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ring-1 ${toneClasses(signal.tone).chip}`}
+                      >
+                        {renderSignalIcon(signal.tone, 13)}
+                        {signal.title}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <Link
+                    href="/nouveau-devis"
+                    className="tour-nouveau-devis inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand"
+                  >
+                    <Plus size={16} />
+                    Nouveau devis
+                  </Link>
+                  <Link
+                    href="/devis"
+                    className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                  >
+                    <FileText size={16} />
+                    Mes devis
+                  </Link>
+                </div>
+              </div>
+            </motion.section>
+
+            <motion.section
+              {...sectionMotion(0.06)}
+              className="client-panel rounded-[1.9rem] p-4"
+            >
+              <div className="flex items-end justify-between gap-3">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                    Chiffres clés
+                  </p>
+                  <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                    Lecture rapide
+                  </h2>
+                </div>
+                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                  {totalQuotes} devis
+                </span>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <CompactMetricCard
+                  label="CA validé"
+                  value={formatCurrency(acceptedRevenueHT)}
+                  detail={`${acceptedQuotesCount} acceptés`}
+                  tone="emerald"
+                  icon={TrendingUp}
+                />
+                <CompactMetricCard
+                  label="Pipeline"
+                  value={formatCurrency(pipelineRevenueHT)}
+                  detail={`${pendingQuotesCount} en attente`}
+                  tone="amber"
+                  icon={Clock3}
+                />
+                <CompactMetricCard
+                  label="Relances"
+                  value={String(devisARelancer.length)}
+                  detail="À surveiller"
+                  tone="rose"
+                  icon={Bell}
+                />
+                <CompactMetricCard
+                  label="Ticket moyen"
+                  value={formatCurrency(averageTicket)}
+                  detail={`${conversionRate}% conversion`}
+                  tone="violet"
+                  icon={LineChart}
+                />
+              </div>
+            </motion.section>
+
+            {setupIsRequired && selectedTradeDefinition ? (
+              <MobileDisclosureSection
+                title="Starter métier"
+                description="Préparez votre activité une fois, puis revenez au chantier."
+                badge={`${starterCatalogCount} en base`}
+                defaultOpen
+              >
+                <div className="space-y-4">
+                  <div className="grid gap-3">
+                    {TRADE_OPTIONS.map((option) => (
+                      <TradeOptionCard
+                        key={option.key}
+                        option={option}
+                        active={selectedTrade === option.key}
+                        onSelect={setSelectedTrade}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">
+                      {selectedTradeDefinition.label} prêt à démarrer
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {selectedTradeDefinition.pitch} {selectedStarterCount} prestations starter seront injectées dans votre catalogue.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <button
+                      type="button"
+                      onClick={handleBootstrapTrade}
+                      disabled={isBootstrappingTrade}
+                      className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+                    >
+                      {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
+                    </button>
+                    <Link
+                      href="/parametres"
+                      className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      Finaliser mes paramètres
+                    </Link>
+                  </div>
+                </div>
+              </MobileDisclosureSection>
+            ) : null}
+
+            <MobileDisclosureSection
+              title="Pilotage semaine"
+              description="Objectif, progression et tendance dans un seul bloc."
+              badge={`${objectifProgress.toFixed(0)}%`}
+            >
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Cap restant</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
+                  </div>
+                  <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Total TTC</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
+                  </div>
+                  <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Objectif</p>
+                    <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
+                  </div>
+                </div>
+
+                <div className="overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+                  <div
+                    className="h-3 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
+                    style={{ width: `${objectifProgress}%` }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleUpdateObjectif}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                >
+                  <Pencil size={14} />
+                  Ajuster l&apos;objectif
+                </button>
+
+                <div className="h-56 overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
+                  {loading ? (
+                    <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
+                      Chargement du graphique…
+                    </div>
+                  ) : (
+                    <DashboardChart monthlyData={monthlyData} />
+                  )}
+                </div>
+              </div>
+            </MobileDisclosureSection>
+
+            <MobileDisclosureSection
+              title="Relances"
+              description="Les dossiers qui demandent un rappel."
+              badge={devisARelancer.length}
+            >
+              {devisARelancer.length === 0 ? (
+                <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Aucun devis âgé de plus de 7 jours n’attend une relance pour le moment.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {devisARelancer.slice(0, 3).map((item) => (
+                    <Link href={`/devis/${item.numero}`} key={item.numero}>
+                      <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 dark:border-rose-400/12 dark:bg-rose-500/8">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
+                        <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
+                          {item.numero} · {formatDateLabel(item.date)}
+                        </p>
+                        <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                          {formatCurrency(item.totalTTC || 0)} • en attente depuis plus de 7 jours.
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </MobileDisclosureSection>
+
+            <MobileDisclosureSection
+              title="Derniers devis"
+              description="Vos affaires récentes, sans surcharge."
+              badge={devisRecents.length}
+            >
+              {devisRecents.length === 0 ? (
+                <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun devis récent</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Créez votre premier devis pour alimenter le cockpit.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {devisRecents.slice(0, 3).map((item) => (
+                    <Link href={`/devis/${item.numero}`} key={item.numero}>
+                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                              {item.nomClient}
+                            </p>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                              {item.numero} · {formatDateLabel(item.date)}
+                            </p>
+                          </div>
+                          <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
+                            {item.statut}
+                          </span>
+                        </div>
+                        <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">
+                          {formatCurrency(item.totalTTC || 0)}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </MobileDisclosureSection>
+
+            <MobileDisclosureSection
+              title="Modules de travail"
+              description="Le reste de la boîte à outils, rangé plus bas."
+              badge={`${quickLinks.length} accès`}
+            >
+              <div className="grid grid-cols-2 gap-3">
+                {quickLinks.map((item) => (
+                  <QuickLinkCard key={item.href} item={item} />
+                ))}
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                <ClientSupportButton />
+                {!isPro ? (
+                  <Link
+                    href="/abonnement"
+                    className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                  >
+                    <Sparkles size={16} />
+                    Passer en PRO
+                  </Link>
+                ) : null}
+                {canAccessAdminDashboard ? (
+                  <Link
+                    href="/admin"
+                    className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                  >
+                    <ShieldCheck size={16} />
+                    Ouvrir le cockpit admin
+                  </Link>
+                ) : null}
+              </div>
+            </MobileDisclosureSection>
+          </div>
+
           <motion.section
             {...sectionMotion(0)}
-            className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.72fr)]"
+            className="hidden items-start gap-4 md:grid xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.72fr)]"
           >
             <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
@@ -919,7 +1307,7 @@ export default function DashboardPage() {
 
           <motion.section
             {...sectionMotion(0.08)}
-            className="client-panel rounded-[2.15rem] p-5 sm:p-6"
+            className="hidden client-panel rounded-[2.15rem] p-5 md:block sm:p-6"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -970,7 +1358,7 @@ export default function DashboardPage() {
 
           <motion.section
             {...sectionMotion(0.16)}
-            className="space-y-4"
+            className="hidden space-y-4 md:block"
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>

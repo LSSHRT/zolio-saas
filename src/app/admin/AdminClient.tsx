@@ -916,6 +916,8 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   }
 
   const currentSectionMeta = sections.find((section) => section.id === activeSection);
+  const proUsersCount = users.filter((user) => user.isPro).length;
+  const healthySystemsCount = systemStatuses.filter((status) => status.status === "healthy").length;
 
   function renderQuickAction() {
     if (activeSection === "utilisateurs") {
@@ -952,10 +954,120 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     return null;
   }
 
+  function renderMobileSectionLead() {
+    let tiles: Array<{ label: string; value: string; detail: string }> = [];
+
+    if (activeSection === "pilotage") {
+      tiles = [
+        {
+          label: "Alertes",
+          value: String(attentionCount),
+          detail: "à traiter",
+        },
+        {
+          label: "Système",
+          value: `${healthySystemsCount}/${systemStatuses.length}`,
+          detail: "briques stables",
+        },
+      ];
+    } else if (activeSection === "utilisateurs") {
+      tiles = [
+        {
+          label: "Base",
+          value: String(users.length),
+          detail: "comptes",
+        },
+        {
+          label: "PRO",
+          value: String(proUsersCount),
+          detail: "actifs",
+        },
+      ];
+    } else if (activeSection === "revenus") {
+      tiles = [
+        {
+          label: "MRR",
+          value: `${data.revenue.mrr} €`,
+          detail: "estimé",
+        },
+        {
+          label: "Conv.",
+          value: `${data.revenue.conversionRate}%`,
+          detail: "globale",
+        },
+      ];
+    } else if (activeSection === "acquisition") {
+      tiles = [
+        {
+          label: "Robot",
+          value: !isCronEnabled ? "OFF" : data.environment.canAutoProspectSend ? "LIVE" : "QUEUE",
+          detail: "mode actif",
+        },
+        {
+          label: "Leads",
+          value: String(queuedCount),
+          detail: "en attente",
+        },
+      ];
+    } else if (activeSection === "systeme") {
+      tiles = [
+        {
+          label: "Briques",
+          value: `${healthySystemsCount}/${systemStatuses.length}`,
+          detail: "au vert",
+        },
+        {
+          label: "Maintenance",
+          value: maintenanceEnabled ? "ON" : "OFF",
+          detail: "globale",
+        },
+      ];
+    }
+
+    const quickAction = renderQuickAction();
+
+    return (
+      <section className="admin-panel-strong relative overflow-hidden rounded-[30px] p-5 lg:hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.18),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
+        <div className="relative">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">Section active</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                {currentSectionMeta?.label}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                {heroStatus.description}
+              </p>
+            </div>
+            <span className={`admin-chip ${heroStatus.tone === "critical" ? "bg-red-500/12 text-red-100 ring-red-300/18" : heroStatus.tone === "warning" ? "bg-amber-400/12 text-amber-100 ring-amber-300/18" : "bg-emerald-500/12 text-emerald-100 ring-emerald-300/18"}`}>
+              {heroStatus.label}
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            {tiles.map((tile) => (
+              <div
+                key={tile.label}
+                className="rounded-[22px] border border-white/8 bg-white/5 px-4 py-4"
+              >
+                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500">{tile.label}</p>
+                <p className="mt-2 text-xl font-semibold text-white">{tile.value}</p>
+                <p className="mt-1 text-sm text-slate-400">{tile.detail}</p>
+              </div>
+            ))}
+          </div>
+
+          {quickAction ? <div className="mt-5">{quickAction}</div> : null}
+        </div>
+      </section>
+    );
+  }
+
   function renderPilotage() {
     return (
       <div className="space-y-6">
-        <section className="admin-panel-strong relative overflow-hidden rounded-[34px] p-6 sm:p-8">
+        <section className="admin-panel-strong relative hidden overflow-hidden rounded-[34px] p-6 sm:p-8 lg:block">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.22),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(244,114,182,0.16),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
           <div className="relative grid gap-8 xl:grid-cols-[1.35fr_0.95fr]">
             <div>
@@ -1836,8 +1948,20 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-30 border-b border-white/8 bg-slate-950/55 backdrop-blur-xl">
-            <div className="px-4 py-4 sm:px-6 lg:px-8">
-              <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+            <div className="px-4 py-3 sm:px-6 lg:px-8 lg:py-4">
+              <div className="flex items-center justify-between gap-3 lg:hidden">
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.32em] text-slate-500">Administration</p>
+                  <h1 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+                    {currentSectionMeta?.label}
+                  </h1>
+                </div>
+                <span className={`admin-chip ${heroStatus.tone === "critical" ? "bg-red-500/12 text-red-100 ring-red-300/18" : heroStatus.tone === "warning" ? "bg-amber-400/12 text-amber-100 ring-amber-300/18" : "bg-emerald-500/12 text-emerald-100 ring-emerald-300/18"}`}>
+                  {heroStatus.label}
+                </span>
+              </div>
+
+              <div className="hidden flex-col gap-4 lg:flex xl:flex-row xl:items-end xl:justify-between">
                 <div className="min-w-0">
                   <p className="text-[11px] uppercase tracking-[0.34em] text-slate-500">Administration</p>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
@@ -1859,7 +1983,9 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             </div>
           </header>
 
-          <main className="px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+          <main className="px-4 py-4 sm:px-6 lg:px-8 lg:py-8">
+            {renderMobileSectionLead()}
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeSection}
