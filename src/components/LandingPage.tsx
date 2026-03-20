@@ -1,12 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   motion,
-  useScroll,
-  useTransform,
   AnimatePresence,
-  useMotionValue,
-  useSpring,
-  type MotionValue,
+  useReducedMotion,
 } from "framer-motion";
 import Link from "next/link";
 import {
@@ -41,19 +37,11 @@ import {
 import Image from "next/image";
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
-// Typographie Cinétique
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 500], [0, 50]);
-  const stretch = useTransform(scrollY, [0, 300], [1, 1.2]);
-  
   return (
-    <motion.h1
-      style={{ y, scaleX: stretch }}
-      className={`font-extrabold tracking-tighter ${className}`}
-    >
+    <h1 className={`font-extrabold tracking-tighter ${className}`}>
       {text}
-    </motion.h1>
+    </h1>
   );
 };
 
@@ -126,50 +114,12 @@ const LandingStage = ({
   </section>
 );
 
-// Spotlight Card Bento Box
 const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => {
-  const divRef = useRef<HTMLDivElement>(null);
-  const [isFocused, setIsFocused] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [opacity, setOpacity] = useState(0);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!divRef.current || isFocused) return;
-    const div = divRef.current;
-    const rect = div.getBoundingClientRect();
-    setPosition({ x: e.clientX - rect.left, y: e.clientY - rect.top });
-  };
-
-  const handleFocus = () => {
-    setIsFocused(true);
-    setOpacity(1);
-  };
-
-  const handleBlur = () => {
-    setIsFocused(false);
-    setOpacity(0);
-  };
-
-  const handleMouseEnter = () => setOpacity(1);
-  const handleMouseLeave = () => setOpacity(0);
-
   return (
     <div
-      ref={divRef}
-      onMouseMove={handleMouseMove}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`relative overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 p-8 shadow-2xl transition-transform duration-500 hover:scale-[1.02] ${className}`}
+      className={`landing-spotlight-card relative overflow-hidden rounded-3xl bg-neutral-900 border border-neutral-800 p-8 shadow-2xl transition-transform duration-500 hover:scale-[1.01] ${className}`}
     >
-      <div
-        className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
-        style={{
-          opacity,
-          background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, rgba(139, 92, 246, 0.15), transparent 40%)`,
-        }}
-      />
+      <div className="landing-spotlight-glow pointer-events-none absolute inset-0" />
       {children}
     </div>
   );
@@ -177,6 +127,8 @@ const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode
 
 // Section de Défilement Horizontal (Responsive & Native)
 const HorizontalScrollCarousel = () => {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <LandingStage className="relative overflow-hidden py-24" tone="neutral">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
@@ -249,12 +201,16 @@ const HorizontalScrollCarousel = () => {
                 <div className="h-24 border-2 border-dashed border-neutral-600 rounded-xl flex items-center justify-center relative bg-white/[0.02]">
                    <span className="absolute text-neutral-600 text-[10px] font-medium uppercase tracking-widest">Signer ici</span>
                    <svg viewBox="0 0 100 40" className="w-full h-full opacity-80 z-10 drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]">
-                      <motion.path 
-                         initial={{ pathLength: 0 }}
-                         animate={{ pathLength: 1 }}
-                         transition={{ duration: 2, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
-                         d="M 10 25 C 20 5, 30 35, 40 15 C 50 -5, 60 40, 70 20 C 80 0, 90 30, 95 25" 
-                         fill="transparent" stroke="#d946ef" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" 
+                      <motion.path
+                         initial={{ pathLength: 1 }}
+                         animate={prefersReducedMotion ? undefined : { pathLength: [0.35, 1, 0.35] }}
+                         transition={prefersReducedMotion ? undefined : { duration: 2.6, repeat: Infinity, repeatType: "loop", ease: "easeInOut" }}
+                         d="M 10 25 C 20 5, 30 35, 40 15 C 50 -5, 60 40, 70 20 C 80 0, 90 30, 95 25"
+                         fill="transparent"
+                         stroke="#d946ef"
+                         strokeWidth="3"
+                         strokeLinecap="round"
+                         strokeLinejoin="round"
                       />
                    </svg>
                 </div>
@@ -369,46 +325,22 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
   );
 };
 
-const LandingCinematicBackdrop = ({
-  pointerX,
-  pointerY,
-  scrollYProgress,
-}: {
-  pointerX: MotionValue<number>;
-  pointerY: MotionValue<number>;
-  scrollYProgress: MotionValue<number>;
-}) => {
-  const hazeSlowX = useTransform(pointerX, [-1, 1], [-56, 56]);
-  const hazeSlowY = useTransform(pointerY, [-1, 1], [-34, 34]);
-  const hazeFastX = useTransform(pointerX, [-1, 1], [92, -92]);
-  const hazeFastY = useTransform(pointerY, [-1, 1], [70, -70]);
-  const beamLift = useTransform(scrollYProgress, [0, 1], [0, -220]);
-  const orbitDrift = useTransform(scrollYProgress, [0, 1], [0, 130]);
-  const orbitRotate = useTransform(scrollYProgress, [0, 1], [0, 42]);
-  const orbitRotateReverse = useTransform(scrollYProgress, [0, 1], [0, -34]);
-  const gridLift = useTransform(scrollYProgress, [0, 1], [0, -110]);
-
+const LandingCinematicBackdrop = () => {
   return (
     <div className="landing-cinematic-bg fixed inset-0 z-[-5] overflow-hidden pointer-events-none" aria-hidden="true">
-      <motion.div className="landing-spectral-haze landing-spectral-haze-a" style={{ x: hazeSlowX, y: hazeSlowY }} />
-      <motion.div className="landing-spectral-haze landing-spectral-haze-b" style={{ x: hazeFastX, y: hazeFastY }} />
-      <motion.div className="landing-spectral-haze landing-spectral-haze-c" style={{ x: hazeSlowX, y: beamLift }} />
+      <div className="landing-spectral-haze landing-spectral-haze-a" />
+      <div className="landing-spectral-haze landing-spectral-haze-b" />
+      <div className="landing-spectral-haze landing-spectral-haze-c" />
 
-      <motion.div className="landing-light-beam landing-light-beam-left" style={{ x: hazeFastX, y: beamLift }} />
-      <motion.div className="landing-light-beam landing-light-beam-right" style={{ x: hazeSlowX, y: beamLift }} />
+      <div className="landing-light-beam landing-light-beam-left" />
+      <div className="landing-light-beam landing-light-beam-right" />
 
-      <motion.div className="landing-orbit-ring" style={{ x: hazeSlowX, y: orbitDrift, rotate: orbitRotate }} />
-      <motion.div
-        className="landing-orbit-ring landing-orbit-ring-secondary"
-        style={{ x: hazeFastX, y: hazeSlowY, rotate: orbitRotateReverse }}
-      />
+      <div className="landing-orbit-ring" />
+      <div className="landing-orbit-ring landing-orbit-ring-secondary" />
 
-      <motion.div className="landing-lens-grid" style={{ x: hazeSlowX, y: gridLift }} />
+      <div className="landing-lens-grid" />
 
-      <motion.div
-        className="landing-float-token hidden lg:block"
-        style={{ x: hazeFastX, y: hazeSlowY }}
-      >
+      <div className="landing-float-token hidden lg:block">
         <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/70">Signal terrain</p>
         <p className="mt-3 text-lg font-semibold text-white">Cockpit chantier en direct</p>
         <div className="mt-4 grid grid-cols-3 gap-2">
@@ -419,56 +351,34 @@ const LandingCinematicBackdrop = ({
             </div>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="landing-float-token landing-float-token-secondary hidden xl:block"
-        style={{ x: hazeSlowX, y: hazeFastY }}
-      >
+      <div className="landing-float-token landing-float-token-secondary hidden xl:block">
         <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-orange-100/70">Mise en scène</p>
         <div className="mt-4 space-y-2">
           <div className="landing-token-line w-[88%]" />
           <div className="landing-token-line landing-token-line-hot w-[72%]" />
           <div className="landing-token-line w-[94%]" />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
-const HeroSceneAccent = ({
-  pointerX,
-  pointerY,
-  scrollYProgress,
-}: {
-  pointerX: MotionValue<number>;
-  pointerY: MotionValue<number>;
-  scrollYProgress: MotionValue<number>;
-}) => {
-  const orbitX = useTransform(pointerX, [-1, 1], [-34, 34]);
-  const orbitY = useTransform(pointerY, [-1, 1], [-20, 20]);
-  const floorY = useTransform(scrollYProgress, [0, 1], [0, -90]);
-  const orbitRotate = useTransform(scrollYProgress, [0, 1], [0, 28]);
-  const orbitRotateReverse = useTransform(scrollYProgress, [0, 1], [0, -22]);
-  const cardX = useTransform(pointerX, [-1, 1], [18, -18]);
-  const cardY = useTransform(pointerY, [-1, 1], [12, -12]);
-
+const HeroSceneAccent = () => {
   return (
     <div className="pointer-events-none absolute inset-[-12%] -z-10 hidden xl:block" aria-hidden="true">
-      <motion.div className="landing-hero-orbit landing-hero-orbit-a" style={{ x: orbitX, y: orbitY, rotate: orbitRotate }} />
-      <motion.div
-        className="landing-hero-orbit landing-hero-orbit-b"
-        style={{ x: cardX, y: cardY, rotate: orbitRotateReverse }}
-      />
-      <motion.div className="landing-hero-floor" style={{ y: floorY }} />
+      <div className="landing-hero-orbit landing-hero-orbit-a" />
+      <div className="landing-hero-orbit landing-hero-orbit-b" />
+      <div className="landing-hero-floor" />
 
-      <motion.div className="landing-hero-data-card landing-hero-data-card-a" style={{ x: cardX, y: orbitY }}>
+      <div className="landing-hero-data-card landing-hero-data-card-a">
         <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-violet-100/60">Temps gagné</p>
         <p className="mt-3 text-3xl font-semibold tracking-tight text-white">-4h</p>
         <p className="mt-1 text-sm text-neutral-400">administratif / semaine</p>
-      </motion.div>
+      </div>
 
-      <motion.div className="landing-hero-data-card landing-hero-data-card-b" style={{ x: orbitX, y: cardY }}>
+      <div className="landing-hero-data-card landing-hero-data-card-b">
         <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/60">Flux signature</p>
         <div className="mt-3 flex items-end gap-3">
           <p className="text-2xl font-semibold tracking-tight text-white">Instantané</p>
@@ -480,18 +390,14 @@ const HeroSceneAccent = ({
           <div className="landing-token-line w-16" />
           <div className="landing-token-line landing-token-line-hot w-10" />
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const rawPointerX = useMotionValue(0);
-  const rawPointerY = useMotionValue(0);
-  const pointerX = useSpring(rawPointerX, { stiffness: 58, damping: 18, mass: 0.6 });
-  const pointerY = useSpring(rawPointerY, { stiffness: 58, damping: 18, mass: 0.6 });
-  const { scrollYProgress } = useScroll();
+  const prefersReducedMotion = useReducedMotion();
   const supportHref = getSupportHref({
     subject: "Démo accompagnée Zolio",
     message:
@@ -499,27 +405,9 @@ export default function LandingPage() {
   });
   const supportIsExternal = isExternalSupportHref(supportHref);
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "touch") return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const normalizedX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-    const normalizedY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-    rawPointerX.set(normalizedX);
-    rawPointerY.set(normalizedY);
-  };
-
-  const handlePointerLeave = () => {
-    rawPointerX.set(0);
-    rawPointerY.set(0);
-  };
-
   return (
-    <div
-      className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative"
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-    >
-      <LandingCinematicBackdrop pointerX={pointerX} pointerY={pointerY} scrollYProgress={scrollYProgress} />
+    <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
+      <LandingCinematicBackdrop />
       <div className="fixed inset-0 z-[-4] bg-[radial-gradient(ellipse_76%_76%_at_50%_-12%,rgba(139,92,246,0.26),rgba(0,0,0,0))]" />
       <div className="landing-grid-overlay fixed inset-0 z-[-3] pointer-events-none" />
       <div
@@ -530,9 +418,9 @@ export default function LandingPage() {
         }}
       />
       <div className="fixed inset-0 z-[-1] pointer-events-none overflow-hidden mix-blend-screen">
-        <div className="absolute left-[-12%] top-[-10%] h-[46vh] w-[48vw] rounded-full bg-violet-600/35 blur-[130px] animate-landing-drift" />
-        <div className="absolute right-[-12%] top-[12%] h-[54vh] w-[42vw] rounded-full bg-fuchsia-600/24 blur-[140px] animate-pulse" style={{ animationDuration: "8s" }} />
-        <div className="absolute bottom-[-18%] left-[18%] h-[36vh] w-[48vw] rounded-full bg-orange-500/16 blur-[150px] animate-pulse" style={{ animationDuration: "10s", animationDelay: "1.5s" }} />
+        <div className={`absolute left-[-12%] top-[-10%] h-[42vh] w-[42vw] rounded-full bg-violet-600/28 blur-[110px] ${prefersReducedMotion ? "" : "animate-landing-drift"}`} />
+        <div className="absolute right-[-12%] top-[12%] h-[46vh] w-[38vw] rounded-full bg-fuchsia-600/18 blur-[112px]" />
+        <div className="absolute bottom-[-18%] left-[18%] h-[32vh] w-[42vw] rounded-full bg-orange-500/12 blur-[120px]" />
       </div>
 
       <div className="relative z-10">
@@ -704,7 +592,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.85, delay: 0.1, ease: "easeOut" }}
                 className="relative"
               >
-                <HeroSceneAccent pointerX={pointerX} pointerY={pointerY} scrollYProgress={scrollYProgress} />
+                <HeroSceneAccent />
                 <div className="landing-panel-strong relative overflow-hidden rounded-[36px] p-4 sm:p-6">
                   <div className="absolute right-[-15%] top-[-10%] h-40 w-40 rounded-full bg-violet-500/20 blur-[90px]" />
                   <div className="absolute bottom-[-18%] left-[-8%] h-32 w-32 rounded-full bg-orange-500/16 blur-[80px]" />
@@ -758,7 +646,7 @@ export default function LandingPage() {
                       {heroSignals.map((signal, index) => (
                         <div
                           key={signal.label}
-                          className={`landing-panel rounded-[28px] p-5 ${index === 0 ? "animate-landing-float" : ""}`}
+                          className={`landing-panel rounded-[28px] p-5 ${index === 0 && !prefersReducedMotion ? "animate-landing-float" : ""}`}
                         >
                           <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">{signal.label}</p>
                           <p className="mt-3 text-2xl font-semibold text-white">{signal.value}</p>
@@ -815,7 +703,7 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-3xl shadow-[0_0_100px_rgba(139,92,246,0.15)] overflow-hidden p-2 sm:p-4">
+            <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_100px_rgba(139,92,246,0.15)] overflow-hidden p-2 sm:p-4">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 mb-4 bg-white/5 rounded-xl">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/80"></div>

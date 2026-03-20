@@ -454,8 +454,8 @@
     box-shadow:
       0 34px 80px -42px rgba(0, 0, 0, 0.82),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
   .landing-panel-strong {
@@ -469,8 +469,8 @@
     box-shadow:
       0 42px 90px -44px rgba(0, 0, 0, 0.92),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(26px);
-    -webkit-backdrop-filter: blur(26px);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
   }
 
   .landing-chip {
@@ -587,14 +587,17 @@
 
   .landing-cinematic-bg {
     isolation: isolate;
+    transform: translateX(-50%) translateZ(0);
   }
 
   .landing-spectral-haze {
     position: absolute;
     border-radius: 9999px;
     mix-blend-mode: screen;
-    filter: blur(120px);
-    opacity: 0.55;
+    filter: blur(96px);
+    opacity: 0.42;
+    transform: translateZ(0);
+    will-change: transform;
   }
 
   .landing-spectral-haze-a {
@@ -624,10 +627,11 @@
   .landing-light-beam {
     position: absolute;
     top: -18vh;
-    height: 140vh;
-    width: 26vw;
-    opacity: 0.16;
-    filter: blur(16px);
+    height: 120vh;
+    width: 22vw;
+    opacity: 0.1;
+    filter: blur(10px);
+    transform: translateZ(0);
   }
 
   .landing-light-beam-left {
@@ -655,9 +659,10 @@
       radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 54%),
       radial-gradient(circle at center, rgba(94, 234, 212, 0.05), transparent 66%);
     box-shadow:
-      0 0 120px rgba(94, 234, 212, 0.08),
-      inset 0 0 60px rgba(255, 255, 255, 0.02);
-    opacity: 0.5;
+      0 0 90px rgba(94, 234, 212, 0.06),
+      inset 0 0 40px rgba(255, 255, 255, 0.02);
+    opacity: 0.34;
+    transform: translateZ(0);
   }
 
   .landing-orbit-ring::before,
@@ -688,13 +693,13 @@
     bottom: -32vh;
     height: 72vh;
     width: 140vw;
-    transform: translateX(-50%) perspective(1500px) rotateX(78deg);
+    transform: translateX(-50%) perspective(1500px) rotateX(78deg) translateZ(0);
     transform-style: preserve-3d;
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 80px 80px;
-    opacity: 0.12;
+    opacity: 0.08;
     mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.92), transparent 74%);
   }
 
@@ -709,11 +714,12 @@
       linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
       rgba(7, 10, 20, 0.72);
     box-shadow:
-      0 28px 80px -40px rgba(0, 0, 0, 0.82),
+      0 22px 60px -36px rgba(0, 0, 0, 0.72),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     padding: 1rem;
+    transform: translateZ(0);
   }
 
   .landing-float-token-secondary {
@@ -743,6 +749,7 @@
     box-shadow:
       inset 0 0 40px rgba(255, 255, 255, 0.02),
       0 0 80px rgba(124, 58, 237, 0.12);
+    transform: translateZ(0);
   }
 
   .landing-hero-orbit-a {
@@ -763,7 +770,7 @@
     right: -8%;
     bottom: -8%;
     height: 34%;
-    transform: perspective(1200px) rotateX(78deg);
+    transform: perspective(1200px) rotateX(78deg) translateZ(0);
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
@@ -780,11 +787,12 @@
       linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
       rgba(5, 8, 18, 0.76);
     box-shadow:
-      0 24px 70px -34px rgba(0, 0, 0, 0.8),
+      0 20px 56px -34px rgba(0, 0, 0, 0.76),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
     padding: 1rem 1.1rem;
-    backdrop-filter: blur(22px);
-    -webkit-backdrop-filter: blur(22px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    transform: translateZ(0);
   }
 
   .landing-hero-data-card-a {
@@ -799,6 +807,22 @@
     width: 14.5rem;
   }
 
+  .landing-spotlight-card {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  .landing-spotlight-glow {
+    opacity: 0;
+    background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.14), transparent 54%);
+    transition: opacity 220ms ease;
+  }
+
+  .landing-spotlight-card:hover .landing-spotlight-glow,
+  .landing-spotlight-card:focus-within .landing-spotlight-glow {
+    opacity: 1;
+  }
+
   @media (max-width: 1023px) {
     .landing-light-beam,
     .landing-orbit-ring,
@@ -809,6 +833,29 @@
     .landing-lens-grid {
       width: 180vw;
       background-size: 52px 52px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .landing-shell .animate-landing-float,
+    .landing-shell .animate-landing-drift,
+    .landing-shell .animate-gradient,
+    .landing-shell .animate-gradient-x,
+    .landing-shell .animate-pulse,
+    .landing-shell .animate-pulse-slow {
+      animation: none !important;
+    }
+
+    .landing-shell .landing-spotlight-card,
+    .landing-shell .landing-spotlight-glow,
+    .landing-shell .landing-spectral-haze,
+    .landing-shell .landing-light-beam,
+    .landing-shell .landing-orbit-ring,
+    .landing-shell .landing-lens-grid,
+    .landing-shell .landing-hero-orbit,
+    .landing-shell .landing-hero-floor,
+    .landing-shell .landing-hero-data-card {
+      transition: none !important;
     }
   }
 }
