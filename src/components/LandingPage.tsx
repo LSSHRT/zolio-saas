@@ -325,38 +325,6 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
   );
 };
 
-const LandingCinematicBackdrop = () => {
-  return (
-    <div className="landing-cinematic-bg fixed inset-0 z-[-5] overflow-hidden pointer-events-none" aria-hidden="true">
-      <div className="landing-spectral-haze landing-spectral-haze-a" />
-      <div className="landing-spectral-haze landing-spectral-haze-b" />
-      <div className="landing-spectral-haze landing-spectral-haze-c" />
-
-      <div className="landing-light-beam landing-light-beam-left" />
-      <div className="landing-light-beam landing-light-beam-right" />
-
-      <div className="landing-orbit-ring" />
-      <div className="landing-orbit-ring landing-orbit-ring-secondary" />
-
-      <div className="landing-lens-grid" />
-
-      <div className="landing-float-token hidden 2xl:block">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-cyan-100/70">Signal terrain</p>
-        <p className="mt-3 text-lg font-semibold text-white">Cockpit chantier en direct</p>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          {[74, 46, 88].map((value, index) => (
-            <div key={index} className="rounded-2xl border border-white/8 bg-white/[0.04] px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-white/35">Flux</p>
-              <p className="mt-1 text-sm font-semibold text-white">{value}%</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-    </div>
-  );
-};
-
 const HeroSceneAccent = () => {
   return (
     <div className="pointer-events-none absolute inset-[-8%] -z-10 hidden 2xl:block" aria-hidden="true">
@@ -385,10 +353,6 @@ export default function LandingPage() {
 
   return (
     <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
-      <LandingCinematicBackdrop />
-      <div className="fixed inset-0 z-[-4] bg-[radial-gradient(ellipse_76%_76%_at_50%_-12%,rgba(139,92,246,0.26),rgba(0,0,0,0))]" />
-      <div className="landing-grid-overlay fixed inset-0 z-[-3] pointer-events-none" />
-
       <div className="relative z-10">
         {/* Navigation */}
         <nav className="fixed inset-x-0 top-3 z-50 transition-all duration-300 sm:top-4">
@@ -454,9 +418,13 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative overflow-hidden pb-24 pt-[8.5rem] sm:pt-[9.5rem] lg:pb-32 lg:pt-[11rem]">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_70%_58%_at_50%_0%,rgba(99,102,241,0.2),rgba(4,6,18,0))]" />
+            <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%,transparent_78%,rgba(255,255,255,0.01))]" />
             <div className={`absolute left-[-10%] top-[-4%] h-[32rem] w-[32rem] rounded-full bg-violet-600/20 blur-[90px] ${prefersReducedMotion ? "" : "animate-landing-drift"}`} />
             <div className="absolute right-[-10%] top-[10%] h-[28rem] w-[28rem] rounded-full bg-fuchsia-600/14 blur-[92px]" />
             <div className="absolute bottom-[-20%] left-[24%] h-[18rem] w-[24rem] rounded-full bg-orange-500/10 blur-[88px]" />
+            <div className="absolute inset-x-[6%] bottom-[9%] h-[34%] rounded-[999px] border border-white/6 opacity-60" />
+            <div className="absolute inset-x-[14%] bottom-[12%] h-[28%] rounded-[999px] border border-white/5 opacity-40" />
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid gap-10 xl:grid-cols-[1.04fr_0.96fr] xl:items-center">
