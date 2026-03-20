@@ -327,23 +327,14 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 
 const HeroSceneAccent = () => {
   return (
-    <div className="pointer-events-none absolute inset-[-8%] -z-10 hidden 2xl:block" aria-hidden="true">
-      <div className="landing-hero-orbit landing-hero-orbit-a" />
-      <div className="landing-hero-floor" />
-
-      <div className="landing-hero-data-card landing-hero-data-card-a">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-violet-100/60">Temps gagné</p>
-        <p className="mt-3 text-3xl font-semibold tracking-tight text-white">-4h</p>
-        <p className="mt-1 text-sm text-neutral-400">administratif / semaine</p>
-      </div>
-
+    <div className="pointer-events-none absolute inset-[-4%] -z-10 hidden 2xl:block" aria-hidden="true">
+      <div className="landing-hero-orbit landing-hero-orbit-a opacity-60" />
     </div>
   );
 };
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
   const supportHref = getSupportHref({
     subject: "Démo accompagnée Zolio",
     message:
@@ -418,13 +409,10 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative overflow-hidden pb-24 pt-[8.5rem] sm:pt-[9.5rem] lg:pb-32 lg:pt-[11rem]">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_70%_58%_at_50%_0%,rgba(99,102,241,0.2),rgba(4,6,18,0))]" />
-            <div className="absolute inset-x-0 top-0 h-full bg-[linear-gradient(180deg,rgba(255,255,255,0.02),transparent_18%,transparent_78%,rgba(255,255,255,0.01))]" />
-            <div className={`absolute left-[-10%] top-[-4%] h-[32rem] w-[32rem] rounded-full bg-violet-600/20 blur-[90px] ${prefersReducedMotion ? "" : "animate-landing-drift"}`} />
-            <div className="absolute right-[-10%] top-[10%] h-[28rem] w-[28rem] rounded-full bg-fuchsia-600/14 blur-[92px]" />
-            <div className="absolute bottom-[-20%] left-[24%] h-[18rem] w-[24rem] rounded-full bg-orange-500/10 blur-[88px]" />
-            <div className="absolute inset-x-[6%] bottom-[9%] h-[34%] rounded-[999px] border border-white/6 opacity-60" />
-            <div className="absolute inset-x-[14%] bottom-[12%] h-[28%] rounded-[999px] border border-white/5 opacity-40" />
+            <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_64%_52%_at_50%_0%,rgba(99,102,241,0.16),rgba(4,6,18,0))]" />
+            <div className="absolute left-[-8%] top-[-2%] h-[24rem] w-[24rem] rounded-full bg-violet-600/14 blur-[72px]" />
+            <div className="absolute right-[-6%] top-[12%] h-[20rem] w-[20rem] rounded-full bg-fuchsia-600/10 blur-[68px]" />
+            <div className="absolute inset-x-[10%] bottom-[11%] h-[26%] rounded-[999px] border border-white/5 opacity-35" />
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid gap-10 xl:grid-cols-[1.04fr_0.96fr] xl:items-center">
@@ -523,9 +511,6 @@ export default function LandingPage() {
               <div className="relative">
                 <HeroSceneAccent />
                 <div className="landing-panel-strong relative overflow-hidden rounded-[36px] p-4 sm:p-6">
-                  <div className="absolute right-[-10%] top-[-8%] h-32 w-32 rounded-full bg-violet-500/14 blur-[70px]" />
-                  <div className="absolute bottom-[-12%] left-[-4%] h-24 w-24 rounded-full bg-orange-500/12 blur-[62px]" />
-
                   <div className="relative flex items-center justify-between border-b border-white/8 pb-4">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.3em] text-white/45">Aperçu produit</p>
@@ -602,29 +587,7 @@ export default function LandingPage() {
               </p>
             </div>
             
-            {/* Demo Floating Badges */}
-            <div className="absolute -left-4 sm:-left-12 top-1/4 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
-              <div className="bg-[#05050A]/80 backdrop-blur-xl border border-violet-500/30 p-3 rounded-xl shadow-2xl flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-violet-500/30 flex items-center justify-center text-violet-300 font-bold animate-pulse">1</div>
-                <p className="text-sm text-white font-medium">Navigation simplifiée<br/><span className="text-neutral-400 text-xs">Tout à portée de main</span></p>
-              </div>
-            </div>
-
-            <div className="absolute right-10 sm:-right-8 top-1/3 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
-              <div className="bg-[#05050A]/80 backdrop-blur-xl border border-orange-500/30 p-3 rounded-xl shadow-2xl flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-orange-500/30 flex items-center justify-center text-orange-300 font-bold animate-pulse">2</div>
-                <p className="text-sm text-white font-medium">Statistiques directes<br/><span className="text-neutral-400 text-xs">Suivi en temps réel</span></p>
-              </div>
-            </div>
-
-            <div className="absolute left-1/3 -bottom-6 z-30 hidden md:block opacity-90 hover:opacity-100 transition-all duration-500 hover:-translate-y-2">
-              <div className="bg-[#05050A]/80 backdrop-blur-xl border border-fuchsia-500/30 p-3 rounded-xl shadow-2xl flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-fuchsia-500/30 flex items-center justify-center text-fuchsia-300 font-bold animate-pulse">3</div>
-                <p className="text-sm text-white font-medium">Création en 1 clic<br/><span className="text-neutral-400 text-xs">Devis ou Facture</span></p>
-              </div>
-            </div>
-
-            <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-[0_0_100px_rgba(139,92,246,0.15)] overflow-hidden p-2 sm:p-4">
+            <div className="relative rounded-2xl sm:rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_0_72px_rgba(139,92,246,0.1)] overflow-hidden p-2 sm:p-4">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 mb-4 bg-white/5 rounded-xl">
                 <div className="flex gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
