@@ -635,13 +635,13 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-[10px] text-slate-400">Quantité</label>
-                    <input type="number" min="0.1" step="0.1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
-                      className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                    <input type="number" min="0.1" step="any" inputMode="decimal" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
+                      className="w-full py-2 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
                   </div>
                   <div>
                     <label className="text-[10px] text-slate-400">Prix/{l.unite}</label>
-                    <input type="number" min="0" step="0.01" value={l.prixUnitaire} onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
-                      className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                    <input type="number" min="0" step="any" inputMode="decimal" value={l.prixUnitaire} onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
+                      className="w-full py-2 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
                   </div>
                   <div className="rounded-lg border border-slate-200/80 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900">
                     <label className="text-[10px] text-slate-400">Total</label>
@@ -694,13 +694,13 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </label>
           <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
             Remise globale (%)
-            <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
-              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+            <input type="number" placeholder="0" step="any" inputMode="decimal" value={remise} onChange={(e) => setRemise(e.target.value)}
+              className="mt-3 w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
           </label>
           <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
             Acompte à la signature (%)
-            <input type="number" placeholder="0" value={acompte} onChange={(e) => setAcompte(e.target.value)}
-              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+            <input type="number" placeholder="0" step="any" inputMode="decimal" value={acompte} onChange={(e) => setAcompte(e.target.value)}
+              className="mt-3 w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
           </label>
         </div>
 

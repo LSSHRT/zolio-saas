@@ -401,6 +401,8 @@ export function LineEditor({
                         <input
                           type="number"
                           min="1"
+                          step="any"
+                          inputMode="decimal"
                           value={ligne.quantite}
                           onChange={(event) => onUpdateQty(index, Number.parseFloat(event.target.value) || 1)}
                           disabled={!canEdit}
@@ -409,6 +411,8 @@ export function LineEditor({
                         <input
                           type="number"
                           min="0"
+                          step="any"
+                          inputMode="decimal"
                           value={ligne.prixUnitaire}
                           onChange={(event) => onUpdatePrix(index, Number.parseFloat(event.target.value) || 0)}
                           disabled={!canEdit}
@@ -486,6 +490,8 @@ export function LineEditor({
                           <input
                             type="number"
                             min="1"
+                            step="any"
+                            inputMode="decimal"
                             value={ligne.quantite}
                             onChange={(event) => onUpdateQty(index, Number.parseFloat(event.target.value) || 1)}
                             disabled={!canEdit}
@@ -498,6 +504,8 @@ export function LineEditor({
                           <input
                             type="number"
                             min="0"
+                            step="any"
+                            inputMode="decimal"
                             value={ligne.prixUnitaire}
                             onChange={(event) => onUpdatePrix(index, Number.parseFloat(event.target.value) || 0)}
                             disabled={!canEdit}

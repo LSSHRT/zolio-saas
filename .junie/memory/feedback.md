@@ -670,3 +670,19 @@
     "NEW INSTRUCTION": "WHEN drafting marketing texts or emails THEN avoid 'gratuit' wording; emphasize trial and Pro value proposition"
 }
 
+[2026-03-17 11:50] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "self-referral exploit",
+    "EXPECTATION": "Users should not be able to use their own referral code to earn rewards.",
+    "NEW INSTRUCTION": "WHEN referral code matches current user's code or account THEN block referral and show clear error"
+}
+
+[2026-03-21 15:18] - Updated by Junie
+{
+    "TYPE": "negative",
+    "CATEGORY": "mobile responsiveness",
+    "EXPECTATION": "The client dashboard should display correctly and function fully on mobile without overflow or broken sections.",
+    "NEW INSTRUCTION": "WHEN user reports mobile dashboard issues THEN request page URL, device+OS, browser, viewport, and screenshots"
+}
+

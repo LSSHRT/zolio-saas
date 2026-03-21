@@ -389,16 +389,16 @@ export default function CataloguePage() {
                 <option value="forfait">Forfait</option>
                 <option value="unité">Unité</option>
               </select>
-              <input required type="number" step="0.01" placeholder="Prix HT €" value={form.prix}
+              <input required type="number" step="any" inputMode="decimal" placeholder="Prix HT €" value={form.prix}
                 onChange={(e) => setForm({ ...form, prix: e.target.value })}
-                className="flex-1 px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
+                className="flex-1 px-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             </div>
-            <input type="number" step="0.01" placeholder="Coût matière estimé (optionnel)" value={form.cout}
+            <input type="number" step="any" inputMode="decimal" placeholder="Coût matière estimé (optionnel)" value={form.cout}
               onChange={(e) => setForm({ ...form, cout: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
-            <input type="number" step="0.01" placeholder="Stock initial (optionnel)" value={form.stock}
+              className="px-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
+            <input type="number" step="any" inputMode="decimal" placeholder="Stock initial (optionnel)" value={form.stock}
               onChange={(e) => setForm({ ...form, stock: e.target.value })}
-              className="px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
+              className="px-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
             <motion.button whileTap={{ scale: 0.96 }} disabled={saving} type="submit"
               className="mt-2 w-full py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-brand disabled:opacity-50">
               {saving ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Ajouter au catalogue"}

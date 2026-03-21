@@ -461,23 +461,26 @@ export default function ClientsPage() {
             <input
               required
               type="email"
+              inputMode="email"
               placeholder="Email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
               required
+              type="tel"
+              inputMode="tel"
               placeholder="Téléphone"
               value={form.telephone}
               onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
               placeholder="Adresse"
               value={form.adresse}
               onChange={(e) => setForm({ ...form, adresse: e.target.value })}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
 
             <div className="flex flex-wrap items-center gap-3 lg:col-span-2">
