@@ -372,17 +372,19 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
-      {/* Background Blobs */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none"></div>
-        <div className="w-8 h-8 border-4 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+      <div className="relative mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center overflow-hidden bg-white/80 px-6 pb-24 font-sans backdrop-blur-sm dark:bg-[#0c0a1d]/95 md:max-w-3xl lg:max-w-5xl sm:my-4 sm:min-h-[850px] sm:rounded-[3rem] sm:shadow-brand-lg">
+        <div className="pointer-events-none absolute left-0 top-0 h-[500px] w-full bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 blur-3xl dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent" />
+        <div className="relative flex flex-col items-center gap-4 text-center">
+          <div className="h-10 w-10 rounded-full border-4 border-violet-500/20 border-t-violet-500 animate-spin" />
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Chargement du devis...</p>
+        </div>
       </div>
     );
   }
 
   if (success) {
     return (
-      <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
+      <div className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center bg-white/80 px-6 pb-24 font-sans backdrop-blur-sm dark:bg-[#0c0a1d]/95 md:max-w-3xl lg:max-w-5xl sm:my-4 sm:min-h-[850px] sm:rounded-[3rem] sm:shadow-brand-lg">
         <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", damping: 12 }}
           className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
           <Check size={48} className="text-emerald-600" />

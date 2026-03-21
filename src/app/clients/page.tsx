@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
+  ClientMobileOverview,
   ClientSectionCard,
   ClientSubpageShell,
   type ClientMobileAction,
@@ -388,6 +389,39 @@ export default function ClientsPage() {
             tone="slate"
           />
         </div>
+      }
+      mobileSummary={
+        <ClientMobileOverview
+          title="CRM terrain"
+          description="Commencez par les fiches utiles, puis ouvrez le détail seulement quand il sert."
+          badge={`${filtered.length} visibles`}
+          items={[
+            {
+              label: "Clients",
+              value: String(clients.length),
+              detail: "Portefeuille total",
+              tone: "violet",
+            },
+            {
+              label: "Joignables",
+              value: String(clientsAvecEmail),
+              detail: "Avec email",
+              tone: "emerald",
+            },
+            {
+              label: "Téléphones",
+              value: String(clientsAvecTelephone),
+              detail: "Relance rapide",
+              tone: "amber",
+            },
+            {
+              label: "Complets",
+              value: String(fichesCompletes),
+              detail: "Fiches bien renseignées",
+              tone: "slate",
+            },
+          ]}
+        />
       }
     >
       <ClientSectionCard className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">

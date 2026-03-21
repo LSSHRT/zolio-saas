@@ -5,7 +5,14 @@ import useSWR from "swr";
 import { ArrowUpRight, Loader2, Plus, Save, StickyNote, Trash2, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { ClientHeroStat, ClientSectionCard, ClientSubpageShell } from "@/components/client-shell";
+import {
+  ClientHeroStat,
+  ClientMobileActionsMenu,
+  ClientMobileOverview,
+  ClientSectionCard,
+  ClientSubpageShell,
+  type ClientMobileAction,
+} from "@/components/client-shell";
 
 interface Note {
   id: string;
@@ -34,6 +41,14 @@ export default function CalepinPage() {
   );
   const recentDate = noteList[0]?.date || "Aucune activité";
   const deleteLabel = noteToDelete?.titre?.trim() || noteToDelete?.contenu?.trim().slice(0, 72) || "cette note";
+  const getMobileNoteActions = (note: Note): ClientMobileAction[] => [
+    {
+      icon: Trash2,
+      label: "Supprimer",
+      onClick: () => requestDelete(note),
+      tone: "danger",
+    },
+  ];
 
   const handleSave = async () => {
     if (!currentNote.titre && !currentNote.contenu) return;
@@ -108,6 +123,16 @@ export default function CalepinPage() {
       description="Capturez vos dimensions, vos idées et vos notes de chantier dans un espace rapide, tactile et beaucoup plus agréable à consulter partout."
       activeNav="calepin"
       eyebrow="Mémoire chantier"
+      mobilePrimaryAction={
+        <button
+          type="button"
+          onClick={() => openNote()}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
+        >
+          <Plus size={16} />
+          Note
+        </button>
+      }
       actions={
         <button
           type="button"
@@ -145,6 +170,39 @@ export default function CalepinPage() {
             tone="slate"
           />
         </div>
+      }
+      mobileSummary={
+        <ClientMobileOverview
+          title="Bloc-notes chantier"
+          description="Un aperçu court, puis les notes une par une pour rester lisible sur téléphone."
+          badge={`${noteList.length} note${noteList.length > 1 ? "s" : ""}`}
+          items={[
+            {
+              label: "Notes",
+              value: String(noteList.length),
+              detail: "Toutes enregistrées",
+              tone: "violet",
+            },
+            {
+              label: "Titrées",
+              value: String(titledNotes),
+              detail: "Plus simples à retrouver",
+              tone: "emerald",
+            },
+            {
+              label: "Dernière",
+              value: recentDate === "Aucune activité" ? "Vide" : "Récente",
+              detail: recentDate,
+              tone: "amber",
+            },
+            {
+              label: "Usage",
+              value: "Terrain",
+              detail: "Rapide et tactile",
+              tone: "slate",
+            },
+          ]}
+        />
       }
     >
       <ClientSectionCard>
@@ -215,7 +273,26 @@ export default function CalepinPage() {
                   {note.contenu}
                 </p>
 
-                <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                <div className="mt-5 flex items-center gap-2 md:hidden">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openNote(note);
+                    }}
+                    className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-violet-400/20 dark:hover:text-white"
+                  >
+                    <ArrowUpRight className="h-4 w-4" />
+                    Ouvrir
+                  </button>
+                  <ClientMobileActionsMenu
+                    buttonLabel={`Actions ${note.titre || "note"}`}
+                    items={getMobileNoteActions(note)}
+                    panelAlign="left"
+                  />
+                </div>
+
+                <div className="mt-5 hidden flex-col gap-2 md:flex md:flex-row">
                   <button
                     type="button"
                     onClick={(event) => {

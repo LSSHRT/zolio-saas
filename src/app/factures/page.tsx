@@ -16,7 +16,14 @@ import {
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
-import { ClientHeroStat, ClientSectionCard, ClientSubpageShell } from "@/components/client-shell";
+import {
+  ClientHeroStat,
+  ClientMobileActionsMenu,
+  ClientMobileOverview,
+  ClientSectionCard,
+  ClientSubpageShell,
+  type ClientMobileAction,
+} from "@/components/client-shell";
 
 interface Facture {
   numero: string;
@@ -253,12 +260,48 @@ export default function FacturesPage() {
     window.location.href = `mailto:${facture.emailClient}?subject=${subject}&body=${body}`;
   };
 
+  const getMobileInvoiceActions = (facture: Facture): ClientMobileAction[] => [
+    ...(facture.statut === "Payée"
+      ? []
+      : [
+          {
+            icon: Clock,
+            label: "Relancer le client",
+            onClick: () => handleRelance(facture),
+          },
+        ]),
+    {
+      disabled: deleting === facture.numero,
+      icon: Trash2,
+      label: deleting === facture.numero ? "Suppression..." : "Supprimer",
+      onClick: () => void handleDelete(facture.numero),
+      tone: "danger",
+    },
+  ];
+
   return (
     <ClientSubpageShell
       title="Mes factures"
       description="Suivez votre facturation, vos encaissements et vos relances dans un cockpit plus lisible, plus dense et pensé pour une vraie consultation terrain."
       activeNav="factures"
       eyebrow="Suivi de trésorerie"
+      mobilePrimaryAction={
+        <button
+          type="button"
+          onClick={handleExportCSV}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
+        >
+          <Download size={16} />
+          Export
+        </button>
+      }
+      mobileSecondaryActions={[
+        {
+          icon: FileText,
+          label: "Livre URSSAF",
+          onClick: handleExportURSSAF,
+        },
+      ]}
       actions={
         <>
           <button
@@ -306,6 +349,39 @@ export default function FacturesPage() {
             tone="slate"
           />
         </div>
+      }
+      mobileSummary={
+        <ClientMobileOverview
+          title="Suivi d’encaissement"
+          description="Commencez par ce qui doit rentrer, puis ouvrez les cartes pour agir sans surcharger l’écran."
+          badge={`${filtered.length} visibles`}
+          items={[
+            {
+              label: "Facturé",
+              value: `${totalFacture.toFixed(0)}€`,
+              detail: `${factures.length} émises`,
+              tone: "emerald",
+            },
+            {
+              label: "Encaissé",
+              value: `${totalPaid.toFixed(0)}€`,
+              detail: `${paidInvoices} payée${paidInvoices > 1 ? "s" : ""}`,
+              tone: "violet",
+            },
+            {
+              label: "En retard",
+              value: String(lateInvoices),
+              detail: "À relancer",
+              tone: "rose",
+            },
+            {
+              label: "Actions",
+              value: "2",
+              detail: "Export + URSSAF",
+              tone: "slate",
+            },
+          ]}
+        />
       }
     >
       <ClientSectionCard className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
@@ -410,102 +486,197 @@ export default function FacturesPage() {
                       transition={{ delay: Math.min(index * 0.03, 0.15) }}
                       className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex min-w-0 items-start gap-3">
-                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 font-bold text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-300">
-                            {(facture.nomClient || "").charAt(0).toUpperCase()}
+                      <div className="md:hidden">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 font-bold text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-300">
+                              {(facture.nomClient || "").charAt(0).toUpperCase()}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                {facture.nomClient}
+                              </p>
+                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                {facture.numero} · {facture.date}
+                              </p>
+                            </div>
                           </div>
 
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                              {facture.nomClient}
-                            </p>
-                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                              {facture.numero} · {facture.date}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div
-                          className={`${config.bg} ${config.color} inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold`}
-                        >
-                          <Icon size={12} />
-                          {displayStatut}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200/70 bg-white/70 p-4 text-sm dark:border-white/8 dark:bg-slate-950/20 md:grid-cols-3">
-                        <div>
-                          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                            Réf devis
-                          </p>
-                          <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
-                            {facture.devisRef || "-"}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                            Total HT
-                          </p>
-                          <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
-                            {facture.totalHT}€
-                          </p>
-                        </div>
-                        <div className="md:text-right">
-                          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                            Total TTC
-                          </p>
-                          <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
-                            {facture.totalTTC}€
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap items-center gap-2">
-                        {facture.statut === "Payée" ? (
-                          <button
-                            type="button"
-                            onClick={() => handleReviewRequest(facture)}
-                            className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
-                            title="Demander un avis Google"
+                          <div
+                            className={`${config.bg} ${config.color} inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold`}
                           >
-                            <MessageSquareQuote size={15} />
-                            Demander un avis
-                          </button>
-                        ) : (
-                          <>
+                            <Icon size={12} />
+                            {displayStatut}
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                              Réf devis
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                              {facture.devisRef || "-"}
+                            </p>
+                          </div>
+                          <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
+                            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                              Total TTC
+                            </p>
+                            <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
+                              {facture.totalTTC}€
+                            </p>
+                          </div>
+                          <div className="col-span-2 rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
+                            <div className="flex items-center justify-between gap-3">
+                              <div>
+                                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                                  Total HT
+                                </p>
+                                <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                  {facture.totalHT}€
+                                </p>
+                              </div>
+                              {late && facture.statut !== "Payée" ? (
+                                <span className="inline-flex rounded-full bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-300/30 dark:text-rose-200 dark:ring-rose-400/20">
+                                  À traiter vite
+                                </span>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex items-center gap-2">
+                          {facture.statut === "Payée" ? (
+                            <button
+                              type="button"
+                              onClick={() => handleReviewRequest(facture)}
+                              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                              title="Demander un avis Google"
+                            >
+                              <MessageSquareQuote size={15} />
+                              Demander un avis
+                            </button>
+                          ) : (
                             <button
                               type="button"
                               onClick={() => handleMarkAsPaid(facture.numero)}
                               disabled={markingPaid === facture.numero}
-                              className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
+                              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
                               title="Marquer comme payée"
                             >
                               <BadgeCheck size={15} />
-                              {markingPaid === facture.numero ? "..." : "Marquer payée"}
+                              {markingPaid === facture.numero ? "Mise à jour..." : "Marquer payée"}
                             </button>
+                          )}
+
+                          <ClientMobileActionsMenu
+                            buttonLabel={`Actions ${facture.numero}`}
+                            items={getMobileInvoiceActions(facture)}
+                            panelAlign="left"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="hidden md:block">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 font-bold text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-300">
+                              {(facture.nomClient || "").charAt(0).toUpperCase()}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                {facture.nomClient}
+                              </p>
+                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                {facture.numero} · {facture.date}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div
+                            className={`${config.bg} ${config.color} inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold`}
+                          >
+                            <Icon size={12} />
+                            {displayStatut}
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-3 rounded-2xl border border-slate-200/70 bg-white/70 p-4 text-sm dark:border-white/8 dark:bg-slate-950/20 md:grid-cols-3">
+                          <div>
+                            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                              Réf devis
+                            </p>
+                            <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
+                              {facture.devisRef || "-"}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                              Total HT
+                            </p>
+                            <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
+                              {facture.totalHT}€
+                            </p>
+                          </div>
+                          <div className="md:text-right">
+                            <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                              Total TTC
+                            </p>
+                            <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
+                              {facture.totalTTC}€
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 flex flex-wrap items-center gap-2">
+                          {facture.statut === "Payée" ? (
                             <button
                               type="button"
-                              onClick={() => handleRelance(facture)}
-                              className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
-                              title="Relancer le client"
+                              onClick={() => handleReviewRequest(facture)}
+                              className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                              title="Demander un avis Google"
                             >
-                              <Clock size={15} />
-                              Relancer
+                              <MessageSquareQuote size={15} />
+                              Demander un avis
                             </button>
-                          </>
-                        )}
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => handleMarkAsPaid(facture.numero)}
+                                disabled={markingPaid === facture.numero}
+                                className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
+                                title="Marquer comme payée"
+                              >
+                                <BadgeCheck size={15} />
+                                {markingPaid === facture.numero ? "..." : "Marquer payée"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleRelance(facture)}
+                                className="inline-flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+                                title="Relancer le client"
+                              >
+                                <Clock size={15} />
+                                Relancer
+                              </button>
+                            </>
+                          )}
 
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(facture.numero)}
-                          disabled={deleting === facture.numero}
-                          className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:opacity-50 dark:border-rose-400/20 dark:bg-transparent dark:text-rose-300"
-                          title="Supprimer la facture"
-                        >
-                          <Trash2 size={15} />
-                          {deleting === facture.numero ? "Suppression..." : "Supprimer"}
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(facture.numero)}
+                            disabled={deleting === facture.numero}
+                            className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:opacity-50 dark:border-rose-400/20 dark:bg-transparent dark:text-rose-300"
+                            title="Supprimer la facture"
+                          >
+                            <Trash2 size={15} />
+                            {deleting === facture.numero ? "Suppression..." : "Supprimer"}
+                          </button>
+                        </div>
                       </div>
                     </motion.div>
                   );

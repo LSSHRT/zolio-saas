@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -12,6 +12,7 @@ import {
   Receipt,
   StickyNote,
   Users,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
@@ -25,6 +26,12 @@ export type ClientMobileAction = {
   label: string;
   onClick?: () => void;
   tone?: "default" | "danger" | "accent";
+};
+type ClientMobileOverviewItem = {
+  detail?: string;
+  label: string;
+  tone?: ClientTone;
+  value: string;
 };
 
 const CLIENT_NAV_ITEMS: Array<{
@@ -164,7 +171,6 @@ export function ClientMobileActionsMenu({
   buttonLabel = "Plus d'actions",
   className = "",
   items,
-  panelAlign = "right",
   stretch = false,
 }: {
   buttonLabel?: string;
@@ -173,55 +179,118 @@ export function ClientMobileActionsMenu({
   panelAlign?: "left" | "right";
   stretch?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
   if (items.length === 0) {
     return null;
   }
 
   return (
-    <details className={`relative md:hidden ${stretch ? "w-full" : ""} ${className}`}>
-      <summary
+    <div className={`md:hidden ${stretch ? "w-full" : ""} ${className}`}>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen(true);
+        }}
         className={`inline-flex cursor-pointer list-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white [&::-webkit-details-marker]:hidden ${stretch ? "flex w-full" : ""}`}
         aria-label={buttonLabel}
       >
         <MoreHorizontal size={18} />
-      </summary>
+      </button>
 
-      <div
-        className={`absolute top-[calc(100%+0.6rem)] z-50 min-w-[220px] rounded-[1.35rem] border border-slate-200/80 bg-white/96 p-2 shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 ${stretch ? "left-0 right-0 min-w-0" : panelAlign === "left" ? "left-0" : "right-0"}`}
-      >
-        <div className="flex flex-col gap-2">
-          {items.map((item) => {
-            const Icon = item.icon;
-            const commonClasses = `inline-flex w-full items-center gap-3 rounded-[1rem] border px-3 py-3 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${mobileActionToneClasses(item.tone)}`;
+      {open ? (
+        <div className="fixed inset-0 z-[70] md:hidden">
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
+            aria-label="Fermer les actions"
+          />
 
-            if (item.href) {
-              return (
-                <Link key={item.label} href={item.href} className={commonClasses}>
-                  <Icon size={16} />
-                  <span className="min-w-0 flex-1">{item.label}</span>
-                </Link>
-              );
-            }
-
-            return (
+          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
+            <div className="mb-3 flex items-center justify-between gap-3 px-1">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                  Actions
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{buttonLabel}</p>
+              </div>
               <button
-                key={item.label}
                 type="button"
-                disabled={item.disabled}
-                onClick={(event) => {
-                  event.currentTarget.closest("details")?.removeAttribute("open");
-                  item.onClick?.();
-                }}
-                className={commonClasses}
+                onClick={() => setOpen(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:border-violet-400/20 dark:hover:text-white"
+                aria-label="Fermer"
               >
-                <Icon size={16} />
-                <span className="min-w-0 flex-1">{item.label}</span>
+                <X size={16} />
               </button>
-            );
-          })}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {items.map((item) => {
+                const Icon = item.icon;
+                const commonClasses = `inline-flex min-h-12 w-full items-center gap-3 rounded-[1rem] border px-3 py-3 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${mobileActionToneClasses(item.tone)}`;
+
+                if (item.href) {
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setOpen(false);
+                      }}
+                      className={commonClasses}
+                    >
+                      <Icon size={16} />
+                      <span className="min-w-0 flex-1">{item.label}</span>
+                    </Link>
+                  );
+                }
+
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    disabled={item.disabled}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setOpen(false);
+                      item.onClick?.();
+                    }}
+                    className={commonClasses}
+                  >
+                    <Icon size={16} />
+                    <span className="min-w-0 flex-1">{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
-    </details>
+      ) : null}
+    </div>
   );
 }
 
@@ -251,6 +320,58 @@ export function ClientHeroStat({
   );
 }
 
+export function ClientMobileOverview({
+  badge,
+  description,
+  items,
+  title,
+}: {
+  badge?: string;
+  description: string;
+  items: ClientMobileOverviewItem[];
+  title: string;
+}) {
+  return (
+    <section className="client-panel rounded-[1.85rem] p-4 md:hidden">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
+            Vue rapide
+          </p>
+          <h2 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
+        </div>
+        {badge ? (
+          <span className="inline-flex shrink-0 rounded-full border border-violet-300/40 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-200">
+            {badge}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        {items.map((item) => (
+          <div
+            key={`${item.label}-${item.value}`}
+            className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4"
+          >
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              {item.label}
+            </p>
+            <p className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+              {item.value}
+            </p>
+            {item.detail ? (
+              <div className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${toneClasses(item.tone ?? "slate")}`}>
+                {item.detail}
+              </div>
+            ) : null}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ClientSectionCard({
   children,
   className = "",
@@ -270,6 +391,7 @@ export function ClientSubpageShell({
   eyebrow = "Espace client",
   mobilePrimaryAction,
   mobileSecondaryActions = [],
+  mobileSummary,
   showMobileDock = true,
   summary,
   title,
@@ -282,6 +404,7 @@ export function ClientSubpageShell({
   eyebrow?: string;
   mobilePrimaryAction?: ReactNode;
   mobileSecondaryActions?: ClientMobileAction[];
+  mobileSummary?: ReactNode;
   showMobileDock?: boolean;
   summary?: ReactNode;
   title: string;
@@ -353,7 +476,8 @@ export function ClientSubpageShell({
                 </div>
               </div>
 
-              {summary}
+              {mobileSummary ? <div className="md:hidden">{mobileSummary}</div> : null}
+              {summary ? <div className={mobileSummary ? "hidden md:block" : ""}>{summary}</div> : null}
             </div>
           </section>
 

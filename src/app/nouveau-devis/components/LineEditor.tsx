@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   BriefcaseBusiness,
+  ChevronDown,
   Lock,
   Package,
   Plus,
@@ -459,97 +460,135 @@ export function LineEditor({
 
                 <div className="mt-5 grid gap-3 lg:hidden">
                   {lignes.map((ligne, index) => (
-                    <div
+                    <details
                       key={`${ligne.nomPrestation || "ligne"}-${index}`}
                       className="rounded-[1.4rem] border border-slate-200/70 bg-white/80 p-4 dark:border-white/8 dark:bg-white/4"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <input
-                          type="text"
-                          list="prestations-list-new-devis"
-                          value={ligne.nomPrestation}
-                          onChange={(event) => onUpdateNom(index, event.target.value)}
-                          disabled={!canEdit}
-                          placeholder="Nom de la prestation"
-                          className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => onRemoveLine(index)}
-                          disabled={!canEdit}
-                          className="inline-flex h-11 w-11 items-center justify-center rounded-full text-rose-500 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-40"
-                          aria-label="Supprimer la ligne"
-                        >
-                          <Trash2 size={17} />
-                        </button>
-                      </div>
+                      <summary className="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                            {ligne.nomPrestation || `Ligne ${index + 1}`}
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <span className="inline-flex rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold text-slate-600 dark:bg-white/8 dark:text-slate-300">
+                              Qté {ligne.quantite}
+                            </span>
+                            <span className="inline-flex rounded-full bg-violet-500/10 px-3 py-1 text-[11px] font-semibold text-violet-700 dark:text-violet-200">
+                              {ligne.prixUnitaire.toFixed(2)}€ / unité
+                            </span>
+                            {ligne.isOptional ? (
+                              <span className="inline-flex rounded-full bg-amber-400/12 px-3 py-1 text-[11px] font-semibold text-amber-700 dark:text-amber-200">
+                                Option
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
 
-                      <div className="mt-4 grid grid-cols-2 gap-3">
-                        <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                          Quantité
-                          <input
-                            type="number"
-                            min="1"
-                            step="any"
-                            inputMode="decimal"
-                            value={ligne.quantite}
-                            onChange={(event) => onUpdateQty(index, Number.parseFloat(event.target.value) || 1)}
-                            disabled={!canEdit}
-                            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
-                          />
-                        </label>
-
-                        <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                          Prix unitaire
-                          <input
-                            type="number"
-                            min="0"
-                            step="any"
-                            inputMode="decimal"
-                            value={ligne.prixUnitaire}
-                            onChange={(event) => onUpdatePrix(index, Number.parseFloat(event.target.value) || 0)}
-                            disabled={!canEdit}
-                            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
-                          />
-                        </label>
-
-                        <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-                          TVA
-                          <select
-                            value={ligne.tva || "10"}
-                            onChange={(event) => onUpdateTva(index, event.target.value)}
-                            disabled={!canEdit}
-                            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
-                          >
-                            {TVA_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-
-                        <div className="rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/4">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        <div className="shrink-0 text-right">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Total
                           </p>
                           <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
                             {ligne.totalLigne.toFixed(2)}€
                           </p>
+                          <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                            Modifier
+                            <ChevronDown size={14} />
+                          </span>
                         </div>
-                      </div>
+                      </summary>
 
-                      <label className="mt-4 inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(ligne.isOptional)}
-                          onChange={() => onToggleOptional(index)}
+                      <div className="mt-4 grid gap-3 border-t border-slate-200/70 pt-4 dark:border-white/8">
+                        <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                          Prestation
+                          <input
+                            type="text"
+                            list="prestations-list-new-devis"
+                            value={ligne.nomPrestation}
+                            onChange={(event) => onUpdateNom(index, event.target.value)}
+                            disabled={!canEdit}
+                            placeholder="Nom de la prestation"
+                            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                          />
+                        </label>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                            Quantité
+                            <input
+                              type="number"
+                              min="1"
+                              step="any"
+                              inputMode="decimal"
+                              value={ligne.quantite}
+                              onChange={(event) => onUpdateQty(index, Number.parseFloat(event.target.value) || 1)}
+                              disabled={!canEdit}
+                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                            />
+                          </label>
+
+                          <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                            Prix unitaire
+                            <input
+                              type="number"
+                              min="0"
+                              step="any"
+                              inputMode="decimal"
+                              value={ligne.prixUnitaire}
+                              onChange={(event) => onUpdatePrix(index, Number.parseFloat(event.target.value) || 0)}
+                              disabled={!canEdit}
+                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                            />
+                          </label>
+
+                          <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                            TVA
+                            <select
+                              value={ligne.tva || "10"}
+                              onChange={(event) => onUpdateTva(index, event.target.value)}
+                              disabled={!canEdit}
+                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                            >
+                              {TVA_OPTIONS.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+
+                          <div className="rounded-xl border border-slate-200/80 bg-slate-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/4">
+                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                              Total
+                            </p>
+                            <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
+                              {ligne.totalLigne.toFixed(2)}€
+                            </p>
+                          </div>
+                        </div>
+
+                        <label className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(ligne.isOptional)}
+                            onChange={() => onToggleOptional(index)}
+                            disabled={!canEdit}
+                            className="h-4 w-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
+                          />
+                          Ligne optionnelle
+                        </label>
+
+                        <button
+                          type="button"
+                          onClick={() => onRemoveLine(index)}
                           disabled={!canEdit}
-                          className="h-4 w-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
-                        />
-                        Ligne optionnelle
-                      </label>
-                    </div>
+                          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+                        >
+                          <Trash2 size={16} />
+                          Supprimer cette ligne
+                        </button>
+                      </div>
+                    </details>
                   ))}
                 </div>
               </>

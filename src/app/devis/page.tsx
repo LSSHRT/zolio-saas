@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
+  ClientMobileOverview,
   ClientSectionCard,
   ClientSubpageShell,
   type ClientMobileAction,
@@ -320,6 +321,39 @@ export default function DevisPage() {
           <ClientHeroStat label="Total TTC" value={`${totalMois.toFixed(0)}€`} detail="Vision globale du portefeuille devis" tone="violet" />
           <ClientHeroStat label="Volume" value={String(filtered.length)} detail={`${viewMode === "list" ? "Vue liste" : "Vue kanban"} active`} tone="slate" />
         </div>
+      }
+      mobileSummary={
+        <ClientMobileOverview
+          title="Priorités devis"
+          description="Les chiffres utiles d’abord, puis vos cartes et actions sans surcharge."
+          badge={`${filtered.length} visibles`}
+          items={[
+            {
+              label: "À signer",
+              value: String(totalEnAttente),
+              detail: `${totalAttente.toFixed(0)}€ en jeu`,
+              tone: "amber",
+            },
+            {
+              label: "Acceptés",
+              value: String(totalAcceptes),
+              detail: `${totalValide.toFixed(0)}€ validés`,
+              tone: "emerald",
+            },
+            {
+              label: "Pipeline",
+              value: `${totalMois.toFixed(0)}€`,
+              detail: viewMode === "list" ? "Lecture liste" : "Lecture kanban",
+              tone: "violet",
+            },
+            {
+              label: "Vue",
+              value: viewMode === "list" ? "Liste" : "Kanban",
+              detail: "Basculez sans quitter la page",
+              tone: "slate",
+            },
+          ]}
+        />
       }
     >
       <ClientSectionCard className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
