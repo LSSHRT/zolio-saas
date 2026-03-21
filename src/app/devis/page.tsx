@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
@@ -31,6 +32,7 @@ import {
   ClientSubpageShell,
   type ClientMobileAction,
 } from "@/components/client-shell";
+import { MobileDialog } from "@/components/mobile-dialog";
 
 interface Devis {
   numero: string;
@@ -45,6 +47,13 @@ interface Devis {
   signingToken?: string;
   lu_le?: string;
 }
+
+type DeleteDialogState =
+  | {
+      kind: "single" | "bulk";
+      numeros: string[];
+    }
+  | null;
 
 const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
   "En attente": { icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
@@ -96,6 +105,7 @@ export default function DevisPage() {
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>(null);
 
   const handleDuplicate = async (numero: string) => {
     setDuplicating(numero);
@@ -105,54 +115,92 @@ export default function DevisPage() {
       if (data.numero) {
         router.push(`/devis/${data.numero}`);
       } else {
-        alert("Erreur lors de la duplication");
+        toast.error(data.error || "Erreur lors de la duplication");
         setDuplicating(null);
       }
     } catch {
-      alert("Erreur réseau");
+      toast.error("Erreur réseau");
       setDuplicating(null);
     }
   };
 
-  const handleDelete = async (numero: string) => {
-    if (!confirm(`Supprimer définitivement le devis ${numero} ?`)) return;
-    setDeleting(numero);
-    try {
-      await fetch(`/api/devis/${numero}`, { method: "DELETE" });
-      mutate(devis.filter((d: Devis) => d.numero !== numero), false);
-    } catch {
-      alert("Erreur lors de la suppression");
+  const openDeleteDialog = (numeros: string[], kind: "single" | "bulk") => {
+    if (numeros.length === 0) {
+      return;
     }
-    setDeleting(null);
+
+    setDeleteDialog({ kind, numeros });
+  };
+
+  const handleDelete = async (numero: string) => {
+    openDeleteDialog([numero], "single");
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteDialog) {
+      return;
+    }
+
+    const numerosToDelete = deleteDialog.numeros;
+    const isBulk = deleteDialog.kind === "bulk";
+    setDeleteDialog(null);
+
+    if (isBulk) {
+      setIsDeletingBulk(true);
+    } else {
+      setDeleting(numerosToDelete[0]);
+    }
+
+    try {
+      let successCount = 0;
+
+      for (const numero of numerosToDelete) {
+        const res = await fetch(`/api/devis/${numero}`, { method: "DELETE" });
+        if (res.ok) {
+          successCount += 1;
+        }
+      }
+
+      if (successCount > 0) {
+        mutate(devis.filter((item: Devis) => !numerosToDelete.includes(item.numero)), false);
+        setSelectedIds((current) => {
+          const next = new Set(current);
+          numerosToDelete.forEach((numero) => next.delete(numero));
+          return next;
+        });
+        toast.success(
+          successCount > 1 ? `${successCount} devis supprimés.` : `Le devis ${numerosToDelete[0]} a été supprimé.`,
+        );
+      } else {
+        toast.error("Aucun devis n'a pu être supprimé.");
+      }
+    } catch {
+      toast.error("Erreur lors de la suppression");
+    } finally {
+      setIsDeletingBulk(false);
+      setDeleting(null);
+    }
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
-    setIsDeletingBulk(true);
-    let successCount = 0;
-    for (const id of Array.from(selectedIds)) {
-      try {
-        const res = await fetch(`/api/devis/${id}`, { method: "DELETE" });
-        if (res.ok) successCount++;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    if (successCount > 0) {
-      mutate(devis.filter((item: Devis) => !selectedIds.has(item.numero)), false);
-      setSelectedIds(new Set());
-    }
-    setIsDeletingBulk(false);
+    openDeleteDialog(Array.from(selectedIds), "bulk");
   };
-  const handleCopySignLink = (numero: string) => {
+
+  const handleCopySignLink = async (numero: string) => {
     const devisItem = devis.find((item: Devis) => item.numero === numero);
     if (!devisItem?.signingToken) {
-      alert("Impossible de générer le lien de signature.");
+      toast.error("Impossible de générer le lien de signature.");
       return;
     }
+
     const link = `${window.location.origin}/signer/${numero}?token=${encodeURIComponent(devisItem.signingToken)}`;
-    navigator.clipboard.writeText(link);
-    alert("Lien de signature copié ! Envoyez-le à votre client.");
+
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Lien de signature copié. Vous pouvez l’envoyer au client.");
+    } catch {
+      toast.error("Impossible de copier le lien de signature.");
+    }
   };
 
   const handleUpdateStatut = async (numero: string, newStatut: string) => {
@@ -163,18 +211,20 @@ export default function DevisPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut: newStatut }),
       });
+      const payload = await res.json().catch(() => null);
       if (res.ok) {
         mutate(devis.map((d: Devis) => d.numero === numero ? { ...d, statut: newStatut } : d), false);
+        toast.success(`Devis ${numero} mis à jour : ${newStatut}.`);
         if (newStatut === "Accepté") {
           import('canvas-confetti').then((confetti) => {
             confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
           });
         }
       } else {
-        alert("Erreur lors de la mise à jour du statut");
+        toast.error(payload?.error || "Erreur lors de la mise à jour du statut");
       }
     } catch {
-      alert("Erreur réseau");
+      toast.error("Erreur réseau");
     }
     setUpdatingStatut(null);
   };
@@ -281,7 +331,8 @@ export default function DevisPage() {
   };
 
   return (
-    <ClientSubpageShell
+    <>
+      <ClientSubpageShell
       title="Mes devis"
       description="Pilotez vos propositions, vos signatures et vos relances dans un espace plus clair, plus dense et plus mobile-friendly."
       activeNav="devis"
@@ -724,5 +775,56 @@ export default function DevisPage() {
         )}
       </ClientSectionCard>
     </ClientSubpageShell>
+
+      <MobileDialog
+        open={deleteDialog !== null}
+        onClose={() => setDeleteDialog(null)}
+        title={deleteDialog?.kind === "bulk" ? "Supprimer plusieurs devis" : "Supprimer ce devis"}
+        description={
+          deleteDialog?.kind === "bulk"
+            ? `Vous allez supprimer ${deleteDialog.numeros.length} devis. Cette action est définitive.`
+            : deleteDialog
+              ? `Le devis ${deleteDialog.numeros[0]} sera supprimé définitivement.`
+              : undefined
+        }
+        tone="danger"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setDeleteDialog(null)}
+              className="inline-flex items-center justify-center rounded-xl border border-slate-200/80 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={() => void confirmDelete()}
+              className="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700"
+            >
+              Confirmer la suppression
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+          <p>
+            {deleteDialog?.kind === "bulk"
+              ? "Les devis sélectionnés disparaîtront de votre pipeline et de votre suivi client."
+              : "Le devis supprimé ne sera plus accessible depuis le pipeline ni depuis son lien de signature."}
+          </p>
+          {deleteDialog && deleteDialog.numeros.length > 0 ? (
+            <div className="rounded-[1.2rem] border border-rose-200/70 bg-rose-50/80 px-4 py-3 dark:border-rose-400/20 dark:bg-rose-500/10">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-700 dark:text-rose-200">
+                Devis concernés
+              </p>
+              <p className="mt-2 font-medium text-slate-900 dark:text-white">
+                {deleteDialog.numeros.join(", ")}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      </MobileDialog>
+    </>
   );
 }

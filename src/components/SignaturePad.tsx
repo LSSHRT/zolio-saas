@@ -2,8 +2,11 @@
 
 import React, { forwardRef } from "react";
 import SignatureCanvas from "react-signature-canvas";
+import type ReactSignatureCanvas from "react-signature-canvas";
 
-const SignaturePad = forwardRef<any, any>((props, ref) => {
+type SignaturePadProps = React.ComponentProps<typeof SignatureCanvas>;
+
+const SignaturePad = forwardRef<ReactSignatureCanvas, SignaturePadProps>((props, ref) => {
   return <SignatureCanvas ref={ref} {...props} />;
 });
 

@@ -2,10 +2,24 @@
 
 import { useEffect, useState, useRef, use, Suspense } from "react";
 import dynamic from "next/dynamic";
+import type ReactSignatureCanvas from "react-signature-canvas";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { motion } from "framer-motion";
 import { CheckCircle, AlertCircle, PenTool, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+
+type PublicQuote = {
+  entreprise?: {
+    color?: string | null;
+    logo?: string | null;
+    nom?: string | null;
+  } | null;
+  nomClient?: string | null;
+  signature?: string | null;
+  statut?: string | null;
+  totalTTC?: number | string | null;
+};
 
 function SignerDevisContent({ params }: { params: Promise<{ numero: string }> }) {
   const unwrappedParams = use(params);
@@ -13,13 +27,13 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   
-  const [devis, setDevis] = useState<any>(null);
+  const [devis, setDevis] = useState<PublicQuote | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [signing, setSigning] = useState(false);
   const [success, setSuccess] = useState(false);
   
-  const sigCanvas = useRef<any>(null);
+  const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
 
   useEffect(() => {
     if (!token) {
@@ -44,31 +58,35 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
 
   const save = async () => {
     if (sigCanvas.current?.isEmpty()) {
-      alert("Veuillez dessiner votre signature avant de valider.");
+      toast.error("Veuillez dessiner votre signature avant de valider.");
       return;
     }
+
+    if (!token) {
+      toast.error("Lien invalide ou expiré");
+      return;
+    }
+
     setSigning(true);
     try {
-      if (!token) {
-        alert("Lien invalide ou expiré");
-        return;
-      }
       const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
       const res = await fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(token)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signatureBase64 }),
       });
-      if (res.ok) {
-        setSuccess(true);
-        import("canvas-confetti").then((confetti) => {
-          confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        });
-      } else {
-        alert("Erreur lors de l'enregistrement de la signature");
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        throw new Error(payload?.error || "Erreur lors de l'enregistrement de la signature");
       }
-    } catch (e) {
-      alert("Erreur réseau");
+
+      setSuccess(true);
+      import("canvas-confetti").then((confetti) => {
+        confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erreur réseau");
     } finally {
       setSigning(false);
     }

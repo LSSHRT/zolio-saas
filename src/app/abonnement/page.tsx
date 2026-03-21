@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, CheckCircle2, Shield, Sparkles, Zap } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
 export default function AbonnementPage() {
@@ -21,19 +22,24 @@ export default function AbonnementPage() {
   const handleSubscribe = async () => {
     setLoading(true);
     try {
-      // Bientôt : appel à l'API Stripe /api/stripe/checkout
-      const res = await fetch("/api/stripe/checkout", { 
+      const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isAnnual })
+        body: JSON.stringify({ isAnnual }),
       });
-      const { url } = await res.json();
-      if (url) window.location.href = url;
-      else alert("Erreur lors de l'initialisation du paiement Stripe.");
+      const payload = await res.json();
+
+      if (!res.ok || !payload.url) {
+        throw new Error(payload.error || "Erreur lors de l'initialisation du paiement Stripe.");
+      }
+
+      window.location.href = payload.url;
     } catch (error) {
       console.error(error);
+      toast.error(error instanceof Error ? error.message : "Impossible de lancer le paiement Stripe.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
