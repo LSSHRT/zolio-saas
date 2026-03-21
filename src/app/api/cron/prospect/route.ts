@@ -429,7 +429,7 @@ export async function GET(req: Request) {
     const runtime = getProspectingRuntime();
     const now = new Date();
     const paris = getProspectParisTimeParts(now);
-    const scheduleReason = getScheduleReason(now);
+    const scheduleReason = isCronTrigger ? null : getScheduleReason(now);
     const hardCap = getProspectDailyLimit();
     const warmupStart = await getWarmupStartDate(now, runtime.canAutoSend);
     const daysSinceWarmupStart = warmupStart
@@ -441,8 +441,10 @@ export async function GET(req: Request) {
       : Math.min(hardCap, MANUAL_QUEUE_CAP);
     const attemptedToday = runtime.canAutoSend ? await getTodayAttemptCount(now) : 0;
     const runtimeReason = runtime.canAutoSend ? null : runtime.reason;
-    const canSendNow = runtime.canAutoSend && isProspectSendingHour(now);
-    const canDiscoverNow = isProspectCollectionHour(now);
+    // Hobby plans can only invoke one Vercel cron per day, so a scheduled run
+    // needs to cover both the queue send and lead discovery phases.
+    const canSendNow = runtime.canAutoSend && (isProspectSendingHour(now) || isCronTrigger);
+    const canDiscoverNow = isProspectCollectionHour(now) || isCronTrigger;
     const sent: string[] = [];
     const queued: string[] = [];
     const failed: string[] = [];
