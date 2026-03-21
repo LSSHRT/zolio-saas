@@ -136,14 +136,18 @@ export function getProspectParisDayRange(date = new Date()) {
   };
 }
 
-export function isProspectWorkingHour(date = new Date()) {
+export function isProspectCollectionHour(date = new Date()) {
   const parts = getProspectParisTimeParts(date);
-  return parts.hour >= 8 && parts.hour <= 16;
+  return parts.hour >= 17 || parts.hour < 8;
+}
+
+export function isProspectWorkingHour(date = new Date()) {
+  return isProspectCollectionHour(date);
 }
 
 export function isProspectSendingHour(date = new Date()) {
   const parts = getProspectParisTimeParts(date);
-  return parts.isWeekday && parts.hour >= 9 && parts.hour <= 16;
+  return parts.hour >= 9 && parts.hour <= 16;
 }
 
 export function getProspectWarmupStage(daysSinceStart: number): ProspectWarmupStage {

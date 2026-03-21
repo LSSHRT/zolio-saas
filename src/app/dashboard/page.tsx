@@ -1062,7 +1062,7 @@ export default function DashboardPage() {
               badge={`${objectifProgress.toFixed(0)}%`}
             >
               <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
                     <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Cap restant</p>
                     <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
@@ -1071,7 +1071,7 @@ export default function DashboardPage() {
                     <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Total TTC</p>
                     <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
                   </div>
-                  <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
+                  <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4 col-span-2">
                     <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Objectif</p>
                     <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
                   </div>

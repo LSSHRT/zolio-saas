@@ -21,7 +21,13 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { ClientHeroStat, ClientSectionCard, ClientSubpageShell } from "@/components/client-shell";
+import {
+  ClientHeroStat,
+  ClientMobileActionsMenu,
+  ClientSectionCard,
+  ClientSubpageShell,
+  type ClientMobileAction,
+} from "@/components/client-shell";
 
 interface Client {
   id: string;
@@ -264,12 +270,70 @@ export default function ClientsPage() {
     }
   };
 
+  const getPrimaryContact = (client: Client) => {
+    if (client.email) {
+      return {
+        icon: Mail,
+        label: client.email,
+      };
+    }
+
+    if (client.telephone) {
+      return {
+        icon: Phone,
+        label: client.telephone,
+      };
+    }
+
+    return {
+      icon: MapPin,
+      label: client.adresse || "Coordonnées à compléter",
+    };
+  };
+
+  const getMobileClientActions = (client: Client): ClientMobileAction[] => [
+    {
+      icon: History,
+      label: "Voir l'historique",
+      onClick: () => setHistoryClient(client),
+    },
+    {
+      icon: Pencil,
+      label: "Modifier la fiche",
+      onClick: () => handleEdit(client),
+      tone: "accent",
+    },
+    {
+      icon: Trash2,
+      label: "Supprimer",
+      onClick: () => void handleDelete(client.id),
+      tone: "danger",
+    },
+  ];
+
   return (
     <ClientSubpageShell
       title="Mes clients"
       description="Gardez vos coordonnées, votre historique et vos fiches de chantier dans un CRM plus propre, plus rapide et bien plus agréable sur mobile."
       activeNav="clients"
       eyebrow="CRM terrain"
+      mobilePrimaryAction={
+        <Link
+          href="/clients/nouveau"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
+        >
+          <Plus size={16} />
+          Nouveau
+        </Link>
+      }
+      mobileSecondaryActions={[
+        {
+          disabled: isImporting,
+          icon: Upload,
+          label: isImporting ? "Import en cours..." : "Importer un CSV",
+          onClick: () => fileInputRef.current?.click(),
+        },
+      ]}
       actions={
         <>
           <input
@@ -340,7 +404,7 @@ export default function ClientsPage() {
           />
         </label>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4">
+        <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
           <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input
               type="checkbox"
@@ -362,7 +426,7 @@ export default function ClientsPage() {
               type="button"
               onClick={handleBulkDelete}
               disabled={isDeletingBulk}
-              className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200 sm:w-auto"
             >
               <Trash2 size={15} />
               {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
@@ -479,80 +543,143 @@ export default function ClientsPage() {
                   {filtered.length} client{filtered.length > 1 ? "s" : ""}
                 </p>
 
-                {filtered.map((client: Client, index: number) => (
-                  <motion.div
-                    key={client.id || index}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(index * 0.03, 0.15) }}
-                    className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex min-w-0 items-start gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 font-bold text-brand-violet dark:bg-violet-500/12 dark:text-violet-200">
-                          {(client.nom || "").charAt(0).toUpperCase()}
-                        </div>
+                {filtered.map((client: Client, index: number) => {
+                  const primaryContact = getPrimaryContact(client);
+                  const PrimaryIcon = primaryContact.icon;
 
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                            {client.nom}
-                          </p>
-                          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                            Ajouté le {client.dateAjout}
-                          </p>
+                  return (
+                    <motion.div
+                      key={client.id || index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(index * 0.03, 0.15) }}
+                      className="rounded-[1.75rem] border border-slate-100 bg-slate-50 dark:border-white/8 dark:bg-white/4"
+                    >
+                      <div className="p-4 md:hidden">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 font-bold text-brand-violet dark:bg-violet-500/12 dark:text-violet-200">
+                            {(client.nom || "").charAt(0).toUpperCase()}
+                          </div>
 
-                          <div className="mt-3 space-y-2">
-                            {client.email && (
-                              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                <Mail size={12} />
-                                <span className="truncate">{client.email}</span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                  {client.nom}
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                  Ajouté le {client.dateAjout}
+                                </p>
                               </div>
-                            )}
-                            {client.telephone && (
-                              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                <Phone size={12} />
-                                <span>{client.telephone}</span>
+                              <ClientMobileActionsMenu items={getMobileClientActions(client)} panelAlign="left" />
+                            </div>
+
+                            <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-xs text-slate-600 ring-1 ring-slate-200/80 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                              <PrimaryIcon size={12} />
+                              <span className="truncate">{primaryContact.label}</span>
+                            </div>
+
+                            <details className="mt-3 rounded-[1.2rem] border border-slate-200/70 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+                              <summary className="cursor-pointer list-none text-sm font-semibold text-slate-700 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
+                                Voir la fiche
+                              </summary>
+                              <div className="mt-3 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                                {client.email ? (
+                                  <div className="flex items-start gap-2">
+                                    <Mail size={12} className="mt-0.5 shrink-0" />
+                                    <span className="min-w-0 break-all">{client.email}</span>
+                                  </div>
+                                ) : null}
+                                {client.telephone ? (
+                                  <div className="flex items-start gap-2">
+                                    <Phone size={12} className="mt-0.5 shrink-0" />
+                                    <span>{client.telephone}</span>
+                                  </div>
+                                ) : null}
+                                {client.adresse ? (
+                                  <div className="flex items-start gap-2">
+                                    <MapPin size={12} className="mt-0.5 shrink-0" />
+                                    <span>{client.adresse}</span>
+                                  </div>
+                                ) : null}
+                                {!client.email && !client.telephone && !client.adresse ? (
+                                  <p>Cette fiche peut encore être enrichie avec les coordonnées du client.</p>
+                                ) : null}
                               </div>
-                            )}
-                            {client.adresse && (
-                              <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                                <MapPin size={12} />
-                                <span className="truncate">{client.adresse}</span>
-                              </div>
-                            )}
+                            </details>
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex shrink-0 items-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setHistoryClient(client)}
-                          className="rounded-xl p-2 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500 dark:hover:bg-indigo-500/10"
-                          title="Voir l'historique"
-                        >
-                          <History size={16} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleEdit(client)}
-                          className="rounded-xl p-2 text-slate-400 transition hover:bg-violet-50 hover:text-brand-violet dark:hover:bg-violet-500/10"
-                          title="Modifier"
-                        >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(client.id)}
-                          className="rounded-xl p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      <div className="hidden p-5 md:block">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 font-bold text-brand-violet dark:bg-violet-500/12 dark:text-violet-200">
+                              {(client.nom || "").charAt(0).toUpperCase()}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                {client.nom}
+                              </p>
+                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                Ajouté le {client.dateAjout}
+                              </p>
+
+                              <div className="mt-3 space-y-2">
+                                {client.email ? (
+                                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <Mail size={12} />
+                                    <span className="truncate">{client.email}</span>
+                                  </div>
+                                ) : null}
+                                {client.telephone ? (
+                                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <Phone size={12} />
+                                    <span>{client.telephone}</span>
+                                  </div>
+                                ) : null}
+                                {client.adresse ? (
+                                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                                    <MapPin size={12} />
+                                    <span className="truncate">{client.adresse}</span>
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex shrink-0 items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => setHistoryClient(client)}
+                              className="rounded-xl p-2 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-500 dark:hover:bg-indigo-500/10"
+                              title="Voir l'historique"
+                            >
+                              <History size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(client)}
+                              className="rounded-xl p-2 text-slate-400 transition hover:bg-violet-50 hover:text-brand-violet dark:hover:bg-violet-500/10"
+                              title="Modifier"
+                            >
+                              <Pencil size={16} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(client.id)}
+                              className="rounded-xl p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-500/10"
+                              title="Supprimer"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </>

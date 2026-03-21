@@ -23,7 +23,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - `PUBLIC_DEVIS_LINK_SECRET`: signs public quote-signature links and must be a long random secret.
 - `CRON_SECRET`: protects the `/api/cron/prospect` endpoint for Vercel Cron calls.
 - `ADMIN_EMAIL`: optional canonical admin email used by server-side admin checks.
-- `HUNTER_API_KEY`: optional Hunter key used by prospecting; if unset, Hunter lookups are skipped.
+- `HUNTER_API_KEY`: required for automated lead discovery; if unset, the prospecting cron cannot source new leads.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

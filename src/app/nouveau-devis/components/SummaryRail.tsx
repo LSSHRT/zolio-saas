@@ -164,7 +164,28 @@ export function SummaryRail({
                 {hasLines ? `${photos.length} photo${photos.length > 1 ? "s" : ""}` : "Prêt à chiffrer"}
               </div>
             </div>
-            <div className="mt-5 grid gap-3 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
+
+            <details className="mt-5 rounded-[1.3rem] border border-white/12 bg-white/6 px-4 py-3 md:hidden">
+              <summary className="cursor-pointer list-none text-sm font-semibold text-white [&::-webkit-details-marker]:hidden">
+                Voir le détail du total
+              </summary>
+              <div className="mt-3 grid gap-3">
+                <div className="rounded-[1.1rem] bg-white/8 px-4 py-3 ring-1 ring-white/10">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">HT</p>
+                  <p className="mt-2 text-xl font-semibold">{totalHT.toFixed(2)}€</p>
+                </div>
+                <div className="rounded-[1.1rem] bg-white/8 px-4 py-3 ring-1 ring-white/10">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">TVA</p>
+                  <p className="mt-2 text-xl font-semibold">{totalTVA.toFixed(2)}€</p>
+                </div>
+                <div className="rounded-[1.1rem] bg-emerald-400/12 px-4 py-3 ring-1 ring-emerald-300/20">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-100/70">Marge estimée</p>
+                  <p className="mt-2 text-xl font-semibold">{marginEstimate.toFixed(2)}€</p>
+                </div>
+              </div>
+            </details>
+
+            <div className="mt-5 hidden gap-3 md:grid md:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
               <div className="rounded-[1.3rem] bg-white/8 px-4 py-3 ring-1 ring-white/10">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/55">HT</p>
                 <p className="mt-2 text-xl font-semibold">{totalHT.toFixed(2)}€</p>
@@ -180,7 +201,67 @@ export function SummaryRail({
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+          <details className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  Annexes chantier
+                </p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  {photos.length > 0 ? `${photos.length} photo${photos.length > 1 ? "s" : ""} jointe(s)` : "Aucune photo jointe"}
+                </p>
+              </div>
+              <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                Gérer
+              </span>
+            </summary>
+
+            <div className="mt-4 border-t border-slate-200/70 pt-4 dark:border-white/8">
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-slate-600 dark:text-slate-300">
+                  Ajoutez des photos si elles doivent apparaître en annexe PDF.
+                </p>
+                <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20">
+                  <Camera size={16} />
+                  Ajouter
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={onFileUpload}
+                  />
+                </label>
+              </div>
+
+              {photos.length > 0 ? (
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  {photos.map((photo, index) => (
+                    <div
+                      key={`${photo.slice(0, 32)}-${index}`}
+                      className="relative aspect-square overflow-hidden rounded-[1.1rem] border border-slate-200/70 dark:border-white/8"
+                    >
+                      <Image src={photo} alt={`Photo chantier ${index + 1}`} fill unoptimized className="object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => onRemovePhoto(index)}
+                        className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-950/70 text-white backdrop-blur"
+                        aria-label="Supprimer la photo"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 rounded-[1.2rem] border border-dashed border-slate-300/70 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300">
+                  Aucune photo jointe pour l’instant.
+                </div>
+              )}
+            </div>
+          </details>
+
+          <div className="hidden rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:block">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
@@ -246,15 +327,26 @@ export function SummaryRail({
           ) : null}
 
           {!trialLocked && emailHint ? (
-            <div className="rounded-[1.4rem] border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100">
-              <div className="flex items-start gap-3">
-                <Mail size={18} className="mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-semibold">Envoi email sous contrôle</p>
-                  <p className="mt-1 leading-6 opacity-80">{emailHint}</p>
+            <>
+              <details className="rounded-[1.4rem] border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100 md:hidden">
+                <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
+                  Envoi email sous contrôle
+                </summary>
+                <div className="mt-3 flex items-start gap-3">
+                  <Mail size={18} className="mt-0.5 shrink-0" />
+                  <p className="leading-6 opacity-80">{emailHint}</p>
+                </div>
+              </details>
+              <div className="hidden rounded-[1.4rem] border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100 md:block">
+                <div className="flex items-start gap-3">
+                  <Mail size={18} className="mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-semibold">Envoi email sous contrôle</p>
+                    <p className="mt-1 leading-6 opacity-80">{emailHint}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           ) : null}
 
           {!trialLocked && showActions ? (
@@ -290,7 +382,20 @@ export function SummaryRail({
             </div>
           ) : null}
 
-          <div className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300">
+          <details className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300 md:hidden">
+            <summary className="cursor-pointer list-none font-semibold text-slate-900 dark:text-white [&::-webkit-details-marker]:hidden">
+              État du compte
+            </summary>
+            <p className="mt-3 leading-6">
+              {isPro
+                ? "Zolio Pro actif. Création illimitée et workflow complet disponible."
+                : remainingTrialQuotes !== null
+                  ? `${remainingTrialQuotes} devis d’essai restant${remainingTrialQuotes > 1 ? "s" : ""}.`
+                  : "Vérification de votre essai en cours..."}
+            </p>
+          </details>
+
+          <div className="hidden rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300 md:block">
             <p className="font-semibold text-slate-900 dark:text-white">État du compte</p>
             <p className="mt-2 leading-6">
               {isPro

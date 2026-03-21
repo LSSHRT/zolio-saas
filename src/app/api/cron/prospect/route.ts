@@ -18,8 +18,8 @@ import {
   getProspectWarmupStage,
   getProspectingRuntime,
   isPersonalMailbox,
+  isProspectCollectionHour,
   isProspectSendingHour,
-  isProspectWorkingHour,
   isValidEmail,
   normalizeEmail,
 } from "@/lib/prospecting";
@@ -369,18 +369,12 @@ async function getTodayAttemptCount(now: Date) {
 }
 
 function getScheduleReason(now: Date) {
-  const paris = getProspectParisTimeParts(now);
-
-  if (!paris.isWeekday) {
-    return "Le week-end, le robot collecte des leads mais n'envoie pas automatiquement.";
-  }
-
-  if (!isProspectWorkingHour(now)) {
-    return "Le robot est en dehors de sa plage horaire de travail locale (08:00-16:59 Europe/Paris).";
+  if (isProspectCollectionHour(now)) {
+    return "Le robot est en collecte entre 17:00 et 07:59 Europe/Paris. Les envois reprennent a 09:00.";
   }
 
   if (!isProspectSendingHour(now)) {
-    return "L'envoi automatique est reserve du lundi au vendredi entre 09:00 et 16:59 (heure de Paris).";
+    return "Le robot est en pause locale entre 08:00 et 08:59 Europe/Paris, entre la collecte de nuit et la prospection de jour.";
   }
 
   return null;
@@ -446,9 +440,9 @@ export async function GET(req: Request) {
       ? Math.max(1, Math.min(hardCap, warmupStage.dailyLimit))
       : Math.min(hardCap, MANUAL_QUEUE_CAP);
     const attemptedToday = runtime.canAutoSend ? await getTodayAttemptCount(now) : 0;
+    const runtimeReason = runtime.canAutoSend ? null : runtime.reason;
     const canSendNow = runtime.canAutoSend && isProspectSendingHour(now);
-    const canDiscoverNow = !paris.isWeekday || isProspectWorkingHour(now);
-    const queueOnlyReason = !runtime.canAutoSend ? runtime.reason : scheduleReason;
+    const canDiscoverNow = isProspectCollectionHour(now);
     const sent: string[] = [];
     const queued: string[] = [];
     const failed: string[] = [];
@@ -570,10 +564,14 @@ export async function GET(req: Request) {
     ].filter(Boolean);
     const message =
       messageParts.length > 0
-        ? `Robot execute : ${messageParts.join(" • ")}. Fenetre active : Lun-Ven 09:00-16:59 Europe/Paris. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
+        ? `Robot execute : ${messageParts.join(" • ")}. Fenetres actives : collecte 17:00-07:59 | prospection 09:00-16:59 Europe/Paris. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
         : canDiscoverNow
           ? `Aucun nouveau lead exploitable trouve. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
-          : `Robot en veille hors plage horaire locale. ${queueOnlyReason || "Aucune action executee."}`;
+          : runtimeReason
+            ? `Robot bloque par sa configuration. ${runtimeReason}`
+            : scheduleReason
+              ? `Robot en veille. ${scheduleReason}`
+              : `Fenetre d'envoi active mais aucun lead n'a pu etre traite. Limite du jour : ${effectiveDailyLimit}.`;
 
     await appendAdminAuditLog({
       level: failed.length > 0 ? "warning" : "success",
@@ -582,7 +580,8 @@ export async function GET(req: Request) {
       actor,
       message,
       meta: [
-        queueOnlyReason,
+        runtimeReason ? `Config: ${runtimeReason}` : null,
+        scheduleReason ? `Planning: ${scheduleReason}` : null,
         `Warmup: ${warmupStage.label}`,
         `Quota: ${effectiveDailyLimit}`,
         `Paris: ${paris.weekday} ${String(paris.hour).padStart(2, "0")}:${String(paris.minute).padStart(2, "0")}`,
@@ -597,7 +596,7 @@ export async function GET(req: Request) {
       queued,
       failed,
       mode: runtime.mode,
-      sendingReason: queueOnlyReason,
+      sendingReason: runtimeReason || scheduleReason,
       targets: targets.map((target) => ({
         trade: target.label,
         city: target.city,

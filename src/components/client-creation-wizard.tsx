@@ -3,7 +3,11 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check } from "lucide-react";
-import { ClientBrandMark } from "@/components/client-shell";
+import {
+  ClientBrandMark,
+  ClientMobileActionsMenu,
+  type ClientMobileAction,
+} from "@/components/client-shell";
 
 export type CreationWizardStep = {
   description: string;
@@ -214,13 +218,34 @@ export function CreationWizardPanel({
 
 export function CreationWizardFooter({
   children,
+  mobileMeta,
+  mobilePrimaryAction,
+  mobileSecondaryActions = [],
 }: {
   children: ReactNode;
+  mobileMeta?: ReactNode;
+  mobilePrimaryAction?: ReactNode;
+  mobileSecondaryActions?: ClientMobileAction[];
 }) {
   return (
     <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-30 sm:sticky sm:bottom-4 sm:inset-x-auto">
       <div className="client-panel rounded-[1.5rem] px-4 py-4 shadow-[0_32px_90px_-52px_rgba(15,23,42,0.42)] sm:rounded-[1.8rem]">
-        <div className="grid gap-3 sm:flex sm:items-center sm:justify-between">{children}</div>
+        {mobilePrimaryAction || mobileSecondaryActions.length > 0 ? (
+          <>
+            <div className="grid gap-3 sm:hidden">
+              {mobileMeta}
+              <div className="grid gap-3">
+                {mobilePrimaryAction}
+                {mobileSecondaryActions.length > 0 ? (
+                  <ClientMobileActionsMenu items={mobileSecondaryActions} stretch />
+                ) : null}
+              </div>
+            </div>
+            <div className="hidden sm:grid sm:gap-3">{children}</div>
+          </>
+        ) : (
+          <div className="grid gap-3 sm:flex sm:items-center sm:justify-between">{children}</div>
+        )}
       </div>
     </div>
   );

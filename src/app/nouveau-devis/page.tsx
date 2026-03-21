@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight, FileText, Rocket, Save, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Rocket, Save, Send } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
@@ -574,7 +574,69 @@ export default function NouveauDevisPage() {
       steps={WIZARD_STEPS}
       title="Nouveau devis"
       footer={
-        <CreationWizardFooter>
+        <CreationWizardFooter
+          mobileMeta={
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              Étape {step + 1} sur {WIZARD_STEPS.length}
+              {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
+            </div>
+          }
+          mobilePrimaryAction={
+            step < WIZARD_STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={handleNextStep}
+                disabled={!canContinue || trialLocked}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {step === 0 ? "Continuer vers le chiffrage" : "Continuer vers la validation"}
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void handleCreate("send")}
+                disabled={!canSubmit || submitMode !== null}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Send size={16} />
+                {submitMode === "send" ? "Création + envoi..." : "Créer et envoyer"}
+              </button>
+            )
+          }
+          mobileSecondaryActions={
+            step === 0
+              ? [
+                  {
+                    href: "/devis",
+                    icon: FileText,
+                    label: "Retour aux devis",
+                  },
+                ]
+              : step === 1
+                ? [
+                    {
+                      icon: ArrowLeft,
+                      label: "Revenir au client",
+                      onClick: () => setStep(0),
+                    },
+                  ]
+                : [
+                    {
+                      icon: ArrowLeft,
+                      label: "Revenir au chiffrage",
+                      onClick: () => setStep(1),
+                    },
+                    {
+                      disabled: !canSubmit || submitMode !== null,
+                      icon: Save,
+                      label: submitMode === "save" ? "Enregistrement..." : "Enregistrer le devis",
+                      onClick: () => void handleCreate("save"),
+                      tone: "accent",
+                    },
+                  ]
+          }
+        >
           <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
             Étape {step + 1} sur {WIZARD_STEPS.length}
             {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}

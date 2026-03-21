@@ -33,6 +33,8 @@ export function ClientSelector({
   showNewClient,
   onToggleNewClient,
 }: ClientSelectorProps) {
+  const selectedPrimaryContact = selectedClient?.email || selectedClient?.telephone || selectedClient?.adresse;
+
   return (
     <ClientSectionCard>
       <div className="flex flex-col gap-5">
@@ -73,7 +75,36 @@ export function ClientSelector({
                   <h3 className="mt-2 truncate text-lg font-semibold text-slate-950 dark:text-white">
                     {selectedClient.nom}
                   </h3>
-                  <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-600 dark:text-slate-300">
+                  {selectedPrimaryContact ? (
+                    <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 text-sm text-slate-600 dark:bg-white/8 dark:text-slate-300">
+                      {selectedClient.email ? <Mail size={14} /> : selectedClient.telephone ? <Phone size={14} /> : <MapPin size={14} />}
+                      <span className="truncate">{selectedPrimaryContact}</span>
+                    </div>
+                  ) : null}
+
+                  {(selectedClient.email && selectedClient.telephone) || selectedClient.adresse ? (
+                    <details className="mt-3 rounded-[1.2rem] border border-emerald-300/40 bg-white/70 px-4 py-3 text-sm text-slate-600 dark:border-emerald-400/20 dark:bg-white/6 dark:text-slate-300 md:hidden">
+                      <summary className="cursor-pointer list-none font-semibold text-emerald-700 dark:text-emerald-200 [&::-webkit-details-marker]:hidden">
+                        Voir plus
+                      </summary>
+                      <div className="mt-3 space-y-2">
+                        {selectedClient.email && selectedClient.telephone ? (
+                          <div className="flex items-start gap-2">
+                            <Phone size={14} className="mt-0.5 shrink-0" />
+                            <span>{selectedClient.telephone}</span>
+                          </div>
+                        ) : null}
+                        {selectedClient.adresse ? (
+                          <div className="flex items-start gap-2">
+                            <MapPin size={14} className="mt-0.5 shrink-0" />
+                            <span>{selectedClient.adresse}</span>
+                          </div>
+                        ) : null}
+                      </div>
+                    </details>
+                  ) : null}
+
+                  <div className="mt-3 hidden flex-wrap gap-2 text-sm text-slate-600 dark:text-slate-300 md:flex">
                     {selectedClient.email ? (
                       <span className="inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1.5 dark:bg-white/8">
                         <Mail size={14} />
@@ -153,7 +184,7 @@ export function ClientSelector({
                   placeholder="Adresse / chantier"
                   className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
                 />
-                <div className="lg:col-span-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-slate-300/70 bg-white/70 px-4 py-3 text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300">
+                <div className="lg:col-span-2 flex flex-col items-start gap-3 rounded-xl border border-dashed border-slate-300/70 bg-white/70 px-4 py-3 text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
                   <span>
                     Le nom suffit pour créer la fiche. L’email accélère ensuite le bouton “Créer et envoyer”.
                   </span>
@@ -197,10 +228,13 @@ export function ClientSelector({
                           {client.nom}
                         </p>
                         <p className="mt-1 truncate text-sm text-slate-500 dark:text-slate-400">
-                          {client.email || "Aucun email renseigné"}
+                          {client.email || client.telephone || "Coordonnées à compléter"}
                         </p>
-                        <p className="mt-2 truncate text-xs text-slate-400 dark:text-slate-500">
+                        <p className="mt-2 hidden truncate text-xs text-slate-400 dark:text-slate-500 md:block">
                           {client.telephone || client.adresse || "Fiche prête à être utilisée dans un devis"}
+                        </p>
+                        <p className="mt-2 text-xs font-semibold text-violet-600 dark:text-violet-200 md:hidden">
+                          Toucher pour sélectionner
                         </p>
                       </div>
                     </div>

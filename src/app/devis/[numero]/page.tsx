@@ -11,6 +11,10 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
+  ClientMobileActionsMenu,
+  type ClientMobileAction,
+} from "@/components/client-shell";
+import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
   getStarterCatalogForTrade,
@@ -349,6 +353,22 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const filteredPrestations = prestations.filter((p) =>
     (p.nom || '').toLowerCase().includes((searchPrestation || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((searchPrestation || '').toLowerCase())
   );
+  const mobileHeaderActions: ClientMobileAction[] =
+    devisInfo?.statut === "En attente"
+      ? [
+          {
+            icon: PenTool,
+            label: "Signer sur place",
+            onClick: () => setShowSignModal(true),
+            tone: "accent",
+          },
+          {
+            icon: PenTool,
+            label: "Copier le lien de signature",
+            onClick: handleCopySignLink,
+          },
+        ]
+      : [];
 
   if (loading) {
     return (
@@ -399,26 +419,29 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">Modifier le devis</h1>
           <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{numero} · {devisInfo?.nomClient}</p>
         </div>
-        {devisInfo?.statut === "En attente" && (
-          <div className="flex items-center gap-2">
-            <motion.button 
-              whileTap={{ scale: 0.9 }}
-              onClick={() => setShowSignModal(true)}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 dark:bg-emerald-900/50 dark:border-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 transition shrink-0"
-            >
-              <PenTool size={14} />
-              <span className="hidden sm:inline">Signer sur place</span>
-            </motion.button>
-            <motion.button 
-              whileTap={{ scale: 0.9 }}
-              onClick={handleCopySignLink}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
-            >
-              <PenTool size={14} />
-              <span className="hidden sm:inline">Lien signature</span>
-            </motion.button>
-          </div>
-        )}
+        {devisInfo?.statut === "En attente" ? (
+          <>
+            <div className="hidden items-center gap-2 sm:flex">
+              <motion.button 
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setShowSignModal(true)}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 dark:bg-emerald-900/50 dark:border-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 transition shrink-0"
+              >
+                <PenTool size={14} />
+                <span>Signer sur place</span>
+              </motion.button>
+              <motion.button 
+                whileTap={{ scale: 0.9 }}
+                onClick={handleCopySignLink}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
+              >
+                <PenTool size={14} />
+                <span>Lien signature</span>
+              </motion.button>
+            </div>
+            <ClientMobileActionsMenu items={mobileHeaderActions} panelAlign="left" />
+          </>
+        ) : null}
       </header>
 
       <main className="flex-1 px-6 flex flex-col gap-5 overflow-y-auto">
@@ -433,7 +456,66 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </div>
         </div>
 
-        <div className="rounded-3xl border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+        <details className="rounded-3xl border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-500/20 dark:bg-violet-500/10 md:hidden">
+          <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
+                  Packs métier
+                </p>
+                <h2 className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
+                  {activeTradeMeta.label} prêt à ajuster
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Packs, starter et catalogue restent repliés pour garder l’édition compacte.
+                </p>
+              </div>
+              <span className="rounded-full bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                {starterCount} starter
+              </span>
+            </div>
+          </summary>
+
+          <div className="mt-4 space-y-4 border-t border-violet-200/70 pt-4 dark:border-violet-400/20">
+            <div className="flex flex-wrap gap-2">
+              {TRADE_OPTIONS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => setSelectedTrade(option.key)}
+                  className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                    activeTrade === option.key
+                      ? "bg-violet-600 text-white shadow-brand"
+                      : "bg-white/80 text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="grid gap-3">
+              <button
+                type="button"
+                onClick={() => setShowForfaits(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-violet-200 bg-white/80 px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-100 dark:border-violet-500/20 dark:bg-white/8 dark:text-violet-200"
+              >
+                <Plus size={16} />
+                Ouvrir les packs
+              </button>
+              <button
+                type="button"
+                onClick={handleImportStarterCatalog}
+                disabled={isImportingStarter}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+              >
+                {isImportingStarter ? "Import..." : `Importer ${starterCount} lignes starter`}
+              </button>
+            </div>
+          </div>
+        </details>
+
+        <div className="hidden rounded-3xl border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-500/20 dark:bg-violet-500/10 md:block">
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
@@ -550,32 +632,32 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   </div>
                   <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1">
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div>
                     <label className="text-[10px] text-slate-400">Quantité</label>
                     <input type="number" min="0.1" step="0.1" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
                       className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
                   </div>
-                  <div className="flex-1">
+                  <div>
                     <label className="text-[10px] text-slate-400">Prix/{l.unite}</label>
                     <input type="number" min="0" step="0.01" value={l.prixUnitaire} onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
                       className="w-full py-1 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
                   </div>
-                  <div className="flex-none flex items-end mb-1 px-1">
+                  <div className="rounded-lg border border-slate-200/80 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900">
+                    <label className="text-[10px] text-slate-400">Total</label>
+                    <p className="mt-1 font-bold text-slate-800 dark:text-slate-200 text-sm">{(l.totalLigne || 0).toFixed(2)}€</p>
+                  </div>
+                  <div className="flex items-end">
                     <label className="flex items-center gap-1 text-[10px] text-slate-500 cursor-pointer">
                       <input type="checkbox" checked={!!l.isOptional} onChange={() => toggleOptional(i)} className="rounded border-slate-300 text-violet-600 focus:ring-violet-500" />
                       Option
                     </label>
                   </div>
-                  <div className="w-20 text-right">
-                    <label className="text-[10px] text-slate-400">Total</label>
-                    <p className="font-bold text-slate-800 dark:text-slate-200 text-sm mt-0.5">{(l.totalLigne || 0).toFixed(2)}€</p>
-                  </div>
                 </div>
               </div>
             ))}
             
-            <div className="flex gap-2 w-full mt-2">
+            <div className="mt-2 grid gap-2 sm:grid-cols-3">
               <button
                 onClick={addLigneLibre}
                 className="flex-1 flex items-center justify-center gap-2 py-3 border border-dashed border-slate-300 text-slate-500 font-medium rounded-xl hover:bg-slate-50 transition dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
@@ -599,30 +681,27 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         </div>
 
         
-        {/* TVA */}
-        <div className="flex items-center gap-3 mt-4">
-          <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Taux TVA :</label>
-          <select value={tva} onChange={(e) => setTva(e.target.value)}
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
-            <option value="0">0%</option>
-            <option value="5.5">5.5%</option>
-            <option value="10">10%</option>
-            <option value="20">20%</option>
-          </select>
-        </div>
-
-        {/* Remise */}
-        <div className="flex items-center gap-3 mt-4">
-          <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Remise globale (%) :</label>
-          <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
-            className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
-        </div>
-
-        {/* Acompte */}
-        <div className="flex items-center gap-3 mt-4 mb-4">
-          <label className="text-sm text-slate-600 dark:text-slate-300 font-medium">Acompte à la signature (%) :</label>
-          <input type="number" placeholder="0" value={acompte} onChange={(e) => setAcompte(e.target.value)}
-            className="w-24 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+        <div className="mt-4 mb-4 grid gap-3 md:grid-cols-3">
+          <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+            Taux TVA
+            <select value={tva} onChange={(e) => setTva(e.target.value)}
+              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+              <option value="0">0%</option>
+              <option value="5.5">5.5%</option>
+              <option value="10">10%</option>
+              <option value="20">20%</option>
+            </select>
+          </label>
+          <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+            Remise globale (%)
+            <input type="number" placeholder="0" value={remise} onChange={(e) => setRemise(e.target.value)}
+              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          </label>
+          <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+            Acompte à la signature (%)
+            <input type="number" placeholder="0" value={acompte} onChange={(e) => setAcompte(e.target.value)}
+              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          </label>
         </div>
 
         {/* Photos */}
@@ -652,22 +731,49 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
         {/* Totaux */}
         <div className="bg-gradient-zolio rounded-2xl p-5 text-white">
-          <div className="flex justify-between mb-2">
-            <span className="text-white/70 text-sm">Total HT</span>
-            <span className="font-semibold">{totalHT.toFixed(2)}€</span>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-white/70 text-sm">Total TTC</p>
+              <p className="mt-2 text-3xl font-bold">{totalTTC.toFixed(2)}€</p>
+            </div>
+            <span className="text-xs bg-emerald-500/20 text-emerald-100 px-2 py-1 rounded-md" title="Estimation de votre marge nette">
+              {photos.length} photo{photos.length > 1 ? "s" : ""}
+            </span>
           </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-white/70 text-sm">TVA ({tva}%)</span>
-            <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
-          </div>
-          <div className="h-px bg-white dark:bg-slate-900/20 my-2" />
-          <div className="flex justify-between items-center">
-            <span className="font-bold text-lg">Total TTC</span>
-            <div className="flex items-center gap-3">
-              <span className="text-xs bg-emerald-500/20 text-emerald-100 px-2 py-1 rounded-md" title="Estimation de votre marge nette">
-                Marge est. : {margeEstimee.toFixed(2)}€
-              </span>
-              <span className="font-bold text-lg">{totalTTC.toFixed(2)}€</span>
+
+          <details className="mt-4 rounded-xl border border-white/12 bg-white/6 px-4 py-3 md:hidden">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-white [&::-webkit-details-marker]:hidden">
+              Voir le détail du total
+            </summary>
+            <div className="mt-3 space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-white/70">Total HT</span>
+                <span className="font-semibold">{totalHT.toFixed(2)}€</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/70">TVA ({tva}%)</span>
+                <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-white/70">Marge estimée</span>
+                <span className="font-semibold">{margeEstimee.toFixed(2)}€</span>
+              </div>
+            </div>
+          </details>
+
+          <div className="mt-4 hidden space-y-2 md:block">
+            <div className="flex justify-between">
+              <span className="text-white/70 text-sm">Total HT</span>
+              <span className="font-semibold">{totalHT.toFixed(2)}€</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-white/70 text-sm">TVA ({tva}%)</span>
+              <span className="font-semibold">{(totalTTC - totalHT).toFixed(2)}€</span>
+            </div>
+            <div className="h-px bg-white/20 my-2" />
+            <div className="flex items-center justify-between">
+              <span className="text-white/80 text-sm">Marge estimée</span>
+              <span className="font-semibold">{margeEstimee.toFixed(2)}€</span>
             </div>
           </div>
         </div>
@@ -722,8 +828,8 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </motion.button>
         </Link>
         <motion.button whileTap={{ scale: 0.96 }} onClick={handleSaveAndResend} disabled={saving || lignes.length === 0}
-          className="flex-[2] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-brand flex items-center justify-center gap-2 text-sm disabled:opacity-40">
-          {saving ? "Envoi..." : <><Save size={16} /> Sauvegarder & Renvoyer <Send size={14} /></>}
+          className="min-w-0 flex-[1.35] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-brand flex items-center justify-center gap-2 text-sm disabled:opacity-40">
+          {saving ? "Envoi..." : <><Save size={16} /> <span className="sm:hidden">Sauvegarder</span><span className="hidden sm:inline">Sauvegarder & Renvoyer</span> <Send size={14} className="hidden sm:block" /></>}
         </motion.button>
       </div>
 

@@ -583,7 +583,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
       status: process.env.HUNTER_API_KEY ? "healthy" : "inactive",
       detail: process.env.HUNTER_API_KEY
         ? "Recherche email enrichie"
-        : "Mode optionnel non configuré",
+        : "Sourcing automatique indisponible: HUNTER_API_KEY manquant",
     },
   ];
 

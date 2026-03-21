@@ -8,6 +8,7 @@ import {
   FileText,
   Home,
   LifeBuoy,
+  MoreHorizontal,
   Receipt,
   StickyNote,
   Users,
@@ -17,6 +18,14 @@ import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/su
 
 export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin";
 type ClientTone = "violet" | "emerald" | "amber" | "rose" | "slate";
+export type ClientMobileAction = {
+  disabled?: boolean;
+  href?: string;
+  icon: LucideIcon;
+  label: string;
+  onClick?: () => void;
+  tone?: "default" | "danger" | "accent";
+};
 
 const CLIENT_NAV_ITEMS: Array<{
   href: string;
@@ -47,6 +56,18 @@ function toneClasses(tone: ClientTone) {
     case "violet":
     default:
       return "bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-200 dark:ring-violet-400/20";
+  }
+}
+
+function mobileActionToneClasses(tone: ClientMobileAction["tone"] = "default") {
+  switch (tone) {
+    case "accent":
+      return "border-violet-200/80 bg-violet-50/80 text-violet-700 hover:border-violet-300 hover:bg-violet-100 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200 dark:hover:bg-violet-500/14";
+    case "danger":
+      return "border-rose-200/80 bg-rose-50/80 text-rose-700 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200 dark:hover:bg-rose-500/14";
+    case "default":
+    default:
+      return "border-slate-200/80 bg-white/90 text-slate-700 hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white";
   }
 }
 
@@ -139,6 +160,71 @@ export function ClientSupportButton({ compact = false }: { compact?: boolean }) 
   );
 }
 
+export function ClientMobileActionsMenu({
+  buttonLabel = "Plus d'actions",
+  className = "",
+  items,
+  panelAlign = "right",
+  stretch = false,
+}: {
+  buttonLabel?: string;
+  className?: string;
+  items: ClientMobileAction[];
+  panelAlign?: "left" | "right";
+  stretch?: boolean;
+}) {
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <details className={`relative md:hidden ${stretch ? "w-full" : ""} ${className}`}>
+      <summary
+        className={`inline-flex cursor-pointer list-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white [&::-webkit-details-marker]:hidden ${stretch ? "flex w-full" : ""}`}
+        aria-label={buttonLabel}
+      >
+        <MoreHorizontal size={18} />
+      </summary>
+
+      <div
+        className={`absolute top-[calc(100%+0.6rem)] z-50 min-w-[220px] rounded-[1.35rem] border border-slate-200/80 bg-white/96 p-2 shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 ${stretch ? "left-0 right-0 min-w-0" : panelAlign === "left" ? "left-0" : "right-0"}`}
+      >
+        <div className="flex flex-col gap-2">
+          {items.map((item) => {
+            const Icon = item.icon;
+            const commonClasses = `inline-flex w-full items-center gap-3 rounded-[1rem] border px-3 py-3 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${mobileActionToneClasses(item.tone)}`;
+
+            if (item.href) {
+              return (
+                <Link key={item.label} href={item.href} className={commonClasses}>
+                  <Icon size={16} />
+                  <span className="min-w-0 flex-1">{item.label}</span>
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={item.label}
+                type="button"
+                disabled={item.disabled}
+                onClick={(event) => {
+                  event.currentTarget.closest("details")?.removeAttribute("open");
+                  item.onClick?.();
+                }}
+                className={commonClasses}
+              >
+                <Icon size={16} />
+                <span className="min-w-0 flex-1">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </details>
+  );
+}
+
 export function ClientHeroStat({
   detail,
   label,
@@ -182,6 +268,8 @@ export function ClientSubpageShell({
   children,
   description,
   eyebrow = "Espace client",
+  mobilePrimaryAction,
+  mobileSecondaryActions = [],
   showMobileDock = true,
   summary,
   title,
@@ -192,6 +280,8 @@ export function ClientSubpageShell({
   children: ReactNode;
   description: string;
   eyebrow?: string;
+  mobilePrimaryAction?: ReactNode;
+  mobileSecondaryActions?: ClientMobileAction[];
   showMobileDock?: boolean;
   summary?: ReactNode;
   title: string;
@@ -215,7 +305,14 @@ export function ClientSubpageShell({
               <ClientBrandMark showLabel={false} />
             </div>
 
-            {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
+            {mobilePrimaryAction || mobileSecondaryActions.length > 0 ? (
+              <div className="flex shrink-0 items-center gap-2">
+                {mobilePrimaryAction}
+                <ClientMobileActionsMenu items={mobileSecondaryActions} />
+              </div>
+            ) : actions ? (
+              <div className="flex items-center gap-2">{actions}</div>
+            ) : null}
           </div>
 
           <div className="hidden flex-col gap-4 md:flex md:flex-row md:items-center md:justify-between">

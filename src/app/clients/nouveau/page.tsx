@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
   CreationWizardFooter,
@@ -82,7 +82,53 @@ export default function NouveauClientPage() {
       steps={STEPS}
       title="Nouveau client"
       footer={
-        <CreationWizardFooter>
+        <CreationWizardFooter
+          mobileMeta={
+            <div className="text-xs text-slate-500 dark:text-slate-400">
+              Étape {step + 1} sur {STEPS.length}
+            </div>
+          }
+          mobilePrimaryAction={
+            step === 0 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={!canContinue}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Continuer
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void handleSubmit()}
+                disabled={saving || !canContinue}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Save size={16} />
+                {saving ? "Création..." : "Créer le client"}
+              </button>
+            )
+          }
+          mobileSecondaryActions={
+            step === 0
+              ? [
+                  {
+                    href: "/clients",
+                    icon: Users,
+                    label: "Retour aux clients",
+                  },
+                ]
+              : [
+                  {
+                    icon: ArrowLeft,
+                    label: "Revenir à l'identité",
+                    onClick: () => setStep(0),
+                  },
+                ]
+          }
+        >
           <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
             Étape {step + 1} sur {STEPS.length}
           </div>

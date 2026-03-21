@@ -119,7 +119,82 @@ export function LineEditor({
             </div>
           ) : null}
 
-          <div className="rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+          <details className="rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
+            <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                    Configurer le chiffrage
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
+                    {activeTradeDefinition.label}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Packs, starter, métier et IA restent ici pour garder la zone de saisie propre.
+                  </p>
+                </div>
+                <span className="rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                  {starterCount} starter
+                </span>
+              </div>
+            </summary>
+
+            <div className="mt-4 space-y-4 border-t border-slate-200/70 pt-4 dark:border-white/8">
+              <div className="flex flex-wrap gap-2">
+                {TRADE_OPTIONS.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => onSelectTrade(option.key)}
+                    className={`rounded-full px-3 py-2 text-sm font-semibold transition ${
+                      activeTrade === option.key
+                        ? "bg-violet-600 text-white shadow-brand"
+                        : "bg-white/80 text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="grid gap-3">
+                <button
+                  type="button"
+                  onClick={onImportStarter}
+                  disabled={isImportingStarter || !canEdit}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-50"
+                >
+                  {isImportingStarter ? "Import..." : `Importer ${starterCount} lignes starter`}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowBundles(true)}
+                  disabled={!canEdit}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200"
+                >
+                  <Package size={16} />
+                  Packs rapides
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenAI}
+                  disabled={!canEdit}
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                >
+                  <Sparkles size={16} />
+                  Assistant IA
+                </button>
+                <Link
+                  href="/catalogue"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                >
+                  Ouvrir le catalogue
+                </Link>
+              </div>
+            </div>
+          </details>
+
+          <div className="hidden rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:block">
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -171,7 +246,33 @@ export function LineEditor({
             </div>
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
+          <div className="grid gap-3 md:hidden">
+            <div className="relative">
+              <Search
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="text"
+                value={prestationSearch}
+                onChange={(event) => onSearchChange(event.target.value)}
+                placeholder="Rechercher une prestation ou une catégorie..."
+                disabled={!canEdit}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={onAddFreeLine}
+              disabled={!canEdit}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/4 dark:text-slate-100 dark:hover:bg-white/8"
+            >
+              <Plus size={16} />
+              Ligne libre
+            </button>
+          </div>
+
+          <div className="hidden gap-3 md:grid lg:grid-cols-[minmax(0,1fr)_auto_auto_auto]">
             <div className="relative">
               <Search
                 size={18}
