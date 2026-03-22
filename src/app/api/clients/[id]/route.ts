@@ -1,7 +1,36 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError } from "@/lib/http";
+
+type ClientUpdatePayload = {
+  nom?: string;
+  email?: string;
+  telephone?: string;
+  adresse?: string;
+};
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function mapClient(client: {
+  id: string;
+  nom: string;
+  email: string | null;
+  telephone: string | null;
+  adresse: string | null;
+  createdAt: Date;
+}) {
+  return {
+    id: client.id,
+    nom: client.nom,
+    email: client.email || "",
+    telephone: client.telephone || "",
+    adresse: client.adresse || "",
+    dateAjout: client.createdAt.toLocaleDateString("fr-FR"),
+  };
+}
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -11,7 +40,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const p = await params;
     const clientId = p.id;
 
-    // Verify ownership
     const existingClient = await prisma.client.findFirst({
       where: { id: clientId, userId }
     });
@@ -37,9 +65,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const p = await params;
     const clientId = p.id;
-    const body = await request.json();
+    const body = (await request.json()) as ClientUpdatePayload;
 
-    // Verify ownership
     const existingClient = await prisma.client.findFirst({
       where: { id: clientId, userId }
     });
@@ -48,24 +75,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Client non trouvé ou non autorisé" }, { status: 404 });
     }
 
+    const nextNom = normalizeText(body.nom);
+
+    if (!nextNom) {
+      return jsonError("Nom du client requis", 400);
+    }
+
     const updatedClient = await prisma.client.update({
       where: { id: clientId },
       data: {
-        nom: body.nom || existingClient.nom,
-        email: body.email || existingClient.email,
-        telephone: body.telephone || existingClient.telephone,
-        adresse: body.adresse || existingClient.adresse,
+        nom: nextNom,
+        email: normalizeText(body.email),
+        telephone: normalizeText(body.telephone),
+        adresse: normalizeText(body.adresse),
       }
     });
 
-    return NextResponse.json({
-      id: updatedClient.id,
-      nom: updatedClient.nom,
-      email: updatedClient.email,
-      telephone: updatedClient.telephone,
-      adresse: updatedClient.adresse,
-      dateAjout: updatedClient.createdAt.toLocaleDateString("fr-FR")
-    });
+    return NextResponse.json(mapClient(updatedClient));
   } catch (error) {
     return internalServerError("client-put", error, "Impossible de modifier le client");
   }

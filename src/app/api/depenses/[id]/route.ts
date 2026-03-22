@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError } from "@/lib/http";
 
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -11,9 +11,13 @@ export async function DELETE(request: Request, context: { params: Promise<{ id: 
     const resolvedParams = await context.params;
     const { id } = resolvedParams;
 
-    await prisma.depense.deleteMany({
+    const deleted = await prisma.depense.deleteMany({
       where: { id, userId }
     });
+
+    if (deleted.count === 0) {
+      return jsonError("Dépense non trouvée ou non autorisée", 404);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

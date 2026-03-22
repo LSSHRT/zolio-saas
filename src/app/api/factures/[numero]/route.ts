@@ -1,7 +1,13 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError } from "@/lib/http";
+
+const ALLOWED_FACTURE_STATUSES = new Set(["Émise", "Payée", "En retard"]);
+
+type FactureStatusPayload = {
+  statut?: string;
+};
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
@@ -10,10 +16,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
 
     const p = await params;
     const numero = p.numero;
-    const body = await request.json();
-    const { statut } = body;
+    const body = (await request.json()) as FactureStatusPayload;
+    const statut = typeof body.statut === "string" ? body.statut.trim() : "";
 
-    if (!statut) return NextResponse.json({ error: "Statut manquant" }, { status: 400 });
+    if (!statut) {
+      return jsonError("Statut manquant", 400);
+    }
+
+    if (!ALLOWED_FACTURE_STATUSES.has(statut)) {
+      return jsonError("Statut de facture invalide", 400);
+    }
 
     const facture = await prisma.facture.findFirst({ where: { numero, userId } });
     if (!facture) return NextResponse.json({ error: "Facture non trouvée" }, { status: 404 });
