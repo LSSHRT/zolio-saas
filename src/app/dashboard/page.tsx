@@ -32,6 +32,7 @@ import { CallBackProps, STATUS, Step } from "react-joyride";
 import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { MobileDialog } from "@/components/mobile-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ClientBrandMark,
@@ -339,9 +340,46 @@ function DashboardNotificationsMenu({
   onClose: () => void;
   showNotifications: boolean;
 }) {
+  const signalList = dashboardSignals.length ? (
+    <div className="space-y-3">
+      {dashboardSignals.map((signal) => {
+        const classes = toneClasses(signal.tone);
+        const content = (
+          <div className="rounded-[1.4rem] border border-slate-200/70 bg-white/70 p-3 dark:border-white/8 dark:bg-white/4">
+            <div className="flex items-start gap-3">
+              <div className={`mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+                {renderSignalIcon(signal.tone)}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{signal.description}</p>
+              </div>
+            </div>
+          </div>
+        );
+
+        return signal.href ? (
+          <Link key={signal.id} href={signal.href} onClick={onClose}>
+            {content}
+          </Link>
+        ) : (
+          <div key={signal.id}>{content}</div>
+        );
+      })}
+    </div>
+  ) : (
+    <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+      <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucune alerte prioritaire</p>
+      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+        Le cockpit est calme pour le moment. Revenez plus tard pour les prochains signaux.
+      </p>
+    </div>
+  );
+
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={onToggle}
         className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
         aria-label="Notifications"
@@ -352,46 +390,34 @@ function DashboardNotificationsMenu({
         )}
       </button>
 
-      {showNotifications && (
-        <div className="client-panel absolute right-0 top-14 z-50 w-[min(92vw,24rem)] rounded-[1.75rem] p-4 shadow-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-slate-950 dark:text-white">Attention du jour</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Les points qui méritent un coup d&apos;œil.
-              </p>
+      {showNotifications ? (
+        <>
+          <div className="md:hidden">
+            <MobileDialog
+              open={showNotifications}
+              onClose={onClose}
+              title="Attention du jour"
+              description="Retrouvez ici les points qui méritent un coup d'œil sans comprimer le cockpit mobile."
+            >
+              {signalList}
+            </MobileDialog>
+          </div>
+
+          <div className="hidden md:block">
+            <div className="client-panel absolute right-0 top-14 z-50 w-[min(92vw,24rem)] rounded-[1.75rem] p-4 shadow-2xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Attention du jour</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Les points qui méritent un coup d&apos;œil.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">{signalList}</div>
             </div>
           </div>
-          <div className="mt-4 space-y-3">
-            {dashboardSignals.map((signal) => {
-              const classes = toneClasses(signal.tone);
-              const content = (
-                <div className="rounded-[1.4rem] border border-slate-200/70 bg-white/70 p-3 dark:border-white/8 dark:bg-white/4">
-                  <div className="flex items-start gap-3">
-                    <div className={`mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
-                      {renderSignalIcon(signal.tone)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        {signal.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-
-              return signal.href ? (
-                <Link key={signal.id} href={signal.href} onClick={onClose}>
-                  {content}
-                </Link>
-              ) : (
-                <div key={signal.id}>{content}</div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+        </>
+      ) : null}
     </div>
   );
 }
@@ -468,11 +494,17 @@ export default function DashboardPage() {
   const objectifActif =
     Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;
   const [showNotifications, setShowNotifications] = useState(false);
+  const [objectifDialogOpen, setObjectifDialogOpen] = useState(false);
+  const [objectifDraft, setObjectifDraft] = useState(() => objectifInitial.toString());
   const [runTour, setRunTour] = useState(() => {
     if (typeof window === "undefined") return false;
     return !localStorage.getItem("zolio_has_seen_tour");
   });
   const [currentHour] = useState(() => new Date().getHours());
+
+  useEffect(() => {
+    setObjectifDraft(objectifActif.toString());
+  }, [objectifActif]);
 
   const handleBootstrapTrade = async () => {
     if (!user || !selectedTradeDefinition) return;
@@ -514,26 +546,29 @@ export default function DashboardPage() {
   };
 
   const handleUpdateObjectif = async () => {
-    const newVal = prompt(
-      "Entrez votre nouvel objectif mensuel (en €) :",
-      objectifActif.toString(),
-    );
-    const parsed = Number(newVal);
+    const parsed = Number(objectifDraft.replace(',', '.').trim());
 
-    if (newVal && !Number.isNaN(parsed) && parsed > 0) {
-      setObjectif(parsed);
-      try {
-        if (user) {
-          await user.update({
-            unsafeMetadata: {
-              ...user.unsafeMetadata,
-              objectifMensuel: parsed,
-            },
-          });
-        }
-      } catch {
-        alert("Erreur lors de la sauvegarde de l'objectif.");
+    if (Number.isNaN(parsed) || parsed <= 0) {
+      toast.error("Entrez un objectif mensuel valide.");
+      return;
+    }
+
+    setObjectif(parsed);
+
+    try {
+      if (user) {
+        await user.update({
+          unsafeMetadata: {
+            ...user.unsafeMetadata,
+            objectifMensuel: parsed,
+          },
+        });
       }
+
+      setObjectifDialogOpen(false);
+      toast.success("Objectif mensuel mis à jour.");
+    } catch {
+      toast.error("Erreur lors de la sauvegarde de l'objectif.");
     }
   };
 
@@ -939,7 +974,7 @@ export default function DashboardPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="mt-4 grid gap-3">
                   <Link
                     href="/nouveau-devis"
                     className="tour-nouveau-devis inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand"
@@ -947,13 +982,26 @@ export default function DashboardPage() {
                     <Plus size={16} />
                     Nouveau devis
                   </Link>
-                  <Link
-                    href="/devis"
-                    className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                  >
-                    <FileText size={16} />
-                    Mes devis
-                  </Link>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Link
+                      href="/devis"
+                      className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      <FileText size={16} />
+                      Mes devis
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setObjectifDraft(objectifActif.toString());
+                        setObjectifDialogOpen(true);
+                      }}
+                      className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      <Pencil size={16} />
+                      Objectif
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.section>
@@ -1085,7 +1133,11 @@ export default function DashboardPage() {
                 </div>
 
                 <button
-                  onClick={handleUpdateObjectif}
+                  type="button"
+                  onClick={() => {
+                    setObjectifDraft(objectifActif.toString());
+                    setObjectifDialogOpen(true);
+                  }}
                   className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
                 >
                   <Pencil size={14} />
@@ -1478,7 +1530,11 @@ export default function DashboardPage() {
                   <div className="mt-3 flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
                     <span>{formatCurrency(CA_TTC)} encaissable / produit</span>
                     <button
-                      onClick={handleUpdateObjectif}
+                      type="button"
+                      onClick={() => {
+                        setObjectifDraft(objectifActif.toString());
+                        setObjectifDialogOpen(true);
+                      }}
                       className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
                     >
                       <Pencil size={14} />
@@ -1698,6 +1754,60 @@ export default function DashboardPage() {
       </div>
 
       <ClientMobileDock active="dashboard" />
+
+      <MobileDialog
+        open={objectifDialogOpen}
+        onClose={() => setObjectifDialogOpen(false)}
+        title="Objectif mensuel"
+        description="Ajustez votre cap sans quitter le cockpit. Le montant est enregistré pour vos prochains retours de progression."
+        tone="accent"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setObjectifDialogOpen(false)}
+              className="inline-flex items-center justify-center rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:text-white"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={handleUpdateObjectif}
+              className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-2.5 text-sm font-semibold text-white shadow-brand"
+            >
+              Enregistrer
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="rounded-[1.4rem] border border-violet-200/70 bg-violet-50/80 px-4 py-4 dark:border-violet-400/20 dark:bg-violet-500/10">
+            <p className="text-[11px] uppercase tracking-[0.24em] text-violet-700 dark:text-violet-100">
+              Cap actuel
+            </p>
+            <p className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+              {formatCurrency(objectifActif)}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Mettez à jour votre objectif pour ajuster le suivi de progression affiché dans le dashboard.
+            </p>
+          </div>
+
+          <label className="block text-sm font-semibold text-slate-950 dark:text-white">
+            Nouvel objectif mensuel (€)
+            <input
+              type="number"
+              inputMode="decimal"
+              min="1"
+              step="100"
+              value={objectifDraft}
+              onChange={(event) => setObjectifDraft(event.target.value)}
+              className="mt-2 w-full rounded-[1.25rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-950 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+              placeholder="5000"
+            />
+          </label>
+        </div>
+      </MobileDialog>
     </div>
   );
 }
