@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { generateDevisPDF } from "@/lib/generatePdf";
@@ -6,6 +7,7 @@ import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
+import { generateSequentialDocumentNumber } from "@/lib/document-number";
 
 type LignePayload = {
   isOptional?: boolean;
@@ -155,12 +157,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Client requis pour créer le devis" }, { status: 400 });
     }
 
-    const currentYear = new Date().getFullYear();
-    const count = await prisma.devis.count({
-      where: { userId, numero: { startsWith: `DEV-${currentYear}-` } },
-    });
-    const numero = `DEV-${currentYear}-${String(count + 1).padStart(3, "0")}`;
-
     const parsedLignes = parseLignes(lignes);
     const tvaGlobale = Number.parseFloat(String(tva || 0));
     const remiseGlobale = Number.parseFloat(String(remise || 0));
@@ -173,20 +169,49 @@ export async function POST(request: Request) {
         return sum + ligneTotal * (1 + ligneTva / 100);
       }, 0) * (1 - remiseGlobale / 100);
 
-    const devis = await prisma.devis.create({
-      data: {
+    let devis;
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const numero = await generateSequentialDocumentNumber({
+        prefix: "DEV",
         userId,
-        numero,
-        client: { connect: { id: finalClientId } },
-        lignes: parsedLignes,
-        remise: remiseGlobale,
-        acompte: Number.parseFloat(String(acompte || 0)),
-        tva: tvaGlobale,
-        photos: parsePhotos(photos),
-        statut: "En attente",
-      },
-      include: { client: true },
-    });
+        findLatest: (basePrefix) =>
+          prisma.devis.findFirst({
+            where: { userId, numero: { startsWith: basePrefix } },
+            orderBy: { numero: "desc" },
+            select: { numero: true },
+          }),
+      });
+
+      try {
+        devis = await prisma.devis.create({
+          data: {
+            userId,
+            numero,
+            client: { connect: { id: finalClientId } },
+            lignes: parsedLignes,
+            remise: remiseGlobale,
+            acompte: Number.parseFloat(String(acompte || 0)),
+            tva: tvaGlobale,
+            photos: parsePhotos(photos),
+            statut: "En attente",
+          },
+          include: { client: true },
+        });
+        break;
+      } catch (error) {
+        const isUniqueConflict =
+          error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+
+        if (!isUniqueConflict || attempt === 4) {
+          throw error;
+        }
+      }
+    }
+
+    if (!devis) {
+      throw new Error("Impossible de créer le devis");
+    }
 
     const shouldAttemptSend = sendNow !== false;
     let emailSent = false;

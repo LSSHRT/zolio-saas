@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError } from "@/lib/http";
+import { generateSequentialDocumentNumber } from "@/lib/document-number";
 
 export async function POST(request: Request) {
   try {
@@ -16,28 +18,50 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
 
-    const year = new Date().getFullYear();
-    const count = await prisma.facture.count({
-      where: { userId, numero: { startsWith: `FAC-${year}` } },
-    });
-
-    const numeroFacture = `FAC-${year}-${String(count + 1).padStart(3, "0")}`;
     const date = new Date();
+    let numeroFacture = "";
 
-    await prisma.facture.create({
-      data: {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      numeroFacture = await generateSequentialDocumentNumber({
+        prefix: "FAC",
         userId,
-        numero: numeroFacture,
-        nomClient: client.nom,
-        emailClient: client.email || null,
-        totalHT: Number(totalHT),
-        tva: Number(tva),
-        totalTTC: Number(totalTTC),
-        statut: "Émise",
-        devisRef: devisNumero || null,
-        date,
-      },
-    });
+        findLatest: (basePrefix) =>
+          prisma.facture.findFirst({
+            where: { userId, numero: { startsWith: basePrefix } },
+            orderBy: { numero: "desc" },
+            select: { numero: true },
+          }),
+      });
+
+      try {
+        await prisma.facture.create({
+          data: {
+            userId,
+            numero: numeroFacture,
+            nomClient: client.nom,
+            emailClient: client.email || null,
+            totalHT: Number(totalHT),
+            tva: Number(tva),
+            totalTTC: Number(totalTTC),
+            statut: "Émise",
+            devisRef: devisNumero || null,
+            date,
+          },
+        });
+        break;
+      } catch (error) {
+        const isUniqueConflict =
+          error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+
+        if (!isUniqueConflict || attempt === 4) {
+          throw error;
+        }
+      }
+    }
+
+    if (!numeroFacture) {
+      throw new Error("Impossible de créer la facture");
+    }
 
     const formattedDate = date.toLocaleDateString("fr-FR");
     const pdfBuffer = await generateFacturePDF({

@@ -50,6 +50,8 @@ model Devis {
   dateFin     DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([userId, numero])
 }
 
 model Depense {
@@ -77,6 +79,8 @@ model Facture {
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@unique([userId, numero])
 }
 
 model Note {
