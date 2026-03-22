@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
+import { generateSequentialDocumentNumber } from "@/lib/document-number";
 
 export async function POST(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
@@ -12,31 +14,53 @@ export async function POST(request: Request, context: { params: Promise<{ numero
     const { numero } = resolvedParams;
 
     const devis = await prisma.devis.findFirst({
-      where: { numero, userId }
+      where: { numero, userId },
     });
 
     if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
 
-    const currentYear = new Date().getFullYear();
-    const count = await prisma.devis.count({
-       where: { userId, numero: { startsWith: `DEV-${currentYear}-` } }
-    });
-    const nextNum = count + 1;
-    const nextNumero = `DEV-${currentYear}-${String(nextNum).padStart(3, "0")}`;
+    let newDevis;
 
-    const newDevis = await prisma.devis.create({
-      data: {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const nextNumero = await generateSequentialDocumentNumber({
+        prefix: "DEV",
         userId,
-        numero: nextNumero,
-        clientId: devis.clientId,
-        lignes: devis.lignes ? JSON.parse(JSON.stringify(devis.lignes)) : [],
-        remise: devis.remise,
-        acompte: devis.acompte,
-        tva: devis.tva,
-        photos: devis.photos ? JSON.parse(JSON.stringify(devis.photos)) : [],
-        statut: "En attente"
+        findLatest: (basePrefix) =>
+          prisma.devis.findFirst({
+            where: { userId, numero: { startsWith: basePrefix } },
+            orderBy: { numero: "desc" },
+            select: { numero: true },
+          }),
+      });
+
+      try {
+        newDevis = await prisma.devis.create({
+          data: {
+            userId,
+            numero: nextNumero,
+            clientId: devis.clientId,
+            lignes: devis.lignes ? JSON.parse(JSON.stringify(devis.lignes)) : [],
+            remise: devis.remise,
+            acompte: devis.acompte,
+            tva: devis.tva,
+            photos: devis.photos ? JSON.parse(JSON.stringify(devis.photos)) : [],
+            statut: "En attente",
+          },
+        });
+        break;
+      } catch (error) {
+        const isUniqueConflict =
+          error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+
+        if (!isUniqueConflict || attempt === 4) {
+          throw error;
+        }
       }
-    });
+    }
+
+    if (!newDevis) {
+      throw new Error("Impossible de dupliquer le devis");
+    }
 
     return NextResponse.json({ success: true, numero: newDevis.numero });
   } catch (error) {
