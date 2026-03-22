@@ -3,13 +3,83 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
+
+type DevisLine = {
+  isOptional?: boolean;
+  prixUnitaire?: number | string;
+  quantite?: number | string;
+  totalLigne?: number | string;
+  tva?: number | string;
+};
+
+type UpdateDevisPayload = {
+  acompte?: unknown;
+  client?: unknown;
+  clientId?: unknown;
+  lignes?: unknown;
+  photos?: unknown;
+  remise?: unknown;
+  statut?: unknown;
+  tva?: unknown;
+};
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function parseNumber(value: unknown, fallback = 0) {
+  const parsed = Number.parseFloat(String(value ?? fallback));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseLignes(value: unknown): DevisLine[] {
+  const parsed = typeof value === "string" ? JSON.parse(value) : value;
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+
+  return parsed.filter((line): line is DevisLine => Boolean(line) && typeof line === "object");
+}
+
+function parsePhotos(value: unknown) {
+  const parsed = typeof value === "string" ? JSON.parse(value) : value;
+  if (!Array.isArray(parsed)) {
+    return [];
+  }
+
+  return parsed.filter((photo): photo is string => typeof photo === "string");
+}
+
+function getLineTotal(line: DevisLine) {
+  if (line.totalLigne !== undefined && line.totalLigne !== null) {
+    return parseNumber(line.totalLigne);
+  }
+
+  return parseNumber(line.quantite) * parseNumber(line.prixUnitaire);
+}
+
+function computeTotals(lines: DevisLine[], defaultTva: number, remise: number) {
+  const activeLines = lines.filter((line) => !line.isOptional);
+  const totalHTBase = activeLines.reduce((sum, line) => sum + getLineTotal(line), 0);
+  const totalHT = totalHTBase * (1 - remise / 100);
+  const totalTTC =
+    activeLines.reduce((sum, line) => {
+      const lineTva = parseNumber(line.tva, defaultTva);
+      return sum + getLineTotal(line) * (1 + lineTva / 100);
+    }, 0) *
+    (1 - remise / 100);
+
+  return { totalHT, totalTTC };
+}
 
 export async function GET(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
@@ -19,27 +89,14 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       include: { client: true },
     });
 
-    if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
+    if (!devis) {
+      return jsonError("Devis introuvable", 404);
+    }
 
-    const parsedLignes =
-      typeof devis.lignes === "string" ? JSON.parse(devis.lignes) : (devis.lignes || []);
+    const parsedLignes = parseLignes(devis.lignes);
     const remiseGlobale = devis.remise || 0;
     const tvaGlobale = devis.tva || 0;
-
-    const totalHTBase = parsedLignes
-      .filter((line: any) => !line.isOptional)
-      .reduce((sum: number, line: any) => {
-        return sum + (line.totalLigne || line.quantite * line.prixUnitaire || 0);
-      }, 0);
-    const totalHT = totalHTBase * (1 - remiseGlobale / 100);
-
-    const totalTTC = parsedLignes
-      .filter((line: any) => !line.isOptional)
-      .reduce((sum: number, line: any) => {
-        const ligneTva = Number.parseFloat(line.tva || tvaGlobale.toString()) || 0;
-        const ligneTotal = line.totalLigne || line.quantite * line.prixUnitaire || 0;
-        return sum + ligneTotal * (1 + ligneTva / 100);
-      }, 0) * (1 - remiseGlobale / 100);
+    const { totalHT, totalTTC } = computeTotals(parsedLignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
       numero: devis.numero,
@@ -57,7 +114,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       totalTTC: totalTTC.toFixed(2),
       signature: devis.signature || "",
       signingToken: createPublicDevisToken(devis.numero, userId),
-      photos: typeof devis.photos === "string" ? JSON.parse(devis.photos) : (devis.photos || []),
+      photos: parsePhotos(devis.photos),
       dateDebut: devis.dateDebut ? devis.dateDebut.toISOString().split("T")[0] : "",
       dateFin: devis.dateFin ? devis.dateFin.toISOString().split("T")[0] : "",
     });
@@ -73,60 +130,55 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
 export async function PUT(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
-    const body = await request.json();
-    const { client, clientId, lignes, remise, acompte, tva, statut, photos } = body;
+    const body = (await request.json()) as UpdateDevisPayload;
+    const lignes = parseLignes(body.lignes);
+    const photos = parsePhotos(body.photos);
+    const tvaNum = parseNumber(body.tva);
+    const remiseNum = parseNumber(body.remise);
+    const acompteNum = parseNumber(body.acompte);
+    const statut = normalizeText(body.statut) || "En attente";
+    const clientName = normalizeText(body.client);
+    let finalClientId = normalizeText(body.clientId) || null;
 
-    let finalClientId = clientId;
-    if (!finalClientId && client) {
+    if (!finalClientId && clientName) {
       const existingClient = await prisma.client.findFirst({
-        where: { userId, nom: client },
+        where: { userId, nom: clientName },
       });
       if (existingClient) {
         finalClientId = existingClient.id;
       } else {
         const newClient = await prisma.client.create({
-          data: { userId, nom: client },
+          data: { userId, nom: clientName },
         });
         finalClientId = newClient.id;
       }
     }
 
-    const parsedLignesForTotals =
-      typeof lignes === "string" ? JSON.parse(lignes) : (lignes || []);
-    const tvaNum = Number.parseFloat(tva || 0);
-    const remiseNum = Number.parseFloat(remise || 0);
-
-    const totalHTBase = parsedLignesForTotals
-      .filter((line: any) => !line.isOptional)
-      .reduce((sum: number, line: any) => {
-        return sum + (line.totalLigne || line.quantite * line.prixUnitaire || 0);
-      }, 0);
-    const totalHT = totalHTBase * (1 - remiseNum / 100);
-    const totalTTC = parsedLignesForTotals
-      .filter((line: any) => !line.isOptional)
-      .reduce((sum: number, line: any) => {
-        const ligneTva = Number.parseFloat(line.tva || tvaNum.toString()) || 0;
-        const ligneTotal = line.totalLigne || line.quantite * line.prixUnitaire || 0;
-        return sum + ligneTotal * (1 + ligneTva / 100);
-      }, 0) * (1 - remiseNum / 100);
-
-    await prisma.devis.updateMany({
+    const { totalHT, totalTTC } = computeTotals(lignes, tvaNum, remiseNum);
+    const updateData = {
+      ...(finalClientId ? { clientId: finalClientId } : {}),
+      lignes,
+      remise: remiseNum,
+      acompte: acompteNum,
+      tva: tvaNum,
+      statut,
+      signature: "",
+      photos,
+    };
+    const result = await prisma.devis.updateMany({
       where: { numero, userId },
-      data: {
-        clientId: finalClientId,
-        lignes: typeof lignes === "string" ? JSON.parse(lignes) : lignes,
-        remise: remiseNum,
-        acompte: Number.parseFloat(acompte || 0),
-        tva: tvaNum,
-        statut: statut || "En attente",
-        signature: "",
-        photos: typeof photos === "string" ? JSON.parse(photos) : (photos || []),
-      },
+      data: updateData,
     });
+
+    if (result.count === 0) {
+      return jsonError("Devis introuvable", 404);
+    }
 
     return NextResponse.json({
       success: true,
@@ -145,14 +197,20 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
 export async function DELETE(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
 
-    await prisma.devis.deleteMany({
+    const result = await prisma.devis.deleteMany({
       where: { numero, userId },
     });
+
+    if (result.count === 0) {
+      return jsonError("Devis introuvable", 404);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
