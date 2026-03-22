@@ -31,7 +31,7 @@ interface LigneDevis { nomPrestation: string; quantite: number; unite: string; p
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prix: number; cout: number; }
 interface GeneratedAILine { designation: string; quantite: number; unite: string; prixUnitaire: number; }
 interface GenerateDevisResponse { error?: string; lignes?: GeneratedAILine[]; }
-interface DevisResult { totalTTC?: string | number; emailSent?: boolean; }
+interface DevisResult { totalTTC?: string | number; emailSent?: boolean; emailSkippedReason?: string; error?: string; }
 interface DevisInfo {
   numero?: string;
   nomClient?: string;
@@ -282,16 +282,17 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       const res = await fetch(`/api/devis/${numero}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lignes, tva, acompte, remise, photos }),
+        body: JSON.stringify({ lignes, tva, acompte, remise, photos, resendEmail: true }),
       });
+      const data = (await res.json()) as DevisResult;
       if (!res.ok) {
-        throw new Error("Impossible d’enregistrer les modifications");
+        throw new Error(data.error || "Impossible d’enregistrer les modifications");
       }
-      const data = await res.json();
       setResult(data);
       setSuccess(true);
-    } catch {
-      toast.error("Erreur lors de la modification du devis.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Erreur lors de la modification du devis.";
+      toast.error(message);
     } finally {
       setSaving(false);
     }
@@ -458,7 +459,17 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         </motion.p>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}
           className="text-slate-400 text-center text-xs mb-8">
-          {result?.emailSent ? "📧 Email renvoyé au client avec le nouveau PDF" : "Enregistré dans Google Sheets (email non configuré)"}
+          {result?.emailSent
+            ? "Email renvoyé au client avec le nouveau PDF."
+            : result?.emailSkippedReason === "missing_client_email"
+              ? "Devis enregistré, mais aucun email client n’est renseigné."
+              : result?.emailSkippedReason === "smtp_not_configured"
+                ? "Devis enregistré, mais l’envoi email n’est pas configuré."
+                : result?.emailSkippedReason === "send_failed"
+                  ? "Devis enregistré, mais l’email n’a pas pu être envoyé."
+                  : result?.emailSkippedReason === "user_unavailable"
+                    ? "Devis enregistré, mais le compte utilisateur est indisponible pour l’envoi."
+                    : "Devis enregistré sans renvoi email."}
         </motion.p>
         <Link href="/devis">
           <motion.button whileTap={{ scale: 0.96 }} className="px-8 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg">

@@ -1,9 +1,12 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { internalServerError, jsonError } from "@/lib/http";
+import { generateDevisPDF } from "@/lib/generatePdf";
+import { sendDevisEmail } from "@/lib/sendEmail";
+import { getCompanyProfile } from "@/lib/company";
+import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
 
 type DevisLine = {
@@ -21,6 +24,7 @@ type UpdateDevisPayload = {
   lignes?: unknown;
   photos?: unknown;
   remise?: unknown;
+  resendEmail?: unknown;
   statut?: unknown;
   tva?: unknown;
 };
@@ -71,7 +75,30 @@ function computeTotals(lines: DevisLine[], defaultTva: number, remise: number) {
     }, 0) *
     (1 - remise / 100);
 
-  return { totalHT, totalTTC };
+  return { totalHT, totalHTBase, totalTTC };
+}
+
+function normalizePdfLignes(lines: DevisLine[], defaultTva: number) {
+  return lines.map((line) => ({
+    isOptional: Boolean(line.isOptional),
+    nomPrestation:
+      typeof (line as { nomPrestation?: unknown }).nomPrestation === "string" &&
+      (line as { nomPrestation?: string }).nomPrestation?.trim()
+        ? (line as { nomPrestation: string }).nomPrestation.trim()
+        : "Prestation",
+    prixUnitaire: parseNumber(line.prixUnitaire),
+    quantite: parseNumber(line.quantite, 1),
+    totalLigne: getLineTotal(line),
+    tva: String(parseNumber(line.tva, defaultTva)),
+    unite:
+      typeof (line as { unite?: unknown }).unite === "string" && (line as { unite?: string }).unite?.trim()
+        ? (line as { unite: string }).unite.trim()
+        : "U",
+  }));
+}
+
+function getEmailSkipReason(configured: { host?: string; user?: string; pass?: string }) {
+  return configured.host && configured.user && configured.pass ? undefined : "smtp_not_configured";
 }
 
 export async function GET(request: Request, context: { params: Promise<{ numero: string }> }) {
@@ -143,6 +170,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     const remiseNum = parseNumber(body.remise);
     const acompteNum = parseNumber(body.acompte);
     const statut = normalizeText(body.statut) || "En attente";
+    const resendEmail = body.resendEmail === true;
     const clientName = normalizeText(body.client);
     let finalClientId = normalizeText(body.clientId) || null;
 
@@ -160,7 +188,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
       }
     }
 
-    const { totalHT, totalTTC } = computeTotals(lignes, tvaNum, remiseNum);
+    const { totalHT, totalHTBase, totalTTC } = computeTotals(lignes, tvaNum, remiseNum);
     const updateData = {
       ...(finalClientId ? { clientId: finalClientId } : {}),
       lignes,
@@ -180,10 +208,99 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
       return jsonError("Devis introuvable", 404);
     }
 
+    const updatedDevis = await prisma.devis.findFirst({
+      where: { numero, userId },
+      include: { client: true },
+    });
+
+    if (!updatedDevis) {
+      return jsonError("Devis introuvable", 404);
+    }
+
+    let emailSent = false;
+    let emailSkippedReason: string | undefined = resendEmail ? undefined : "creation_only";
+
+    if (resendEmail) {
+      try {
+        const user = await currentUser();
+
+        if (!user) {
+          emailSkippedReason = "user_unavailable";
+        } else if (!updatedDevis.client?.email) {
+          emailSkippedReason = "missing_client_email";
+        } else {
+          const smtpConfig = {
+            host: process.env.SMTP_HOST,
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          };
+          const smtpSkipReason = getEmailSkipReason(smtpConfig);
+
+          if (smtpSkipReason) {
+            emailSkippedReason = smtpSkipReason;
+          } else {
+            const client = await clerkClient();
+            const freshUser = await client.users.getUser(user.id);
+            const entreprise = getCompanyProfile(freshUser);
+            const pdfBuffer = await generateDevisPDF({
+              numeroDevis: updatedDevis.numero,
+              date: updatedDevis.date.toLocaleDateString("fr-FR"),
+              client: {
+                nom: updatedDevis.client?.nom || "",
+                email: updatedDevis.client?.email || "",
+                telephone: updatedDevis.client?.telephone || "",
+                adresse: updatedDevis.client?.adresse || "",
+              },
+              entreprise: {
+                nom: entreprise.nom,
+                email: entreprise.email,
+                telephone: entreprise.telephone,
+                adresse: entreprise.adresse,
+                siret: entreprise.siret,
+                color: entreprise.color,
+                logo: entreprise.logo,
+                iban: entreprise.iban,
+                bic: entreprise.bic,
+                legal: entreprise.legal,
+                statut: entreprise.statut,
+                assurance: entreprise.assurance,
+                cgv: entreprise.cgv,
+              },
+              lignes: normalizePdfLignes(lignes, tvaNum),
+              totalHT: totalHT.toFixed(2),
+              tva: String(tvaNum),
+              totalTTC: totalTTC.toFixed(2),
+              acompte: acompteNum.toString(),
+              remise: remiseNum.toString(),
+              statut,
+              signatureBase64: "",
+              photos,
+            });
+
+            await sendDevisEmail(
+              updatedDevis.client.email,
+              updatedDevis.client.nom,
+              updatedDevis.numero,
+              totalTTC.toFixed(2),
+              pdfBuffer,
+            );
+
+            emailSent = true;
+          }
+        }
+      } catch (error) {
+        logServerError("devis-detail-put-email", error);
+        emailSkippedReason = "send_failed";
+      }
+    }
+
     return NextResponse.json({
       success: true,
       totalHT: totalHT.toFixed(2),
+      totalHTBase: totalHTBase.toFixed(2),
       totalTTC: totalTTC.toFixed(2),
+      emailSent,
+      emailSkippedReason,
     });
   } catch (error) {
     return internalServerError(
