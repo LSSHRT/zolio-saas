@@ -103,7 +103,7 @@ export function CreationWizardShell({
                 {steps[currentStep]?.description}
               </p>
 
-              <div className="grid grid-cols-3 gap-2">
+              <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
                 {steps.map((step, index) => {
                   const isActive = index === currentStep;
                   const isDone = index < currentStep;
@@ -111,7 +111,7 @@ export function CreationWizardShell({
                   return (
                     <div
                       key={step.title}
-                      className={`rounded-[1.2rem] border px-3 py-3 text-left ${
+                      className={`min-w-[10.5rem] snap-start rounded-[1.2rem] border px-3 py-3 text-left ${
                         isActive
                           ? "border-violet-300/50 bg-violet-500/10 dark:border-violet-400/20 dark:bg-violet-500/12"
                           : "border-slate-200/70 bg-white/70 dark:border-white/8 dark:bg-white/4"

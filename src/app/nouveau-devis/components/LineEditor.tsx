@@ -26,6 +26,7 @@ type LineEditorProps = {
   activeTrade: TradeKey;
   activeTradeDefinition: TradeDefinition;
   canEdit: boolean;
+  expressPrestations: Prestation[];
   filteredPrestations: Prestation[];
   hasClient: boolean;
   isImportingStarter: boolean;
@@ -60,6 +61,7 @@ export function LineEditor({
   activeTrade,
   activeTradeDefinition,
   canEdit,
+  expressPrestations,
   filteredPrestations,
   hasClient,
   isImportingStarter,
@@ -248,6 +250,44 @@ export function LineEditor({
           </div>
 
           <div className="grid gap-3 md:hidden">
+            {expressPrestations.length > 0 ? (
+              <div className="rounded-[1.6rem] border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-400/20 dark:bg-violet-500/10">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
+                      Devis express
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                      Ajoutez vos prestations les plus proches en un tap.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-violet-700 ring-1 ring-violet-200 dark:bg-white/8 dark:text-violet-200 dark:ring-violet-400/20">
+                    {expressPrestations.length} rapide{expressPrestations.length > 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-2 min-[390px]:grid-cols-2">
+                  {expressPrestations.map((prestation) => (
+                    <button
+                      key={`express-${prestation.id}`}
+                      type="button"
+                      onClick={() => onAddPrestation(prestation)}
+                      disabled={!canEdit}
+                      className="rounded-[1.2rem] border border-white/70 bg-white/90 px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                    >
+                      <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{prestation.nom}</p>
+                      <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                        {prestation.categorie}
+                      </p>
+                      <p className="mt-2 text-sm font-semibold text-violet-700 dark:text-violet-200">
+                        {prestation.prix}€ / {prestation.unite}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div className="relative">
               <Search
                 size={18}
@@ -512,7 +552,7 @@ export function LineEditor({
                           />
                         </label>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid gap-3 min-[390px]:grid-cols-2">
                           <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                             Quantité
                             <input
@@ -602,14 +642,14 @@ export function LineEditor({
       </ClientSectionCard>
 
       {showBundles ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-[#0d1328]">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/65 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+          <div className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#0d1328] sm:max-h-[80vh] sm:rounded-[2rem] sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
                   Packs rapides
                 </p>
-                <h3 className="mt-2 text-2xl font-semibold text-slate-950 dark:text-white">
+                <h3 className="mt-2 text-xl font-semibold text-slate-950 dark:text-white sm:text-2xl">
                   {activeTradeDefinition.label}
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
@@ -626,7 +666,7 @@ export function LineEditor({
               </button>
             </div>
 
-            <div className="mt-5 grid gap-3">
+            <div className="mt-5 grid flex-1 gap-3 overflow-y-auto pr-1">
               {tradeBundles.map((bundle) => (
                 <button
                   key={bundle.nom}

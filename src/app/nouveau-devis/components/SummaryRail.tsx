@@ -76,7 +76,7 @@ export function SummaryRail({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
-                Résumé & actions
+                Résumé &amp; actions
               </p>
               <h2 className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
                 Le devis se valide ici
@@ -111,6 +111,43 @@ export function SummaryRail({
                 Aucun client sélectionné. Le cockpit reste visible, mais les CTA finaux resteront en attente.
               </p>
             )}
+          </div>
+
+          <div className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                  Action express
+                </p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  Si tout est prêt, envoyez le devis tout de suite depuis ce récapitulatif mobile.
+                </p>
+              </div>
+              <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                {hasLines ? "Prêt" : "En cours"}
+              </span>
+            </div>
+
+            <div className="mt-4 grid gap-3 min-[390px]:grid-cols-2">
+              <button
+                type="button"
+                onClick={onSaveOnly}
+                disabled={!canSubmit || saveBusy}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+              >
+                <Save size={16} />
+                {saveBusy ? "Sauvegarde..." : "Enregistrer"}
+              </button>
+              <button
+                type="button"
+                onClick={onCreateAndSend}
+                disabled={!canSubmit || sendBusy}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <Send size={16} />
+                {sendBusy ? "Envoi..." : "Envoyer"}
+              </button>
+            </div>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
@@ -235,7 +272,7 @@ export function SummaryRail({
               </div>
 
               {photos.length > 0 ? (
-                <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="mt-4 grid grid-cols-2 gap-3 min-[420px]:grid-cols-3">
                   {photos.map((photo, index) => (
                     <div
                       key={`${photo.slice(0, 32)}-${index}`}

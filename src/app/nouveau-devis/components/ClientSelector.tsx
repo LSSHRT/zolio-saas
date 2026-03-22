@@ -12,6 +12,7 @@ type ClientSelectorProps = {
   onNewClientChange: (field: keyof QuickClientForm, value: string) => void;
   onSearchChange: (value: string) => void;
   onSelectClient: (client: Client) => void;
+  recentClients: Client[];
   searchValue: string;
   selectedClient: Client | null;
   showNewClient: boolean;
@@ -28,6 +29,7 @@ export function ClientSelector({
   onNewClientChange,
   onSearchChange,
   onSelectClient,
+  recentClients,
   searchValue,
   selectedClient,
   showNewClient,
@@ -140,6 +142,40 @@ export function ClientSelector({
 
         {!selectedClient ? (
           <>
+            {!showNewClient && recentClients.length > 0 ? (
+              <div className="grid gap-3 rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                      Devis express
+                    </p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                      Reprenez un client récent en un tap pour lancer le devis plus vite.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                    {recentClients.length} rapide{recentClients.length > 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                <div className="grid gap-2 min-[380px]:grid-cols-2 xl:grid-cols-4">
+                  {recentClients.map((client) => (
+                    <button
+                      key={`recent-${client.id}`}
+                      type="button"
+                      onClick={() => onSelectClient(client)}
+                      className="rounded-[1.2rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 dark:border-white/10 dark:bg-white/6 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
+                    >
+                      <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{client.nom}</p>
+                      <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
+                        {client.telephone || client.email || "Client récent"}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div className="relative">
               <Search
                 size={18}

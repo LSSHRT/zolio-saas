@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, FileText, Rocket, Save, Send } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
@@ -35,6 +35,105 @@ import type {
 } from "./types";
 
 const TRIAL_QUOTE_LIMIT = 3;
+const DRAFT_STORAGE_PREFIX = "zolio:nouveau-devis:draft:";
+
+type CreateDevisDraft = {
+  acompte: string;
+  lignes: LigneDevis[];
+  photos: string[];
+  remise: string;
+  savedAt: string;
+  selectedClientId: string;
+  selectedTrade: TradeKey;
+  step: number;
+  tva: string;
+  version: 1;
+};
+
+function getDraftStorageKey(userId?: string | null) {
+  return userId ? `${DRAFT_STORAGE_PREFIX}${userId}` : null;
+}
+
+function isDraftEmpty(draft: CreateDevisDraft) {
+  return (
+    draft.selectedClientId === "" &&
+    draft.lignes.length === 0 &&
+    draft.photos.length === 0 &&
+    draft.acompte === "" &&
+    draft.remise === "" &&
+    draft.step === 0
+  );
+}
+
+function parseDraft(value: string): CreateDevisDraft | null {
+  try {
+    const parsedDraft = JSON.parse(value) as Partial<CreateDevisDraft>;
+    if (parsedDraft.version !== 1 || !Array.isArray(parsedDraft.lignes)) {
+      return null;
+    }
+
+    const normalizedStep = typeof parsedDraft.step === "number" ? parsedDraft.step : 0;
+    const normalizedTrade =
+      typeof parsedDraft.selectedTrade === "string" && getTradeDefinition(parsedDraft.selectedTrade)
+        ? (parsedDraft.selectedTrade as TradeKey)
+        : DEFAULT_TRADE;
+
+    return {
+      acompte: typeof parsedDraft.acompte === "string" ? parsedDraft.acompte : "",
+      lignes: parsedDraft.lignes,
+      photos: Array.isArray(parsedDraft.photos) ? parsedDraft.photos.filter((photo): photo is string => typeof photo === "string") : [],
+      remise: typeof parsedDraft.remise === "string" ? parsedDraft.remise : "",
+      savedAt: typeof parsedDraft.savedAt === "string" ? parsedDraft.savedAt : new Date().toISOString(),
+      selectedClientId: typeof parsedDraft.selectedClientId === "string" ? parsedDraft.selectedClientId : "",
+      selectedTrade: normalizedTrade,
+      step: normalizedStep,
+      tva: typeof parsedDraft.tva === "string" ? parsedDraft.tva : "10",
+      version: 1,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildDraftSnapshot({
+  acompte,
+  lignes,
+  photos,
+  remise,
+  selectedClientId,
+  selectedTrade,
+  step,
+  tva,
+}: Omit<CreateDevisDraft, "savedAt" | "version">): CreateDevisDraft {
+  return {
+    acompte,
+    lignes,
+    photos,
+    remise,
+    savedAt: new Date().toISOString(),
+    selectedClientId,
+    selectedTrade,
+    step,
+    tva,
+    version: 1,
+  };
+}
+
+function formatDraftSavedAt(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return null;
+  }
+
+  return parsedDate.toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 const WIZARD_STEPS: CreationWizardStep[] = [
   {
@@ -130,6 +229,10 @@ export default function NouveauDevisPage() {
   const [newClient, setNewClient] = useState<QuickClientForm>(EMPTY_CLIENT_FORM);
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
+  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const draftReadyRef = useRef(false);
+  const lastDraftFingerprintRef = useRef("");
 
   const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
   const activeTrade = companyTrade?.key ?? selectedTrade;
@@ -141,12 +244,46 @@ export default function NouveauDevisPage() {
     () => clients.find((client) => client.id === selectedClientId) ?? null,
     [clients, selectedClientId],
   );
+  const draftStorageKey = getDraftStorageKey(user?.id);
 
   useEffect(() => {
     if (companyTrade) {
       setSelectedTrade(companyTrade.key);
     }
   }, [companyTrade]);
+
+  useEffect(() => {
+    if (!draftStorageKey || typeof window === "undefined") {
+      draftReadyRef.current = true;
+      return;
+    }
+
+    const rawDraft = window.localStorage.getItem(draftStorageKey);
+    if (!rawDraft) {
+      draftReadyRef.current = true;
+      return;
+    }
+
+    const parsedDraft = parseDraft(rawDraft);
+    if (!parsedDraft) {
+      window.localStorage.removeItem(draftStorageKey);
+      draftReadyRef.current = true;
+      return;
+    }
+
+    setSelectedClientId(parsedDraft.selectedClientId);
+    setLignes(parsedDraft.lignes);
+    setTva(parsedDraft.tva);
+    setAcompte(parsedDraft.acompte);
+    setRemise(parsedDraft.remise);
+    setPhotos(parsedDraft.photos);
+    setSelectedTrade(parsedDraft.selectedTrade);
+    setStep(Math.min(parsedDraft.step, WIZARD_STEPS.length - 1));
+    setDraftSavedAt(parsedDraft.savedAt);
+    setDraftStatus("saved");
+    lastDraftFingerprintRef.current = rawDraft;
+    draftReadyRef.current = true;
+  }, [draftStorageKey]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -200,6 +337,46 @@ export default function NouveauDevisPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!draftStorageKey || typeof window === "undefined" || !draftReadyRef.current) {
+      return;
+    }
+
+    const draft = buildDraftSnapshot({
+      acompte,
+      lignes,
+      photos,
+      remise,
+      selectedClientId,
+      selectedTrade,
+      step,
+      tva,
+    });
+
+    if (isDraftEmpty(draft)) {
+      window.localStorage.removeItem(draftStorageKey);
+      lastDraftFingerprintRef.current = "";
+      setDraftStatus("idle");
+      setDraftSavedAt(null);
+      return;
+    }
+
+    const nextFingerprint = JSON.stringify(draft);
+    if (nextFingerprint === lastDraftFingerprintRef.current) {
+      return;
+    }
+
+    setDraftStatus("saving");
+    const timeout = window.setTimeout(() => {
+      window.localStorage.setItem(draftStorageKey, nextFingerprint);
+      lastDraftFingerprintRef.current = nextFingerprint;
+      setDraftStatus("saved");
+      setDraftSavedAt(draft.savedAt);
+    }, 250);
+
+    return () => window.clearTimeout(timeout);
+  }, [acompte, draftStorageKey, lignes, photos, remise, selectedClientId, selectedTrade, step, tva]);
+
   const filteredClients = useMemo(() => {
     const search = searchClient.trim().toLowerCase();
     if (!search) {
@@ -213,6 +390,8 @@ export default function NouveauDevisPage() {
     );
   }, [clients, searchClient]);
 
+  const recentClients = useMemo(() => clients.slice(0, 4), [clients]);
+
   const filteredPrestations = useMemo(() => {
     const search = searchPrestation.trim().toLowerCase();
     if (!search) {
@@ -225,6 +404,11 @@ export default function NouveauDevisPage() {
       ),
     );
   }, [prestations, searchPrestation]);
+
+  const expressPrestations = useMemo(() => {
+    const catalog = searchPrestation.trim() ? filteredPrestations : prestations;
+    return catalog.slice(0, 4);
+  }, [filteredPrestations, prestations, searchPrestation]);
 
   const totalHTBase = lignes
     .filter((ligne) => !ligne.isOptional)
@@ -256,6 +440,7 @@ export default function NouveauDevisPage() {
     selectedClient && !selectedClient.email
       ? "Ce client n’a pas d’email. Le devis sera bien créé, mais l’envoi sera naturellement ignoré."
       : null;
+  const draftSavedLabel = formatDraftSavedAt(draftSavedAt);
 
   const addLineFromPrestation = (prestation: Prestation) => {
     setLignes((current) => [
@@ -541,6 +726,13 @@ export default function NouveauDevisPage() {
         throw new Error(payload.error || "Impossible de créer le devis");
       }
 
+      if (draftStorageKey && typeof window !== "undefined") {
+        window.localStorage.removeItem(draftStorageKey);
+        lastDraftFingerprintRef.current = "";
+        setDraftStatus("idle");
+        setDraftSavedAt(null);
+      }
+
       router.push(`/devis/${payload.numero}?${buildCreationQuery(mode, payload)}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erreur lors de la création du devis";
@@ -576,9 +768,18 @@ export default function NouveauDevisPage() {
       footer={
         <CreationWizardFooter
           mobileMeta={
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              Étape {step + 1} sur {WIZARD_STEPS.length}
-              {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
+            <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
+              <div>
+                Étape {step + 1} sur {WIZARD_STEPS.length}
+                {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
+              </div>
+              <div className="font-medium text-violet-700 dark:text-violet-200">
+                {draftStatus === "saving"
+                  ? "Brouillon en cours de sauvegarde…"
+                  : draftSavedLabel
+                    ? `Brouillon enregistré à ${draftSavedLabel}`
+                    : "Brouillon local prêt dès la première saisie"}
+              </div>
             </div>
           }
           mobilePrimaryAction={
@@ -637,9 +838,18 @@ export default function NouveauDevisPage() {
                   ]
           }
         >
-          <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
-            Étape {step + 1} sur {WIZARD_STEPS.length}
-            {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
+          <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+            <div>
+              Étape {step + 1} sur {WIZARD_STEPS.length}
+              {step === 0 ? " • sélection du client" : step === 1 ? " • composition du devis" : " • validation finale"}
+            </div>
+            <div className="font-medium text-violet-700 dark:text-violet-200">
+              {draftStatus === "saving"
+                ? "Brouillon en cours de sauvegarde…"
+                : draftSavedLabel
+                  ? `Brouillon enregistré à ${draftSavedLabel}`
+                  : "Brouillon local prêt dès la première saisie"}
+            </div>
           </div>
 
           <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
@@ -733,6 +943,7 @@ export default function NouveauDevisPage() {
                 }
                 onSearchChange={setSearchClient}
                 onSelectClient={(client) => setSelectedClientId(client.id)}
+                recentClients={recentClients}
                 onToggleNewClient={() => setShowNewClient((current) => !current)}
                 searchValue={searchClient}
                 selectedClient={selectedClient}
@@ -753,6 +964,7 @@ export default function NouveauDevisPage() {
                 activeTrade={activeTrade}
                 activeTradeDefinition={activeTradeDefinition}
                 canEdit={canEdit}
+                expressPrestations={expressPrestations}
                 filteredPrestations={filteredPrestations}
                 hasClient={hasClient}
                 isImportingStarter={isImportingStarter}
