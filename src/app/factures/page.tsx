@@ -24,6 +24,7 @@ import {
   ClientSubpageShell,
   type ClientMobileAction,
 } from "@/components/client-shell";
+import { MobileDialog } from "@/components/mobile-dialog";
 
 interface Facture {
   numero: string;
@@ -58,6 +59,8 @@ export default function FacturesPage() {
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
+  const [pendingDeleteFacture, setPendingDeleteFacture] = useState<Facture | null>(null);
+  const [confirmBulkDeleteOpen, setConfirmBulkDeleteOpen] = useState(false);
 
   const googleReviewLink =
     (user?.unsafeMetadata?.companyGoogleReview as string) ||
@@ -104,14 +107,13 @@ export default function FacturesPage() {
   );
 
   const handleDelete = async (numero: string) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir supprimer cette facture ?")) return;
-
     setDeleting(numero);
     try {
       const response = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
       if (response.ok) {
         mutate(factures.filter((facture: Facture) => facture.numero !== numero), false);
         toast.success("Facture supprimée");
+        setPendingDeleteFacture(null);
       } else {
         toast.error("Erreur lors de la suppression de la facture");
       }
@@ -192,8 +194,6 @@ export default function FacturesPage() {
   };
 
   const handleBulkDelete = async () => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${selectedIds.size} élément(s) ?`)) return;
-
     setIsDeletingBulk(true);
     let successCount = 0;
 
@@ -209,6 +209,10 @@ export default function FacturesPage() {
     if (successCount > 0) {
       mutate(factures.filter((facture: Facture) => !selectedIds.has(facture.numero)), false);
       setSelectedIds(new Set());
+      setConfirmBulkDeleteOpen(false);
+      toast.success(`${successCount} facture${successCount > 1 ? "s" : ""} supprimée${successCount > 1 ? "s" : ""}`);
+    } else {
+      toast.error("Aucune facture n'a pu être supprimée");
     }
 
     setIsDeletingBulk(false);
@@ -274,7 +278,7 @@ export default function FacturesPage() {
       disabled: deleting === facture.numero,
       icon: Trash2,
       label: deleting === facture.numero ? "Suppression..." : "Supprimer",
-      onClick: () => void handleDelete(facture.numero),
+      onClick: () => setPendingDeleteFacture(facture),
       tone: "danger",
     },
   ];
@@ -384,7 +388,7 @@ export default function FacturesPage() {
         />
       }
     >
-      <ClientSectionCard className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+      <ClientSectionCard className="grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -396,8 +400,8 @@ export default function FacturesPage() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4">
-          <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
+        <div className="grid gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4 sm:grid-cols-[auto_1fr] sm:items-center">
+          <label className="flex min-h-11 items-center gap-2 text-sm text-slate-600 dark:text-slate-300 cursor-pointer">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-slate-300 text-brand-violet focus:ring-violet-500"
@@ -414,19 +418,29 @@ export default function FacturesPage() {
           </label>
 
           {selectedIds.size > 0 ? (
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={isDeletingBulk}
-              className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
-            >
-              <Trash2 size={15} />
-              {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
-            </button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:text-right">
+                {selectedIds.size} facture{selectedIds.size > 1 ? "s" : ""} prête{selectedIds.size > 1 ? "s" : ""} à être supprimée{selectedIds.size > 1 ? "s" : ""}
+              </p>
+              <button
+                type="button"
+                onClick={() => setConfirmBulkDeleteOpen(true)}
+                disabled={isDeletingBulk}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+              >
+                <Trash2 size={15} />
+                {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
+              </button>
+            </div>
           ) : (
-            <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Exportez vos données ou relancez vos règlements depuis cette vue.
-            </span>
+            <div className="space-y-1 sm:text-right">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                Actions rapides
+              </p>
+              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                Exportez vos données ou relancez vos règlements depuis cette vue.
+              </span>
+            </div>
           )}
         </div>
       </ClientSectionCard>
@@ -467,9 +481,19 @@ export default function FacturesPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {filtered.length} facture{filtered.length > 1 ? "s" : ""}
-                </p>
+                <div className="flex flex-col gap-2 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                      Liste active
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                      {filtered.length} facture{filtered.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs sm:text-right">
+                    Ouvrez une carte pour encaisser, relancer ou nettoyer votre vue sans quitter le mobile.
+                  </p>
+                </div>
 
                 {filtered.map((facture: Facture, index: number) => {
                   const late = isLate(facture);
@@ -511,7 +535,7 @@ export default function FacturesPage() {
                           </div>
                         </div>
 
-                        <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div className="mt-4 grid gap-3 sm:grid-cols-2">
                           <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
                             <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                               Réf devis
@@ -528,8 +552,8 @@ export default function FacturesPage() {
                               {facture.totalTTC}€
                             </p>
                           </div>
-                          <div className="col-span-2 rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
-                            <div className="flex items-center justify-between gap-3">
+                          <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20 sm:col-span-2">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                               <div>
                                 <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                                   Total HT
@@ -539,7 +563,7 @@ export default function FacturesPage() {
                                 </p>
                               </div>
                               {late && facture.statut !== "Payée" ? (
-                                <span className="inline-flex rounded-full bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-300/30 dark:text-rose-200 dark:ring-rose-400/20">
+                                <span className="inline-flex self-start rounded-full bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold text-rose-700 ring-1 ring-rose-300/30 dark:text-rose-200 dark:ring-rose-400/20">
                                   À traiter vite
                                 </span>
                               ) : null}
@@ -547,12 +571,12 @@ export default function FacturesPage() {
                           </div>
                         </div>
 
-                        <div className="mt-4 flex items-center gap-2">
+                        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
                           {facture.statut === "Payée" ? (
                             <button
                               type="button"
                               onClick={() => handleReviewRequest(facture)}
-                              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 sm:flex-1"
                               title="Demander un avis Google"
                             >
                               <MessageSquareQuote size={15} />
@@ -563,7 +587,7 @@ export default function FacturesPage() {
                               type="button"
                               onClick={() => handleMarkAsPaid(facture.numero)}
                               disabled={markingPaid === facture.numero}
-                              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50"
+                              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-100 disabled:opacity-50 sm:flex-1"
                               title="Marquer comme payée"
                             >
                               <BadgeCheck size={15} />
@@ -574,7 +598,7 @@ export default function FacturesPage() {
                           <ClientMobileActionsMenu
                             buttonLabel={`Actions ${facture.numero}`}
                             items={getMobileInvoiceActions(facture)}
-                            panelAlign="left"
+                            stretch
                           />
                         </div>
                       </div>
@@ -668,7 +692,7 @@ export default function FacturesPage() {
 
                           <button
                             type="button"
-                            onClick={() => handleDelete(facture.numero)}
+                            onClick={() => setPendingDeleteFacture(facture)}
                             disabled={deleting === facture.numero}
                             className="inline-flex items-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:opacity-50 dark:border-rose-400/20 dark:bg-transparent dark:text-rose-300"
                             title="Supprimer la facture"
@@ -686,6 +710,72 @@ export default function FacturesPage() {
           </>
         )}
       </ClientSectionCard>
+
+      <MobileDialog
+        open={Boolean(pendingDeleteFacture)}
+        onClose={() => setPendingDeleteFacture(null)}
+        title="Supprimer cette facture ?"
+        description={
+          pendingDeleteFacture
+            ? `La facture ${pendingDeleteFacture.numero} de ${pendingDeleteFacture.nomClient} sera supprimée définitivement.`
+            : undefined
+        }
+        tone="danger"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setPendingDeleteFacture(null)}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={() => pendingDeleteFacture && void handleDelete(pendingDeleteFacture.numero)}
+              disabled={Boolean(pendingDeleteFacture && deleting === pendingDeleteFacture.numero)}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+            >
+              {pendingDeleteFacture && deleting === pendingDeleteFacture.numero ? "Suppression..." : "Supprimer"}
+            </button>
+          </>
+        }
+      >
+        <div className="rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200">
+          Retirez cette facture seulement si vous n&apos;en avez plus besoin dans votre suivi d&apos;encaissement.
+        </div>
+      </MobileDialog>
+
+      <MobileDialog
+        open={confirmBulkDeleteOpen}
+        onClose={() => setConfirmBulkDeleteOpen(false)}
+        title="Supprimer la sélection ?"
+        description={`Vous allez retirer ${selectedIds.size} facture${selectedIds.size > 1 ? "s" : ""} de votre suivi.`}
+        tone="danger"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setConfirmBulkDeleteOpen(false)}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleBulkDelete()}
+              disabled={isDeletingBulk}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+            >
+              {isDeletingBulk ? "Suppression..." : "Confirmer la suppression"}
+            </button>
+          </>
+        }
+      >
+        <div className="rounded-2xl border border-rose-200/70 bg-rose-50/80 px-4 py-3 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200">
+          Cette action permet de nettoyer rapidement la vue mobile, mais elle reste définitive.
+        </div>
+      </MobileDialog>
     </ClientSubpageShell>
   );
 }
