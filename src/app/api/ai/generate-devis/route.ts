@@ -1,95 +1,215 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError, logServerError } from "@/lib/http";
+
+type GenerateDevisPayload = {
+  description?: unknown;
+};
+
+type GeneratedAILine = {
+  designation: string;
+  prixUnitaire: number;
+  quantite: number;
+  unite: string;
+};
+
+type GeneratedAILineCandidate = {
+  designation?: unknown;
+  lignes?: unknown;
+  prixUnitaire?: unknown;
+  quantite?: unknown;
+  unite?: unknown;
+};
+
+const GEMINI_MODELS = ["gemini-3-flash-preview", "gemini-2.5-flash", "gemini-2.0-flash"] as const;
+const MAX_DESCRIPTION_LENGTH = 4000;
+const MAX_GENERATED_LINES = 20;
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function parsePositiveNumber(value: unknown) {
+  const parsed = typeof value === "number" ? value : Number.parseFloat(String(value));
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    return null;
+  }
+
+  return Number(parsed.toFixed(2));
+}
+
+function extractJsonPayload(responseText: string) {
+  const cleaned = responseText.replace(/```json/gi, "").replace(/```/g, "").trim();
+
+  if (cleaned.startsWith("[") || cleaned.startsWith("{")) {
+    return cleaned;
+  }
+
+  const arrayStart = cleaned.indexOf("[");
+  const arrayEnd = cleaned.lastIndexOf("]");
+  if (arrayStart >= 0 && arrayEnd > arrayStart) {
+    return cleaned.slice(arrayStart, arrayEnd + 1);
+  }
+
+  const objectStart = cleaned.indexOf("{");
+  const objectEnd = cleaned.lastIndexOf("}");
+  if (objectStart >= 0 && objectEnd > objectStart) {
+    return cleaned.slice(objectStart, objectEnd + 1);
+  }
+
+  return cleaned;
+}
+
+function normalizeGeneratedLine(candidate: GeneratedAILineCandidate) {
+  const designation = normalizeText(candidate.designation);
+  const unite = normalizeText(candidate.unite) || "u";
+  const quantite = parsePositiveNumber(candidate.quantite);
+  const prixUnitaire = parsePositiveNumber(candidate.prixUnitaire);
+
+  if (!designation || quantite === null || prixUnitaire === null) {
+    return null;
+  }
+
+  return {
+    designation,
+    quantite,
+    unite,
+    prixUnitaire,
+  } satisfies GeneratedAILine;
+}
+
+function parseGeneratedLines(responseText: string) {
+  const parsed = JSON.parse(extractJsonPayload(responseText)) as unknown;
+
+  const rawLines = Array.isArray(parsed)
+    ? parsed
+    : parsed && typeof parsed === "object" && Array.isArray((parsed as GeneratedAILineCandidate).lignes)
+      ? (parsed as { lignes: unknown[] }).lignes
+      : [];
+
+  return rawLines
+    .map((line) =>
+      line && typeof line === "object"
+        ? normalizeGeneratedLine(line as GeneratedAILineCandidate)
+        : null,
+    )
+    .filter((line): line is GeneratedAILine => line !== null)
+    .slice(0, MAX_GENERATED_LINES);
+}
+
+async function resolveGeminiApiKey() {
+  let geminiApiKey = normalizeText(process.env.GEMINI_API_KEY);
+  const adminEmail = normalizeText(process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL);
+
+  if (!adminEmail) {
+    return geminiApiKey;
+  }
+
+  try {
+    const client = await clerkClient();
+    const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
+    const customKey = normalizeText(adminUsers.data[0]?.publicMetadata?.customGeminiKey);
+
+    if (customKey) {
+      geminiApiKey = customKey;
+    }
+  } catch (error) {
+    logServerError("ai-generate-devis-admin-key", error);
+  }
+
+  return geminiApiKey;
+}
+
+async function generateGeminiContent(genAI: GoogleGenerativeAI, prompt: string) {
+  let lastError: unknown = null;
+
+  for (const modelName of GEMINI_MODELS) {
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text().trim();
+
+      if (responseText) {
+        return responseText;
+      }
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  throw lastError ?? new Error("Aucun modèle Gemini disponible");
+}
+
+async function incrementAiUsageCount(userId: string) {
+  try {
+    const client = await clerkClient();
+    const user = await client.users.getUser(userId);
+    const currentCount = typeof user.publicMetadata?.aiDevisCount === "number" ? user.publicMetadata.aiDevisCount : 0;
+
+    await client.users.updateUserMetadata(userId, {
+      publicMetadata: {
+        aiDevisCount: currentCount + 1,
+      },
+    });
+  } catch (error) {
+    logServerError("ai-generate-devis-counter", error);
+  }
+}
 
 export async function POST(req: NextRequest) {
   try {
     const { userId } = getAuth(req);
     if (!userId) {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+      return jsonError("Non autorisé", 401);
     }
 
-    let geminiApiKey = process.env.GEMINI_API_KEY || "";
-
-    // Tentative de récupération de la clé API personnalisée de l'Admin
+    let body: GenerateDevisPayload;
     try {
-      const adminEmail = process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-      if (adminEmail) {
-        const client = await clerkClient();
-        const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
-        if (adminUsers.data.length > 0) {
-          const customKey = adminUsers.data[0].publicMetadata?.customGeminiKey as string;
-          if (customKey && customKey.trim() !== "") {
-            geminiApiKey = customKey;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn("Impossible de récupérer la clé personnalisée de l'admin:", e);
+      body = (await req.json()) as GenerateDevisPayload;
+    } catch {
+      return jsonError("Payload invalide", 400);
     }
 
-    if (!geminiApiKey) {
-      return NextResponse.json({ error: "Clé API Gemini non configurée" }, { status: 500 });
-    }
-
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-
-    const { description } = await req.json();
+    const description = normalizeText(body.description);
     if (!description) {
-      return NextResponse.json({ error: "Description manquante" }, { status: 400 });
+      return jsonError("Description manquante", 400);
+    }
+
+    if (description.length > MAX_DESCRIPTION_LENGTH) {
+      return jsonError(`Description trop longue (${MAX_DESCRIPTION_LENGTH} caractères max)`, 400);
+    }
+
+    const geminiApiKey = await resolveGeminiApiKey();
+    if (!geminiApiKey) {
+      return jsonError("Clé API Gemini non configurée", 500);
     }
 
     const prompt = `Tu es un assistant expert pour les artisans du bâtiment.
-Génère une liste de prestations pour un devis basé sur la description suivante : "${description}".
-Réponds UNIQUEMENT au format JSON avec un tableau d'objets, sans aucun texte autour, sans bloc markdown.
-Chaque objet doit avoir ces propriétés exactes :
+Génère une liste de prestations pour un devis basé sur la description suivante : ${JSON.stringify(description)}.
+Réponds UNIQUEMENT au format JSON avec soit un tableau d'objets, soit un objet de la forme {"lignes": [...]}, sans aucun texte autour et sans bloc markdown.
+Chaque ligne doit avoir ces propriétés exactes :
 - "designation" (string, description claire et professionnelle de la tâche)
-- "quantite" (number)
+- "quantite" (number strictement positif)
 - "unite" (string, ex: "m2", "h", "u", "forfait")
-- "prixUnitaire" (number, estimation réaliste du prix en euros)
+- "prixUnitaire" (number strictement positif, estimation réaliste du prix en euros)
+Limite la réponse à ${MAX_GENERATED_LINES} lignes maximum.`;
 
-Exemple:
-[
-  { "designation": "Dépose de l'existant", "quantite": 1, "unite": "forfait", "prixUnitaire": 350 },
-  { "designation": "Fourniture et pose de carrelage mural", "quantite": 15, "unite": "m2", "prixUnitaire": 65 }
-]`;
+    const genAI = new GoogleGenerativeAI(geminiApiKey);
+    const responseText = await generateGeminiContent(genAI, prompt);
 
-    let result;
+    let lignes: GeneratedAILine[];
     try {
-      const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-      result = await model.generateContent(prompt);
-    } catch (e: any) {
-      console.warn("Modèle gemini-3-flash-preview introuvable ou erreur, tentative avec gemini-2.5-flash...", e.message);
-      try {
-        const fallbackModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        result = await fallbackModel.generateContent(prompt);
-      } catch (e2: any) {
-        console.warn("Modèle gemini-2.5-flash introuvable, tentative avec gemini-2.0-flash...", e2.message);
-        const fallbackModel2 = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        result = await fallbackModel2.generateContent(prompt);
-      }
+      lignes = parseGeneratedLines(responseText);
+    } catch {
+      return jsonError("La réponse IA n’est pas un JSON exploitable", 502);
     }
-    const responseText = result.response.text();
-    
-    // Nettoyer la réponse au cas où il y aurait du markdown
-    const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
-    
-    const lignes = JSON.parse(cleanedText);
 
-    // Incrémenter le compteur IA pour l'utilisateur
-    try {
-      const client = await clerkClient();
-      const user = await client.users.getUser(userId);
-      const currentCount = (user.publicMetadata?.aiDevisCount as number) || 0;
-      await client.users.updateUserMetadata(userId, {
-        publicMetadata: {
-          aiDevisCount: currentCount + 1
-        }
-      });
-    } catch (e) {
-      console.error("Erreur incrementation compteur IA:", e);
+    if (lignes.length === 0) {
+      return jsonError("Aucune ligne exploitable n’a été générée", 502);
     }
+
+    await incrementAiUsageCount(userId);
 
     return NextResponse.json({ lignes });
   } catch (error) {

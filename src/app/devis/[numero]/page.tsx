@@ -30,7 +30,7 @@ interface LigneDevis { nomPrestation: string; quantite: number; unite: string; p
 
 interface Prestation { id: string; categorie: string; nom: string; unite: string; prix: number; cout: number; }
 interface GeneratedAILine { designation: string; quantite: number; unite: string; prixUnitaire: number; }
-interface GenerateDevisResponse { lignes?: GeneratedAILine[]; }
+interface GenerateDevisResponse { error?: string; lignes?: GeneratedAILine[]; }
 interface DevisResult { totalTTC?: string | number; emailSent?: boolean; }
 interface DevisInfo {
   numero?: string;
@@ -208,24 +208,29 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         body: JSON.stringify({ description: aiPrompt })
       });
       const data = (await res.json()) as GenerateDevisResponse;
-      if (data.lignes && Array.isArray(data.lignes)) {
-        const newLignes = data.lignes.map((line) => ({
-          nomPrestation: line.designation,
-          quantite: line.quantite,
-          unite: line.unite,
-          prixUnitaire: line.prixUnitaire,
-          totalLigne: line.quantite * line.prixUnitaire,
-          tva: tva,
-          isOptional: false
-        }));
-        setLignes([...lignes, ...newLignes]);
-        setShowAIModal(false);
-        setAiPrompt("");
-        toast.success(`${newLignes.length} ligne(s) ajoutée(s) avec l’IA.`);
+      if (!res.ok) {
+        throw new Error(data.error || "Impossible de générer les lignes IA");
       }
+      if (!Array.isArray(data.lignes) || data.lignes.length === 0) {
+        throw new Error(data.error || "Aucune ligne exploitable n’a été générée");
+      }
+      const generatedLines = data.lignes;
+      const newLignes = generatedLines.map((line) => ({
+        nomPrestation: line.designation,
+        quantite: line.quantite,
+        unite: line.unite,
+        prixUnitaire: line.prixUnitaire,
+        totalLigne: line.quantite * line.prixUnitaire,
+        tva: tva,
+        isOptional: false
+      }));
+      setLignes((current) => [...current, ...newLignes]);
+      setShowAIModal(false);
+      setAiPrompt("");
+      toast.success(`${newLignes.length} ligne(s) ajoutée(s) avec l’IA.`);
     } catch (error) {
-      console.error("Erreur IA", error);
-      toast.error("Erreur lors de la génération avec l’IA.");
+      const message = error instanceof Error ? error.message : "Erreur lors de la génération avec l’IA.";
+      toast.error(message);
     } finally {
       setIsGeneratingAI(false);
     }

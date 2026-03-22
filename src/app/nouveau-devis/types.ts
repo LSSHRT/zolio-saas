@@ -34,6 +34,7 @@ export interface GeneratedAILine {
 }
 
 export interface GenerateDevisResponse {
+  error?: string;
   lignes?: GeneratedAILine[];
 }
 

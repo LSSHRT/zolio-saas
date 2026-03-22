@@ -612,30 +612,34 @@ export default function NouveauDevisPage() {
       const payload = (await response.json()) as GenerateDevisResponse;
 
       if (!response.ok) {
-        throw new Error("Impossible de générer les lignes IA");
+        throw new Error(payload.error || "Impossible de générer les lignes IA");
       }
 
-      if (payload.lignes && Array.isArray(payload.lignes)) {
-        setLignes((current) => [
-          ...current,
-          ...payload.lignes!.map((line) => ({
-            nomPrestation: line.designation,
-            quantite: line.quantite,
-            unite: line.unite,
-            prixUnitaire: line.prixUnitaire,
-            totalLigne: line.quantite * line.prixUnitaire,
-            tva,
-            isOptional: false,
-          })),
-        ]);
+      if (!Array.isArray(payload.lignes) || payload.lignes.length === 0) {
+        throw new Error(payload.error || "Aucune ligne exploitable n’a été générée");
       }
+
+      const generatedLines = payload.lignes;
+
+      setLignes((current) => [
+        ...current,
+        ...generatedLines.map((line) => ({
+          nomPrestation: line.designation,
+          quantite: line.quantite,
+          unite: line.unite,
+          prixUnitaire: line.prixUnitaire,
+          totalLigne: line.quantite * line.prixUnitaire,
+          tva,
+          isOptional: false,
+        })),
+      ]);
 
       setShowAIModal(false);
       setAiPrompt("");
-      toast.success("Les lignes IA ont été ajoutées au devis.");
+      toast.success(`${generatedLines.length} ligne(s) IA ajoutée(s) au devis.`);
     } catch (error) {
-      console.error("Erreur IA", error);
-      toast.error("Erreur lors de la génération avec l’IA.");
+      const message = error instanceof Error ? error.message : "Erreur lors de la génération avec l’IA.";
+      toast.error(message);
     } finally {
       setIsGeneratingAI(false);
     }
