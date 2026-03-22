@@ -3,6 +3,11 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const PUBLIC_DEVIS_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 const PUBLIC_DEVIS_TOKEN_PURPOSE = "public-devis-signature";
 
+function resolvePublicDevisSecret() {
+  const secret = process.env.PUBLIC_DEVIS_LINK_SECRET || process.env.CLERK_SECRET_KEY;
+  return typeof secret === "string" && secret.trim().length > 0 ? secret : undefined;
+}
+
 type PublicDevisPayload = {
   exp: number;
   numero: string;
@@ -11,7 +16,7 @@ type PublicDevisPayload = {
 };
 
 function getPublicDevisSecret() {
-  const secret = process.env.PUBLIC_DEVIS_LINK_SECRET;
+  const secret = resolvePublicDevisSecret();
 
   if (!secret) {
     throw new Error("PUBLIC_DEVIS_LINK_SECRET is not set");
@@ -53,7 +58,7 @@ function signValue(value: string) {
 }
 
 export function createPublicDevisToken(numero: string, userId: string) {
-  if (!process.env.PUBLIC_DEVIS_LINK_SECRET) {
+  if (!resolvePublicDevisSecret()) {
     return null;
   }
 
