@@ -5,8 +5,14 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { ArrowLeft, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
+import { Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  ClientHeroStat,
+  ClientMobileOverview,
+  ClientSectionCard,
+  ClientSubpageShell,
+} from "@/components/client-shell";
 
 interface Depense {
   categorie: string;
@@ -64,6 +70,9 @@ export default function DepensesPage() {
       return depenseDate.getMonth() === now.getMonth() && depenseDate.getFullYear() === now.getFullYear();
     }).length;
   }, [filteredDepenses]);
+  const latestExpenseLabel = filteredDepenses[0]?.date
+    ? new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(new Date(filteredDepenses[0].date))
+    : "Aucune";
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Voulez-vous vraiment supprimer cette dépense ?")) {
@@ -91,103 +100,161 @@ export default function DepensesPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm p-4 md:p-8 space-y-6">
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-br from-violet-500/8 via-fuchsia-500/6 to-orange-400/4 dark:from-violet-600/15 dark:via-fuchsia-500/10 dark:to-transparent blur-3xl -z-10 pointer-events-none" />
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/dashboard" className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-            <ArrowLeft size={20} className="text-slate-600 dark:text-slate-300" />
-          </Link>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
-            <Receipt className="text-brand-fuchsia" /> Dépenses & Achats
-          </h1>
-        </div>
-
+    <ClientSubpageShell
+      title="Dépenses & achats"
+      description="Suivez vos achats, retrouvez vite une dépense terrain et gardez un résumé clair même sur un écran vertical compact."
+      eyebrow="Pilotage dépenses"
+      activeNav="tools"
+      mobilePrimaryAction={
         <Link
           href="/depenses/nouveau"
-          className="bg-gradient-zolio hover:opacity-90 text-white p-2 md:px-4 md:py-2 rounded-full md:rounded-xl shadow-sm flex items-center gap-2 transition-all"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
         >
-          <Plus size={20} />
-          <span className="hidden md:block">Nouvelle dépense</span>
+          <Plus size={16} />
+          Ajouter
         </Link>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <p className="text-xs text-slate-500 dark:text-slate-400">Total TTC</p>
-          <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{totalDepenses.toFixed(2)} €</p>
+      }
+      summary={
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <ClientHeroStat
+            label="Total"
+            value={`${totalDepenses.toFixed(0)}€`}
+            detail="Montant filtré TTC"
+            tone="violet"
+          />
+          <ClientHeroStat
+            label="Ce mois"
+            value={String(thisMonthCount)}
+            detail="Dépenses enregistrées"
+            tone="emerald"
+          />
+          <ClientHeroStat
+            label="Catégories"
+            value={String(categoriesCount)}
+            detail="Répartitions actives"
+            tone="amber"
+          />
+          <ClientHeroStat
+            label="Dernière"
+            value={latestExpenseLabel}
+            detail="Dernière date visible"
+            tone="slate"
+          />
         </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <p className="text-xs text-slate-500 dark:text-slate-400">Ce mois-ci</p>
-          <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{thisMonthCount}</p>
-        </div>
-        <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-          <p className="text-xs text-slate-500 dark:text-slate-400">Catégories</p>
-          <p className="text-lg font-bold text-slate-800 dark:text-white font-mono">{categoriesCount}</p>
-        </div>
-      </div>
-
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-        <input
-          type="text"
-          placeholder="Rechercher une dépense..."
-          className="w-full pl-10 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm focus:ring-2 focus:ring-violet-500 outline-none dark:text-white"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
+      }
+      mobileSummary={
+        <ClientMobileOverview
+          title="Suivi terrain"
+          description="Retrouvez vos dépenses récentes sans forcer l’horizontal: recherche, totaux et suppression restent accessibles au pouce."
+          badge={`${filteredDepenses.length} lignes`}
+          items={[
+            {
+              label: "Total",
+              value: `${totalDepenses.toFixed(0)}€`,
+              detail: "Vue filtrée",
+              tone: "violet",
+            },
+            {
+              label: "Ce mois",
+              value: String(thisMonthCount),
+              detail: "Dépenses", 
+              tone: "emerald",
+            },
+            {
+              label: "Catégories",
+              value: String(categoriesCount),
+              detail: "Actives",
+              tone: "amber",
+            },
+            {
+              label: "Dernière",
+              value: latestExpenseLabel,
+              detail: "Date visible",
+              tone: "slate",
+            },
+          ]}
         />
-      </div>
+      }
+    >
+      <ClientSectionCard>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input
+            type="text"
+            placeholder="Rechercher une dépense..."
+            className="w-full rounded-[1.1rem] border border-slate-200/80 bg-white/80 py-3 pl-10 pr-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
+      </ClientSectionCard>
 
-      {!data ? (
-        <div className="animate-pulse space-y-4">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="h-20 bg-slate-200 dark:bg-slate-800 rounded-xl" />
-          ))}
-        </div>
-      ) : filteredDepenses.length === 0 ? (
-        <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-          <Receipt className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
-          <p className="text-slate-500 dark:text-slate-400">Aucune dépense trouvée.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {filteredDepenses.map((depense) => (
-            <motion.div
-              key={depense.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 flex justify-between items-center hover:shadow-md transition-shadow group"
+      <ClientSectionCard>
+        {!data ? (
+          <div className="animate-pulse space-y-4">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="h-24 rounded-[1.5rem] bg-slate-100 dark:bg-white/6" />
+            ))}
+          </div>
+        ) : filteredDepenses.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-3 rounded-[1.85rem] border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
+            <Receipt className="text-slate-300 dark:text-slate-600" size={46} />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Aucune dépense trouvée</h2>
+            <p className="max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+              Ajoutez vos achats au fil du terrain pour garder un suivi propre des matériaux, sous-traitants et frais divers.
+            </p>
+            <Link
+              href="/depenses/nouveau"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
             >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                    <Tag size={12} />
-                    {depense.categorie || "Autre"}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {new Date(depense.date).toLocaleDateString("fr-FR")}
-                  </span>
-                </div>
-                <p className="font-medium text-slate-800 dark:text-white">{depense.description}</p>
-              </div>
+              <Plus size={16} />
+              Ajouter une dépense
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredDepenses.map((depense) => (
+              <motion.article
+                key={depense.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-slate-200/80 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-600 dark:border-white/10 dark:bg-white/8 dark:text-slate-300">
+                        <Tag size={12} />
+                        {depense.categorie || "Autre"}
+                      </span>
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                        {new Date(depense.date).toLocaleDateString("fr-FR")}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm font-semibold leading-6 text-slate-900 dark:text-white">
+                      {depense.description}
+                    </p>
+                  </div>
 
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="font-bold text-slate-900 dark:text-white font-mono">{depense.montant.toFixed(2)} €</p>
+                  <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end">
+                    <p className="text-base font-bold text-slate-900 dark:text-white font-mono">
+                      {depense.montant.toFixed(2)} €
+                    </p>
+                    <button
+                      onClick={() => void handleDelete(depense.id)}
+                      disabled={deletingId === depense.id}
+                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-rose-200/80 bg-rose-50/80 text-rose-600 transition hover:border-rose-300 hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200"
+                      aria-label={`Supprimer la dépense ${depense.description}`}
+                    >
+                      <Trash2 size={17} />
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => void handleDelete(depense.id)}
-                  disabled={deletingId === depense.id}
-                  className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
+              </motion.article>
+            ))}
+          </div>
+        )}
+      </ClientSectionCard>
+    </ClientSubpageShell>
   );
 }

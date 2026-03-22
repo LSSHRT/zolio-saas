@@ -160,7 +160,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
   return (
     <>
-      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-sm items-center justify-between gap-1.5 rounded-[1.75rem] px-2.5 py-2.5 lg:hidden">
+      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-sm items-center justify-between gap-1.5 rounded-[1.75rem] px-2.5 py-2.5 lg:hidden">
         {CLIENT_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
@@ -195,7 +195,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             aria-label="Fermer le menu outils"
           />
 
-          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
+          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(72vh,30rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -369,7 +369,7 @@ export function ClientMobileActionsMenu({
             aria-label="Fermer les actions"
           />
 
-          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
+          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(72vh,30rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -488,7 +488,7 @@ export function ClientMobileOverview({
         ) : null}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
         {items.map((item) => (
           <div
             key={`${item.label}-${item.value}`}
@@ -569,8 +569,8 @@ export function ClientSubpageShell({
             </div>
 
             {mobilePrimaryAction || mobileSecondaryActions.length > 0 ? (
-              <div className="flex shrink-0 items-center gap-2">
-                {mobilePrimaryAction}
+              <div className="flex min-w-0 shrink-0 items-center gap-2">
+                {mobilePrimaryAction ? <div className="max-w-[calc(100vw-12rem)] shrink overflow-hidden">{mobilePrimaryAction}</div> : null}
                 <ClientMobileActionsMenu items={mobileSecondaryActions} />
               </div>
             ) : actions ? (
