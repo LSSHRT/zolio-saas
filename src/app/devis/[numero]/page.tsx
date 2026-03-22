@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, use, useRef, useMemo } from "react";
+import type ReactSignatureCanvas from "react-signature-canvas";
 import dynamic from "next/dynamic";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -71,7 +72,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
-  const sigCanvas = useRef<{ clear: () => void; isEmpty: () => boolean; getTrimmedCanvas: () => HTMLCanvasElement } | null>(null);
+  const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
   const creationToastHandled = useRef(false);
 
   const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
@@ -330,7 +331,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         alert("Lien de signature indisponible.");
         return;
       }
-      const signatureBase64 = sigCanvas.current!.getTrimmedCanvas().toDataURL("image/png");
+      const signatureCanvas = sigCanvas.current;
+      if (!signatureCanvas) {
+        alert("Le module de signature n’est pas prêt. Réessayez dans un instant.");
+        return;
+      }
+      const signatureBase64 = signatureCanvas.getTrimmedCanvas().toDataURL("image/png");
       const res = await fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(devisInfo.signingToken)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

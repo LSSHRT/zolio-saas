@@ -67,9 +67,15 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
       return;
     }
 
+    const signatureCanvas = sigCanvas.current;
+    if (!signatureCanvas) {
+      toast.error("Le module de signature n’est pas prêt. Réessayez dans un instant.");
+      return;
+    }
+
     setSigning(true);
     try {
-      const signatureBase64 = sigCanvas.current.getTrimmedCanvas().toDataURL("image/png");
+      const signatureBase64 = signatureCanvas.getTrimmedCanvas().toDataURL("image/png");
       const res = await fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(token)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
