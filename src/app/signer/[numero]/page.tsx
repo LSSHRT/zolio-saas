@@ -5,7 +5,17 @@ import dynamic from "next/dynamic";
 import type ReactSignatureCanvas from "react-signature-canvas";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });
 import { motion } from "framer-motion";
-import { CheckCircle, AlertCircle, PenTool, Loader2 } from "lucide-react";
+import NextImage from "next/image";
+import {
+  AlertCircle,
+  CheckCircle,
+  CircleDollarSign,
+  FileSignature,
+  Loader2,
+  PenTool,
+  RotateCcw,
+  ShieldCheck,
+} from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -21,18 +31,28 @@ type PublicQuote = {
   totalTTC?: number | string | null;
 };
 
+const formatCurrency = (value?: number | string | null) => {
+  const amount = typeof value === "string" ? Number.parseFloat(value) : Number(value ?? 0);
+
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    minimumFractionDigits: 2,
+  }).format(Number.isFinite(amount) ? amount : 0);
+};
+
 function SignerDevisContent({ params }: { params: Promise<{ numero: string }> }) {
   const unwrappedParams = use(params);
   const numero = unwrappedParams.numero;
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
+
   const [devis, setDevis] = useState<PublicQuote | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [signing, setSigning] = useState(false);
   const [success, setSuccess] = useState(false);
-  
+
   const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
 
   useEffect(() => {
@@ -43,8 +63,8 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
     }
 
     fetch(`/api/public/devis/${numero}?token=${encodeURIComponent(token)}`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         if (data.error) setError(data.error);
         else setDevis(data);
       })
@@ -98,109 +118,198 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
     }
   };
 
+  const accentColor = devis?.entreprise?.color || "#7c3aed";
+  const companyName = devis?.entreprise?.nom || "Signature en ligne";
+  const clientName = devis?.nomClient || "Client";
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 dark:bg-slate-950">
+        <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-[2rem] border border-white/70 bg-white/90 px-6 py-8 text-center shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-slate-900/85 dark:shadow-black/20">
+          <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">Chargement du devis</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Préparation de l’espace de signature sécurisé.</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error || !devis) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 p-6">
-        <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Document introuvable</h1>
-        <p className="text-slate-500 mt-2">{error || "Ce devis n'existe pas."}</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10 dark:bg-slate-950">
+        <div className="w-full max-w-md rounded-[2rem] border border-red-100 bg-white/95 p-7 text-center shadow-xl shadow-slate-200/50 dark:border-red-500/20 dark:bg-slate-900/90 dark:shadow-black/20">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10">
+            <AlertCircle className="h-8 w-8 text-red-500" />
+          </div>
+          <h1 className="mt-5 text-xl font-bold text-slate-900 dark:text-white">Document introuvable</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">{error || "Ce devis n'existe pas."}</p>
+        </div>
       </div>
     );
   }
 
   if (success || devis.statut === "Accepté" || devis.signature) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 p-6 text-center">
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle className="w-10 h-10 text-emerald-600" />
-        </motion.div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Devis Signé !</h1>
-        <p className="text-slate-500">Le devis n°{numero} a été validé avec succès.</p>
-        <p className="text-slate-500 mt-2">Vous pouvez fermer cette page.</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10 dark:bg-slate-950">
+        <div className="w-full max-w-md rounded-[2rem] border border-emerald-100 bg-white/95 p-7 text-center shadow-xl shadow-slate-200/50 dark:border-emerald-500/20 dark:bg-slate-900/90 dark:shadow-black/20">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/10"
+          >
+            <CheckCircle className="h-10 w-10 text-emerald-600" />
+          </motion.div>
+          <h1 className="mt-6 text-2xl font-bold text-slate-900 dark:text-white">Devis signé</h1>
+          <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            Le devis n°{numero} a bien été validé. Vous pouvez maintenant fermer cette page.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900 p-4 sm:p-6">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden"
-      >
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            {devis.entreprise?.logo ? (
-              <img src={devis.entreprise.logo} alt="Logo" className="w-12 h-12 object-contain rounded-xl" />
-            ) : (
-              <div className="w-12 h-12 rounded-2xl flex items-center justify-center" style={{ backgroundColor: devis.entreprise?.color ? `${devis.entreprise.color}20` : '#ede9fe' }}>
-                <PenTool className="w-6 h-6" style={{ color: devis.entreprise?.color || '#7c3aed' }} />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col px-4 pb-32 pt-4 sm:px-6 sm:pb-10 sm:pt-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="overflow-hidden rounded-[2rem] border border-white/70 bg-white/95 shadow-xl shadow-slate-200/60 dark:border-white/10 dark:bg-slate-900/90 dark:shadow-black/20"
+        >
+          <div className="relative overflow-hidden border-b border-slate-100 px-5 pb-6 pt-5 dark:border-white/10 sm:px-8 sm:pb-8 sm:pt-7">
+            <div
+              className="pointer-events-none absolute inset-x-0 top-0 h-32 opacity-80 blur-3xl"
+              style={{ background: `linear-gradient(135deg, ${accentColor}20 0%, transparent 70%)` }}
+            />
+
+            <div className="relative flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-white dark:bg-white dark:text-slate-900">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Signature sécurisée
+              </span>
+              <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 dark:bg-white/10 dark:text-slate-200">
+                Devis n°{numero}
+              </span>
+            </div>
+
+            <div className="relative mt-5 flex items-start gap-4">
+              {devis.entreprise?.logo ? (
+                <NextImage
+                  src={devis.entreprise.logo}
+                  alt={`Logo ${companyName}`}
+                  width={56}
+                  height={56}
+                  unoptimized
+                  className="h-14 w-14 rounded-2xl border border-slate-200 object-contain dark:border-white/10"
+                />
+              ) : (
+                <div
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: `${accentColor}20` }}
+                >
+                  <PenTool className="h-6 w-6" style={{ color: accentColor }} />
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white sm:text-2xl">{companyName}</h1>
+                <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                  Relisez les informations ci-dessous, signez en portrait, puis validez en bas d’écran.
+                </p>
               </div>
-            )}
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">{devis.entreprise?.nom || "Signature en ligne"}</h1>
-              <p className="text-slate-500 text-sm">Devis n°{numero}</p>
+            </div>
+
+            <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[1.4rem] border border-slate-200/80 bg-slate-50/90 p-4 dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">Client</p>
+                <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">{clientName}</p>
+              </div>
+              <div className="rounded-[1.4rem] border border-slate-200/80 bg-slate-50/90 p-4 dark:border-white/10 dark:bg-white/5">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  <CircleDollarSign className="h-3.5 w-3.5" />
+                  Montant
+                </p>
+                <p className="mt-2 text-lg font-bold" style={{ color: accentColor }}>
+                  {formatCurrency(devis.totalTTC)}
+                </p>
+              </div>
+              <div className="rounded-[1.4rem] border border-slate-200/80 bg-slate-50/90 p-4 dark:border-white/10 dark:bg-white/5">
+                <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                  <FileSignature className="h-3.5 w-3.5" />
+                  Étape
+                </p>
+                <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">Signez puis validez</p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-slate-50 dark:bg-slate-700/50 rounded-2xl p-5 mb-6 space-y-3 border border-slate-100 dark:border-slate-700">
-            <div className="flex justify-between">
-              <span className="text-slate-500 dark:text-slate-400">Client :</span>
-              <span className="font-semibold text-slate-900 dark:text-white">{devis.nomClient}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500 dark:text-slate-400">Montant Total :</span>
-              <span className="font-bold text-lg" style={{ color: devis.entreprise?.color || '#7c3aed' }}>{devis.totalTTC} €</span>
+          <div className="px-5 py-5 sm:px-8 sm:py-7">
+            <div className="rounded-[1.75rem] border border-slate-200/80 bg-slate-50/70 p-4 dark:border-white/10 dark:bg-white/5 sm:p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="text-base font-semibold text-slate-900 dark:text-white">Votre signature</h2>
+                  <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                    Utilisez votre doigt ou un stylet pour signer dans le cadre ci-dessous.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={clear}
+                  className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Effacer
+                </button>
+              </div>
+
+              <div className="mt-4 overflow-hidden rounded-[1.5rem] border-2 border-dashed border-slate-200 bg-white dark:border-white/10 dark:bg-slate-950/70">
+                <SignaturePad
+                  ref={sigCanvas}
+                  penColor="black"
+                  canvasProps={{ className: "h-[280px] w-full cursor-crosshair sm:h-72" }}
+                />
+              </div>
+
+              <div className="mt-4 rounded-[1.25rem] bg-white px-4 py-3 text-sm leading-6 text-slate-500 ring-1 ring-slate-200/70 dark:bg-slate-950/70 dark:text-slate-300 dark:ring-white/10">
+                En signant ce document, vous confirmez votre accord sur le devis et ses conditions générales de vente.
+              </div>
             </div>
           </div>
+        </motion.div>
 
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <label className="font-medium text-slate-700 dark:text-slate-300">Votre signature</label>
-              <button onClick={clear} className="text-xs font-medium hover:opacity-80" style={{ color: devis.entreprise?.color || '#7c3aed' }}>Effacer</button>
-            </div>
-            <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-white dark:bg-slate-900">
-              <SignaturePad 
-                ref={sigCanvas} 
-                penColor="black"
-                canvasProps={{ className: "w-full h-48 cursor-crosshair" }} 
-              />
-            </div>
-            <p className="text-xs text-slate-400 mt-3 text-center">
-              En signant ce document, vous acceptez les conditions générales de vente.
+        <div className="sticky bottom-0 z-20 -mx-4 mt-auto border-t border-slate-200/80 bg-white/96 px-4 py-4 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-[1.75rem] sm:border sm:px-5 sm:py-5 dark:border-white/10 dark:bg-slate-900/96">
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={save}
+              disabled={signing}
+              className="flex w-full items-center justify-center gap-2 rounded-[1.25rem] px-4 py-4 text-sm font-bold text-white transition-all disabled:opacity-50 hover:opacity-95"
+              style={{ backgroundColor: accentColor }}
+            >
+              {signing ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
+              {signing ? "Enregistrement..." : "Valider et signer"}
+            </button>
+            <p className="text-center text-xs leading-5 text-slate-500 dark:text-slate-400">
+              Signature sécurisée, sans application à installer. Prenez le téléphone en portrait pour plus de confort.
             </p>
           </div>
-
-          <button 
-            onClick={save} 
-            disabled={signing}
-            className="w-full flex items-center justify-center gap-2 text-white py-4 rounded-2xl font-bold transition-all disabled:opacity-50 hover:opacity-90"
-            style={{ backgroundColor: devis.entreprise?.color || '#7c3aed' }}
-          >
-            {signing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
-            {signing ? "Enregistrement..." : "Valider et Signer"}
-          </button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
 
 export default function SignerDevis({ params }: { params: Promise<{ numero: string }> }) {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+          <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+        </div>
+      }
+    >
       <SignerDevisContent params={params} />
     </Suspense>
   );
