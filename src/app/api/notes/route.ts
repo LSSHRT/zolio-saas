@@ -1,6 +1,25 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { internalServerError, jsonError } from "@/lib/http";
+
+type NotePayload = {
+  titre?: string;
+  contenu?: string;
+};
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function mapNote(note: { id: string; titre: string; contenu: string; date: Date }) {
+  return {
+    id: note.id,
+    titre: note.titre,
+    contenu: note.contenu,
+    date: note.date.toLocaleDateString("fr-FR"),
+  };
+}
 
 export async function GET() {
   try {
@@ -9,20 +28,12 @@ export async function GET() {
 
     const notes = await prisma.note.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" }
     });
 
-    const formattedNotes = notes.map(note => ({
-      id: note.id,
-      titre: note.titre,
-      contenu: note.contenu,
-      date: note.date.toLocaleDateString("fr-FR"),
-    }));
-
-    return NextResponse.json(formattedNotes);
+    return NextResponse.json(notes.map(mapNote));
   } catch (error) {
-    console.error("Erreur GET /api/notes:", error);
-    return new NextResponse("Erreur interne", { status: 500 });
+    return internalServerError("notes-get", error, "Impossible de récupérer les notes");
   }
 }
 
@@ -31,19 +42,24 @@ export async function POST(req: Request) {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const data = await req.json();
+    const data = (await req.json()) as NotePayload;
+    const titre = normalizeText(data.titre);
+    const contenu = normalizeText(data.contenu);
+
+    if (!titre && !contenu) {
+      return jsonError("Titre ou contenu requis", 400);
+    }
     
     const newNote = await prisma.note.create({
       data: {
         userId,
-        titre: data.titre,
-        contenu: data.contenu,
+        titre,
+        contenu,
       }
     });
 
-    return NextResponse.json({ success: true, id: newNote.id });
+    return NextResponse.json({ success: true, data: mapNote(newNote) });
   } catch (error) {
-    console.error("Erreur POST /api/notes:", error);
-    return new NextResponse("Erreur interne", { status: 500 });
+    return internalServerError("notes-post", error, "Impossible d'ajouter la note");
   }
 }
