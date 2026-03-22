@@ -6,13 +6,15 @@ import { internalServerError, jsonError } from "@/lib/http";
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
-    
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
+
     const resolvedParams = await context.params;
     const { id } = resolvedParams;
 
     const deleted = await prisma.depense.deleteMany({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     if (deleted.count === 0) {
