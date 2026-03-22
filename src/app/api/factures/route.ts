@@ -5,18 +5,138 @@ import { prisma } from "@/lib/prisma";
 import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
+
+type FactureLine = {
+  isOptional?: boolean;
+  nomPrestation?: unknown;
+  prixUnitaire?: unknown;
+  quantite?: unknown;
+  totalLigne?: unknown;
+  tva?: unknown;
+  unite?: unknown;
+};
+
+type FactureClientPayload = {
+  adresse?: unknown;
+  email?: unknown;
+  nom?: unknown;
+  telephone?: unknown;
+};
+
+type CreateFacturePayload = {
+  client?: unknown;
+  devisNumero?: unknown;
+  lignes?: unknown;
+  totalHT?: unknown;
+  totalTTC?: unknown;
+  tva?: unknown;
+};
+
+type FactureRecord = {
+  createdAt: Date;
+  date: Date;
+  devisRef: string | null;
+  emailClient: string | null;
+  nomClient: string;
+  numero: string;
+  statut: string;
+  totalHT: number;
+  totalTTC: number;
+  tva: number;
+};
+
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function parseNumber(value: unknown, fallback = 0) {
+  const parsed = Number.parseFloat(String(value ?? fallback));
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseClient(value: unknown) {
+  const client = value && typeof value === "object" ? (value as FactureClientPayload) : {};
+
+  return {
+    adresse: normalizeText(client.adresse),
+    email: normalizeText(client.email),
+    nom: normalizeText(client.nom),
+    telephone: normalizeText(client.telephone),
+  };
+}
+
+function parseLignes(value: unknown) {
+  const parsed = Array.isArray(value) ? value : [];
+
+  return parsed
+    .filter((line): line is FactureLine => Boolean(line) && typeof line === "object")
+    .map((line) => ({
+      isOptional: Boolean(line.isOptional),
+      nomPrestation: normalizeText(line.nomPrestation),
+      prixUnitaire: parseNumber(line.prixUnitaire),
+      quantite: parseNumber(line.quantite),
+      totalLigne:
+        line.totalLigne === undefined || line.totalLigne === null
+          ? parseNumber(line.quantite) * parseNumber(line.prixUnitaire)
+          : parseNumber(line.totalLigne),
+      tva: normalizeText(line.tva),
+      unite: normalizeText(line.unite),
+    }))
+    .filter((line) => line.nomPrestation && line.quantite > 0 && line.prixUnitaire >= 0);
+}
+
+function mapFacture(facture: FactureRecord) {
+  return {
+    numero: facture.numero,
+    date: facture.date.toLocaleDateString("fr-FR"),
+    nomClient: facture.nomClient,
+    emailClient: facture.emailClient || "",
+    totalHT: facture.totalHT,
+    tva: facture.tva,
+    totalTTC: facture.totalTTC,
+    statut: facture.statut,
+    devisRef: facture.devisRef || "",
+  };
+}
 
 export async function POST(request: Request) {
   try {
     const { userId } = await auth();
     const user = await currentUser();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const entreprise = getCompanyProfile(user);
-    const body = await request.json();
-    const { devisNumero, client, lignes, tva, totalHT, totalTTC } = body;
+    const body = (await request.json()) as CreateFacturePayload;
+    const client = parseClient(body.client);
+    const lignes = parseLignes(body.lignes);
+    const devisNumero = normalizeText(body.devisNumero);
+    const totalHT = parseNumber(body.totalHT);
+    const totalTTC = parseNumber(body.totalTTC);
+    const tva = parseNumber(body.tva);
+
+    if (!client.nom) {
+      return jsonError("Le client est obligatoire", 400);
+    }
+
+    if (lignes.length === 0) {
+      return jsonError("La facture doit contenir au moins une ligne valide", 400);
+    }
+
+    if (!Number.isFinite(totalHT) || totalHT < 0) {
+      return jsonError("Le total HT est invalide", 400);
+    }
+
+    if (!Number.isFinite(totalTTC) || totalTTC <= 0) {
+      return jsonError("Le total TTC est invalide", 400);
+    }
+
+    if (!Number.isFinite(tva) || tva < 0) {
+      return jsonError("Le taux de TVA est invalide", 400);
+    }
 
     const date = new Date();
     let numeroFacture = "";
@@ -40,9 +160,9 @@ export async function POST(request: Request) {
             numero: numeroFacture,
             nomClient: client.nom,
             emailClient: client.email || null,
-            totalHT: Number(totalHT),
-            tva: Number(tva),
-            totalTTC: Number(totalTTC),
+            totalHT,
+            tva,
+            totalTTC,
             statut: "Émise",
             devisRef: devisNumero || null,
             date,
@@ -84,18 +204,31 @@ export async function POST(request: Request) {
         assurance: entreprise.assurance,
       },
       lignes,
-      totalHT,
-      tva,
-      totalTTC,
+      totalHT: totalHT.toFixed(2),
+      tva: String(tva),
+      totalTTC: totalTTC.toFixed(2),
     });
 
     let emailSent = false;
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    let emailSkippedReason = "";
+
+    if (!client.email) {
+      emailSkippedReason = "missing_client_email";
+    } else if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+      emailSkippedReason = "smtp_not_configured";
+    } else {
       try {
-        await sendDevisEmail(client.email, client.nom, numeroFacture, totalTTC, pdfBuffer);
+        await sendDevisEmail(
+          client.email,
+          client.nom,
+          numeroFacture,
+          totalTTC.toFixed(2),
+          pdfBuffer,
+        );
         emailSent = true;
-      } catch (emailErr) {
-        console.error("Email non envoyé:", emailErr);
+      } catch (emailError) {
+        emailSkippedReason = "send_failed";
+        logServerError("factures-post-email", emailError);
       }
     }
 
@@ -103,12 +236,13 @@ export async function POST(request: Request) {
       numeroFacture,
       date: formattedDate,
       client,
-      totalHT,
-      tva,
-      totalTTC,
+      totalHT: totalHT.toFixed(2),
+      tva: String(tva),
+      totalTTC: totalTTC.toFixed(2),
       lignes,
       statut: "Émise",
       emailSent,
+      emailSkippedReason,
     });
   } catch (error) {
     return internalServerError("factures-post", error, "Impossible de créer la facture");
@@ -118,26 +252,16 @@ export async function POST(request: Request) {
 export async function GET() {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const facturesDb = await prisma.facture.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
     });
 
-    const factures = facturesDb.map((facture) => ({
-      numero: facture.numero,
-      date: facture.date.toLocaleDateString("fr-FR"),
-      nomClient: facture.nomClient,
-      emailClient: facture.emailClient || "",
-      totalHT: facture.totalHT,
-      tva: facture.tva,
-      totalTTC: facture.totalTTC,
-      statut: facture.statut,
-      devisRef: facture.devisRef || "",
-    }));
-
-    return NextResponse.json(factures);
+    return NextResponse.json(facturesDb.map(mapFacture));
   } catch (error) {
     return internalServerError(
       "factures-get",
