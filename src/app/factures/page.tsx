@@ -110,12 +110,13 @@ export default function FacturesPage() {
     setDeleting(numero);
     try {
       const response = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
       if (response.ok) {
         mutate(factures.filter((facture: Facture) => facture.numero !== numero), false);
         toast.success("Facture supprimée");
         setPendingDeleteFacture(null);
       } else {
-        toast.error("Erreur lors de la suppression de la facture");
+        toast.error(payload.error || "Erreur lors de la suppression de la facture");
       }
     } catch {
       toast.error("Erreur réseau");
@@ -226,16 +227,17 @@ export default function FacturesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ statut: "Payée" }),
       });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string; statut?: string };
       if (response.ok) {
         mutate(
           factures.map((facture: Facture) =>
-            facture.numero === numero ? { ...facture, statut: "Payée" } : facture,
+            facture.numero === numero ? { ...facture, statut: payload.statut || "Payée" } : facture,
           ),
           false,
         );
         toast.success("Facture marquée comme payée !");
       } else {
-        toast.error("Erreur lors de la mise à jour");
+        toast.error(payload.error || "Erreur lors de la mise à jour");
       }
     } catch {
       toast.error("Erreur réseau");

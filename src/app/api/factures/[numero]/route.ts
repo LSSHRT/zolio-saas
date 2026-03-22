@@ -12,7 +12,9 @@ type FactureStatusPayload = {
 export async function PATCH(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const p = await params;
     const numero = p.numero;
@@ -28,7 +30,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
     }
 
     const facture = await prisma.facture.findFirst({ where: { numero, userId } });
-    if (!facture) return NextResponse.json({ error: "Facture non trouvée" }, { status: 404 });
+    if (!facture) {
+      return jsonError("Facture non trouvée", 404);
+    }
 
     const updated = await prisma.facture.update({
       where: { id: facture.id },
@@ -44,21 +48,23 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
 export async function DELETE(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();
-    if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
 
     const p = await params;
     const numero = p.numero;
 
     const existingFacture = await prisma.facture.findFirst({
-      where: { numero, userId }
+      where: { numero, userId },
     });
 
     if (!existingFacture) {
-      return NextResponse.json({ error: "Facture non trouvée ou non autorisée" }, { status: 404 });
+      return jsonError("Facture non trouvée ou non autorisée", 404);
     }
 
     await prisma.facture.delete({
-      where: { id: existingFacture.id }
+      where: { id: existingFacture.id },
     });
 
     return NextResponse.json({ success: true });
