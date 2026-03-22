@@ -9,6 +9,16 @@ import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError } from "@/lib/http";
 import { verifyPublicDevisToken } from "@/lib/public-devis-token";
 
+type PublicDevisLine = {
+  isOptional?: boolean;
+  nomPrestation?: string;
+  prixUnitaire?: number | string;
+  quantite?: number | string;
+  totalLigne?: number | string;
+  tva?: number | string;
+  unite?: string;
+};
+
 function getValidatedToken(request: Request, numero: string) {
   const token = new URL(request.url).searchParams.get("token");
 
@@ -17,6 +27,53 @@ function getValidatedToken(request: Request, numero: string) {
   }
 
   return verifyPublicDevisToken(token, numero);
+}
+
+function parseLignes(value: unknown): PublicDevisLine[] {
+  if (typeof value === "string") {
+    return JSON.parse(value) as PublicDevisLine[];
+  }
+
+  if (Array.isArray(value)) {
+    return value as PublicDevisLine[];
+  }
+
+  return [];
+}
+
+function getLineTotal(line: PublicDevisLine) {
+  if (line.totalLigne !== undefined && line.totalLigne !== null) {
+    return Number(line.totalLigne);
+  }
+
+  return Number(line.quantite ?? 0) * Number(line.prixUnitaire ?? 0);
+}
+
+function normalizeLignes(lines: PublicDevisLine[]) {
+  return lines.map((line) => ({
+    nomPrestation: typeof line.nomPrestation === "string" && line.nomPrestation.trim().length > 0
+      ? line.nomPrestation
+      : "Prestation",
+    quantite: Number(line.quantite ?? 0),
+    unite: typeof line.unite === "string" && line.unite.trim().length > 0 ? line.unite : "U",
+    prixUnitaire: Number(line.prixUnitaire ?? 0),
+    totalLigne: getLineTotal(line),
+    tva: line.tva !== undefined && line.tva !== null ? String(line.tva) : undefined,
+    isOptional: Boolean(line.isOptional),
+  }));
+}
+
+function computeTotals(lines: PublicDevisLine[], defaultTva: number, remiseGlobale: number) {
+  const activeLines = lines.filter((line) => !line.isOptional);
+  const totalHTBase = activeLines.reduce((sum, line) => sum + getLineTotal(line), 0);
+  const totalHT = totalHTBase * (1 - remiseGlobale / 100);
+  const totalTTC =
+    activeLines.reduce((sum, line) => {
+      const ligneTva = Number.parseFloat(String(line.tva ?? defaultTva)) || 0;
+      return sum + getLineTotal(line) * (1 + ligneTva / 100);
+    }, 0) * (1 - remiseGlobale / 100);
+
+  return { totalHT, totalTTC };
 }
 
 export async function GET(request: Request, context: { params: Promise<{ numero: string }> }) {
@@ -37,17 +94,10 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
     const entreprise = getCompanyProfile(user);
-    const lignes =
-      typeof devis.lignes === "string" ? JSON.parse(devis.lignes) : (devis.lignes || []);
+    const lignes = parseLignes(devis.lignes);
     const remiseGlobale = devis.remise || 0;
     const tvaGlobale = devis.tva || 0;
-    const totalTTC = lignes
-      .filter((line: any) => !line.isOptional)
-      .reduce((sum: number, line: any) => {
-        const ligneTva = Number.parseFloat(line.tva || tvaGlobale.toString()) || 0;
-        const ligneTotal = line.totalLigne || line.quantite * line.prixUnitaire || 0;
-        return sum + ligneTotal * (1 + ligneTva / 100);
-      }, 0) * (1 - remiseGlobale / 100);
+    const { totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
       numero: devis.numero,
@@ -122,22 +172,11 @@ export async function POST(request: Request, context: { params: Promise<{ numero
       const emailClient = devis.client?.email;
 
       if (emailClient) {
-        const lignes =
-          typeof devis.lignes === "string" ? JSON.parse(devis.lignes) : devis.lignes;
-        const tvaGlobale = devis.tva?.toString() || "0";
+        const lignes = parseLignes(devis.lignes);
+        const lignesPdf = normalizeLignes(lignes);
+        const tvaGlobale = devis.tva || 0;
         const remiseGlobale = devis.remise || 0;
-        const totalHTBase = (lignes as any[])
-          .filter((line) => !line.isOptional)
-          .reduce((sum, line) => sum + (line.totalLigne || line.quantite * line.prixUnitaire), 0);
-        const montantRemise = totalHTBase * remiseGlobale / 100;
-        const totalHT = totalHTBase - montantRemise;
-        const totalTTC = (lignes as any[])
-          .filter((line) => !line.isOptional)
-          .reduce((sum, line) => {
-            const ligneTva = Number.parseFloat(line.tva || tvaGlobale) || 0;
-            const ligneTotal = line.totalLigne || line.quantite * line.prixUnitaire;
-            return sum + ligneTotal * (1 + ligneTva / 100);
-          }, 0) * (1 - remiseGlobale / 100);
+        const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
         const pdfBuffer = await generateDevisPDF({
           numeroDevis: devis.numero,
@@ -163,9 +202,9 @@ export async function POST(request: Request, context: { params: Promise<{ numero
             assurance: entreprise.assurance,
             cgv: entreprise.cgv,
           },
-          lignes,
+          lignes: lignesPdf,
           totalHT: totalHT.toFixed(2),
-          tva: tvaGlobale,
+          tva: tvaGlobale.toString(),
           totalTTC: totalTTC.toFixed(2),
           acompte: devis.acompte?.toString() || "",
           remise: remiseGlobale.toString(),
