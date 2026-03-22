@@ -15,6 +15,7 @@ import {
   ClientMobileActionsMenu,
   type ClientMobileAction,
 } from "@/components/client-shell";
+import { MobileDialog } from "@/components/mobile-dialog";
 import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
@@ -72,6 +73,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
   const creationToastHandled = useRef(false);
 
@@ -219,10 +221,11 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         setLignes([...lignes, ...newLignes]);
         setShowAIModal(false);
         setAiPrompt("");
+        toast.success(`${newLignes.length} ligne(s) ajoutée(s) avec l’IA.`);
       }
     } catch (error) {
       console.error("Erreur IA", error);
-      alert("Erreur lors de la génération avec l'IA");
+      toast.error("Erreur lors de la génération avec l’IA.");
     } finally {
       setIsGeneratingAI(false);
     }
@@ -276,13 +279,17 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lignes, tva, acompte, remise, photos }),
       });
+      if (!res.ok) {
+        throw new Error("Impossible d’enregistrer les modifications");
+      }
       const data = await res.json();
       setResult(data);
       setSuccess(true);
     } catch {
-      alert("Erreur lors de la modification");
+      toast.error("Erreur lors de la modification du devis.");
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -310,30 +317,35 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
     });
   };
 
-  const handleCopySignLink = () => {
+  const handleCopySignLink = async () => {
     if (!devisInfo?.signingToken) {
-      alert("Impossible de générer le lien de signature.");
+      toast.error("Impossible de générer le lien de signature.");
       return;
     }
     const link = `${window.location.origin}/signer/${numero}?token=${encodeURIComponent(devisInfo.signingToken)}`;
-    navigator.clipboard.writeText(link);
-    alert("Lien de signature copié ! Envoyez-le à votre client.");
+
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Lien de signature copié. Vous pouvez l’envoyer au client.");
+    } catch {
+      toast.error("Impossible de copier le lien de signature.");
+    }
   };
 
   const handleSignSurPlace = async () => {
     if (sigCanvas.current?.isEmpty()) {
-      alert("Veuillez demander au client de dessiner sa signature.");
+      toast.error("Veuillez demander au client de dessiner sa signature.");
       return;
     }
     setSignLoading(true);
     try {
       if (!devisInfo?.signingToken) {
-        alert("Lien de signature indisponible.");
+        toast.error("Lien de signature indisponible.");
         return;
       }
       const signatureCanvas = sigCanvas.current;
       if (!signatureCanvas) {
-        alert("Le module de signature n’est pas prêt. Réessayez dans un instant.");
+        toast.error("Le module de signature n’est pas prêt. Réessayez dans un instant.");
         return;
       }
       const signatureBase64 = signatureCanvas.getTrimmedCanvas().toDataURL("image/png");
@@ -342,23 +354,61 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signatureBase64 }),
       });
-      if (res.ok) {
-        setShowSignModal(false);
-        alert("Devis signé avec succès !");
-        window.location.href = "/devis";
-      } else {
-        alert("Erreur lors de l'enregistrement de la signature");
+      if (!res.ok) {
+        throw new Error("Erreur lors de l'enregistrement de la signature");
       }
+      setShowSignModal(false);
+      toast.success("Devis signé avec succès.");
+      router.push("/devis");
     } catch {
-      alert("Erreur réseau");
+      toast.error("Erreur lors de l’enregistrement de la signature.");
     } finally {
       setSignLoading(false);
     }
   };
 
+  const handleCreateInvoice = async () => {
+    if (isCreatingInvoice || saving) {
+      return;
+    }
+
+    setIsCreatingInvoice(true);
+    try {
+      const res = await fetch("/api/factures", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          devisNumero: devisInfo?.numero,
+          client: { nom: devisInfo?.nomClient, email: devisInfo?.emailClient },
+          lignes,
+          tva,
+          totalHT: totalHT.toFixed(2),
+          totalTTC: totalTTC.toFixed(2),
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Erreur lors de la création de la facture");
+      }
+
+      const confetti = await import("canvas-confetti");
+      confetti.default({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
+      toast.success("Facture créée avec succès.");
+      setTimeout(() => {
+        router.push("/factures");
+      }, 900);
+    } catch {
+      toast.error("Erreur lors de la création de la facture.");
+    } finally {
+      setIsCreatingInvoice(false);
+    }
+  };
+
   const filteredPrestations = prestations.filter((p) =>
-    (p.nom || '').toLowerCase().includes((searchPrestation || '').toLowerCase()) || (p.categorie || '').toLowerCase().includes((searchPrestation || '').toLowerCase())
+    (p.nom || "").toLowerCase().includes((searchPrestation || "").toLowerCase()) ||
+    (p.categorie || "").toLowerCase().includes((searchPrestation || "").toLowerCase())
   );
+
   const mobileHeaderActions: ClientMobileAction[] =
     devisInfo?.statut === "En attente"
       ? [
@@ -788,174 +838,163 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
 
         {/* Transformer en facture (si accepté) */}
         {devisInfo?.statut === "Accepté" && (
-          <motion.button 
+          <motion.button
             whileTap={{ scale: 0.96 }}
-            onClick={async () => {
-              if (saving) return;
-              try {
-                // On s'assure d'avoir les données
-                const res = await fetch("/api/factures", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    devisNumero: devisInfo.numero,
-                    client: { nom: devisInfo.nomClient, email: devisInfo.emailClient },
-                    lignes,
-                    tva,
-                    totalHT: totalHT.toFixed(2),
-                    totalTTC: totalTTC.toFixed(2)
-                  }),
-                });
-                if (res.ok) {
-                  import('canvas-confetti').then((confetti) => {
-                    confetti.default({ particleCount: 150, spread: 100, origin: { y: 0.5 } });
-                    setTimeout(() => {
-                      window.location.href = "/factures";
-                    }, 1500);
-                  });
-                } else {
-                  alert("Erreur lors de la création de la facture");
-                }
-    } catch {
-                alert("Erreur réseau");
-              }
-            }}
-            className="w-full py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 text-sm mt-1 dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+            onClick={handleCreateInvoice}
+            disabled={isCreatingInvoice || saving}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 py-3 text-sm font-bold text-emerald-700 shadow-sm disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
-            <Check size={16} /> Transformer en Facture
+            {isCreatingInvoice ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+            {isCreatingInvoice ? "Création..." : "Transformer en Facture"}
           </motion.button>
         )}
       </main>
 
       {/* Bottom action */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-4 flex gap-3 sm:rounded-b-[3rem]">
-        <Link href="/devis" className="flex-1">
-          <motion.button whileTap={{ scale: 0.96 }}
-            className="w-full py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm">
-            <ArrowLeft size={16} /> Annuler
+      <div className="sticky bottom-0 left-0 right-0 mt-auto border-t border-slate-100 bg-white/95 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:rounded-b-[3rem]">
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link href="/devis" className="flex-1">
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              className="w-full rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700 flex items-center justify-center gap-2 dark:bg-slate-800 dark:text-slate-200"
+            >
+              <ArrowLeft size={16} /> Annuler
+            </motion.button>
+          </Link>
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={handleSaveAndResend}
+            disabled={saving || lignes.length === 0}
+            className="min-w-0 flex-[1.35] rounded-xl bg-gradient-zolio py-3 text-sm font-semibold text-white shadow-lg shadow-brand flex items-center justify-center gap-2 disabled:opacity-40"
+          >
+            {saving ? (
+              "Envoi..."
+            ) : (
+              <>
+                <Save size={16} />
+                <span className="sm:hidden">Sauvegarder</span>
+                <span className="hidden sm:inline">Sauvegarder et renvoyer</span>
+                <Send size={14} className="hidden sm:block" />
+              </>
+            )}
           </motion.button>
-        </Link>
-        <motion.button whileTap={{ scale: 0.96 }} onClick={handleSaveAndResend} disabled={saving || lignes.length === 0}
-          className="min-w-0 flex-[1.35] py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg shadow-brand flex items-center justify-center gap-2 text-sm disabled:opacity-40">
-          {saving ? "Envoi..." : <><Save size={16} /> <span className="sm:hidden">Sauvegarder</span><span className="hidden sm:inline">Sauvegarder & Renvoyer</span> <Send size={14} className="hidden sm:block" /></>}
-        </motion.button>
+        </div>
       </div>
 
-      {/* Modal Signature sur place */}
-      {showSignModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Faire signer le client</h2>
-                <button onClick={() => setShowSignModal(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                  <X size={24} />
-                </button>
-              </div>
-              <p className="text-sm text-slate-500 mb-6">Demandez à {devisInfo?.nomClient} de signer ci-dessous pour valider le devis de {totalTTC.toFixed(2)}€ TTC.</p>
-              
-              <div className="border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900 mb-4 relative">
-                <SignaturePad 
-                  ref={sigCanvas} 
-                  penColor="black"
-                  canvasProps={{ className: "w-full h-48 cursor-crosshair" }} 
-                />
-                <button onClick={() => sigCanvas.current?.clear()} className="absolute top-2 right-2 text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">
-                  Effacer
-                </button>
-              </div>
-
-              <button 
-                onClick={handleSignSurPlace} 
-                disabled={signLoading}
-                className="w-full flex items-center justify-center gap-2 text-white py-4 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 transition-all disabled:opacity-50"
-              >
-                {signLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check size={20} />}
-                {signLoading ? "Enregistrement..." : "Valider la signature"}
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Modale IA */}
-      {showAIModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-md shadow-xl border border-slate-100 dark:border-slate-800">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2"><Sparkles className="text-brand-fuchsia" size={20} /> Rédiger avec l&apos;IA</h3>
-              <button onClick={() => setShowAIModal(false)} className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full"><X size={20} /></button>
-            </div>
-            <p className="text-sm text-slate-500 mb-4">
-              Décrivez les travaux à réaliser (ex: &quot;Refaire une salle de bain de 10m2 avec douche italienne et peinture&quot;) et l&apos;IA générera les lignes de devis pour vous.
-            </p>
-            <textarea
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              placeholder="Décrivez votre chantier..."
-              className="w-full h-32 p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4 resize-none"
+      <MobileDialog
+        open={showSignModal}
+        onClose={() => !signLoading && setShowSignModal(false)}
+        title="Faire signer le client"
+        description={`Demandez à ${devisInfo?.nomClient ?? "votre client"} de signer pour valider le devis de ${totalTTC.toFixed(2)}€ TTC.`}
+        tone="accent"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowSignModal(false)}
+              disabled={signLoading}
+              className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200/80 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700 disabled:opacity-50 sm:w-auto dark:border-white/10 dark:text-slate-200 dark:hover:border-violet-400/20 dark:hover:text-white"
+            >
+              Annuler
+            </button>
+            <button
+              type="button"
+              onClick={handleSignSurPlace}
+              disabled={signLoading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 sm:w-auto"
+            >
+              {signLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check size={16} />}
+              {signLoading ? "Enregistrement..." : "Valider la signature"}
+            </button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="relative overflow-hidden rounded-[1.4rem] border-2 border-dashed border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60">
+            <SignaturePad
+              ref={sigCanvas}
+              penColor="black"
+              canvasProps={{ className: "h-52 w-full cursor-crosshair" }}
             />
             <button
+              type="button"
+              onClick={() => sigCanvas.current?.clear()}
+              className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold text-violet-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-violet-50 dark:bg-slate-900/90 dark:text-violet-200 dark:ring-white/10"
+            >
+              Effacer
+            </button>
+          </div>
+          <p className="text-sm leading-6 text-slate-500 dark:text-slate-300">
+            Faites signer en mode portrait puis validez pour enregistrer immédiatement la signature sur ce devis.
+          </p>
+        </div>
+      </MobileDialog>
+
+      <MobileDialog
+        open={showAIModal}
+        onClose={() => !isGeneratingAI && setShowAIModal(false)}
+        title="Rédiger avec l’IA"
+        description="Décrivez le chantier en quelques phrases. L’IA prépare les lignes de devis, prêtes à être ajustées ensuite."
+        tone="accent"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setShowAIModal(false)}
+              disabled={isGeneratingAI}
+              className="inline-flex w-full items-center justify-center rounded-xl border border-slate-200/80 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700 disabled:opacity-50 sm:w-auto dark:border-white/10 dark:text-slate-200 dark:hover:border-violet-400/20 dark:hover:text-white"
+            >
+              Fermer
+            </button>
+            <button
+              type="button"
               onClick={generateWithAI}
               disabled={isGeneratingAI || !aiPrompt.trim()}
-              className="w-full py-3 bg-gradient-zolio text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 disabled:opacity-50 transition"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-50 sm:w-auto"
             >
-              {isGeneratingAI ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles size={18} />}
+              {isGeneratingAI ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles size={16} />}
               {isGeneratingAI ? "Génération..." : "Générer les lignes"}
             </button>
-          </motion.div>
-        </div>
-      )}
+          </>
+        }
+      >
+        <textarea
+          value={aiPrompt}
+          onChange={(e) => setAiPrompt(e.target.value)}
+          placeholder="Exemple : rénovation complète d’une salle de bain de 10 m² avec dépose, plomberie, carrelage et peinture."
+          className="h-40 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+        />
+      </MobileDialog>
 
-      {showForfaits && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/55 backdrop-blur-sm">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg rounded-3xl border border-slate-100 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
-                  Packs rapides
-                </p>
-                <h3 className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">
-                  {activeTradeMeta.label}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Ajoutez un pack métier complet, puis ajustez les quantités et options directement dans le devis.
-                </p>
+      <MobileDialog
+        open={showForfaits}
+        onClose={() => setShowForfaits(false)}
+        title={`Packs rapides ${activeTradeMeta.label}`}
+        description="Ajoutez un pack métier complet, puis ajustez les quantités et options directement dans le devis."
+      >
+        <div className="max-h-[52vh] space-y-3 overflow-y-auto pr-1">
+          {forfaits.map((forfait) => (
+            <button
+              key={forfait.nom}
+              type="button"
+              onClick={() => applyForfait(forfait)}
+              className="w-full rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{forfait.nom}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+                    {forfait.description}
+                  </p>
+                </div>
+                <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-200">
+                  {forfait.lignes.length} lignes
+                </span>
               </div>
-              <button onClick={() => setShowForfaits(false)} className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 dark:hover:bg-slate-800">
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {forfaits.map((forfait) => (
-                <button
-                  key={forfait.nom}
-                  type="button"
-                  onClick={() => applyForfait(forfait)}
-                  className="w-full rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{forfait.nom}</p>
-                      <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                        {forfait.description}
-                      </p>
-                    </div>
-                    <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-200">
-                      {forfait.lignes.length} lignes
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </motion.div>
+            </button>
+          ))}
         </div>
-      )}
+      </MobileDialog>
     </div>
   );
 }
