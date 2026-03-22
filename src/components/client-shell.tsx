@@ -126,6 +126,10 @@ function useOverlayCloseSignal(onClose: () => void) {
   }, [onClose]);
 }
 
+function bottomSheetBaseClasses() {
+  return "absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(78vh,32rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96";
+}
+
 export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
@@ -191,11 +195,15 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
           <button
             type="button"
             onClick={() => setToolsOpen(false)}
-            className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]"
             aria-label="Fermer le menu outils"
           />
 
-          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(72vh,30rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
+          <div className={bottomSheetBaseClasses()}>
+            <div className="mb-3 flex justify-center sm:hidden">
+              <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
+            </div>
+
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -223,7 +231,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setToolsOpen(false)}
-                    className={`inline-flex min-h-[84px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
+                    className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
                       pathname === item.href ? "accent" : "default",
                     )}`}
                   >
@@ -321,26 +329,8 @@ export function ClientMobileActionsMenu({
 }) {
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
+  useBodyScrollLock(open);
+  useOverlayCloseSignal(() => setOpen(false));
 
   if (items.length === 0) {
     return null;
@@ -354,7 +344,7 @@ export function ClientMobileActionsMenu({
           event.stopPropagation();
           setOpen(true);
         }}
-        className={`inline-flex cursor-pointer list-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white [&::-webkit-details-marker]:hidden ${stretch ? "flex w-full" : ""}`}
+        className={`inline-flex min-h-11 cursor-pointer list-none items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white [&::-webkit-details-marker]:hidden ${stretch ? "flex w-full" : ""}`}
         aria-label={buttonLabel}
       >
         <MoreHorizontal size={18} />
@@ -365,11 +355,15 @@ export function ClientMobileActionsMenu({
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]"
             aria-label="Fermer les actions"
           />
 
-          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(72vh,30rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
+          <div className={bottomSheetBaseClasses()}>
+            <div className="mb-3 flex justify-center sm:hidden">
+              <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
+            </div>
+
             <div className="mb-3 flex items-center justify-between gap-3 px-1">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">

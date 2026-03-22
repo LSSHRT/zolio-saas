@@ -60,20 +60,24 @@ export function MobileDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center p-3 sm:items-center sm:p-6">
+    <div className="fixed inset-0 z-[90] flex items-end justify-center p-0 pt-6 sm:items-center sm:p-6">
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/55 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-slate-950/60 backdrop-blur-[3px]"
         aria-label="Fermer la fenêtre"
       />
 
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 w-full max-w-lg overflow-hidden rounded-[1.9rem] border border-slate-200/80 bg-white/96 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.5)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96"
+        className="relative z-10 flex max-h-[min(88vh,46rem)] w-full flex-col overflow-hidden rounded-t-[1.9rem] border border-slate-200/80 bg-white/96 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.5)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 sm:max-h-[min(82vh,44rem)] sm:max-w-lg sm:rounded-[1.9rem]"
       >
-        <div className={`border-b px-5 py-4 sm:px-6 ${getToneClasses(tone)}`}>
+        <div className="flex justify-center pt-3 sm:hidden">
+          <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
+        </div>
+
+        <div className={`shrink-0 border-b px-5 py-4 sm:px-6 ${getToneClasses(tone)}`}>
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] opacity-80">Action rapide</p>
@@ -93,11 +97,11 @@ export function MobileDialog({
           </div>
         </div>
 
-        {children ? <div className="px-5 py-5 sm:px-6">{children}</div> : null}
+        {children ? <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div> : null}
 
         {actions ? (
-          <div className="flex flex-col-reverse gap-3 border-t border-slate-200/80 px-5 py-4 sm:flex-row sm:justify-end sm:px-6 dark:border-white/10">
-            {actions}
+          <div className="shrink-0 border-t border-slate-200/80 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur sm:flex-row sm:justify-end sm:px-6 sm:pb-4 dark:border-white/10 dark:bg-slate-950/95">
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">{actions}</div>
           </div>
         ) : null}
       </div>
