@@ -1,15 +1,20 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Calendar,
+  CreditCard,
   FileText,
   Home,
   LifeBuoy,
   MoreHorizontal,
+  Package,
   Receipt,
+  Settings,
   StickyNote,
   Users,
   X,
@@ -17,7 +22,7 @@ import {
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
 
-export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin";
+export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin" | "tools";
 type ClientTone = "violet" | "emerald" | "amber" | "rose" | "slate";
 export type ClientMobileAction = {
   disabled?: boolean;
@@ -45,6 +50,18 @@ const CLIENT_NAV_ITEMS: Array<{
   { href: "/clients", icon: Users, key: "clients", label: "Clients" },
   { href: "/factures", icon: Receipt, key: "factures", label: "Factures" },
   { href: "/calepin", icon: StickyNote, key: "calepin", label: "Calepin" },
+] as const;
+
+const CLIENT_TOOL_ITEMS: Array<{
+  href: string;
+  icon: LucideIcon;
+  label: string;
+}> = [
+  { href: "/planning", icon: Calendar, label: "Planning" },
+  { href: "/catalogue", icon: Package, label: "Catalogue" },
+  { href: "/depenses", icon: CreditCard, label: "Dépenses" },
+  { href: "/parametres", icon: Settings, label: "Paramètres" },
+  { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
 ] as const;
 
 const SUPPORT_HREF = getSupportHref();
@@ -78,6 +95,37 @@ function mobileActionToneClasses(tone: ClientMobileAction["tone"] = "default") {
   }
 }
 
+function useBodyScrollLock(open: boolean) {
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        document.dispatchEvent(new CustomEvent("client-shell-close-overlays"));
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+}
+
+function useOverlayCloseSignal(onClose: () => void) {
+  useEffect(() => {
+    const handleClose = () => onClose();
+    document.addEventListener("client-shell-close-overlays", handleClose);
+    return () => document.removeEventListener("client-shell-close-overlays", handleClose);
+  }, [onClose]);
+}
+
 export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
   return (
     <div className="flex min-w-0 items-center gap-3">
@@ -104,26 +152,97 @@ export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
 }
 
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
+  const pathname = usePathname();
+  const [toolsOpen, setToolsOpen] = useState(false);
+
+  useBodyScrollLock(toolsOpen);
+  useOverlayCloseSignal(() => setToolsOpen(false));
+
   return (
-    <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-sm items-center justify-between gap-1.5 rounded-[1.75rem] px-2.5 py-2.5 lg:hidden">
-      {CLIENT_NAV_ITEMS.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Link
-            key={item.key}
-            href={item.href}
-            className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
-          >
-            <Icon size={20} strokeWidth={active === item.key ? 2.4 : 2} />
-            <span className="text-[11px] font-semibold">{item.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <>
+      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-sm items-center justify-between gap-1.5 rounded-[1.75rem] px-2.5 py-2.5 lg:hidden">
+        {CLIENT_NAV_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
+            >
+              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 2} />
+              <span className="text-[11px] font-semibold">{item.label}</span>
+            </Link>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={() => setToolsOpen(true)}
+          className={`client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
+          aria-label="Plus d'outils"
+        >
+          <MoreHorizontal size={20} strokeWidth={active === "tools" ? 2.4 : 2} />
+          <span className="text-[11px] font-semibold">Plus</span>
+        </button>
+      </nav>
+
+      {toolsOpen ? (
+        <div className="fixed inset-0 z-[70] lg:hidden">
+          <button
+            type="button"
+            onClick={() => setToolsOpen(false)}
+            className="absolute inset-0 bg-slate-950/45 backdrop-blur-[2px]"
+            aria-label="Fermer le menu outils"
+          />
+
+          <div className="absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96">
+            <div className="mb-3 flex items-center justify-between gap-3 px-1">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                  Outils
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                  Accès rapide aux modules secondaires
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setToolsOpen(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:border-violet-400/20 dark:hover:text-white"
+                aria-label="Fermer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2.5">
+              {CLIENT_TOOL_ITEMS.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setToolsOpen(false)}
+                    className={`inline-flex min-h-[84px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
+                      pathname === item.href ? "accent" : "default",
+                    )}`}
+                  >
+                    <Icon size={18} />
+                    <span className="leading-5">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
 export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
+  const pathname = usePathname();
+
   return (
     <nav className="client-panel mt-4 hidden items-center gap-2 rounded-[1.75rem] p-2 lg:flex">
       {CLIENT_NAV_ITEMS.map((item) => {
@@ -145,6 +264,27 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </Link>
         );
       })}
+
+      <div className="ml-auto flex items-center gap-2 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 px-2 py-2 dark:border-white/10 dark:bg-white/4">
+        {CLIENT_TOOL_ITEMS.map((item) => {
+          const Icon = item.icon;
+          const isCurrentTool = pathname === item.href || pathname.startsWith(`${item.href}/`);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`inline-flex items-center gap-2 rounded-[1rem] px-3 py-2 text-sm font-semibold transition ${
+                isCurrentTool
+                  ? "bg-white text-violet-700 shadow-sm dark:bg-white/10 dark:text-white"
+                  : "text-slate-600 hover:bg-white hover:text-violet-700 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
+              }`}
+            >
+              <Icon size={16} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }
