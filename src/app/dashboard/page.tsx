@@ -1787,7 +1787,7 @@ export default function DashboardPage() {
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
                       Une priorité claire, puis les suivantes juste en dessous.
                     </p>
-                  
+                  </div>
                   <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
                     {actionPlan.length} priorités
                   </span>
@@ -1833,7 +1833,6 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-            </div>
               
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex items-center justify-between">
