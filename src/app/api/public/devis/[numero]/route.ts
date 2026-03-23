@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendDevisSignedEmail } from "@/lib/sendEmail";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
-import { internalServerError, jsonError } from "@/lib/http";
+import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { verifyPublicDevisToken } from "@/lib/public-devis-token";
 
 type PublicDevisLine = {
@@ -165,13 +165,20 @@ export async function POST(request: Request, context: { params: Promise<{ numero
       },
     });
 
+    let emailSent = false;
+    let emailSkippedReason: string | undefined;
+
     try {
       const client = await clerkClient();
       const user = await client.users.getUser(userId);
       const entreprise = getCompanyProfile(user);
-      const emailClient = devis.client?.email;
+      const emailClient = devis.client?.email?.trim();
 
-      if (emailClient) {
+      if (!emailClient) {
+        emailSkippedReason = "missing_client_email";
+      } else if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        emailSkippedReason = "smtp_not_configured";
+      } else {
         const lignes = parseLignes(devis.lignes);
         const lignesPdf = normalizeLignes(lignes);
         const tvaGlobale = devis.tva || 0;
@@ -215,17 +222,20 @@ export async function POST(request: Request, context: { params: Promise<{ numero
 
         await sendDevisSignedEmail(
           emailClient,
-          entreprise.nom,
+          devis.client?.nom || entreprise.nom,
           devis.numero,
           totalTTC.toFixed(2),
           pdfBuffer,
         );
+
+        emailSent = true;
       }
     } catch (emailError) {
-      console.error("Erreur envoi email PDF:", emailError);
+      logServerError("public-devis-post-email", emailError);
+      emailSkippedReason = "send_failed";
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, emailSent, emailSkippedReason });
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "MISSING_TOKEN" || error.message === "Token expired") {

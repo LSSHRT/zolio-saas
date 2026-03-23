@@ -107,6 +107,18 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
         throw new Error(payload?.error || "Erreur lors de l'enregistrement de la signature");
       }
 
+      if (payload?.emailSkippedReason === "missing_client_email") {
+        toast.success("Devis signé. L’email client n’a pas été envoyé car aucune adresse n’est enregistrée.");
+      } else if (payload?.emailSkippedReason === "smtp_not_configured") {
+        toast.success("Devis signé. L’email client n’a pas été envoyé car la messagerie n’est pas configurée.");
+      } else if (payload?.emailSkippedReason === "send_failed") {
+        toast.success("Devis signé. L’envoi automatique de l’email a échoué, mais la signature est bien enregistrée.");
+      } else if (payload?.emailSent) {
+        toast.success("Devis signé et copie envoyée au client.");
+      } else {
+        toast.success("Devis signé avec succès.");
+      }
+
       setSuccess(true);
       import("canvas-confetti").then((confetti) => {
         confetti.default({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
