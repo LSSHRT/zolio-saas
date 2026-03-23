@@ -1484,7 +1484,9 @@ export default function DashboardPage() {
             {...sectionMotion(0)}
             className="hidden items-start gap-4 md:grid xl:grid-cols-[minmax(0,1.18fr)_minmax(21rem,0.82fr)]"
           >
-            <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
+            {/* Colonne Principale (Gauche) */}
+            <div className="space-y-4">
+              <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-fuchsia-500/14 blur-[80px]" />
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
@@ -1572,69 +1574,8 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-
-            <div className="space-y-4 xl:self-start">
-              <div className="client-panel rounded-[2.2rem] p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Action principale</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Une priorité claire, puis les suivantes juste en dessous.
-                    </p>
-                  </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                    {actionPlan.length} priorités
-                  </span>
-                </div>
-
-                <div className="mt-5 grid gap-3">
-                  <DashboardActionCard item={actionPlan[0]} compact />
-                  {actionPlanSecondary.length > 0 ? (
-                    <div className="grid gap-3 xl:grid-cols-1">
-                      {actionPlanSecondary.map((item) => (
-                        <DashboardActionCard key={item.id} item={item} compact />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="client-panel rounded-[2.2rem] p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">À surveiller</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Les points secondaires à garder visibles sans parasiter le haut du cockpit.
-                    </p>
-                  </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                    {secondarySignals.length}
-                  </span>
-                </div>
-
-                {secondarySignals.length > 0 ? (
-                  <div className="mt-5 space-y-3">
-                    {secondarySignals.map((signal) => (
-                      <FocusSignalCard key={signal.id} signal={signal} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="mt-5 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Le cockpit reste volontairement simple : une priorité claire, puis le suivi utile seulement.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </motion.section>
-
-          <motion.section
-            {...sectionMotion(0.08)}
-            className="hidden client-panel rounded-[2.15rem] p-5 md:block sm:p-6"
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div className="client-panel rounded-[2.15rem] p-5 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
@@ -1649,7 +1590,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
               <MetricCard
                 label="CA validé"
                 value={formatCurrency(acceptedRevenueHT)}
@@ -1679,29 +1620,8 @@ export default function DashboardPage() {
                 icon={LineChart}
               />
             </div>
-          </motion.section>
-
-          <motion.section
-            {...sectionMotion(0.16)}
-            className="hidden space-y-4 md:block"
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Suivi &amp; outils</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  Le suivi business à gauche, les urgences et modules à droite
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Une grille simple pour éviter les blocs juxtaposés sans logique de lecture.
-                </p>
-              </div>
-              <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                {quickLinks.length} modules clés
-              </span>
             </div>
-
-            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(21rem,0.88fr)] xl:items-start">
-              <div className="space-y-4">
+              
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -1858,7 +1778,63 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="space-y-4">
+            {/* Colonne Secondaire (Droite) */}
+            <div className="space-y-4 xl:self-start">
+              <div className="client-panel rounded-[2.2rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Action principale</p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                      Une priorité claire, puis les suivantes juste en dessous.
+                    </p>
+                  
+                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                    {actionPlan.length} priorités
+                  </span>
+                </div>
+
+                <div className="mt-5 grid gap-3">
+                  <DashboardActionCard item={actionPlan[0]} compact />
+                  {actionPlanSecondary.length > 0 ? (
+                    <div className="grid gap-3 xl:grid-cols-1">
+                      {actionPlanSecondary.map((item) => (
+                        <DashboardActionCard key={item.id} item={item} compact />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="client-panel rounded-[2.2rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">À surveiller</p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                      Les points secondaires à garder visibles sans parasiter le haut du cockpit.
+                    </p>
+                  </div>
+                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                    {secondarySignals.length}
+                  </span>
+                </div>
+
+                {secondarySignals.length > 0 ? (
+                  <div className="mt-5 space-y-3">
+                    {secondarySignals.map((signal) => (
+                      <FocusSignalCard key={signal.id} signal={signal} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Le cockpit reste volontairement simple : une priorité claire, puis le suivi utile seulement.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+              
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -2020,7 +1996,6 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
-              </div>
             </div>
           </motion.section>
         </main>
