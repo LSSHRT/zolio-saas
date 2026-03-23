@@ -1636,48 +1636,45 @@ export default function DashboardPage() {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  Les chiffres à lire sans détour
+                  Fonctionnalités et outils
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Une seule ligne KPI, directement après la priorité du jour.
+                  Accédez rapidement à vos outils essentiels.
                 </p>
               </div>
-              <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                {totalQuotes} devis monitorés
+              <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                {quickLinks.length} accès directs
               </span>
             </div>
 
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <MetricCard
-                label="CA validé"
-                value={formatCurrency(acceptedRevenueHT)}
-                detail={`${acceptedQuotesCount} devis acceptés`}
-                tone="emerald"
-                icon={TrendingUp}
-              />
-              <MetricCard
-                label="Pipeline"
-                value={formatCurrency(pipelineRevenueHT)}
-                detail={`${pendingQuotesCount} devis en attente`}
-                tone="amber"
-                icon={Clock3}
-              />
-              <MetricCard
-                label="Relances"
-                value={String(devisARelancer.length)}
-                detail="Clients à relancer cette semaine"
-                tone="rose"
-                icon={Bell}
-              />
-              <MetricCard
-                label="Ticket moyen"
-                value={formatCurrency(averageTicket)}
-                detail={`${conversionRate}% de conversion sur les devis suivis`}
-                tone="violet"
-                icon={LineChart}
-              />
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {quickLinks.map((item) => (
+                <QuickLinkCard key={item.href} item={item} />
+              ))}
+            </div>
+
+            <div className="mt-5 flex flex-wrap gap-3">
+              <ClientSupportButton />
+              {!isPro && (
+                <Link
+                  href="/abonnement"
+                  className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                >
+                  <Sparkles size={16} />
+                  Passer en PRO
+                </Link>
+              )}
+              {canAccessAdminDashboard && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                >
+                  <ShieldCheck size={16} />
+                  Ouvrir le cockpit admin
+                </Link>
+              )}
             </div>
           </motion.section>
 
@@ -1976,50 +1973,6 @@ export default function DashboardPage() {
                   </div>
                 ) : null}
 
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Les outils utiles, enfin à leur place
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Les accès `Clients`, `Factures`, `Calepin` et `Paramètres` restent visibles sans remonter au-dessus des priorités.
-                      </p>
-                    </div>
-                    <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                      {quickLinks.length} accès directs
-                    </span>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                    {quickLinks.map((item) => (
-                      <QuickLinkCard key={item.href} item={item} />
-                    ))}
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <ClientSupportButton />
-                    {!isPro && (
-                      <Link
-                        href="/abonnement"
-                        className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                      >
-                        <Sparkles size={16} />
-                        Passer en PRO
-                      </Link>
-                    )}
-                    {canAccessAdminDashboard && (
-                      <Link
-                        href="/admin"
-                        className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                      >
-                        <ShieldCheck size={16} />
-                        Ouvrir le cockpit admin
-                      </Link>
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
           </motion.section>
