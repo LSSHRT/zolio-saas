@@ -1482,128 +1482,152 @@ export default function DashboardPage() {
 
           <motion.section
             {...sectionMotion(0)}
-            className="hidden items-start gap-4 md:grid xl:grid-cols-[minmax(0,1.28fr)_minmax(21rem,0.72fr)]"
+            className="hidden md:block"
           >
-            <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
+            <div className="client-panel-strong relative overflow-hidden rounded-[2.4rem] px-6 py-6 lg:px-7 lg:py-7">
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-fuchsia-500/14 blur-[80px]" />
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
 
-              <div className="relative max-w-3xl">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
-                    <GreetingIcon size={15} />
-                    {todayLabel}
+              <div className="relative grid gap-5 xl:grid-cols-[minmax(0,0.96fr)_minmax(0,1.04fr)] xl:items-start">
+                <div className="space-y-5">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
+                      <GreetingIcon size={15} />
+                      {todayLabel}
+                    </div>
+                    <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
+                      <BriefcaseBusiness size={14} />
+                      {starterTrade?.shortLabel || "Métier à définir"}
+                    </div>
+                    <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
+                      {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
+                    </span>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
-                    <BriefcaseBusiness size={14} />
-                    {starterTrade?.shortLabel || "Métier à définir"}
-                  </div>
-                </div>
 
-                <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-[3.15rem]">
-                  {greetingText}
-                  {user?.firstName ? `, ${user.firstName}` : ""}.
-                </h1>
-                <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                  Un accueil plus simple: l’action utile maintenant, les chiffres ensuite, puis les modules plus bas sans vous perdre dans des cartes répétées.
-                </p>
-
-                <div className="mt-6 flex flex-wrap gap-3">
-                  <Link href="/nouveau-devis" className="tour-nouveau-devis">
-                    <motion.div
-                      whileTap={{ scale: 0.98 }}
-                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-[0_22px_60px_-30px_rgba(124,58,237,0.65)]"
-                    >
-                      <Plus size={17} />
-                      Nouveau devis
-                    </motion.div>
-                  </Link>
-
-                  <Link
-                    href="/devis"
-                    className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                  >
-                    <FileText size={17} />
-                    Ouvrir mes devis
-                  </Link>
-                </div>
-
-                <div className="mt-6 grid gap-3 lg:grid-cols-3">
-                  {heroIndicators.map((indicator) => (
-                    <HeroIndicatorPill key={indicator.id} indicator={indicator} />
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="client-panel rounded-[2.2rem] p-5 sm:p-6 xl:self-start">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Focus du jour</p>
-                  <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    {todayFocus.title}
-                  </h2>
-                </div>
-                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10">
-                  {dashboardSignals.length} signal{dashboardSignals.length > 1 ? "s" : ""}
-                </span>
-              </div>
-
-              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                {todayFocus.description}
-              </p>
-
-              {todayFocus.href ? (
-                <Link
-                  href={todayFocus.href}
-                  className="mt-5 inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                >
-                  Ouvrir l&apos;action
-                  <ChevronRight size={16} />
-                </Link>
-              ) : null}
-
-              <div className="mt-6 space-y-3">
-                <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Action principale</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Une priorité claire, puis le reste à suivre sans brouiller la lecture.
+                    <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+                      Priorité du jour
+                    </p>
+                    <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white lg:text-[3rem]">
+                      {todayFocus.title}
+                    </h1>
+                    <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+                      {todayFocus.description}
                     </p>
                   </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                    {actionPlan.length} priorités
-                  </span>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {heroIndicators.map((indicator) => (
+                      <HeroIndicatorPill key={indicator.id} indicator={indicator} />
+                    ))}
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <Link href="/nouveau-devis" className="tour-nouveau-devis">
+                      <motion.div
+                        whileTap={{ scale: 0.98 }}
+                        className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-[0_22px_60px_-30px_rgba(124,58,237,0.65)]"
+                      >
+                        <Plus size={17} />
+                        Nouveau devis
+                      </motion.div>
+                    </Link>
+
+                    <Link
+                      href="/devis"
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      <FileText size={17} />
+                      Ouvrir mes devis
+                    </Link>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setObjectifDraft(objectifActif.toString());
+                        setObjectifDialogOpen(true);
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      <Pencil size={16} />
+                      Ajuster l&apos;objectif
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid gap-3">
-                  <DashboardActionCard item={actionPlan[0]} compact />
-                  {actionPlanSecondary.length > 0 ? (
-                    <div className="grid gap-3 xl:grid-cols-2">
-                      {actionPlanSecondary.map((item) => (
-                        <DashboardActionCard key={item.id} item={item} compact />
-                      ))}
+                <div className="grid gap-4 lg:grid-cols-[minmax(0,1.05fr)_minmax(18rem,0.95fr)]">
+                  <div className="rounded-[2rem] border border-white/55 bg-white/78 p-5 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.22)] backdrop-blur dark:border-white/10 dark:bg-white/6">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Action principale</p>
+                        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                          Commencez par une seule action claire, puis déroulez le reste.
+                        </p>
+                      </div>
+                      <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                        {actionPlan.length} priorités
+                      </span>
                     </div>
-                  ) : null}
+
+                    <div className="mt-4 grid gap-3">
+                      <DashboardActionCard item={actionPlan[0]} compact />
+                      {actionPlanSecondary.length > 0 ? (
+                        <div className="grid gap-3 xl:grid-cols-2">
+                          {actionPlanSecondary.map((item) => (
+                            <DashboardActionCard key={item.id} item={item} compact />
+                          ))}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="rounded-[2rem] border border-white/55 bg-white/78 p-5 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.22)] backdrop-blur dark:border-white/10 dark:bg-white/6">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Ce qu&apos;il faut surveiller</p>
+                      <div className="mt-4 space-y-3">
+                        {secondarySignals.length > 0 ? (
+                          secondarySignals.map((signal) => (
+                            <FocusSignalCard key={signal.id} signal={signal} />
+                          ))
+                        ) : (
+                          <div className="rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                              Le cockpit reste simple : un seul focus principal pour avancer sans dispersion.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-[2rem] border border-white/55 bg-white/78 p-5 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.22)] backdrop-blur dark:border-white/10 dark:bg-white/6">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cap du mois</p>
+                      <div className="mt-3 flex items-end justify-between gap-4">
+                        <div>
+                          <p className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                            {objectifProgress.toFixed(0)}%
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                            {remainingToGoal > 0
+                              ? `${formatCurrency(remainingToGoal)} TTC restent à sécuriser.`
+                              : "Objectif atteint, vous pouvez pousser les prochaines signatures."}
+                          </p>
+                        </div>
+                        <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                          {formatCurrency(objectifActif)}
+                        </span>
+                      </div>
+                      <div className="mt-4 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+                        <div
+                          className="h-3 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
+                          style={{ width: `${objectifProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {secondarySignals.length > 0 ? (
-                <div className="mt-6 space-y-3">
-                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">À surveiller ensuite</p>
-                  {secondarySignals.map((signal) => (
-                    <FocusSignalCard key={signal.id} signal={signal} />
-                  ))}
-                </div>
-              ) : (
-                <div className="mt-6 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
-                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                    Le cockpit reste simple: un seul focus principal pour avancer sans dispersion.
-                  </p>
-                </div>
-              )}
             </div>
           </motion.section>
 
@@ -1618,7 +1642,7 @@ export default function DashboardPage() {
                   Les chiffres à lire sans détour
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Une seule ligne KPI, sans doublon avec le hero.
+                  Une seule ligne KPI, juste sous la priorité du jour.
                 </p>
               </div>
               <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
@@ -1664,12 +1688,12 @@ export default function DashboardPage() {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage &amp; modules</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Outils &amp; suivi</p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  Le reste du cockpit, rangé plus bas
+                  Les dossiers récents, les relances et les modules au bon endroit
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Ici seulement: progression, relances détaillées, setup métier et accès aux modules.
+                  Le bas du cockpit sert maintenant à suivre, comparer et accéder aux modules sans brouiller la priorité métier.
                 </p>
               </div>
               <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
@@ -1677,67 +1701,215 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-[1.08fr_0.92fr] xl:items-start">
-              <div className="space-y-4">
-                {setupIsRequired && selectedTradeDefinition && (
-                  <div
-                    id="dashboard-setup-panel"
-                    className="client-panel rounded-[2.1rem] p-5 sm:p-6"
+            {setupIsRequired && selectedTradeDefinition ? (
+              <div
+                id="dashboard-setup-panel"
+                className="client-panel rounded-[2.1rem] p-5 sm:p-6"
+              >
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Starter métier</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Branchez votre activité une fois
+                    </h2>
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Ce setup reste visible, mais rangé à part pour ne plus prendre la place des urgences desktop.
+                    </p>
+                  </div>
+                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                    {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} déjà en base
+                  </span>
+                </div>
+
+                <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  {TRADE_OPTIONS.map((option) => (
+                    <TradeOptionCard
+                      key={option.key}
+                      option={option}
+                      active={selectedTrade === option.key}
+                      onSelect={setSelectedTrade}
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
+                  <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDefinition.label} prêt à démarrer</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {selectedTradeDefinition.pitch} {selectedStarterCount} prestations starter seront injectées dans le catalogue.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleBootstrapTrade}
+                      disabled={isBootstrappingTrade}
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+                    >
+                      {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
+                    </button>
+                    <Link
+                      href="/parametres"
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      Finaliser mes paramètres
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="grid gap-4 xl:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)_minmax(18rem,0.86fr)] xl:items-start">
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Les affaires les plus récentes
+                    </h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Une lecture plus simple : client, statut, montant, puis ouverture directe.
+                    </p>
+                  </div>
+                  <Link
+                    href="/devis"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition hover:text-violet-800 dark:text-violet-200 dark:hover:text-white"
                   >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Starter métier</p>
-                        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                          Branchez votre activité une fois
-                        </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Ce setup reste ici pour ne plus concurrencer l’action du jour en haut de page.
-                        </p>
-                      </div>
-                      <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                        {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} déjà en base
-                      </span>
-                    </div>
+                    Voir tous les devis
+                    <ChevronRight size={16} />
+                  </Link>
+                </div>
 
-                    <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                      {TRADE_OPTIONS.map((option) => (
-                        <TradeOptionCard
-                          key={option.key}
-                          option={option}
-                          active={selectedTrade === option.key}
-                          onSelect={setSelectedTrade}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-end">
-                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDefinition.label} prêt à démarrer</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          {selectedTradeDefinition.pitch} {selectedStarterCount} prestations starter seront injectées dans le catalogue.
-                        </p>
+                {loading ? (
+                  <div className="mt-5 space-y-3">
+                    {[1, 2, 3].map((item) => (
+                      <div
+                        key={item}
+                        className="animate-shimmer rounded-[1.6rem] border border-slate-200/70 bg-white/70 p-4 dark:border-white/8 dark:bg-white/4"
+                      >
+                        <div className="h-4 w-1/3 rounded bg-slate-100/90 dark:bg-white/10" />
+                        <div className="mt-3 h-3 w-1/2 rounded bg-slate-100/70 dark:bg-white/10" />
                       </div>
-
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={handleBootstrapTrade}
-                          disabled={isBootstrappingTrade}
-                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
-                        >
-                          {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
-                        </button>
-                        <Link
-                          href="/parametres"
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                        >
-                          Finaliser mes paramètres
-                        </Link>
-                      </div>
+                    ))}
+                  </div>
+                ) : devisRecents.length === 0 ? (
+                  <div className="mt-5 rounded-[1.7rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-10 text-center dark:border-white/10 dark:bg-white/4">
+                    <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-violet-500/10 text-violet-600 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                      <Sparkles size={24} />
                     </div>
+                    <p className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">
+                      Le cockpit attend votre premier devis
+                    </p>
+                    <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Lancez votre première création pour alimenter le suivi d&apos;activité, les relances et les statistiques.
+                    </p>
+                    <Link href="/nouveau-devis" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand">
+                      <Plus size={16} />
+                      Créer mon premier devis
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="mt-5 grid gap-3 xl:grid-cols-2">
+                    {devisRecents.map((item) => (
+                      <Link href={`/devis/${item.numero}`} key={item.numero}>
+                        <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:border-violet-300/50 dark:border-white/8 dark:bg-white/4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                                <LineChart size={18} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                  {item.nomClient}
+                                </p>
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                  {item.numero} · {formatDateLabel(item.date)}
+                                </p>
+                              </div>
+                            </div>
+                            <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
+                              {item.statut}
+                            </span>
+                          </div>
+                          <div className="mt-5 flex items-end justify-between gap-3">
+                            <div>
+                              <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Montant TTC</p>
+                              <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
+                                {formatCurrency(item.totalTTC || 0)}
+                              </p>
+                            </div>
+                            <span className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-200">
+                              Ouvrir
+                              <ChevronRight size={16} />
+                            </span>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 )}
+              </div>
 
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
+                    <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      À traiter sans tarder
+                    </h2>
+                  </div>
+                  <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
+                    {devisARelancer.length}
+                  </span>
+                </div>
+
+                {devisARelancer.length === 0 ? (
+                  <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
+                    <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-300/30 dark:text-emerald-300 dark:ring-emerald-400/20">
+                      <FileCheck2 size={22} />
+                    </div>
+                    <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Aucun devis âgé de plus de 7 jours n&apos;attend une relance pour le moment.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-5 space-y-3">
+                    {devisARelancer.map((item) => (
+                      <Link href={`/devis/${item.numero}`} key={item.numero}>
+                        <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 transition hover:-translate-y-0.5 dark:border-rose-400/12 dark:bg-rose-500/8">
+                          <div className="flex items-start gap-3">
+                            <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-rose-600 ring-1 ring-rose-200/80 dark:bg-white/10 dark:text-rose-200 dark:ring-white/10">
+                              <Bell size={17} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                    {item.nomClient}
+                                  </p>
+                                  <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
+                                    {item.numero} · {formatDateLabel(item.date)}
+                                  </p>
+                                </div>
+                                <p className="text-sm font-semibold text-slate-950 dark:text-white">
+                                  {formatCurrency(item.totalTTC || 0)}
+                                </p>
+                              </div>
+                              <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                                En attente depuis plus de 7 jours. Un rappel rapide peut faire la différence.
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-4">
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
@@ -1746,7 +1918,7 @@ export default function DashboardPage() {
                         Vision chiffre d&apos;affaires
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Le cap mensuel n’apparaît plus qu’ici, avec la progression et la tendance.
+                        Le cap mensuel et la tendance restent visibles ici, dans une colonne dédiée.
                       </p>
                     </div>
                     <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/80 px-4 py-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-white/4">
@@ -1755,18 +1927,20 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <div className="mt-5 grid gap-3">
                     <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
                       <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cap restant</p>
                       <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
                     </div>
-                    <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Total TTC</p>
-                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
-                    </div>
-                    <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
-                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
+                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                        <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Total TTC</p>
+                        <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
+                      </div>
+                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                        <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
+                        <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -1804,164 +1978,14 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Les affaires les plus récentes
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Une lecture plus simple : client, statut, montant, puis ouverture directe.
-                      </p>
-                    </div>
-                    <Link
-                      href="/devis"
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition hover:text-violet-800 dark:text-violet-200 dark:hover:text-white"
-                    >
-                      Voir tous les devis
-                      <ChevronRight size={16} />
-                    </Link>
-                  </div>
-
-                  {loading ? (
-                    <div className="mt-5 space-y-3">
-                      {[1, 2, 3].map((item) => (
-                        <div
-                          key={item}
-                          className="animate-shimmer rounded-[1.6rem] border border-slate-200/70 bg-white/70 p-4 dark:border-white/8 dark:bg-white/4"
-                        >
-                          <div className="h-4 w-1/3 rounded bg-slate-100/90 dark:bg-white/10" />
-                          <div className="mt-3 h-3 w-1/2 rounded bg-slate-100/70 dark:bg-white/10" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : devisRecents.length === 0 ? (
-                    <div className="mt-5 rounded-[1.7rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-10 text-center dark:border-white/10 dark:bg-white/4">
-                      <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-[1.5rem] bg-violet-500/10 text-violet-600 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
-                        <Sparkles size={24} />
-                      </div>
-                      <p className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">
-                        Le cockpit attend votre premier devis
-                      </p>
-                      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Lancez votre première création pour alimenter le suivi d&apos;activité, les relances et les statistiques.
-                      </p>
-                      <Link href="/nouveau-devis" className="mt-5 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand">
-                        <Plus size={16} />
-                        Créer mon premier devis
-                      </Link>
-                    </div>
-                  ) : (
-                    <div className="mt-5 grid gap-3 xl:grid-cols-2">
-                      {devisRecents.map((item) => (
-                        <Link href={`/devis/${item.numero}`} key={item.numero}>
-                          <div className="rounded-[1.55rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:border-violet-300/50 dark:border-white/8 dark:bg-white/4">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex items-start gap-3">
-                                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
-                                  <LineChart size={18} />
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                                    {item.nomClient}
-                                  </p>
-                                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                    {item.numero} · {formatDateLabel(item.date)}
-                                  </p>
-                                </div>
-                              </div>
-                              <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
-                                {item.statut}
-                              </span>
-                            </div>
-                            <div className="mt-5 flex items-end justify-between gap-3">
-                              <div>
-                                <p className="text-xs uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">Montant TTC</p>
-                                <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
-                                  {formatCurrency(item.totalTTC || 0)}
-                                </p>
-                              </div>
-                              <span className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-200">
-                                Ouvrir
-                                <ChevronRight size={16} />
-                              </span>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        À traiter sans tarder
-                      </h2>
-                    </div>
-                    <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
-                      {devisARelancer.length}
-                    </span>
-                  </div>
-
-                  {devisARelancer.length === 0 ? (
-                    <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
-                      <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-300/30 dark:text-emerald-300 dark:ring-emerald-400/20">
-                        <FileCheck2 size={22} />
-                      </div>
-                      <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Aucun devis âgé de plus de 7 jours n&apos;attend une relance pour le moment.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-5 space-y-3">
-                      {devisARelancer.map((item) => (
-                        <Link href={`/devis/${item.numero}`} key={item.numero}>
-                          <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 transition hover:-translate-y-0.5 dark:border-rose-400/12 dark:bg-rose-500/8">
-                            <div className="flex items-start gap-3">
-                              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-rose-600 ring-1 ring-rose-200/80 dark:bg-white/10 dark:text-rose-200 dark:ring-white/10">
-                                <Bell size={17} />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                                      {item.nomClient}
-                                    </p>
-                                    <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
-                                      {item.numero} · {formatDateLabel(item.date)}
-                                    </p>
-                                  </div>
-                                  <p className="text-sm font-semibold text-slate-950 dark:text-white">
-                                    {formatCurrency(item.totalTTC || 0)}
-                                  </p>
-                                </div>
-                                <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                  En attente depuis plus de 7 jours. Un rappel rapide peut faire la différence.
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
                       <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Les outils utiles, plus bas et mieux rangés
+                        Les outils utiles, enfin à leur place
                       </h2>
                       <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Les accès `Clients`, `Factures`, `Calepin` et `Paramètres` restent visibles, mais ne prennent plus la priorité sur l’accueil.
+                        Les accès `Clients`, `Factures`, `Calepin` et `Paramètres` restent visibles sans remonter au-dessus des priorités.
                       </p>
                     </div>
                     <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
@@ -1969,7 +1993,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
 
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                     {quickLinks.map((item) => (
                       <QuickLinkCard key={item.href} item={item} />
                     ))}
