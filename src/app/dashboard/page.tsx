@@ -68,6 +68,18 @@ type DashboardSignal = {
   tone: Tone;
 };
 
+type DashboardActionPlanItem = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  href?: string;
+  icon: LucideIcon;
+  tone: Tone;
+  value?: string;
+  ctaLabel?: string;
+};
+
 type QuickLinkItem = {
   href: string;
   label: string;
@@ -203,6 +215,48 @@ function FocusSignalCard({ signal }: { signal: DashboardSignal }) {
   );
 
   return signal.href ? <Link href={signal.href}>{content}</Link> : content;
+}
+
+function DashboardActionCard({
+  item,
+  compact = false,
+}: {
+  item: DashboardActionPlanItem;
+  compact?: boolean;
+}) {
+  const classes = toneClasses(item.tone);
+  const Icon = item.icon;
+  const content = (
+    <div
+      className={`rounded-[1.6rem] border border-slate-200/70 bg-white/80 p-4 shadow-[0_20px_44px_-36px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4 ${
+        compact ? "sm:p-4" : "sm:p-5"
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+          <Icon size={18} />
+        </div>
+        {item.value ? (
+          <span className={`client-chip shrink-0 ring-1 ${classes.chip}`}>{item.value}</span>
+        ) : null}
+      </div>
+
+      <div className="mt-4">
+        <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">{item.eyebrow}</p>
+        <p className="mt-2 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">{item.title}</p>
+        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+      </div>
+
+      {item.href || item.ctaLabel ? (
+        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-violet-700 dark:text-violet-200">
+          {item.ctaLabel || "Ouvrir"}
+          {item.href ? <ChevronRight size={16} /> : null}
+        </div>
+      ) : null}
+    </div>
+  );
+
+  return item.href ? <Link href={item.href}>{content}</Link> : content;
 }
 
 function MetricCard({
@@ -827,6 +881,112 @@ export default function DashboardPage() {
   }, [totalQuotes, devisARelancer.length, isPro, pendingQuotesCount, pipelineRevenueHT, setupIsRequired]);
   const secondarySignals = dashboardSignals.filter((signal) => signal.title !== todayFocus.title).slice(0, 2);
 
+  const actionPlan = useMemo<DashboardActionPlanItem[]>(() => {
+    const items: DashboardActionPlanItem[] = [
+      {
+        id: "create-quote",
+        eyebrow: "Action du jour",
+        title: totalQuotes === 0 ? "Créer le premier devis" : "Lancer un nouveau devis",
+        description:
+          totalQuotes === 0
+            ? "Commencez par une vraie affaire pour débloquer un cockpit beaucoup plus parlant."
+            : "Le raccourci le plus direct pour nourrir votre pipeline sans fouiller dans les modules.",
+        href: "/nouveau-devis",
+        icon: Plus,
+        tone: "violet",
+        ctaLabel: "Créer maintenant",
+      },
+    ];
+
+    if (devisARelancer.length > 0) {
+      items.push({
+        id: "follow-up",
+        eyebrow: "Urgent",
+        title: `${devisARelancer.length} relance${devisARelancer.length > 1 ? "s" : ""} à faire`,
+        description: "Les devis laissés sans rappel sont votre perte la plus évitable. Traitez-les en priorité.",
+        href: "/devis",
+        icon: Bell,
+        tone: "rose",
+        value: String(devisARelancer.length),
+        ctaLabel: "Voir les relances",
+      });
+    } else if (pendingQuotesCount > 0) {
+      items.push({
+        id: "pipeline",
+        eyebrow: "À suivre",
+        title: "Surveiller le pipe chaud",
+        description: `${pendingQuotesCount} devis attendent encore une décision pour ${formatCurrency(pipelineRevenueHT)} HT.`,
+        href: "/devis",
+        icon: Clock3,
+        tone: "amber",
+        value: formatCurrency(pipelineRevenueHT),
+        ctaLabel: "Ouvrir le pipe",
+      });
+    } else {
+      items.push({
+        id: "recent-quotes",
+        eyebrow: "Suivi",
+        title: "Garder vos devis sous contrôle",
+        description: "Votre pipeline est propre. Utilisez la liste devis pour vérifier signatures, statuts et suivis clients.",
+        href: "/devis",
+        icon: FileText,
+        tone: "emerald",
+        value: `${totalQuotes}`,
+        ctaLabel: "Ouvrir mes devis",
+      });
+    }
+
+    if (setupIsRequired) {
+      items.push({
+        id: "setup",
+        eyebrow: "Setup",
+        title: "Finaliser le starter métier",
+        description: "Un seul passage ici pour récupérer vos libellés, packs et prix de départ plus bas dans la page.",
+        href: "#dashboard-setup-panel",
+        icon: BriefcaseBusiness,
+        tone: "violet",
+        ctaLabel: "Configurer",
+      });
+    } else if (!isPro) {
+      items.push({
+        id: "upgrade",
+        eyebrow: "Croissance",
+        title: "Déverrouiller le mode PRO",
+        description: "Passez en PRO pour lever les limites d'essai et garder tout votre flux de vente actif.",
+        href: "/abonnement",
+        icon: Sparkles,
+        tone: "violet",
+        ctaLabel: "Voir l'abonnement",
+      });
+    } else {
+      items.push({
+        id: "goal",
+        eyebrow: "Cap du mois",
+        title: remainingToGoal > 0 ? "Rester au contact de l'objectif" : "Objectif atteint ce mois-ci",
+        description:
+          remainingToGoal > 0
+            ? `${formatCurrency(remainingToGoal)} TTC restent à sécuriser pour atteindre votre cap mensuel.`
+            : "Le cap mensuel est déjà atteint. Vous pouvez maintenant accélérer sur les prochaines signatures.",
+        href: "/factures",
+        icon: Target,
+        tone: remainingToGoal > 0 ? "slate" : "emerald",
+        value: remainingToGoal > 0 ? formatCurrency(remainingToGoal) : `${objectifProgress.toFixed(0)}%`,
+        ctaLabel: remainingToGoal > 0 ? "Suivre mes encaissements" : "Voir les factures",
+      });
+    }
+
+    return items;
+  }, [
+    devisARelancer.length,
+    isPro,
+    objectifProgress,
+    pendingQuotesCount,
+    pipelineRevenueHT,
+    remainingToGoal,
+    setupIsRequired,
+    totalQuotes,
+  ]);
+
   return (
     <div className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
@@ -974,33 +1134,25 @@ export default function DashboardPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-4 grid gap-3">
-                  <Link
-                    href="/nouveau-devis"
-                    className="tour-nouveau-devis inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand"
-                  >
-                    <Plus size={16} />
-                    Nouveau devis
-                  </Link>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Link
-                      href="/devis"
-                      className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                    >
-                      <FileText size={16} />
-                      Mes devis
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setObjectifDraft(objectifActif.toString());
-                        setObjectifDialogOpen(true);
-                      }}
-                      className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                    >
-                      <Pencil size={16} />
-                      Objectif
-                    </button>
+                <div className="mt-5 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                        Plan du jour
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                        Deux actions utiles, sans détour.
+                      </p>
+                    </div>
+                    <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                      {actionPlan.length} priorités
+                    </span>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {actionPlan.slice(0, 2).map((item) => (
+                      <DashboardActionCard key={item.id} item={item} compact />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -1340,14 +1492,35 @@ export default function DashboardPage() {
                 </Link>
               ) : null}
 
+              <div className="mt-6 space-y-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Plan du jour</p>
+                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                      Les deux prochaines actions qui méritent votre attention.
+                    </p>
+                  </div>
+                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                    {actionPlan.length} priorités
+                  </span>
+                </div>
+
+                <div className="grid gap-3">
+                  {actionPlan.slice(0, 2).map((item) => (
+                    <DashboardActionCard key={item.id} item={item} compact />
+                  ))}
+                </div>
+              </div>
+
               {secondarySignals.length > 0 ? (
-                <div className="mt-5 space-y-3">
+                <div className="mt-6 space-y-3">
+                  <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">À surveiller ensuite</p>
                   {secondarySignals.map((signal) => (
                     <FocusSignalCard key={signal.id} signal={signal} />
                   ))}
                 </div>
               ) : (
-                <div className="mt-5 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
+                <div className="mt-6 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
                   <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
                     Le cockpit reste simple: un seul focus principal pour avancer sans dispersion.
@@ -1414,7 +1587,7 @@ export default function DashboardPage() {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage & modules</p>
+                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage &amp; modules</p>
                 <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
                   Le reste du cockpit, rangé plus bas
                 </h2>
