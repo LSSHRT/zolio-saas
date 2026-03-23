@@ -89,6 +89,13 @@ type QuickLinkItem = {
   tourClass?: string;
 };
 
+type DashboardHeroIndicator = {
+  id: string;
+  label: string;
+  value: string;
+  tone: Tone;
+};
+
 function readStringMetadata(value: unknown) {
   return typeof value === "string" ? value : "";
 }
@@ -339,6 +346,24 @@ function CompactMetricCard({
         </div>
       </div>
       <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{detail}</p>
+    </div>
+  );
+}
+
+function HeroIndicatorPill({ indicator }: { indicator: DashboardHeroIndicator }) {
+  const classes = toneClasses(indicator.tone);
+
+  return (
+    <div className="rounded-[1.15rem] border border-white/55 bg-white/78 px-3 py-3 shadow-[0_16px_36px_-30px_rgba(15,23,42,0.2)] backdrop-blur dark:border-white/10 dark:bg-white/6">
+      <div className="flex items-center gap-2">
+        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+          {renderSignalIcon(indicator.tone, 14)}
+        </span>
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">{indicator.label}</p>
+          <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">{indicator.value}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -880,6 +905,34 @@ export default function DashboardPage() {
     };
   }, [totalQuotes, devisARelancer.length, isPro, pendingQuotesCount, pipelineRevenueHT, setupIsRequired]);
   const secondarySignals = dashboardSignals.filter((signal) => signal.title !== todayFocus.title).slice(0, 2);
+  const heroIndicators = useMemo<DashboardHeroIndicator[]>(() => {
+    const indicators: DashboardHeroIndicator[] = [];
+
+    if (devisARelancer.length > 0) {
+      indicators.push({
+        id: "hero-followups",
+        label: "Relances",
+        value: `${devisARelancer.length} à faire`,
+        tone: "rose",
+      });
+    }
+
+    indicators.push({
+      id: "hero-pipeline",
+      label: "Pipeline",
+      value: formatCurrency(pipelineRevenueHT),
+      tone: pendingQuotesCount > 0 ? "amber" : "slate",
+    });
+
+    indicators.push({
+      id: "hero-goal",
+      label: remainingToGoal > 0 ? "Cap restant" : "Objectif",
+      value: remainingToGoal > 0 ? formatCurrency(remainingToGoal) : "Atteint",
+      tone: remainingToGoal > 0 ? "violet" : "emerald",
+    });
+
+    return indicators.slice(0, 3);
+  }, [devisARelancer.length, pendingQuotesCount, pipelineRevenueHT, remainingToGoal]);
 
   const actionPlan = useMemo<DashboardActionPlanItem[]>(() => {
     const items: DashboardActionPlanItem[] = [
@@ -986,6 +1039,8 @@ export default function DashboardPage() {
     setupIsRequired,
     totalQuotes,
   ]);
+
+  const actionPlanSecondary = actionPlan.slice(1, 3);
 
   return (
     <div className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
@@ -1116,6 +1171,12 @@ export default function DashboardPage() {
                   Le cockpit mobile va droit au but: une action utile, puis vos chiffres clés.
                 </p>
 
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                  {heroIndicators.map((indicator) => (
+                    <HeroIndicatorPill key={indicator.id} indicator={indicator} />
+                  ))}
+                </div>
+
                 <div className="mt-4">
                   <FocusSignalCard signal={todayFocus} />
                 </div>
@@ -1138,10 +1199,10 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                        Plan du jour
+                        Action principale
                       </p>
                       <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                        Deux actions utiles, sans détour.
+                        Une action forte en tête, le reste plus bas.
                       </p>
                     </div>
                     <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
@@ -1150,9 +1211,14 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="grid gap-3">
-                    {actionPlan.slice(0, 2).map((item) => (
-                      <DashboardActionCard key={item.id} item={item} compact />
-                    ))}
+                    <DashboardActionCard item={actionPlan[0]} compact />
+                    {actionPlanSecondary.length > 0 ? (
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {actionPlanSecondary.map((item) => (
+                          <DashboardActionCard key={item.id} item={item} compact />
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -1462,6 +1528,12 @@ export default function DashboardPage() {
                     Ouvrir mes devis
                   </Link>
                 </div>
+
+                <div className="mt-6 grid gap-3 lg:grid-cols-3">
+                  {heroIndicators.map((indicator) => (
+                    <HeroIndicatorPill key={indicator.id} indicator={indicator} />
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1495,9 +1567,9 @@ export default function DashboardPage() {
               <div className="mt-6 space-y-3">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Plan du jour</p>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Action principale</p>
                     <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Les deux prochaines actions qui méritent votre attention.
+                      Une priorité claire, puis le reste à suivre sans brouiller la lecture.
                     </p>
                   </div>
                   <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
@@ -1506,9 +1578,14 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="grid gap-3">
-                  {actionPlan.slice(0, 2).map((item) => (
-                    <DashboardActionCard key={item.id} item={item} compact />
-                  ))}
+                  <DashboardActionCard item={actionPlan[0]} compact />
+                  {actionPlanSecondary.length > 0 ? (
+                    <div className="grid gap-3 xl:grid-cols-2">
+                      {actionPlanSecondary.map((item) => (
+                        <DashboardActionCard key={item.id} item={item} compact />
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
