@@ -17,6 +17,8 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   devis     Devis[]
+
+  @@index([userId])
 }
 
 model Prestation {
@@ -30,6 +32,8 @@ model Prestation {
   stock       Int?     @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Devis {
@@ -63,6 +67,8 @@ model Depense {
   categorie   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model Facture {
@@ -91,6 +97,8 @@ model Note {
   date      DateTime @default(now())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
 
 model ProspectMail {

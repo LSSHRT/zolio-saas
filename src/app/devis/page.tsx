@@ -104,8 +104,27 @@ export default function DevisPage() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
+  const [converting, setConverting] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>(null);
+
+  const handleConvertToFacture = async (numero: string) => {
+    setConverting(numero);
+    try {
+      const res = await fetch(`/api/devis/${numero}/convert`, { method: "POST" });
+      const data = await res.json();
+      if (res.ok && data.facture) {
+        toast.success("Devis converti en facture avec succès");
+        router.push(`/factures/${data.facture.numero}`);
+      } else {
+        toast.error(data.error || "Erreur lors de la conversion");
+        setConverting(null);
+      }
+    } catch {
+      toast.error("Erreur réseau");
+      setConverting(null);
+    }
+  };
 
   const handleDuplicate = async (numero: string) => {
     setDuplicating(numero);
@@ -267,9 +286,12 @@ export default function DevisPage() {
 
   const getMobileQuoteActions = (quote: Devis): ClientMobileAction[] => {
     const pending = isEnAttente(quote.statut);
+    const accepted = quote.statut === "Accepté" || quote.statut === "Signé";
     const isUpdating = updatingStatut === quote.numero;
     const isDuplicating = duplicating === quote.numero;
     const isDeleting = deleting === quote.numero;
+    const isConverting = converting === quote.numero;
+
     const items: ClientMobileAction[] = [
       {
         href: `/devis/${quote.numero}`,
@@ -283,6 +305,16 @@ export default function DevisPage() {
         onClick: () => void handleDuplicate(quote.numero),
       },
     ];
+
+    if (accepted) {
+      items.unshift({
+        disabled: isConverting,
+        icon: FileText,
+        label: isConverting ? "Conversion..." : "Convertir en facture",
+        onClick: () => void handleConvertToFacture(quote.numero),
+        tone: "accent",
+      });
+    }
 
     if (pending) {
       items.unshift(
