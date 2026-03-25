@@ -37,8 +37,13 @@ import {
   HardHat
 } from "lucide-react";
 import Image from "next/image";
-import Spline from '@splinetool/react-spline';
+import dynamic from 'next/dynamic';
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
+
+const Spline = dynamic(() => import('@splinetool/react-spline'), { 
+  ssr: false,
+  loading: () => <div className="w-full h-full flex items-center justify-center text-white/50">Chargement de la 3D...</div>
+});
 
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
   const shouldReduceMotion = useReducedMotion();
