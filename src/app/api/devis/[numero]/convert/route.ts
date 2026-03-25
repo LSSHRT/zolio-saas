@@ -73,7 +73,8 @@ export async function POST(
         data: {
           userId,
           numero: newNumero,
-          devisRef: devis.numero,
+          devisId: devis.id, // Nouveau lien relationnel
+          devisRef: devis.numero, // Gardé pour compatibilité
           nomClient: devis.client.nom,
           emailClient: devis.client.email,
           totalHT,

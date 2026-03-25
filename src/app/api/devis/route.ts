@@ -70,15 +70,45 @@ function normalizeLignes(lines: LignePayload[]) {
   }));
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
+    // Parse query parameters for search, pagination, and filtering
+    const url = new URL(request.url);
+    const searchQuery = url.searchParams.get("q")?.trim() || "";
+    const statusFilter = url.searchParams.get("statut")?.trim() || "";
+    const page = Math.max(1, Number.parseInt(url.searchParams.get("page") || "1", 10) || 1);
+    const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get("limit") || "50", 10) || 50));
+    const offset = (page - 1) * limit;
+
+    // Build where clause
+    const where: Record<string, unknown> = { userId };
+
+    // Status filter
+    if (statusFilter) {
+      where.statut = statusFilter;
+    }
+
+    // Search filter (by client name or devis number)
+    if (searchQuery) {
+      where.OR = [
+        { numero: { contains: searchQuery, mode: "insensitive" } },
+        { client: { nom: { contains: searchQuery, mode: "insensitive" } } },
+      ];
+    }
+
+    // Get total count for pagination metadata
+    const totalCount = await prisma.devis.count({ where });
+
+    // Fetch paginated results
     const devis = await prisma.devis.findMany({
-      where: { userId },
+      where,
       include: { client: true },
       orderBy: { createdAt: "desc" },
+      skip: offset,
+      take: limit,
     });
 
     const mapped = devis.map((d) => {
@@ -121,7 +151,16 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json(mapped);
+    return NextResponse.json({
+      data: mapped,
+      pagination: {
+        page,
+        limit,
+        total: totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        hasMore: offset + limit < totalCount,
+      },
+    });
   } catch (error) {
     return internalServerError("devis-get", error, "Impossible de récupérer les devis");
   }

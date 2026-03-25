@@ -96,7 +96,12 @@ function buildFollowUpMailTo(devis: Devis) {
 export default function DevisPage() {
   const router = useRouter();
   const { data, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
-  const devis = useMemo<Devis[]>(() => (Array.isArray(data) ? data : []), [data]);
+  const devis = useMemo<Devis[]>(() => {
+    // Handle both old format (array) and new format ({ data, pagination })
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.data)) return data.data;
+    return [];
+  }, [data]);
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());

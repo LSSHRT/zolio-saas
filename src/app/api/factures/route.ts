@@ -37,6 +37,7 @@ type CreateFacturePayload = {
 type FactureRecord = {
   createdAt: Date;
   date: Date;
+  devisId: string | null;
   devisRef: string | null;
   emailClient: string | null;
   nomClient: string;
@@ -98,6 +99,7 @@ function mapFacture(facture: FactureRecord) {
     totalTTC: facture.totalTTC,
     statut: facture.statut,
     devisRef: facture.devisRef || "",
+    devisId: facture.devisId || "",
   };
 }
 
@@ -141,6 +143,16 @@ export async function POST(request: Request) {
     const date = new Date();
     let numeroFacture = "";
 
+    // Try to find the devis by numero to link via devisId
+    let linkedDevisId: string | null = null;
+    if (devisNumero) {
+      const linkedDevis = await prisma.devis.findUnique({
+        where: { userId_numero: { userId, numero: devisNumero } },
+        select: { id: true },
+      });
+      linkedDevisId = linkedDevis?.id ?? null;
+    }
+
     for (let attempt = 0; attempt < 5; attempt += 1) {
       numeroFacture = await generateSequentialDocumentNumber({
         prefix: "FAC",
@@ -164,6 +176,7 @@ export async function POST(request: Request) {
             tva,
             totalTTC,
             statut: "Émise",
+            devisId: linkedDevisId,
             devisRef: devisNumero || null,
             date,
           },

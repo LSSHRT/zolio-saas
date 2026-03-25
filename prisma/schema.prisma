@@ -37,23 +37,24 @@ model Prestation {
 }
 
 model Devis {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   numero      String
   clientId    String
-  client      Client   @relation(fields: [clientId], references: [id])
-  date        DateTime @default(now())
-  statut      String   @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
-  remise      Float?   @default(0)
-  acompte     Float?   @default(0)
-  tva         Float?   @default(0)
-  signature   String?  // Base64 signature image
-  lignes      Json     // Array of items
-  photos      Json?    // Array of photo base64 strings
+  client      Client    @relation(fields: [clientId], references: [id])
+  date        DateTime  @default(now())
+  statut      String    @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
+  remise      Float?    @default(0)
+  acompte     Float?    @default(0)
+  tva         Float?    @default(0)
+  signature   String?   // Base64 signature image
+  lignes      Json      // Array of items
+  photos      Json?     // Array of photo base64 strings
   dateDebut   DateTime?
   dateFin     DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  factures    Facture[] // Factures générées depuis ce devis
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@unique([userId, numero])
 }
@@ -75,7 +76,9 @@ model Facture {
   id          String   @id @default(cuid())
   userId      String
   numero      String
-  devisRef    String?
+  devisId     String?  // Lien vers le devis source
+  devis       Devis?   @relation(fields: [devisId], references: [id], onDelete: SetNull)
+  devisRef    String?  // @deprecated - Ancien champ texte, gardé pour migration
   nomClient   String
   emailClient String?
   totalHT     Float
@@ -87,6 +90,7 @@ model Facture {
   updatedAt   DateTime @updatedAt
 
   @@unique([userId, numero])
+  @@index([devisId])
 }
 
 model Note {

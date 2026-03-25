@@ -1,45 +1,136 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Zolio — SaaS de gestion pour les artisans du bâtiment
 
-## Getting Started
+Zolio est une application tout-en-un pour les professionnels du bâtiment : devis, factures, signature électronique, catalogue de prestations et suivi d'activité.
 
-Set the required environment variables before starting the app. Copy `.env.example` into `.env.local` and add the rest of your existing service credentials.
+## 🚀 Démarrage rapide
 
-First, run the development server:
+### Prérequis
+
+- Node.js 18+
+- PostgreSQL (ou Vercel Postgres / Supabase)
+- Compte Clerk (authentification)
+- Compte Stripe (paiements)
+
+### Installation
 
 ```bash
+# Cloner le repo
+git clone https://github.com/LSSHRT/zolio-saas.git
+cd zolio-saas
+
+# Installer les dépendances
+npm install
+
+# Copier le fichier d'exemple de variables d'environnement
+cp .env.example .env.local
+
+# Configurer les variables d'environnement (voir ci-dessous)
+nano .env.local
+
+# Générer le client Prisma
+npx prisma generate
+
+# Lancer les migrations de base de données
+npx prisma migrate dev
+
+# Lancer en mode développement
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Variables d'environnement
 
-## Security Variables
+| Variable | Description | Obligatoire |
+|----------|-------------|-------------|
+| `DATABASE_URL` | URL de connexion PostgreSQL | ✅ |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clé publique Clerk | ✅ |
+| `CLERK_SECRET_KEY` | Clé secrète Clerk | ✅ |
+| `NEXT_PUBLIC_APP_URL` | URL de l'app (ex: http://localhost:3000) | ✅ |
+| `STRIPE_SECRET_KEY` | Clé secrète Stripe | ✅ |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Clé publique Stripe | ✅ |
+| `STRIPE_WEBHOOK_SECRET` | Secret webhook Stripe | ✅ |
+| `GEMINI_API_KEY` | Clé API Google Gemini (IA) | ✅ |
+| `PUBLIC_DEVIS_LINK_SECRET` | Secret pour les tokens de devis publics | ✅ |
+| `CRON_SECRET` | Secret pour les appels cron | ✅ |
+| `ADMIN_EMAIL` | Email de l'admin | Optionnel |
+| `SMTP_HOST` | Serveur SMTP transactionnel | Optionnel |
+| `SMTP_USER` | Login SMTP | Optionnel |
+| `SMTP_PASS` | Mot de passe SMTP | Optionnel |
+| `PROSPECT_SMTP_HOST` | Serveur SMTP prospection | Optionnel |
+| `PROSPECT_SMTP_USER` | Login SMTP prospection | Optionnel |
+| `PROSPECT_SMTP_PASS` | Mot de passe SMTP prospection | Optionnel |
+| `HUNTER_API_KEY` | Clé API Hunter.io (recherche d'emails) | Optionnel |
 
-- `PUBLIC_DEVIS_LINK_SECRET`: signs public quote-signature links and must be a long random secret.
-- `CRON_SECRET`: protects the `/api/cron/prospect` endpoint for Vercel Cron calls.
-- `ADMIN_EMAIL`: optional canonical admin email used by server-side admin checks.
-- `HUNTER_API_KEY`: required for automated lead discovery; if unset, the prospecting cron cannot source new leads.
+## 📂 Architecture
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/                    # Pages et routes API (Next.js App Router)
+│   ├── api/                # Routes API
+│   │   ├── devis/          # CRUD devis
+│   │   ├── factures/       # CRUD factures
+│   │   ├── clients/        # CRUD clients
+│   │   ├── stripe/         # Paiements
+│   │   ├── ai/             # IA (génération de devis)
+│   │   ├── cron/           # Robot de prospection
+│   │   └── webhooks/       # Webhooks Stripe
+│   ├── dashboard/          # Tableau de bord
+│   ├── devis/              # Liste et détails des devis
+│   ├── nouveau-devis/      # Création de devis
+│   ├── factures/           # Liste des factures
+│   ├── clients/            # Gestion des clients
+│   ├── catalogue/          # Catalogue de prestations
+│   ├── admin/              # Panel admin
+│   └── parametres/         # Réglages entreprise
+├── components/             # Composants React réutilisables
+├── lib/                    # Utilitaires et logique métier
+│   ├── prisma.ts           # Connexion base de données
+│   ├── company.ts          # Profil entreprise
+│   ├── generatePdf.ts      # Génération PDF
+│   ├── sendEmail.ts        # Envoi d'emails
+│   ├── prospecting.ts      # Logique de prospection
+│   └── client-dashboard.ts # Données du dashboard
+prisma/
+└── schema.prisma           # Schéma de la base de données
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Commandes
 
-## Learn More
+```bash
+npm run dev          # Lancer le serveur de développement
+npm run build        # Build de production
+npm run start        # Lancer le serveur de production
+npm run lint         # Vérifier le code avec ESLint
+npm run test         # Lancer les tests
+npm run test:watch   # Lancer les tests en mode watch
+npm run test:coverage # Rapport de couverture
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 🧪 Tests
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Les tests sont écrits avec [Vitest](https://vitest.dev/). Pour lancer les tests :
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run test
+```
 
-## Deploy on Vercel
+Les fichiers de tests sont dans `src/lib/__tests__/`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔐 Sécurité
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Authentification** : Clerk (email, Google, Apple)
+- **Tokens de devis** : HMAC-SHA256 avec expiration (7 jours)
+- **Webhooks Stripe** : Vérification de signature
+- **Headers sécurité** : HSTS, CSP, COOP, COEP, CORP
+- **Rate limiting** : Via quotas API
+
+## 📧 Prospection
+
+Le robot de prospection fonctionne via un cron Vercel qui :
+1. Découvre des entreprises via Hunter.io
+2. Envoie des emails de prospection
+3. Respecte un système de warmup (envoi progressif)
+4. Applique un cooldown de 60 jours entre chaque contact
+
+## 📄 Licence
+
+MIT
