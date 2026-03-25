@@ -37,13 +37,8 @@ import {
   HardHat
 } from "lucide-react";
 import Image from "next/image";
-import dynamic from 'next/dynamic';
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
-const Spline = dynamic(() => import('@splinetool/react-spline'), { 
-  ssr: false,
-  loading: () => <div className="w-full h-full flex items-center justify-center text-white/50">Chargement de la 3D...</div>
-});
 
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
   const shouldReduceMotion = useReducedMotion();
@@ -349,14 +344,6 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
   );
 };
 
-const HeroSceneAccent = () => {
-  return (
-    <div className="pointer-events-auto absolute inset-[-20%] -z-10 hidden 2xl:block opacity-60 mix-blend-lighten" aria-hidden="true" style={{ width: '140%', height: '140%' }}>
-      <Spline scene="https://prod.spline.design/6Wq1Q7YGyM-iab9I/scene.splinecode" />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-[#05050A]/20 to-transparent pointer-events-none" />
-    </div>
-  );
-};
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -534,7 +521,6 @@ export default function LandingPage() {
               </div>
 
               <div className="relative">
-                <HeroSceneAccent />
                 <div className="landing-panel-strong relative overflow-hidden rounded-[36px] p-4 sm:p-6">
                   <div className="relative flex items-center justify-between border-b border-white/8 pb-4">
                     <div>
