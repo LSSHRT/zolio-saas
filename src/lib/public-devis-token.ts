@@ -4,7 +4,7 @@ const PUBLIC_DEVIS_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 const PUBLIC_DEVIS_TOKEN_PURPOSE = "public-devis-signature";
 
 function resolvePublicDevisSecret() {
-  const secret = process.env.PUBLIC_DEVIS_LINK_SECRET || process.env.CLERK_SECRET_KEY;
+  const secret = process.env.PUBLIC_DEVIS_LINK_SECRET;
   return typeof secret === "string" && secret.trim().length > 0 ? secret : undefined;
 }
 

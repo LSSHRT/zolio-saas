@@ -18,7 +18,7 @@ export default function AbonnementSuccessPage() {
 
       const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-      const interval: any = setInterval(function() {
+      const interval: ReturnType<typeof setInterval> = setInterval(function() {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
@@ -69,7 +69,7 @@ export default function AbonnementSuccessPage() {
 
         <Link href="/dashboard">
           <motion.button whileTap={{ scale: 0.96 }} className="w-full py-4 bg-slate-900 text-white font-bold rounded-xl shadow-xl shadow-slate-900/20 flex items-center justify-center gap-2">
-            <Home size={18} /> Retour à l'accueil
+            <Home size={18} /> Retour à l&apos;accueil
           </motion.button>
         </Link>
       </motion.div>

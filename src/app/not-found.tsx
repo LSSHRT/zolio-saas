@@ -10,11 +10,11 @@ export default function NotFound() {
           Page introuvable
         </h1>
         <p className="mt-4 text-base leading-7 text-gray-600 dark:text-gray-400">
-          Désolé, nous n'avons pas pu trouver la page que vous recherchez.
+          Désolé, nous n&apos;avons pas pu trouver la page que vous recherchez.
         </p>
         <div className="mt-8 flex items-center justify-center gap-x-4">
           <Link href="/" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
           <Link href="/contact" className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800">
             Contacter le support

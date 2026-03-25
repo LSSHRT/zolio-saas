@@ -13,7 +13,7 @@ function getStripe() {
   });
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const user = await currentUser();
     if (!user) {
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return internalServerError("stripe-portal", error, "Impossible d'ouvrir le portail client");
   }
 }

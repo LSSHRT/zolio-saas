@@ -44,3 +44,14 @@ next-env.d.ts
 /.clerk/
 
 /src/generated/prisma
+
+# stale build artifacts
+.next_stale_*
+
+# IDE / tools
+.junie/
+.idea/
+
+# temp scripts in root (move to scripts/ instead)
+/*.js
+current_landing.tsx

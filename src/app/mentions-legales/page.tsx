@@ -11,7 +11,7 @@ export default function MentionsLegales() {
 
       <div className="max-w-4xl mx-auto relative z-10">
         <Link href="/" className="inline-flex items-center text-violet-400 hover:text-violet-300 mb-12 transition-colors">
-          <ArrowLeft className="w-4 h-4 mr-2" /> Retour à l'accueil
+          <ArrowLeft className="w-4 h-4 mr-2" /> Retour à l&apos;accueil
         </Link>
         
         <h1 className="text-4xl sm:text-5xl font-bold text-white mb-12">Mentions Légales</h1>
@@ -45,7 +45,7 @@ export default function MentionsLegales() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">3. Propriété intellectuelle</h2>
             <p>
-              L'ensemble du contenu de ce site (structure, design, textes, images, animations, logos) est la propriété exclusive de Zolio. 
+              L&apos;ensemble du contenu de ce site (structure, design, textes, images, animations, logos) est la propriété exclusive de Zolio. 
               Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable.
             </p>
           </section>
@@ -53,7 +53,7 @@ export default function MentionsLegales() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">4. Limitation de responsabilité</h2>
             <p>
-              Zolio s'efforce de fournir sur son site des informations aussi précises que possible. Toutefois, l'entreprise ne pourra être tenue responsable des omissions, des inexactitudes et des carences dans la mise à jour, qu'elles soient de son fait ou du fait des tiers partenaires qui lui fournissent ces informations.
+              Zolio s&apos;efforce de fournir sur son site des informations aussi précises que possible. Toutefois, l&apos;entreprise ne pourra être tenue responsable des omissions, des inexactitudes et des carences dans la mise à jour, qu&apos;elles soient de son fait ou du fait des tiers partenaires qui lui fournissent ces informations.
             </p>
           </section>
         </div>
