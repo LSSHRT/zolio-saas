@@ -37,6 +37,7 @@ import {
   HardHat
 } from "lucide-react";
 import Image from "next/image";
+import Spline from '@splinetool/react-spline';
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
@@ -345,8 +346,9 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 
 const HeroSceneAccent = () => {
   return (
-    <div className="pointer-events-none absolute inset-[-4%] -z-10 hidden 2xl:block" aria-hidden="true">
-      <div className="landing-hero-orbit landing-hero-orbit-a opacity-60" />
+    <div className="pointer-events-auto absolute inset-[-20%] -z-10 hidden 2xl:block opacity-60 mix-blend-lighten" aria-hidden="true" style={{ width: '140%', height: '140%' }}>
+      <Spline scene="https://prod.spline.design/6Wq1Q7YGyM-iab9I/scene.splinecode" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-[#05050A]/20 to-transparent pointer-events-none" />
     </div>
   );
 };
