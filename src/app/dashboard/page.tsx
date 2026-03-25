@@ -33,6 +33,7 @@ import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { DashboardMobileSkeleton, DashboardDesktopSkeleton, DevisCardSkeleton, ChartSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ClientBrandMark,
@@ -1366,9 +1367,7 @@ export default function DashboardPage() {
 
                 <div className="h-56 overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
                   {loading ? (
-                    <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-                      Chargement du graphique…
-                    </div>
+                    <ChartSkeleton />
                   ) : (
                     <DashboardChart monthlyData={monthlyData} />
                   )}
@@ -1680,9 +1679,7 @@ export default function DashboardPage() {
 
                   <div className="mt-5 h-64 w-full overflow-hidden rounded-[1.9rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
                     {loading ? (
-                      <div className="flex h-full items-center justify-center text-sm text-slate-500 dark:text-slate-400">
-                        Chargement du graphique…
-                      </div>
+                      <ChartSkeleton />
                     ) : (
                       <DashboardChart monthlyData={monthlyData} />
                     )}
@@ -1712,13 +1709,7 @@ export default function DashboardPage() {
                   {loading ? (
                     <div className="mt-5 space-y-3">
                       {[1, 2, 3].map((item) => (
-                        <div
-                          key={item}
-                          className="animate-shimmer rounded-[1.6rem] border border-slate-200/70 bg-white/70 p-4 dark:border-white/8 dark:bg-white/4"
-                        >
-                          <div className="h-4 w-1/3 rounded bg-slate-100/90 dark:bg-white/10" />
-                          <div className="mt-3 h-3 w-1/2 rounded bg-slate-100/70 dark:bg-white/10" />
-                        </div>
+                        <DevisCardSkeleton key={item} />
                       ))}
                     </div>
                   ) : devisRecents.length === 0 ? (

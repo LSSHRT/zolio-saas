@@ -488,21 +488,21 @@ export default function DevisPage() {
         {loading && (
           <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 animate-pulse">
+              <div key={i} className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/70 dark:border-white/8 animate-shimmer">
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-slate-200/60 dark:bg-white/10 shrink-0" />
                     <div>
-                      <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-32 mb-1.5" />
-                      <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-24" />
+                      <div className="h-4 bg-slate-200/60 dark:bg-white/10 rounded w-32 mb-1.5" />
+                      <div className="h-3 bg-slate-100/60 dark:bg-white/8 rounded w-24" />
                     </div>
                   </div>
-                  <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-20" />
+                  <div className="h-6 bg-slate-200/60 dark:bg-white/10 rounded-full w-20" />
                 </div>
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-16" />
-                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-12" />
-                  <div className="h-8 bg-slate-100 dark:bg-slate-700 rounded w-20" />
+                  <div className="h-8 bg-slate-100/60 dark:bg-white/8 rounded-xl w-16" />
+                  <div className="h-8 bg-slate-100/60 dark:bg-white/8 rounded-xl w-12" />
+                  <div className="h-8 bg-slate-100/60 dark:bg-white/8 rounded-xl w-20" />
                 </div>
               </div>
             ))}

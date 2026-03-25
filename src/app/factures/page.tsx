@@ -453,21 +453,21 @@ export default function FacturesPage() {
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="animate-pulse rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
+                className="animate-shimmer rounded-[1.75rem] border border-slate-200/70 bg-white/70 p-5 dark:border-white/8 dark:bg-white/4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-2xl bg-slate-200 dark:bg-slate-700" />
+                    <div className="h-12 w-12 rounded-2xl bg-slate-200/60 dark:bg-white/10" />
                     <div>
-                      <div className="mb-2 h-4 w-32 rounded bg-slate-200 dark:bg-slate-700" />
-                      <div className="h-3 w-24 rounded bg-slate-100 dark:bg-slate-700" />
+                      <div className="mb-2 h-4 w-32 rounded bg-slate-200/60 dark:bg-white/10" />
+                      <div className="h-3 w-24 rounded bg-slate-100/60 dark:bg-white/8" />
                     </div>
                   </div>
-                  <div className="h-6 w-20 rounded bg-slate-200 dark:bg-slate-700" />
+                  <div className="h-6 w-20 rounded-full bg-slate-200/60 dark:bg-white/10" />
                 </div>
                 <div className="mt-4 flex items-center justify-between">
-                  <div className="h-8 w-24 rounded bg-slate-100 dark:bg-slate-700" />
-                  <div className="h-8 w-20 rounded bg-slate-100 dark:bg-slate-700" />
+                  <div className="h-8 w-24 rounded-xl bg-slate-100/60 dark:bg-white/8" />
+                  <div className="h-8 w-20 rounded-xl bg-slate-100/60 dark:bg-white/8" />
                 </div>
               </div>
             ))}
