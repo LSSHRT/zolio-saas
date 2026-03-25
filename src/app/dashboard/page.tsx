@@ -533,8 +533,10 @@ export default function DashboardPage() {
     fetcher,
     {
       revalidateOnFocus: false,
+      revalidateOnReconnect: false,
       keepPreviousData: true,
-      dedupingInterval: 15000,
+      dedupingInterval: 30000, // 30 secondes au lieu de 15
+      refreshInterval: 0, // Pas de rafraîchissement automatique
     },
   );
 

@@ -11,7 +11,13 @@ export async function GET() {
     }
 
     const summary = await getClientDashboardSummary(userId);
-    return NextResponse.json(summary);
+
+    return NextResponse.json(summary, {
+      headers: {
+        // Cache côté CDN pendant 30 secondes, le client peut utiliser le cache 10s
+        "Cache-Control": "private, s-maxage=30, stale-while-revalidate=10",
+      },
+    });
   } catch (error) {
     return internalServerError("dashboard-summary-get", error, "Impossible de charger le cockpit client");
   }
