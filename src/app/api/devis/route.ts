@@ -15,7 +15,7 @@ import {
   computeTotals,
   type LignePayload,
 } from "@/lib/devis-lignes";
-import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 
 type CreateDevisBody = {
   acompte?: number | string;

@@ -182,15 +182,6 @@ type ProspectEmailContext = {
   city?: string;
 };
 
-
-function prospectAudienceLabel(context?: ProspectEmailContext) {
-  if (!context?.tradeLabel) {
-    return "les entreprises du batiment";
-  }
-
-  return `les ${context.tradeLabel}`;
-}
-
 /**
  * Envoie un email de prospection automatique à un artisan.
  */
