@@ -6,6 +6,7 @@ import { frFR } from "@clerk/localizations";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SWRProvider } from "@/components/SWRProvider";
 import { SystemRuntimeLayer } from "@/components/SystemRuntimeLayer";
+import { NotificationPrompt } from "@/components/NotificationPrompt";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
@@ -62,6 +63,7 @@ export default function RootLayout({
           >
             <SWRProvider>
               <SystemRuntimeLayer />
+              <NotificationPrompt />
               {children}
               <Toaster
                 position="bottom-center"
