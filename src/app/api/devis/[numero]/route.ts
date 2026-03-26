@@ -16,6 +16,7 @@ import {
   computeTotals,
   type LignePayload,
 } from "@/lib/devis-lignes";
+import { uploadPhotos } from "@/lib/blob-photos";
 
 type UpdateDevisPayload = {
   acompte?: unknown;
@@ -165,6 +166,11 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
       return jsonError("Devis introuvable", 404);
     }
 
+    // Upload des photos vers Vercel Blob
+    const photoUrls = photos.length > 0
+      ? await uploadPhotos(photos, numero)
+      : [];
+
     // Mettre à jour le devis
     const updateData: Record<string, unknown> = {
       ...(finalClientId ? { clientId: finalClientId } : {}),
@@ -173,7 +179,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
       tva: tvaNum,
       statut,
       signature: "",
-      photos,
+      photos: photoUrls,
     };
 
     await prisma.devis.update({

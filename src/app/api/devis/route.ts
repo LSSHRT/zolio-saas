@@ -16,6 +16,7 @@ import {
   type LignePayload,
 } from "@/lib/devis-lignes";
 import { rateLimit } from "@/lib/rate-limit";
+import { uploadPhotos } from "@/lib/blob-photos";
 
 type CreateDevisBody = {
   acompte?: number | string;
@@ -191,6 +192,12 @@ export async function POST(request: Request) {
       });
 
       try {
+        // Upload des photos vers Vercel Blob (au lieu de base64)
+        const parsedPhotos = parsePhotos(photos);
+        const photoUrls = parsedPhotos.length > 0
+          ? await uploadPhotos(parsedPhotos, numero)
+          : [];
+
         devis = await prisma.devis.create({
           data: {
             userId,
@@ -199,7 +206,7 @@ export async function POST(request: Request) {
             remise: remiseGlobale,
             acompte: Number.parseFloat(String(acompte || 0)),
             tva: tvaGlobale,
-            photos: parsePhotos(photos),
+            photos: photoUrls,
             statut: "En attente",
           },
           include: { client: true },
