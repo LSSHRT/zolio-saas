@@ -17,6 +17,7 @@ import {
 } from "@/lib/devis-lignes";
 import { rateLimit } from "@/lib/rate-limit";
 import { uploadPhotos } from "@/lib/blob-photos";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 type CreateDevisBody = {
   acompte?: number | string;
@@ -298,6 +299,14 @@ export async function POST(request: Request) {
         emailSkippedReason = "send_failed";
       }
     }
+
+    // Notification push à l'artisan
+    sendPushNotification(userId, {
+      title: "📝 Devis créé",
+      body: `Devis ${devis.numero} pour ${devis.client ? devis.client.nom : "un client"} — ${totalTTC.toFixed(2)}€`,
+      url: `/devis/${devis.numero}`,
+      tag: `devis-created-${devis.numero}`,
+    }).catch(() => {});
 
     return NextResponse.json({
       numero: devis.numero,

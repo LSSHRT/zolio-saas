@@ -15,6 +15,7 @@ import {
   type LignePayload,
 } from "@/lib/devis-lignes";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 function getValidatedToken(request: Request, numero: string) {
   const token = new URL(request.url).searchParams.get("token");
@@ -141,6 +142,14 @@ export async function POST(request: Request, context: { params: Promise<{ numero
         signature,
       },
     });
+
+    // Envoyer une notification push à l'artisan
+    await sendPushNotification(userId, {
+      title: "✅ Devis signé !",
+      body: `${devis.client?.nom || "Le client"} a signé le devis ${numero}`,
+      url: `/devis/${numero}`,
+      tag: `devis-signed-${numero}`,
+    }).catch(() => {}); // Ne pas bloquer si la notification échoue
 
     let emailSent = false;
     let emailSkippedReason: string | undefined;
