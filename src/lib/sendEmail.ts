@@ -260,6 +260,17 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
     ? `Je suis tombé sur ${context.companyName} et je me suis dit que ça pourrait vous parler.`
     : `Je prends contact avec des ${tradeLabel} ${city ? `sur ${city}` : ""} qui perdent du temps sur leur paperasse.`;
 
+  // Lignes personnalisées selon si on a le nom de l'entreprise ou non
+  const personalLines = context?.companyName
+    ? [
+        `${context.companyName} a l'air de faire du bon travail.`,
+        `On a créé Zolio spécifiquement pour les ${tradeLabel} comme vous.`,
+      ]
+    : [
+        `On accompagne déjà des ${tradeLabel} ${city ? `à ${city}` : ""}.`,
+        `Zolio est fait spécifiquement pour votre métier.`,
+      ];
+
   // Pixel de tracking d'ouverture (1x1 transparent)
   const trackingPixel = `<img src="https://www.zolio.site/api/prospect-domains/track?e=${encodeURIComponent(toEmail)}" width="1" height="1" style="display:none" alt="" />`;
 
