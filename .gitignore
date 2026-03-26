@@ -51,6 +51,17 @@ next-env.d.ts
 # IDE / tools
 .junie/
 .idea/
+.gemini/
+.vscode/
+.mcp.json
+opencode.json
+config/
+
+# binaires
+acli
+
+# test output
+output/
 
 # temp scripts in root (move to scripts/ instead)
 /*.js
