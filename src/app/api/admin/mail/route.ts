@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendProspectEmail } from "@/lib/sendEmail";
 import { requireAdminUser } from "@/lib/admin";
 import { internalServerError, jsonError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   ProspectingConfigError,
   getProspectCooldownCutoff,

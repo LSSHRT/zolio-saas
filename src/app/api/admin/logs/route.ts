@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminUser } from "@/lib/admin";
 import { getAdminAuditLogs } from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET() {
   try {

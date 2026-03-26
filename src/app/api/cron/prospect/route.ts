@@ -9,6 +9,7 @@ import {
   setAdminSettingValue,
 } from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 import {
   ProspectingConfigError,
   getProspectCooldownCutoff,

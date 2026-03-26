@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 function parseOptionalDate(value: unknown) {
   if (!value) {

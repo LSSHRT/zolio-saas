@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Stripe webhook endpoint
 export async function POST(req: Request) {

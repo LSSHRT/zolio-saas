@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { buildPrestationCreateData } from "@/lib/prestations";
 import { getStarterCatalogForTrade, getTradeDefinition } from "@/lib/trades";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {

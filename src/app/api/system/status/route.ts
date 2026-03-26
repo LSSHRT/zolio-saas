@@ -3,6 +3,7 @@ import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { getAdminRuntimeState } from "@/lib/admin-settings";
 import { getAdminEmail, isAdminUser } from "@/lib/admin";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function GET() {
   try {
