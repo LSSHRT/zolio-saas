@@ -99,47 +99,61 @@ function parseGeneratedLines(responseText: string) {
     .slice(0, MAX_GENERATED_LINES);
 }
 
-async function resolveGeminiApiKey() {
-  let geminiApiKey = normalizeText(process.env.GEMINI_API_KEY);
+async function resolveGeminiApiKeys() {
+  const keys: string[] = [];
+
+  // Clé principale
+  const mainKey = normalizeText(process.env.GEMINI_API_KEY);
+  if (mainKey) keys.push(mainKey);
+
+  // Clé de fallback (quand le quota est atteint)
+  const fallbackKey = normalizeText(process.env.GEMINI_API_KEY_2);
+  if (fallbackKey) keys.push(fallbackKey);
+
+  // Clé custom de l'admin
   const adminEmail = normalizeText(process.env.ADMIN_EMAIL || process.env.NEXT_PUBLIC_ADMIN_EMAIL);
-
-  if (!adminEmail) {
-    return geminiApiKey;
-  }
-
-  try {
-    const client = await clerkClient();
-    const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
-    const customKey = normalizeText(adminUsers.data[0]?.publicMetadata?.customGeminiKey);
-
-    if (customKey) {
-      geminiApiKey = customKey;
+  if (adminEmail) {
+    try {
+      const client = await clerkClient();
+      const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
+      const customKey = normalizeText(adminUsers.data[0]?.publicMetadata?.customGeminiKey);
+      if (customKey && !keys.includes(customKey)) keys.push(customKey);
+    } catch (error) {
+      logServerError("ai-generate-devis-admin-key", error);
     }
-  } catch (error) {
-    logServerError("ai-generate-devis-admin-key", error);
   }
 
-  return geminiApiKey;
+  return keys;
 }
 
-async function generateGeminiContent(genAI: GoogleGenerativeAI, prompt: string) {
+async function generateGeminiContent(apiKeys: string[], prompt: string) {
   let lastError: unknown = null;
 
-  for (const modelName of GEMINI_MODELS) {
-    try {
-      const model = genAI.getGenerativeModel({ model: modelName });
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text().trim();
+  // Essayer chaque clé API
+  for (const apiKey of apiKeys) {
+    const genAI = new GoogleGenerativeAI(apiKey);
 
-      if (responseText) {
-        return responseText;
+    for (const modelName of GEMINI_MODELS) {
+      try {
+        const model = genAI.getGenerativeModel({ model: modelName });
+        const result = await model.generateContent(prompt);
+        const responseText = result.response.text().trim();
+
+        if (responseText) {
+          return responseText;
+        }
+      } catch (error: unknown) {
+        lastError = error;
+        // Si c'est une erreur de quota (429), essayer la clé suivante
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes("429") || errorMessage.includes("quota") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
+          break; // Passe à la clé suivante
+        }
       }
-    } catch (error) {
-      lastError = error;
     }
   }
 
-  throw lastError ?? new Error("Aucun modèle Gemini disponible");
+  throw lastError ?? new Error("Aucune clé API Gemini disponible");
 }
 
 async function incrementAiUsageCount(userId: string) {
@@ -185,8 +199,8 @@ export async function POST(req: NextRequest) {
       return jsonError(`Description trop longue (${MAX_DESCRIPTION_LENGTH} caractères max)`, 400);
     }
 
-    const geminiApiKey = await resolveGeminiApiKey();
-    if (!geminiApiKey) {
+    const geminiApiKeys = await resolveGeminiApiKeys();
+    if (geminiApiKeys.length === 0) {
       return jsonError("Clé API Gemini non configurée", 500);
     }
 
@@ -200,8 +214,7 @@ Chaque ligne doit avoir ces propriétés exactes :
 - "prixUnitaire" (number strictement positif, estimation réaliste du prix en euros)
 Limite la réponse à ${MAX_GENERATED_LINES} lignes maximum.`;
 
-    const genAI = new GoogleGenerativeAI(geminiApiKey);
-    const responseText = await generateGeminiContent(genAI, prompt);
+    const responseText = await generateGeminiContent(geminiApiKeys, prompt);
 
     let lignes: GeneratedAILine[];
     try {
