@@ -1,8 +1,10 @@
 /**
  * Helper pour les notifications Web Push
+ * Utilise la DB PostgreSQL pour persister les abonnements
  */
 
 import webpush from "web-push";
+import { prisma } from "@/lib/prisma";
 
 // Configurer VAPID
 webpush.setVapidDetails(
@@ -10,14 +12,6 @@ webpush.setVapidDetails(
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "",
   process.env.VAPID_PRIVATE_KEY || ""
 );
-
-type PushSubscription = {
-  endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
-};
 
 type PushPayload = {
   title: string;
@@ -28,35 +22,36 @@ type PushPayload = {
   requireInteraction?: boolean;
 };
 
-// Stockage en mémoire des abonnements (en prod, utiliser la DB)
-// Pour simplifier, on stocke les abonnements par userId dans un Map
-const subscriptions = new Map<string, PushSubscription[]>();
-
-export function saveSubscription(userId: string, subscription: PushSubscription) {
-  const existing = subscriptions.get(userId) || [];
-  // Éviter les doublons
-  const filtered = existing.filter((s) => s.endpoint !== subscription.endpoint);
-  filtered.push(subscription);
-  subscriptions.set(userId, filtered);
+export async function saveSubscription(
+  userId: string,
+  subscription: { endpoint: string; keys: { p256dh: string; auth: string } }
+) {
+  await prisma.pushSubscription.upsert({
+    where: { endpoint: subscription.endpoint },
+    update: { p256dh: subscription.keys.p256dh, auth: subscription.keys.auth },
+    create: {
+      userId,
+      endpoint: subscription.endpoint,
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+    },
+  });
 }
 
-export function getSubscriptions(userId: string): PushSubscription[] {
-  return subscriptions.get(userId) || [];
-}
-
-export function removeSubscription(userId: string, endpoint: string) {
-  const existing = subscriptions.get(userId) || [];
-  subscriptions.set(
-    userId,
-    existing.filter((s) => s.endpoint !== endpoint)
-  );
+export async function removeSubscription(userId: string, endpoint: string) {
+  await prisma.pushSubscription.deleteMany({
+    where: { userId, endpoint },
+  });
 }
 
 export async function sendPushNotification(
   userId: string,
   payload: PushPayload
 ): Promise<{ sent: number; failed: number }> {
-  const subs = getSubscriptions(userId);
+  const subs = await prisma.pushSubscription.findMany({
+    where: { userId },
+  });
+
   let sent = 0;
   let failed = 0;
 
@@ -64,33 +59,25 @@ export async function sendPushNotification(
 
   for (const sub of subs) {
     try {
-      await webpush.sendNotification(sub, notificationPayload);
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: { p256dh: sub.p256dh, auth: sub.auth },
+        },
+        notificationPayload
+      );
       sent++;
     } catch (error: unknown) {
       failed++;
       const statusCode = (error as { statusCode?: number })?.statusCode;
-      // 410 = Gone (l'abonnement a expiré)
+      // 410 = Gone (abonnement expiré), 404 = Not Found
       if (statusCode === 410 || statusCode === 404) {
-        removeSubscription(userId, sub.endpoint);
+        await prisma.pushSubscription.deleteMany({
+          where: { endpoint: sub.endpoint },
+        });
       }
     }
   }
 
   return { sent, failed };
-}
-
-export async function sendPushToAll(
-  userIds: string[],
-  payload: PushPayload
-): Promise<{ sent: number; failed: number }> {
-  let totalSent = 0;
-  let totalFailed = 0;
-
-  for (const userId of userIds) {
-    const result = await sendPushNotification(userId, payload);
-    totalSent += result.sent;
-    totalFailed += result.failed;
-  }
-
-  return { sent: totalSent, failed: totalFailed };
 }
