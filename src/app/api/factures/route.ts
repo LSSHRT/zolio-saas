@@ -6,6 +6,7 @@ import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 
 type FactureLine = {

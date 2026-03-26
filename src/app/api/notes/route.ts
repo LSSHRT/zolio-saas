@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 type NotePayload = {
   titre?: string;

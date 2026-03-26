@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 type ClientRecord = {
   id: string;
@@ -55,6 +56,9 @@ export async function GET() {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
+    const rl = rateLimit(`clients-get:${userId}`, 60, 60_000);
+    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
+
     const clients = await prisma.client.findMany({
       where: { userId },
       orderBy: { createdAt: "desc" },
@@ -70,6 +74,9 @@ export async function POST(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
+    const rl = rateLimit(`clients-post:${userId}`, 30, 60_000);
+    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
 
     const body = (await request.json()) as ClientPayload | ClientPayload[];
 
