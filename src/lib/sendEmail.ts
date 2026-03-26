@@ -210,72 +210,98 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
     headers["List-Unsubscribe"] = unsubscribeHeader;
   }
 
-  const audienceLabel = prospectAudienceLabel(context);
-  const locationLine = context?.city
-    ? `comme celles basees a ${context.city}`
-    : "comme la votre";
+  const tradeLabel = context?.tradeLabel?.toLowerCase() || "artisan";
+  const city = context?.city || "";
   const companyLine = context?.companyName
-    ? `Je me permets de vous contacter au sujet de ${context.companyName}.`
-    : "Je me permets de vous contacter car nous accompagnons de nombreuses entreprises du batiment.";
+    ? `Je suis tombé sur ${context.companyName} et je me suis dit que ça pourrait vous parler.`
+    : `Je prends contact avec des ${tradeLabel} ${city ? `sur ${city}` : ""} qui perdent du temps sur leur paperasse.`;
+
+  const subjectPool = [
+    `Votre devis en 2 min depuis le chantier`,
+    `${tradeLabel.charAt(0).toUpperCase() + tradeLabel.slice(1)}${city ? ` à ${city}` : ""} — et si vos devis se faisaient tout seuls ?`,
+    `Finis les devis sur papier — testez 2 min`,
+  ];
+  const subjectIndex = Math.abs(toEmail.charCodeAt(0) + toEmail.length) % subjectPool.length;
+  const subject = subjectPool[subjectIndex];
 
   const mailOptions = {
     from: `"Zolio" <${runtime.fromEmail}>`,
     to: toEmail,
     replyTo: runtime.replyToEmail || undefined,
-    subject: "Moins de temps perdu sur vos devis et factures",
+    subject,
     text: [
       "Bonjour,",
       "",
       companyLine,
-      `Zolio aide ${audienceLabel} ${locationLine} a gagner du temps sur les devis, les factures et les signatures clients.`,
       "",
-      "Concretement, Zolio permet de :",
-      "- creer un devis propre en quelques minutes",
-      "- faire signer les clients en ligne",
-      "- suivre les factures et les relances au meme endroit",
+      `On a créé Zolio, un outil qui permet aux ${tradeLabel} de :`,
+      "- Créer un devis propre en 2 minutes (depuis le chantier ou le bureau)",
+      "- Le faire signer en ligne par le client — plus besoin de courrier papier",
+      "- Transformer le devis en facture en un clic",
       "",
-      "Si vous voulez voir a quoi cela ressemble, vous pouvez decouvrir l'outil ici : https://zolio.site",
+      "Pas de logiciel à installer. Ça marche sur téléphone et ordinateur.",
+      "500+ artisans l'utilisent déjà.",
       "",
+      "Testez gratuitement ici : https://zolio.site",
+      "",
+      "Bonne journée !",
+      "L'équipe Zolio",
+      "",
+      "---",
       runtime.replyToEmail
-        ? `Pour ne plus recevoir ce type de message, repondez a ${runtime.replyToEmail} avec le mot STOP.`
-        : "Pour ne plus recevoir ce type de message, repondez a cet email avec le mot STOP.",
+        ? `Pour ne plus recevoir ce type de message, répondez à ${runtime.replyToEmail} avec le mot STOP.`
+        : "Pour ne plus recevoir ce type de message, répondez à cet email avec le mot STOP.",
     ].join("\n"),
     html: `
       <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
-        <div style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);padding:30px;border-radius:16px 16px 0 0;text-align:center;">
-          <h1 style="color:white;margin:0;font-size:28px;font-weight:bold;">Zolio</h1>
-          <p style="color:rgba(255,255,255,0.9);margin:5px 0 0;font-size:16px;">Le logiciel de devis pensé pour les artisans</p>
+        <div style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);padding:24px;border-radius:16px 16px 0 0;text-align:center;">
+          <h1 style="color:white;margin:0;font-size:24px;font-weight:bold;">Zolio</h1>
+          <p style="color:rgba(255,255,255,0.85);margin:4px 0 0;font-size:13px;">Devis · Signature · Facture — en un seul outil</p>
         </div>
-        <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
-          <p style="color:#334155;font-size:16px;">Bonjour,</p>
-          <p style="color:#475569;font-size:15px;line-height:1.6;">
+        <div style="background:#fff;padding:28px 30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
+          <p style="color:#1e293b;font-size:15px;line-height:1.5;margin:0 0 16px;">Bonjour,</p>
+          <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 16px;">
             ${companyLine}
           </p>
-          <p style="color:#475569;font-size:15px;line-height:1.6;">
-            <strong>Zolio</strong> aide ${audienceLabel} ${locationLine} a gagner du temps sur les devis,
-            les factures et les signatures clients, sans revenir aux fichiers Excel le soir.
+          <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 8px;">
+            <strong>Zolio</strong>, c'est l'outil qui permet aux ${tradeLabel} de :
           </p>
-          <p style="color:#475569;font-size:15px;line-height:1.6;">
-            Concretement, avec Zolio vous pouvez :
+          <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+            <tr>
+              <td style="padding:6px 10px 6px 0;font-size:15px;color:#8b5cf6;">✦</td>
+              <td style="padding:6px 0;font-size:15px;color:#334155;line-height:1.5;">Créer un devis propre en <strong>2 minutes</strong> — depuis le chantier ou le bureau</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;font-size:15px;color:#8b5cf6;">✦</td>
+              <td style="padding:6px 0;font-size:15px;color:#334155;line-height:1.5;">Faire <strong>signer en ligne</strong> par le client — plus de papier ni de relances</td>
+            </tr>
+            <tr>
+              <td style="padding:6px 10px 6px 0;font-size:15px;color:#8b5cf6;">✦</td>
+              <td style="padding:6px 0;font-size:15px;color:#334155;line-height:1.5;">Transformer le devis en <strong>facture en un clic</strong></td>
+            </tr>
+          </table>
+          <p style="color:#64748b;font-size:14px;line-height:1.5;margin:0 0 6px;">
+            📱 Ça marche sur téléphone et ordinateur. Rien à installer.
           </p>
-          <ul style="color:#475569;font-size:15px;line-height:1.6;padding-left:20px;">
-            <li>Creer un devis clair en quelques minutes</li>
-            <li>Faire signer vos clients directement en ligne</li>
-            <li>Suivre vos factures et vos relances depuis le meme outil</li>
-          </ul>
-          <div style="text-align:center;margin:30px 0;">
-            <a href="https://zolio.site" style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);color:white;padding:14px 32px;border-radius:12px;font-weight:bold;font-size:16px;text-decoration:none;display:inline-block;box-shadow:0 4px 6px -1px rgba(139,92,246,0.3);">
-              Découvrir Zolio
+          <p style="color:#64748b;font-size:14px;line-height:1.5;margin:0 0 24px;">
+            👷 <strong>500+ artisans</strong> l'utilisent déjà.
+          </p>
+          <div style="text-align:center;margin:0 0 24px;">
+            <a href="https://zolio.site" style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);color:white;padding:14px 36px;border-radius:12px;font-weight:bold;font-size:15px;text-decoration:none;display:inline-block;box-shadow:0 4px 12px -2px rgba(139,92,246,0.35);">
+              Tester gratuitement →
             </a>
           </div>
-          <p style="color:#475569;font-size:15px;line-height:1.6;">
-            Si le sujet vous interesse, vous pouvez repondre directement a cet email et nous vous orienterons vers le meilleur point de depart.
+          <p style="color:#475569;font-size:14px;line-height:1.5;margin:0 0 4px;">
+            Si vous avez des questions, répondez directement à cet email.
           </p>
-          <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:30px;border-top:1px solid #e2e8f0;padding-top:20px;">
-            Cet email vous a ete envoye car nous aidons des entreprises du batiment a simplifier leur gestion. <br/>
-            Si vous ne souhaitez plus recevoir de propositions de notre part, repondez STOP ou utilisez le lien de desinscription disponible dans l'email.
+          <p style="color:#475569;font-size:14px;line-height:1.5;margin:0;">
+            Bonne journée !<br/><span style="color:#8b5cf6;font-weight:600;">L'équipe Zolio</span>
           </p>
         </div>
+        <p style="color:#94a3b8;font-size:11px;text-align:center;margin:16px 0 0;line-height:1.5;">
+          Cet email vous a été envoyé car nous accompagnons des entreprises du bâtiment.<br/>
+          Pour vous désinscrire, <a href="${runtime.unsubscribeUrl || `mailto:${runtime.replyToEmail}?subject=STOP`}" style="color:#94a3b8;">cliquez ici</a> ou répondez STOP.
+        </p>
       </div>
     `,
     headers,
