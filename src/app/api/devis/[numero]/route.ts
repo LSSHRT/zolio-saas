@@ -8,14 +8,13 @@ import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
-
-type DevisLine = {
-  isOptional?: boolean;
-  prixUnitaire?: number | string;
-  quantite?: number | string;
-  totalLigne?: number | string;
-  tva?: number | string;
-};
+import {
+  parseLignes,
+  replaceLignesForDevis,
+  normalizeLigneForOutput,
+  computeTotals,
+  type LignePayload,
+} from "@/lib/devis-lignes";
 
 type UpdateDevisPayload = {
   acompte?: unknown;
@@ -38,15 +37,6 @@ function parseNumber(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function parseLignes(value: unknown): DevisLine[] {
-  const parsed = typeof value === "string" ? JSON.parse(value) : value;
-  if (!Array.isArray(parsed)) {
-    return [];
-  }
-
-  return parsed.filter((line): line is DevisLine => Boolean(line) && typeof line === "object");
-}
-
 function parsePhotos(value: unknown) {
   const parsed = typeof value === "string" ? JSON.parse(value) : value;
   if (!Array.isArray(parsed)) {
@@ -54,47 +44,6 @@ function parsePhotos(value: unknown) {
   }
 
   return parsed.filter((photo): photo is string => typeof photo === "string");
-}
-
-function getLineTotal(line: DevisLine) {
-  if (line.totalLigne !== undefined && line.totalLigne !== null) {
-    return parseNumber(line.totalLigne);
-  }
-
-  return parseNumber(line.quantite) * parseNumber(line.prixUnitaire);
-}
-
-function computeTotals(lines: DevisLine[], defaultTva: number, remise: number) {
-  const activeLines = lines.filter((line) => !line.isOptional);
-  const totalHTBase = activeLines.reduce((sum, line) => sum + getLineTotal(line), 0);
-  const totalHT = totalHTBase * (1 - remise / 100);
-  const totalTTC =
-    activeLines.reduce((sum, line) => {
-      const lineTva = parseNumber(line.tva, defaultTva);
-      return sum + getLineTotal(line) * (1 + lineTva / 100);
-    }, 0) *
-    (1 - remise / 100);
-
-  return { totalHT, totalHTBase, totalTTC };
-}
-
-function normalizePdfLignes(lines: DevisLine[], defaultTva: number) {
-  return lines.map((line) => ({
-    isOptional: Boolean(line.isOptional),
-    nomPrestation:
-      typeof (line as { nomPrestation?: unknown }).nomPrestation === "string" &&
-      (line as { nomPrestation?: string }).nomPrestation?.trim()
-        ? (line as { nomPrestation: string }).nomPrestation.trim()
-        : "Prestation",
-    prixUnitaire: parseNumber(line.prixUnitaire),
-    quantite: parseNumber(line.quantite, 1),
-    totalLigne: getLineTotal(line),
-    tva: String(parseNumber(line.tva, defaultTva)),
-    unite:
-      typeof (line as { unite?: unknown }).unite === "string" && (line as { unite?: string }).unite?.trim()
-        ? (line as { unite: string }).unite.trim()
-        : "U",
-  }));
 }
 
 function getEmailSkipReason(configured: { host?: string; user?: string; pass?: string }) {
@@ -113,17 +62,32 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
-      include: { client: true },
+      include: { client: true, lignesNorm: { orderBy: { position: "asc" } } },
     });
 
     if (!devis) {
       return jsonError("Devis introuvable", 404);
     }
 
-    const parsedLignes = parseLignes(devis.lignes);
+    // Utilise lignesNorm si disponible, sinon fallback sur JSON
+    let lignes: LignePayload[];
+    if (devis.lignesNorm.length > 0) {
+      lignes = devis.lignesNorm.map((ligne) => ({
+        isOptional: ligne.isOptional,
+        nomPrestation: ligne.nomPrestation,
+        prixUnitaire: ligne.prixUnitaire,
+        quantite: ligne.quantite,
+        totalLigne: ligne.totalLigne,
+        tva: ligne.tva,
+        unite: ligne.unite,
+      }));
+    } else {
+      lignes = parseLignes(devis.lignes);
+    }
+
     const remiseGlobale = devis.remise || 0;
     const tvaGlobale = devis.tva || 0;
-    const { totalHT, totalTTC } = computeTotals(parsedLignes, tvaGlobale, remiseGlobale);
+    const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
       numero: devis.numero,
@@ -133,7 +97,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       clientId: devis.clientId,
       date: devis.date.toLocaleDateString("fr-FR"),
       statut: devis.statut,
-      lignes: parsedLignes,
+      lignes: lignes.map(normalizeLigneForOutput),
       remise: remiseGlobale,
       acompte: devis.acompte,
       tva: `${tvaGlobale}%`,
@@ -189,9 +153,20 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     }
 
     const { totalHT, totalHTBase, totalTTC } = computeTotals(lignes, tvaNum, remiseNum);
-    const updateData = {
+
+    // Trouver le devis pour récupérer l'id
+    const existingDevis = await prisma.devis.findFirst({
+      where: { numero, userId },
+      select: { id: true },
+    });
+
+    if (!existingDevis) {
+      return jsonError("Devis introuvable", 404);
+    }
+
+    // Mettre à jour le devis
+    const updateData: Record<string, unknown> = {
       ...(finalClientId ? { clientId: finalClientId } : {}),
-      lignes,
       remise: remiseNum,
       acompte: acompteNum,
       tva: tvaNum,
@@ -199,14 +174,14 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
       signature: "",
       photos,
     };
-    const result = await prisma.devis.updateMany({
-      where: { numero, userId },
+
+    await prisma.devis.update({
+      where: { id: existingDevis.id },
       data: updateData,
     });
 
-    if (result.count === 0) {
-      return jsonError("Devis introuvable", 404);
-    }
+    // Remplacer les lignes normalisées
+    await replaceLignesForDevis(existingDevis.id, lignes);
 
     const updatedDevis = await prisma.devis.findFirst({
       where: { numero, userId },
@@ -242,6 +217,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
             const client = await clerkClient();
             const freshUser = await client.users.getUser(user.id);
             const entreprise = getCompanyProfile(freshUser);
+            const normalizedLignes = lignes.map(normalizeLigneForOutput);
             const pdfBuffer = await generateDevisPDF({
               numeroDevis: updatedDevis.numero,
               date: updatedDevis.date.toLocaleDateString("fr-FR"),
@@ -266,7 +242,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
                 assurance: entreprise.assurance,
                 cgv: entreprise.cgv,
               },
-              lignes: normalizePdfLignes(lignes, tvaNum),
+              lignes: normalizedLignes,
               totalHT: totalHT.toFixed(2),
               tva: String(tvaNum),
               totalTTC: totalTTC.toFixed(2),

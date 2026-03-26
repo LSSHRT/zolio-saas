@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
-
-const prisma = new PrismaClient();
+import { parseLignes, computeTotals } from "@/lib/devis-lignes";
 
 export async function POST(
   request: Request,
@@ -25,6 +24,7 @@ export async function POST(
       },
       include: {
         client: true,
+        lignesNorm: { orderBy: { position: "asc" } },
       },
     });
 
@@ -51,21 +51,16 @@ export async function POST(
       },
     });
 
-    // Calculate totals
-    let totalHT = 0;
-    const lignes = devis.lignes as Array<{ quantite?: number; prixHT?: number; prixUnitaire?: number }>;
-    if (Array.isArray(lignes)) {
-      totalHT = lignes.reduce((acc, l) => {
-        const q = l.quantite || 0;
-        const p = l.prixUnitaire ?? l.prixHT ?? 0;
-        return acc + (q * p);
-      }, 0);
-    }
-    if (devis.remise) {
-      totalHT = totalHT * (1 - devis.remise / 100);
-    }
-    const tvaAmount = totalHT * ((devis.tva || 0) / 100);
-    const totalTTC = totalHT + tvaAmount;
+    // Récupérer les lignes (normalisées en priorité, sinon JSON)
+    const lignes = devis.lignesNorm.length > 0
+      ? devis.lignesNorm
+      : parseLignes(devis.lignes);
+
+    const { totalHT, totalTTC } = computeTotals(
+      lignes,
+      devis.tva || 0,
+      devis.remise || 0,
+    );
 
     // Create Facture and update Devis in a transaction
     const [facture] = await prisma.$transaction([
@@ -73,8 +68,8 @@ export async function POST(
         data: {
           userId,
           numero: newNumero,
-          devisId: devis.id, // Nouveau lien relationnel
-          devisRef: devis.numero, // Gardé pour compatibilité
+          devisId: devis.id,
+          devisRef: devis.numero,
           nomClient: devis.client.nom,
           emailClient: devis.client.email,
           totalHT,

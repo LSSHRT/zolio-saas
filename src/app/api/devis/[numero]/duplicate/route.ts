@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
+import { createLignesForDevis } from "@/lib/devis-lignes";
 
 export async function POST(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
@@ -15,9 +16,23 @@ export async function POST(request: Request, context: { params: Promise<{ numero
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
+      include: { lignesNorm: { orderBy: { position: "asc" } } },
     });
 
     if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
+
+    // Récupérer les lignes source (normalisées en priorité)
+    const lignesSource = devis.lignesNorm.length > 0
+      ? devis.lignesNorm.map((ligne) => ({
+          isOptional: ligne.isOptional,
+          nomPrestation: ligne.nomPrestation,
+          prixUnitaire: ligne.prixUnitaire,
+          quantite: ligne.quantite,
+          totalLigne: ligne.totalLigne,
+          tva: ligne.tva,
+          unite: ligne.unite,
+        }))
+      : [];
 
     let newDevis;
 
@@ -39,7 +54,6 @@ export async function POST(request: Request, context: { params: Promise<{ numero
             userId,
             numero: nextNumero,
             clientId: devis.clientId,
-            lignes: devis.lignes ? JSON.parse(JSON.stringify(devis.lignes)) : [],
             remise: devis.remise,
             acompte: devis.acompte,
             tva: devis.tva,
@@ -47,6 +61,12 @@ export async function POST(request: Request, context: { params: Promise<{ numero
             statut: "En attente",
           },
         });
+
+        // Dupliquer les lignes normalisées
+        if (lignesSource.length > 0) {
+          await createLignesForDevis(newDevis.id, lignesSource);
+        }
+
         break;
       } catch (error) {
         const isUniqueConflict =

@@ -37,26 +37,45 @@ model Prestation {
 }
 
 model Devis {
-  id          String    @id @default(cuid())
+  id          String       @id @default(cuid())
   userId      String
   numero      String
   clientId    String
-  client      Client    @relation(fields: [clientId], references: [id])
-  date        DateTime  @default(now())
-  statut      String    @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
-  remise      Float?    @default(0)
-  acompte     Float?    @default(0)
-  tva         Float?    @default(0)
-  signature   String?   // Base64 signature image
-  lignes      Json      // Array of items
-  photos      Json?     // Array of photo base64 strings
+  client      Client       @relation(fields: [clientId], references: [id])
+  date        DateTime     @default(now())
+  statut      String       @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
+  remise      Float?       @default(0)
+  acompte     Float?       @default(0)
+  tva         Float?       @default(0)
+  signature   String?      // Base64 signature image
+  lignes      Json?        // @deprecated — migré vers LigneDevis
+  lignesNorm  LigneDevis[] // Lignes normalisées
+  photos      Json?        // Array of photo base64 strings
   dateDebut   DateTime?
   dateFin     DateTime?
-  factures    Facture[] // Factures générées depuis ce devis
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  factures    Facture[]    // Factures générées depuis ce devis
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
   @@unique([userId, numero])
+}
+
+model LigneDevis {
+  id             String @id @default(cuid())
+  devisId        String
+  devis          Devis  @relation(fields: [devisId], references: [id], onDelete: Cascade)
+  nomPrestation  String
+  unite          String @default("U")
+  quantite       Float  @default(1)
+  prixUnitaire   Float  @default(0)
+  totalLigne     Float  @default(0)
+  tva            String @default("20")
+  isOptional     Boolean @default(false)
+  position       Int    @default(0) // Ordre d'affichage
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([devisId])
 }
 
 model Depense {

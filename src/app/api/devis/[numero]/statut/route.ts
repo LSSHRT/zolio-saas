@@ -2,46 +2,19 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
+import { parseLignes, type LignePayload } from "@/lib/devis-lignes";
 
-type DevisLine = {
-  isOptional?: boolean;
-  nom?: string;
-  nomPrestation?: string;
-  optionnel?: boolean;
-  quantite?: number | string;
-};
-
-function parseLignes(value: unknown): DevisLine[] {
-  if (typeof value === "string") {
-    return JSON.parse(value) as DevisLine[];
-  }
-
-  if (Array.isArray(value)) {
-    return value as DevisLine[];
-  }
-
-  return [];
-}
-
-function getLineName(line: DevisLine) {
+function getLineName(line: LignePayload) {
   if (typeof line.nomPrestation === "string" && line.nomPrestation.trim().length > 0) {
     return line.nomPrestation;
-  }
-
-  if (typeof line.nom === "string" && line.nom.trim().length > 0) {
-    return line.nom;
   }
 
   return "";
 }
 
-function getLineQuantity(line: DevisLine) {
+function getLineQuantity(line: LignePayload) {
   const quantity = Number.parseInt(String(line.quantite ?? 1), 10);
   return Number.isNaN(quantity) || quantity <= 0 ? 1 : quantity;
-}
-
-function isOptionalLine(line: DevisLine) {
-  return Boolean(line.isOptional ?? line.optionnel);
 }
 
 export async function PATCH(request: Request, context: { params: Promise<{ numero: string }> }) {
@@ -57,6 +30,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ numer
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
+      include: { lignesNorm: { orderBy: { position: "asc" } } },
     });
 
     if (!devis) return new NextResponse("Devis introuvable", { status: 404 });
@@ -69,13 +43,24 @@ export async function PATCH(request: Request, context: { params: Promise<{ numer
       statut !== "Facturé" &&
       statut !== "Payé";
 
-    const lignes = parseLignes(devis.lignes);
+    // Utilise lignesNorm si disponible, sinon fallback sur JSON
+    const lignes: LignePayload[] = devis.lignesNorm.length > 0
+      ? devis.lignesNorm.map((ligne) => ({
+          isOptional: ligne.isOptional,
+          nomPrestation: ligne.nomPrestation,
+          prixUnitaire: ligne.prixUnitaire,
+          quantite: ligne.quantite,
+          totalLigne: ligne.totalLigne,
+          tva: ligne.tva,
+          unite: ligne.unite,
+        }))
+      : parseLignes(devis.lignes);
 
     if (isNewSale || isCancelSale) {
       for (const ligne of lignes) {
         const nomPrestation = getLineName(ligne);
 
-        if (isOptionalLine(ligne) || !nomPrestation) {
+        if (ligne.isOptional || !nomPrestation) {
           continue;
         }
 
