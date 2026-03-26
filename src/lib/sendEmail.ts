@@ -279,6 +279,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
     `${tradeLabel.charAt(0).toUpperCase() + tradeLabel.slice(1)}${city ? ` à ${city}` : ""} — et si vos devis se faisaient tout seuls ?`,
     `Finis les devis sur papier — testez 2 min`,
   ];
+  // A/B testing : rotation déterministe selon l'email
   const subjectIndex = Math.abs(toEmail.charCodeAt(0) + toEmail.length) % subjectPool.length;
   const subject = subjectPool[subjectIndex];
 
