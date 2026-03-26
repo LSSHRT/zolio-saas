@@ -13,7 +13,7 @@ function getStripe() {
   });
 }
 
-export async function POST(_request: Request) {
+export async function POST() {
   try {
     const user = await currentUser();
     if (!user) {

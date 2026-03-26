@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { getCompanyProfile, type CompanyProfile } from "../company";
+import { getCompanyProfile } from "../company";
 
 describe("company", () => {
   describe("getCompanyProfile", () => {

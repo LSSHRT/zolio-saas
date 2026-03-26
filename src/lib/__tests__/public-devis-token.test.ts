@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 
 // Set env var before importing the module
 process.env.PUBLIC_DEVIS_LINK_SECRET = "test-secret-key-for-unit-tests";

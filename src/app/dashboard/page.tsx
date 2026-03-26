@@ -33,7 +33,7 @@ import useSWR from "swr";
 import { UserButton, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { MobileDialog } from "@/components/mobile-dialog";
-import { DashboardMobileSkeleton, DashboardDesktopSkeleton, DevisCardSkeleton, ChartSkeleton } from "@/components/Skeleton";
+import { DevisCardSkeleton, ChartSkeleton } from "@/components/Skeleton";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ClientBrandMark,

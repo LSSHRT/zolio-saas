@@ -1,7 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
-
 type SkeletonProps = {
   className?: string;
   rounded?: string;
