@@ -252,7 +252,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
 
   return (
-    <nav className="client-panel mt-4 hidden items-center gap-2 rounded-[1.75rem] p-2 lg:flex">
+    <nav className="client-panel mt-4 hidden items-center gap-2 rounded-[1.75rem] p-2 lg:flex overflow-x-auto">
       {CLIENT_NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = active === item.key;
