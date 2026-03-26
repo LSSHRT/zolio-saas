@@ -34,7 +34,7 @@ import type {
   QuickClientForm,
 } from "./types";
 
-const TRIAL_QUOTE_LIMIT = 3;
+const TRIAL_QUOTE_LIMIT = 5;
 const DRAFT_STORAGE_PREFIX = "zolio:nouveau-devis:draft:";
 
 type CreateDevisDraft = {
