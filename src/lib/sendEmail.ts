@@ -260,6 +260,9 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
     ? `Je suis tombé sur ${context.companyName} et je me suis dit que ça pourrait vous parler.`
     : `Je prends contact avec des ${tradeLabel} ${city ? `sur ${city}` : ""} qui perdent du temps sur leur paperasse.`;
 
+  // Pixel de tracking d'ouverture (1x1 transparent)
+  const trackingPixel = `<img src="https://www.zolio.site/api/prospect-domains/track?e=${encodeURIComponent(toEmail)}" width="1" height="1" style="display:none" alt="" />`;
+
   const subjectPool = [
     `Votre devis en 2 min depuis le chantier`,
     `${tradeLabel.charAt(0).toUpperCase() + tradeLabel.slice(1)}${city ? ` à ${city}` : ""} — et si vos devis se faisaient tout seuls ?`,
@@ -354,6 +357,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
           Cet email vous a été envoyé car nous accompagnons des entreprises du bâtiment.<br/>
           Pour vous désinscrire, <a href="${runtime.unsubscribeUrl || `mailto:${runtime.replyToEmail}?subject=STOP`}" style="color:#94a3b8;">cliquez ici</a> ou répondez STOP.
         </p>
+        ${trackingPixel}
       </div>
     `,
     headers,
