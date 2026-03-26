@@ -132,6 +132,22 @@ model ProspectMail {
   createdAt DateTime @default(now())
 }
 
+model ProspectDomain {
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  company   String?  // Nom de l'entreprise
+  trade     String?  // Métier (peintre, plombier...)
+  city      String?  // Ville
+  source    String   @default("Manual") // Manual, Automated
+  used      Boolean  @default(false) // Déjà utilisé par le robot
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([used])
+  @@index([trade])
+}
+
 model AdminSetting {
   id        String   @id @default(cuid())
   key       String   @unique

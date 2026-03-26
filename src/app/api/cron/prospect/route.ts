@@ -26,21 +26,7 @@ import {
 import { prisma } from "@/lib/prisma";
 
 const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "";
-const SEARCH_TARGETS_PER_RUN = 3;
-const DOMAINS_PER_TARGET = 3;
-const CANDIDATE_POOL_MULTIPLIER = 4;
-const MANUAL_QUEUE_CAP = 3;
-const SEARCH_RESULT_BLOCKLIST = [
-  "bing.",
-  "pagesjaunes",
-  "travaux",
-  "yelp",
-  "facebook",
-  "instagram",
-  "linkedin",
-  "societe.com",
-  "youtube",
-];
+const DOMAINS_PER_RUN = 5; // Nombre de domaines à traiter par exécution
 const GENERIC_INBOX_PREFIXES = [
   "contact",
   "bonjour",
@@ -52,46 +38,14 @@ const GENERIC_INBOX_PREFIXES = [
   "direction",
   "admin",
 ];
-const BUILDING_TRADES = [
-  { key: "peintre", label: "peintres en batiment", searchTerms: ["peintre batiment", "entreprise peinture"] },
-  { key: "plaquiste", label: "plaquistes", searchTerms: ["plaquiste", "placo isolation"] },
-  { key: "plombier", label: "plombiers", searchTerms: ["plombier", "depannage plomberie"] },
-  { key: "electricien", label: "electriciens", searchTerms: ["electricien", "installation electrique"] },
-  { key: "chauffagiste", label: "chauffagistes", searchTerms: ["chauffagiste", "pompe a chaleur"] },
-  { key: "menuisier", label: "menuisiers", searchTerms: ["menuisier", "menuiserie exterieure"] },
-  { key: "carreleur", label: "carreleurs", searchTerms: ["carreleur", "pose carrelage"] },
-  { key: "macon", label: "macons", searchTerms: ["macon", "maconnerie generale"] },
-  { key: "couvreur", label: "couvreurs", searchTerms: ["couvreur", "charpente couverture"] },
-  { key: "facadier", label: "facadiers", searchTerms: ["facadier", "ravalement facade"] },
-] as const;
-const TARGET_CITIES = [
-  "Paris",
-  "Lyon",
-  "Marseille",
-  "Toulouse",
-  "Bordeaux",
-  "Nantes",
-  "Lille",
-  "Montpellier",
-  "Rennes",
-  "Nice",
-  "Strasbourg",
-  "Grenoble",
-];
 
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
-type ProspectSearchTarget = {
-  key: string;
-  label: string;
-  city: string;
-  searchTerms: string[];
-};
-
-type DiscoveredDomain = {
-  domain: string;
-  companyName: string;
+type HunterEmailRecord = {
+  value?: string;
+  confidence?: number;
+  type?: string;
 };
 
 type ProspectCandidate = {
@@ -104,134 +58,7 @@ type ProspectCandidate = {
   score: number;
 };
 
-type HunterEmailResult = {
-  email: string;
-  score: number;
-};
-
-type HunterEmailRecord = {
-  value?: string;
-  confidence?: number;
-  type?: string;
-};
-
-function getDaySeed(date = new Date()) {
-  return Math.floor(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) / 86400000);
-}
-
-function pickDailyItems<T>(items: readonly T[], count: number, seed: number, step: number) {
-  const picks: T[] = [];
-
-  if (items.length === 0) {
-    return picks;
-  }
-
-  const normalizedStep = Math.max(1, Math.abs(step) % items.length || 1);
-
-  for (let index = 0; index < count && index < items.length; index += 1) {
-    picks.push(items[(seed + index * normalizedStep) % items.length]);
-  }
-
-  return picks;
-}
-
-function getDailySearchTargets(): ProspectSearchTarget[] {
-  const seed = getDaySeed();
-  const trades = pickDailyItems(BUILDING_TRADES, SEARCH_TARGETS_PER_RUN, seed % BUILDING_TRADES.length, 3);
-  const cities = pickDailyItems(TARGET_CITIES, SEARCH_TARGETS_PER_RUN, (seed * 2) % TARGET_CITIES.length, 5);
-
-  return trades.map((trade, index) => ({
-    key: trade.key,
-    label: trade.label,
-    city: cities[index % cities.length] || TARGET_CITIES[0],
-    searchTerms: [...trade.searchTerms],
-  }));
-}
-
-function normalizeDomain(value: string) {
-  return value.replace(/^www\./, "").toLowerCase();
-}
-
-function isBlockedDiscoveryDomain(domain: string) {
-  const normalized = normalizeDomain(domain);
-  return SEARCH_RESULT_BLOCKLIST.some((blocked) => normalized.includes(blocked));
-}
-
-function humanizeCompanyName(domain: string) {
-  const root = normalizeDomain(domain).split(".").slice(0, -1).join(".");
-  const tokens = root
-    .split(/[-_.]+/)
-    .filter(Boolean)
-    .slice(0, 4)
-    .map((token) => token.charAt(0).toUpperCase() + token.slice(1));
-
-  return tokens.join(" ") || domain;
-}
-
-function buildSearchQueries(target: ProspectSearchTarget) {
-  const exclusions = "-pagesjaunes -facebook -instagram -linkedin -societe -youtube";
-
-  return [
-    `${target.searchTerms[0]} ${target.city} artisan site:.fr ${exclusions}`,
-    `${target.searchTerms[1] || target.searchTerms[0]} ${target.city} entreprise batiment site:.fr ${exclusions}`,
-  ];
-}
-
-async function fetchSearchHtml(query: string) {
-  const response = await fetch(`https://www.bing.com/search?q=${encodeURIComponent(query)}`, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-    },
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    return "";
-  }
-
-  return response.text();
-}
-
-async function discoverDomainsForTarget(target: ProspectSearchTarget) {
-  const discovered = new Map<string, DiscoveredDomain>();
-
-  for (const query of buildSearchQueries(target)) {
-    try {
-      const html = await fetchSearchHtml(query);
-      const domainRegex = /https?:\/\/(?:www\.)?([a-zA-Z0-9-]+\.(?:fr|com|net))/g;
-
-      for (const match of html.matchAll(domainRegex)) {
-        const rawDomain = match[1]?.toLowerCase();
-        if (!rawDomain) continue;
-
-        const domain = normalizeDomain(rawDomain);
-        if (isBlockedDiscoveryDomain(domain)) continue;
-
-        if (!discovered.has(domain)) {
-          discovered.set(domain, {
-            domain,
-            companyName: humanizeCompanyName(domain),
-          });
-        }
-
-        if (discovered.size >= DOMAINS_PER_TARGET) {
-          break;
-        }
-      }
-
-      if (discovered.size >= DOMAINS_PER_TARGET) {
-        break;
-      }
-    } catch (error) {
-      console.error("prospect-domain-discovery", error);
-    }
-  }
-
-  return Array.from(discovered.values()).slice(0, DOMAINS_PER_TARGET);
-}
-
-function scoreHunterEmail(item: unknown): HunterEmailResult | null {
+function scoreHunterEmail(item: unknown): { email: string; score: number } | null {
   const record: HunterEmailRecord | null =
     typeof item === "object" && item !== null ? (item as HunterEmailRecord) : null;
   const email = typeof record?.value === "string" ? normalizeEmail(record.value) : "";
@@ -268,53 +95,94 @@ function scoreHunterEmail(item: unknown): HunterEmailResult | null {
   return { email, score };
 }
 
-async function findEmailsViaHunter(poolSize: number) {
-  const targets = getDailySearchTargets();
+/**
+ * Récupère des domaines non utilisés de la DB et cherche les emails via Hunter
+ */
+async function findCandidatesFromDomains(poolSize: number): Promise<{
+  domains: { domain: string; company: string | null; trade: string | null; city: string | null }[];
+  candidates: ProspectCandidate[];
+}> {
+  // Récupérer des domaines non utilisés
+  const domains = await prisma.prospectDomain.findMany({
+    where: { used: false },
+    orderBy: { createdAt: "asc" },
+    take: DOMAINS_PER_RUN,
+  });
+
+  if (domains.length === 0) {
+    // Réinitialiser si tous les domaines ont été utilisés
+    await prisma.prospectDomain.updateMany({
+      where: { used: true },
+      data: { used: false, usedAt: null },
+    });
+
+    const resetDomains = await prisma.prospectDomain.findMany({
+      where: { used: false },
+      orderBy: { createdAt: "asc" },
+      take: DOMAINS_PER_RUN,
+    });
+
+    if (resetDomains.length === 0) {
+      return { domains: [], candidates: [] };
+    }
+
+    domains.push(...resetDomains);
+  }
+
   const candidates: ProspectCandidate[] = [];
+  const domainInfos = domains.map((d) => ({
+    domain: d.domain,
+    company: d.company,
+    trade: d.trade,
+    city: d.city,
+  }));
 
-  for (const target of targets) {
-    const domains = await discoverDomainsForTarget(target);
+  for (const domainRow of domains) {
+    try {
+      const hunterUrl = `https://api.hunter.io/v2/domain-search?domain=${domainRow.domain}&api_key=${HUNTER_API_KEY}`;
+      const hunterRes = await fetch(hunterUrl, { cache: "no-store" });
+      if (!hunterRes.ok) continue;
 
-    for (const discovered of domains) {
-      try {
-        const hunterUrl = `https://api.hunter.io/v2/domain-search?domain=${discovered.domain}&api_key=${HUNTER_API_KEY}`;
-        const hunterRes = await fetch(hunterUrl, { cache: "no-store" });
-        if (!hunterRes.ok) continue;
+      const payload = await hunterRes.json();
+      const emails: unknown[] = Array.isArray(payload?.data?.emails) ? payload.data.emails : [];
+      const scoredEmails = emails
+        .map((item: unknown) => scoreHunterEmail(item))
+        .filter((item): item is { email: string; score: number } => Boolean(item))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2);
 
-        const payload = await hunterRes.json();
-        const emails: unknown[] = Array.isArray(payload?.data?.emails) ? payload.data.emails : [];
-        const scoredEmails = emails
-          .map((item: unknown) => scoreHunterEmail(item))
-          .filter((item): item is HunterEmailResult => Boolean(item))
-          .sort((left, right) => right.score - left.score)
-          .slice(0, 2);
-
-        for (const scored of scoredEmails) {
-          candidates.push({
-            email: scored.email,
-            source: `Robot (Hunter • ${target.label} • ${target.city} • ${discovered.domain})`,
-            tradeLabel: target.label,
-            city: target.city,
-            domain: discovered.domain,
-            companyName: discovered.companyName,
-            score: scored.score,
-          });
-        }
-      } catch (error) {
-        console.error("prospect-hunter", error);
+      for (const scored of scoredEmails) {
+        candidates.push({
+          email: scored.email,
+          source: `Robot (Hunter • ${domainRow.domain})`,
+          tradeLabel: domainRow.trade || "Artisan BTP",
+          city: domainRow.city || "",
+          domain: domainRow.domain,
+          companyName: domainRow.company || domainRow.domain,
+          score: scored.score,
+        });
       }
+
+      // Marquer le domaine comme utilisé
+      await prisma.prospectDomain.update({
+        where: { id: domainRow.id },
+        data: { used: true, usedAt: new Date() },
+      });
+    } catch (error) {
+      console.error("prospect-hunter", error);
     }
   }
 
+  // Dédupliquer par email
   const uniqueByEmail = new Map<string, ProspectCandidate>();
-  for (const candidate of candidates.sort((left, right) => right.score - left.score)) {
+  for (const candidate of candidates.sort((a, b) => b.score - a.score)) {
     if (!uniqueByEmail.has(candidate.email)) {
       uniqueByEmail.set(candidate.email, candidate);
     }
   }
 
   return {
-    targets,
+    domains: domainInfos,
     candidates: Array.from(uniqueByEmail.values()).slice(0, poolSize),
   };
 }
@@ -426,6 +294,25 @@ export async function GET(req: Request) {
       );
     }
 
+    // Vérifier qu'on a des domaines en base
+    const domainCount = await prisma.prospectDomain.count();
+    if (domainCount === 0) {
+      await appendAdminAuditLog({
+        level: "warning",
+        scope: "acquisition",
+        action: "cron.no_domains",
+        actor: isAdminTrigger
+          ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
+          : "Cron Vercel",
+        message: "Aucun domaine d'artisan en base. Lancez le seed ou ajoutez des domaines via l'API.",
+      });
+
+      return NextResponse.json(
+        { message: "Aucun domaine d'artisan en base. Ajoutez des domaines pour démarrer la prospection." },
+        { status: 200 },
+      );
+    }
+
     const runtime = getProspectingRuntime();
     const now = new Date();
     const paris = getProspectParisTimeParts(now);
@@ -438,18 +325,16 @@ export async function GET(req: Request) {
     const warmupStage = getProspectWarmupStage(daysSinceWarmupStart);
     const effectiveDailyLimit = runtime.canAutoSend
       ? Math.max(1, Math.min(hardCap, warmupStage.dailyLimit))
-      : Math.min(hardCap, MANUAL_QUEUE_CAP);
+      : Math.min(hardCap, 3);
     const attemptedToday = runtime.canAutoSend ? await getTodayAttemptCount(now) : 0;
     const runtimeReason = runtime.canAutoSend ? null : runtime.reason;
-    // Hobby plans can only invoke one Vercel cron per day, so a scheduled run
-    // needs to cover both the queue send and lead discovery phases.
     const canSendNow = runtime.canAutoSend && (isProspectSendingHour(now) || isCronTrigger);
-    const canDiscoverNow = isProspectCollectionHour(now) || isCronTrigger;
     const sent: string[] = [];
     const queued: string[] = [];
     const failed: string[] = [];
     const recentProcessed = new Set<string>();
 
+    // Phase 1 : Envoyer les emails en file d'attente
     if (canSendNow) {
       const remainingBeforeQueue = Math.max(0, effectiveDailyLimit - attemptedToday);
       if (remainingBeforeQueue > 0) {
@@ -464,10 +349,7 @@ export async function GET(req: Request) {
             await sendProspectEmail(row.email);
             await prisma.prospectMail.update({
               where: { id: row.id },
-              data: {
-                status: "Sent",
-                createdAt: new Date(),
-              },
+              data: { status: "Sent", createdAt: new Date() },
             });
             sent.push(row.email);
             recentProcessed.add(row.email);
@@ -475,10 +357,7 @@ export async function GET(req: Request) {
             const status = error instanceof ProspectingConfigError ? "Blocked" : "Failed";
             await prisma.prospectMail.update({
               where: { id: row.id },
-              data: {
-                status,
-                createdAt: new Date(),
-              },
+              data: { status, createdAt: new Date() },
             });
             failed.push(row.email);
             recentProcessed.add(row.email);
@@ -491,15 +370,16 @@ export async function GET(req: Request) {
       }
     }
 
+    // Phase 2 : Découvrir de nouveaux leads via Hunter + domaines en base
     const remainingForDiscovery = canSendNow
       ? Math.max(0, effectiveDailyLimit - (attemptedToday + sent.length + failed.length))
       : effectiveDailyLimit;
-    let targets: ProspectSearchTarget[] = [];
+    let discoveredDomains: { domain: string; company: string | null; trade: string | null; city: string | null }[] = [];
 
-    if (canDiscoverNow && remainingForDiscovery > 0) {
-      const poolSize = Math.max(remainingForDiscovery * CANDIDATE_POOL_MULTIPLIER, remainingForDiscovery);
-      const discovery = await findEmailsViaHunter(poolSize);
-      targets = discovery.targets;
+    if (remainingForDiscovery > 0) {
+      const poolSize = Math.max(remainingForDiscovery * 4, remainingForDiscovery);
+      const discovery = await findCandidatesFromDomains(poolSize);
+      discoveredDomains = discovery.domains;
 
       for (const candidate of discovery.candidates) {
         if ((canSendNow ? sent.length + queued.length + failed.length : queued.length) >= remainingForDiscovery) {
@@ -555,10 +435,10 @@ export async function GET(req: Request) {
     const actor = isAdminTrigger
       ? currentAdmin?.emailAddresses[0]?.emailAddress || "Admin"
       : "Cron Vercel";
-    const targetSummary =
-      targets.length > 0
-        ? targets.map((target) => `${target.label} • ${target.city}`).join(" | ")
-        : "aucun ciblage execute";
+    const domainSummary =
+      discoveredDomains.length > 0
+        ? discoveredDomains.map((d) => `${d.domain} (${d.trade || "?"} — ${d.city || "?"})`).join(" | ")
+        : "aucun domaine traite";
     const messageParts = [
       sent.length > 0 ? `${sent.length} email(s) envoye(s)` : null,
       queued.length > 0 ? `${queued.length} lead(s) mis en file d'attente` : null,
@@ -566,14 +446,12 @@ export async function GET(req: Request) {
     ].filter(Boolean);
     const message =
       messageParts.length > 0
-        ? `Robot execute : ${messageParts.join(" • ")}. Fenetres actives : collecte 17:00-07:59 | prospection 09:00-16:59 Europe/Paris. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
-        : canDiscoverNow
-          ? `Aucun nouveau lead exploitable trouve. Limite du jour : ${effectiveDailyLimit}. Ciblage du jour : ${targetSummary}.`
-          : runtimeReason
-            ? `Robot bloque par sa configuration. ${runtimeReason}`
-            : scheduleReason
-              ? `Robot en veille. ${scheduleReason}`
-              : `Fenetre d'envoi active mais aucun lead n'a pu etre traite. Limite du jour : ${effectiveDailyLimit}.`;
+        ? `Robot execute : ${messageParts.join(" • ")}. Limite du jour : ${effectiveDailyLimit}. Domaines traités : ${domainSummary}.`
+        : runtimeReason
+          ? `Robot bloque par sa configuration. ${runtimeReason}`
+          : scheduleReason
+            ? `Robot en veille. ${scheduleReason}`
+            : `Aucun lead trouvé dans les domaines traités. Limite du jour : ${effectiveDailyLimit}. Domaines : ${domainSummary}.`;
 
     await appendAdminAuditLog({
       level: failed.length > 0 ? "warning" : "success",
@@ -599,9 +477,10 @@ export async function GET(req: Request) {
       failed,
       mode: runtime.mode,
       sendingReason: runtimeReason || scheduleReason,
-      targets: targets.map((target) => ({
-        trade: target.label,
-        city: target.city,
+      domains: discoveredDomains.map((d) => ({
+        domain: d.domain,
+        trade: d.trade,
+        city: d.city,
       })),
       dailyLimit: effectiveDailyLimit,
       attemptedToday,
