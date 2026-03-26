@@ -182,6 +182,50 @@ type ProspectEmailContext = {
   city?: string;
 };
 
+// Exemples de devis par métier pour la personnalisation
+const TRADE_EXAMPLES: Record<string, { example: string; pain: string }> = {
+  peintre: {
+    example: "Peinture murs 2 couches — 40m² × 24€ = 960€",
+    pain: "calculer les m², les prix au m², les couches...",
+  },
+  plaquiste: {
+    example: "Cloison BA13 + isolation — 18m² × 42€ = 756€",
+    pain: "calculer les m² de placo, les ossatures, les bandes...",
+  },
+  plombier: {
+    example: "Remplacement chauffe-eau — 1 × 320€ = 320€",
+    pain: "faire les devis sur le coin de la table après le chantier...",
+  },
+  electricien: {
+    example: "Mise aux normes tableau — 1 × 850€ = 850€",
+    pain: "tout recalculer à chaque fois, les prises, les lignes...",
+  },
+  chauffagiste: {
+    example: "Pompe à chaleur air/eau — 1 × 4500€ = 4500€",
+    pain: "les devis complexes avec main d'œuvre et matériel...",
+  },
+  menuisier: {
+    example: "Pose parquet chêne — 25m² × 65€ = 1625€",
+    pain: "les métrages, les finitions, les seuils...",
+  },
+  carreleur: {
+    example: "Pose carrelage grand format — 20m² × 35€ = 700€",
+    pain: "les découpes, les angles, la colle, les joints...",
+  },
+  macon: {
+    example: "Mur porteur + hourdis — 12m² × 85€ = 1020€",
+    pain: "les devis qui changent à chaque chantier...",
+  },
+  couvreur: {
+    example: "Réfection toiture tuiles — 80m² × 55€ = 4400€",
+    pain: "les devis longs avec matériaux et main d'œuvre...",
+  },
+  facadier: {
+    example: "Ravalement façade — 120m² × 35€ = 4200€",
+    pain: "les devis avec échafaudage, produits, finitions...",
+  },
+};
+
 /**
  * Envoie un email de prospection automatique à un artisan.
  */
@@ -203,6 +247,15 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
 
   const tradeLabel = context?.tradeLabel?.toLowerCase() || "artisan";
   const city = context?.city || "";
+  const tradeKey = Object.keys(TRADE_EXAMPLES).find(k => tradeLabel.includes(k));
+  const tradeExample = tradeKey ? TRADE_EXAMPLES[tradeKey] : null;
+  const exampleLine = tradeExample
+    ? `Exemple : "${tradeExample.example}"`
+    : `Exemple : "Prestation — 20 × 35€ = 700€"`;
+  const painLine = tradeExample
+    ? `Vous aussi, vous en avez marre de ${tradeExample.pain}`
+    : `Vous aussi, vous perdez du temps sur vos devis ?`;
+
   const companyLine = context?.companyName
     ? `Je suis tombé sur ${context.companyName} et je me suis dit que ça pourrait vous parler.`
     : `Je prends contact avec des ${tradeLabel} ${city ? `sur ${city}` : ""} qui perdent du temps sur leur paperasse.`;
@@ -225,9 +278,13 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
       "",
       companyLine,
       "",
-      `On a créé Zolio, un outil qui permet aux ${tradeLabel} de :`,
+      painLine + " ?",
+      "",
+      `Zolio, c'est l'outil qui permet aux ${tradeLabel} de créer un devis en 2 minutes chrono.`,
+      exampleLine,
+      "",
       "- Créer un devis propre en 2 minutes (depuis le chantier ou le bureau)",
-      "- Le faire signer en ligne par le client — plus besoin de courrier papier",
+      "- Faire signer en ligne par le client — plus besoin de courrier papier",
       "- Transformer le devis en facture en un clic",
       "",
       "Pas de logiciel à installer. Ça marche sur téléphone et ordinateur.",
@@ -254,9 +311,13 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
           <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 16px;">
             ${companyLine}
           </p>
-          <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 8px;">
-            <strong>Zolio</strong>, c'est l'outil qui permet aux ${tradeLabel} de :
+          <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 16px;">
+            ${painLine} ? Avec <strong>Zolio</strong>, vos devis se font en 2 minutes chrono :
           </p>
+          <div style="background:#f1f5f9;border-radius:10px;padding:14px 16px;margin:0 0 20px;border-left:3px solid #8b5cf6;">
+            <p style="color:#64748b;font-size:12px;margin:0 0 4px;">Exemple de devis généré :</p>
+            <p style="color:#1e293b;font-size:14px;font-weight:600;margin:0;">${exampleLine}</p>
+          </div>
           <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
             <tr>
               <td style="padding:6px 10px 6px 0;font-size:15px;color:#8b5cf6;">✦</td>
