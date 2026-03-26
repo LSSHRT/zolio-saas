@@ -1,5 +1,19 @@
 # Changelog — Zolio SaaS
 
+## [1.3.0] — 2026-03-26
+
+### ✨ Architecture
+- **Normalisation des lignes de devis** — les lignes JSON stockées dans le champ `lignes` de la table `Devis` ont été migrées vers une nouvelle table `LigneDevis`
+- Nouveau modèle Prisma `LigneDevis` avec relation vers `Devis` (onDelete: Cascade)
+- Champs : `nomPrestation`, `unite`, `quantite`, `prixUnitaire`, `totalLigne`, `tva`, `isOptional`, `position`
+- Le champ `lignes` (JSON) est marqué `@deprecated` et gardé pour rétrocompatibilité
+
+### 🔧 Technique
+- Nouveau helper `lib/devis-lignes.ts` — logique commune (parse, normalise, computeTotals, CRUD)
+- Routes API mises à jour : `devis/route.ts`, `devis/[numero]/route.ts`, `devis/[numero]/convert/route.ts`, `devis/[numero]/duplicate/route.ts`, `devis/[numero]/statut/route.ts`, `public/devis/[numero]/route.ts`
+- Script de migration `scripts/migrate-lignes.ts` pour déplacer les données existantes
+- Toutes les routes utilisent `lignesNorm` en priorité avec fallback JSON
+
 ## [1.2.0] — 2026-03-26
 
 ### 🧹 Nettoyage
