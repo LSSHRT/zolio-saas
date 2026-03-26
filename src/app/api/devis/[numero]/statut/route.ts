@@ -5,6 +5,15 @@ import { internalServerError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseLignes, type LignePayload } from "@/lib/devis-lignes";
 
+const ALLOWED_DEVIS_STATUSES = new Set([
+  "En attente",
+  "Accepté",
+  "Refusé",
+  "Annulé",
+  "Facturé",
+  "Payé",
+]);
+
 function getLineName(line: LignePayload) {
   if (typeof line.nomPrestation === "string" && line.nomPrestation.trim().length > 0) {
     return line.nomPrestation;
@@ -28,6 +37,9 @@ export async function PATCH(request: Request, context: { params: Promise<{ numer
     const { statut } = await request.json();
 
     if (!statut) return new NextResponse("Statut manquant", { status: 400 });
+    if (!ALLOWED_DEVIS_STATUSES.has(statut)) {
+      return new NextResponse(`Statut invalide. Valeurs acceptées: ${[...ALLOWED_DEVIS_STATUSES].join(", ")}`, { status: 400 });
+    }
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
