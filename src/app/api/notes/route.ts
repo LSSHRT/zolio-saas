@@ -50,7 +50,15 @@ export async function POST(req: Request) {
     if (!titre && !contenu) {
       return jsonError("Titre ou contenu requis", 400);
     }
-    
+
+    if (titre.length > 200) {
+      return jsonError("Le titre ne doit pas dépasser 200 caractères", 400);
+    }
+
+    if (contenu.length > 10000) {
+      return jsonError("Le contenu ne doit pas dépasser 10 000 caractères", 400);
+    }
+
     const newNote = await prisma.note.create({
       data: {
         userId,
