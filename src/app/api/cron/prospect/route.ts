@@ -360,7 +360,7 @@ async function alreadyProcessedRecently(email: string) {
     where: {
       email,
       createdAt: { gt: getProspectCooldownCutoff() },
-      status: { in: ["Sent", "Queued", "Blocked"] },
+      status: { in: ["Sent", "Queued", "Blocked", "Opened", "Failed"] },
     },
     orderBy: { createdAt: "desc" },
   });
