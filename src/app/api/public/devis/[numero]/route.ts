@@ -14,6 +14,7 @@ import {
   computeTotals,
   type LignePayload,
 } from "@/lib/devis-lignes";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 function getValidatedToken(request: Request, numero: string) {
   const token = new URL(request.url).searchParams.get("token");
@@ -27,6 +28,13 @@ function getValidatedToken(request: Request, numero: string) {
 
 export async function GET(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
+    // Rate limit : 30 requêtes par minute par IP
+    const ip = getClientIp(request);
+    const rl = rateLimit(`public-devis-get:${ip}`, 30, 60_000);
+    if (!rl.allowed) {
+      return jsonError("Trop de requêtes. Réessayez dans une minute.", 429);
+    }
+
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
     const { userId } = getValidatedToken(request, numero);
@@ -96,6 +104,13 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
 
 export async function POST(request: Request, context: { params: Promise<{ numero: string }> }) {
   try {
+    // Rate limit : 10 requêtes par minute par IP (signature = action sensible)
+    const ip = getClientIp(request);
+    const rl = rateLimit(`public-devis-post:${ip}`, 10, 60_000);
+    if (!rl.allowed) {
+      return jsonError("Trop de requêtes. Réessayez dans une minute.", 429);
+    }
+
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
     const { userId } = getValidatedToken(request, numero);

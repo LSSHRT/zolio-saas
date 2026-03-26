@@ -15,6 +15,7 @@ import {
   computeTotals,
   type LignePayload,
 } from "@/lib/devis-lignes";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 type CreateDevisBody = {
   acompte?: number | string;
@@ -43,6 +44,10 @@ export async function GET(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
+    // Rate limit : 60 requêtes/min par utilisateur
+    const rl = rateLimit(`devis-get:${userId}`, 60, 60_000);
+    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
 
     const url = new URL(request.url);
     const searchQuery = url.searchParams.get("q")?.trim() || "";
@@ -136,6 +141,10 @@ export async function POST(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
+
+    // Rate limit : 30 créations/min par utilisateur
+    const rl = rateLimit(`devis-post:${userId}`, 30, 60_000);
+    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
 
     const body = (await request.json()) as CreateDevisBody;
     const { client, clientId, lignes, remise, acompte, tva, photos, sendNow } = body;

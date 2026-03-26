@@ -1,5 +1,10 @@
 import type { NextConfig } from "next";
 
+const ALLOWED_ORIGINS = [
+  "https://www.zolio.site",
+  "https://zolio.site",
+];
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
@@ -32,6 +37,13 @@ const securityHeaders = [
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
   { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+  // CORS restreint — uniquement zolio.site
+  { key: "Access-Control-Allow-Origin", value: ALLOWED_ORIGINS[0] },
+  { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, PATCH, OPTIONS" },
+  { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization, Stripe-Signature" },
+  { key: "Access-Control-Max-Age", value: "86400" },
+  // Empêcher le sniffing MIME et les attaques de contenu
+  { key: "X-Content-Type-Options", value: "nosniff" },
 ];
 
 const nextConfig: NextConfig = {
