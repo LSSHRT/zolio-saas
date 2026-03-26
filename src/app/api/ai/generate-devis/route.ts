@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 type GenerateDevisPayload = {
   description?: unknown;
@@ -163,6 +164,10 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return jsonError("Non autorisé", 401);
     }
+
+    // Rate limit : 20 générations IA/heure (coûteuse en tokens)
+    const rl = rateLimit(`ai-generate:${userId}`, 20, 60 * 60_000);
+    if (!rl.allowed) return jsonError("Trop de requêtes. Réessayez plus tard.", 429);
 
     let body: GenerateDevisPayload;
     try {

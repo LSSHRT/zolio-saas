@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { currentUser } from "@clerk/nextjs/server";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Initialisation de Stripe avec la clé secrète (lazy pour éviter le crash au build)
 function getStripe() {
@@ -20,6 +21,11 @@ export async function POST(request: Request) {
       return new NextResponse("Non autorisé", { status: 401 });
     }
     const userId = user.id;
+
+    // Rate limit : 10 checkouts/heure par utilisateur
+    const rl = rateLimit(`stripe-checkout:${userId}`, 10, 60 * 60_000);
+    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
+
     const userEmail = user.emailAddresses[0]?.emailAddress;
 
     const { isAnnual } = await request.json();

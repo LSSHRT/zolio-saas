@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { internalServerError } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 // Initialisation de Stripe
 function getStripe() {
@@ -19,6 +20,10 @@ export async function POST() {
     if (!user) {
       return new NextResponse("Non autorisé", { status: 401 });
     }
+
+    // Rate limit : 20 accès/heure par utilisateur
+    const rl = rateLimit(`stripe-portal:${user.id}`, 20, 60 * 60_000);
+    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
 
     const stripe = getStripe();
     let customerId = user.publicMetadata?.stripeCustomerId as string;
