@@ -1,5 +1,2 @@
-import { withSentry } from "@sentry/nextjs";
-
-// Wrapper Sentry pour les routes API
-// Utilisez comme: export const GET = withSentry(yourHandler);
-export { withSentry };
+// Sentry est configuré via sentry.server.config.ts et sentry.client.config.ts
+// Les erreurs sont capturées automatiquement par l'instrumentation de Sentry.

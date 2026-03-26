@@ -28,7 +28,8 @@ import { prisma } from "@/lib/prisma";
 
 const HUNTER_API_KEY = process.env.HUNTER_API_KEY || "";
 const SCRAPINGBEE_API_KEY = process.env.SCRAPINGBEE_API_KEY || "";
-const DOMAINS_PER_TARGET = 3;
+const DOMAINS_PER_TARGET = 5;
+const QUERIES_PER_TARGET = 3; // Nombre de requêtes Bing par cible
 const CANDIDATE_POOL_MULTIPLIER = 4;
 const GENERIC_INBOX_PREFIXES = [
   "contact",
@@ -196,12 +197,13 @@ function extractDomainsFromHtml(html: string): string[] {
 
 async function discoverDomainsForTarget(target: ProspectSearchTarget): Promise<DiscoveredDomain[]> {
   const discovered = new Map<string, DiscoveredDomain>();
-  const exclusions = "-pagesjaunes -facebook -instagram -linkedin -societe -youtube";
+  const exclusions = "-pagesjaunes -facebook -instagram -linkedin -societe -youtube -google -yelp -tripadvisor";
 
   const queries = [
     `${target.searchTerms[0]} ${target.city} artisan site:.fr ${exclusions}`,
     `${target.searchTerms[1] || target.searchTerms[0]} ${target.city} entreprise batiment site:.fr ${exclusions}`,
-  ];
+    `${target.searchTerms[0]} ${target.city} devis travaux site:.fr ${exclusions}`,
+  ].slice(0, QUERIES_PER_TARGET);
 
   for (const query of queries) {
     const html = await fetchSearchViaScrapingBee(query);
