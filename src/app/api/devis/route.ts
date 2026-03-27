@@ -54,6 +54,7 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const searchQuery = url.searchParams.get("q")?.trim() || "";
     const statusFilter = url.searchParams.get("statut")?.trim() || "";
+    const tagFilter = url.searchParams.get("tag")?.trim() || "";
     const page = Math.max(1, Number.parseInt(url.searchParams.get("page") || "1", 10) || 1);
     const limit = Math.min(100, Math.max(1, Number.parseInt(url.searchParams.get("limit") || "50", 10) || 50));
     const offset = (page - 1) * limit;
@@ -69,6 +70,10 @@ export async function GET(request: Request) {
         { numero: { contains: searchQuery, mode: "insensitive" } },
         { client: { nom: { contains: searchQuery, mode: "insensitive" } } },
       ];
+    }
+
+    if (tagFilter) {
+      where.tags = { array_contains: tagFilter };
     }
 
     const totalCount = await prisma.devis.count({ where });
