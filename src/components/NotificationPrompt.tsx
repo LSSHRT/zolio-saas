@@ -12,15 +12,22 @@ export function NotificationPrompt() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Ne pas afficher si pas supporté ou si déjà choisi
+    // Ne pas afficher si pas supporté
     if (!isSupported) return;
+    // Ne pas afficher si déjà abonné
+    if (isSubscribed) {
+      localStorage.setItem(STORAGE_KEY, "granted");
+      return;
+    }
+
+    // Afficher si : pas encore de choix OU choix "denied" (pour redemander)
     const choice = localStorage.getItem(STORAGE_KEY);
-    if (choice !== null) return;
+    if (choice === "granted") return; // Déjà accepté, ne plus demander
 
     // Attendre 3 secondes après le chargement
     const timer = setTimeout(() => setShow(true), 3000);
     return () => clearTimeout(timer);
-  }, [isSupported]);
+  }, [isSupported, isSubscribed]);
 
   async function handleAccept() {
     setLoading(true);
