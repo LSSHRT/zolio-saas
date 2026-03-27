@@ -10,6 +10,7 @@
  */
 
 import { prisma } from "@/lib/prisma";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 const DEVIS_EXPIRY_DAYS = 7;
 const REMINDER_DAYS = [4, 6]; // Jours 4 et 6 après création (3j et 1j avant expiration)
@@ -65,6 +66,14 @@ export async function checkExpiringDevis() {
       numero: d.numero,
       action: `Rappel envoyé (${daysLeft}j restants)`,
     });
+
+    // Notification push à l'artisan
+    sendPushNotification(d.userId, {
+      title: "⏰ Rappel devis",
+      body: `Le devis ${d.numero} expire dans ${daysLeft} jour(s). Client : ${d.client?.nom || "inconnu"}`,
+      url: `/devis/${d.numero}`,
+      tag: `devis-reminder-${d.numero}`,
+    }).catch(() => {});
   }
 
   return results;
