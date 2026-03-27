@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 const ALLOWED_FACTURE_STATUSES = new Set(["Émise", "Payée", "En retard"]);
 
@@ -39,6 +40,16 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
       where: { id: facture.id },
       data: { statut },
     });
+
+    // Notification si la facture est payée
+    if (statut === "Payée" && facture.statut !== "Payée") {
+      sendPushNotification(userId, {
+        title: "💰 Facture payée !",
+        body: `Facture ${numero} — ${facture.totalTTC.toFixed(2)}€ reçus`,
+        url: `/factures`,
+        tag: `facture-paid-${numero}`,
+      }).catch(() => {});
+    }
 
     return NextResponse.json({ success: true, statut: updated.statut });
   } catch (error) {
