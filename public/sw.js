@@ -49,7 +49,12 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   // Ne pas intercepter les requêtes cross-origin
   if (url.origin !== self.location.origin) {
-    return; // Laisser le navigateur gérer normalement
+    return;
   }
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      // En cas d'erreur réseau, retourner une réponse vide au lieu de crasher
+      return new Response("", { status: 503, statusText: "Service Unavailable" });
+    })
+  );
 });
