@@ -44,6 +44,12 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 // Passer toutes les requêtes fetch au réseau (ne pas intercepter)
+// Mais ignorer les requêtes cross-origin (images Clerk, etc.)
 self.addEventListener("fetch", (event) => {
+  const url = new URL(event.request.url);
+  // Ne pas intercepter les requêtes cross-origin
+  if (url.origin !== self.location.origin) {
+    return; // Laisser le navigateur gérer normalement
+  }
   event.respondWith(fetch(event.request));
 });
