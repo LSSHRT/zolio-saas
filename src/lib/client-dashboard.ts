@@ -45,6 +45,7 @@ export type ClientDashboardSummary = {
   recentQuotes: ClientDashboardQuoteSummary[];
   followUpQuotes: ClientDashboardQuoteSummary[];
   monthlyData: ClientDashboardMonthlyDatum[];
+  topClients: Array<{ nom: string; devisCount: number; revenueHT: number }>;
 };
 
 type DashboardLineItem = {
@@ -279,6 +280,21 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     }
   }
 
+  // Top clients par revenu
+  const clientRevenue = new Map<string, { nom: string; devisCount: number; revenueHT: number }>();
+  for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
+    const nom = quote.client?.nom || "Inconnu";
+    const existing = clientRevenue.get(nom) || { nom, devisCount: 0, revenueHT: 0 };
+    const lines = Array.isArray(quote.lignes) ? (quote.lignes as DashboardLineItem[]) : [];
+    const totals = computeQuoteTotals(lines, quote.tva || 0, quote.remise || 0);
+    existing.devisCount++;
+    existing.revenueHT += totals.totalHT;
+    clientRevenue.set(nom, existing);
+  }
+  const topClients = Array.from(clientRevenue.values())
+    .sort((a, b) => b.revenueHT - a.revenueHT)
+    .slice(0, 5);
+
   return {
     starterCatalogCount,
     totalQuotes: totalCount,
@@ -294,5 +310,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     recentQuotes: (recentQuotes as RawDashboardQuote[]).map(mapQuote),
     followUpQuotes: (followUpQuotesRaw as RawDashboardQuote[]).map(mapQuote),
     monthlyData: months.map(({ name, CA }) => ({ name, CA })),
+    topClients,
   };
 }
