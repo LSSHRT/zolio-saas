@@ -51,6 +51,8 @@ model Devis {
   lignes      Json?        // @deprecated — migré vers LigneDevis
   lignesNorm  LigneDevis[] // Lignes normalisées
   photos      Json?        // Array of photo base64 strings
+  tags        Json?        // Array de tags (ex: ["urgent", "récurrent"])
+  notes       String?      // Notes internes sur le devis
   dateDebut   DateTime?
   dateFin     DateTime?
   factures    Facture[]    // Factures générées depuis ce devis
