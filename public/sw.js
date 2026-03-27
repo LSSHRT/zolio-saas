@@ -30,17 +30,20 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
-      // Chercher un onglet ouvert avec Zolio
       for (const client of clientList) {
         if (client.url.includes(self.location.origin) && "focus" in client) {
           client.navigate(url);
           return client.focus();
         }
       }
-      // Sinon ouvrir un nouvel onglet
       if (clients.openWindow) {
         return clients.openWindow(url);
       }
     })
   );
+});
+
+// Passer toutes les requêtes fetch au réseau (ne pas intercepter)
+self.addEventListener("fetch", (event) => {
+  event.respondWith(fetch(event.request));
 });
