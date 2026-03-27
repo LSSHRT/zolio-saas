@@ -29,7 +29,7 @@ export async function GET() {
 
     const notes = await prisma.note.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" }
+      orderBy: [{ epingle: "desc" }, { createdAt: "desc" }]
     });
 
     return NextResponse.json(notes.map(mapNote));
