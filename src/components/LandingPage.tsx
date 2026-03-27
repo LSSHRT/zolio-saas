@@ -151,7 +151,7 @@ const HorizontalScrollCarousel = () => {
   return (
     <LandingStage className="relative overflow-hidden py-24" tone="neutral">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-        <h2 className="text-3xl sm:text-5xl font-bold text-white text-center">
+        <h2 className="text-2xl sm:text-3xl sm:text-5xl font-bold text-white text-center">
           Comment ça marche ? <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient-x">En 3 étapes</span>
         </h2>
       </div>
@@ -435,7 +435,7 @@ export default function LandingPage() {
 
                 <KineticText
                   text="Gérez vos chantiers. Pas la paperasse."
-                  className="landing-text-gradient mx-auto mt-8 max-w-5xl text-5xl sm:text-6xl md:text-7xl xl:mx-0 xl:text-[5.5rem]"
+                  className="landing-text-gradient mx-auto mt-8 max-w-5xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:mx-0 xl:text-[5.5rem]"
                 />
 
                 <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-300 sm:text-xl xl:mx-0">
