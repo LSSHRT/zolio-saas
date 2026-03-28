@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { sendDevisSignedEmail } from "@/lib/sendEmail";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
-import { internalServerError, jsonError, logServerError } from "@/lib/http";
+import { internalServerError, jsonError, logServerError, rateLimitResponse, safeJsonParse } from "@/lib/http";
 import { verifyPublicDevisToken } from "@/lib/public-devis-token";
 import {
   parseLignes,
@@ -32,9 +32,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
     // Rate limit : 30 requêtes par minute par IP
     const ip = getClientIp(request);
     const rl = rateLimit(`public-devis-get:${ip}`, 30, 60_000);
-    if (!rl.allowed) {
-      return jsonError("Trop de requêtes. Réessayez dans une minute.", 429);
-    }
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
@@ -108,9 +106,7 @@ export async function POST(request: Request, context: { params: Promise<{ numero
     // Rate limit : 10 requêtes par minute par IP (signature = action sensible)
     const ip = getClientIp(request);
     const rl = rateLimit(`public-devis-post:${ip}`, 10, 60_000);
-    if (!rl.allowed) {
-      return jsonError("Trop de requêtes. Réessayez dans une minute.", 429);
-    }
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
@@ -215,7 +211,9 @@ export async function POST(request: Request, context: { params: Promise<{ numero
           remise: remiseGlobale.toString(),
           statut: "Accepté",
           signatureBase64: signature,
-          photos: typeof devis.photos === "string" ? JSON.parse(devis.photos) : (devis.photos || []),
+          photos: typeof devis.photos === "string"
+            ? safeJsonParse(devis.photos, [] as string[])
+            : (Array.isArray(devis.photos) ? (devis.photos as string[]) : []),
         });
 
         await sendDevisSignedEmail(

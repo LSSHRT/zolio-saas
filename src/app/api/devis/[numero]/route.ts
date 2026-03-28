@@ -40,7 +40,16 @@ function parseNumber(value: unknown, fallback = 0) {
 }
 
 function parsePhotos(value: unknown) {
-  const parsed = typeof value === "string" ? JSON.parse(value) : value;
+  let parsed: unknown;
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  } else {
+    parsed = value;
+  }
   if (!Array.isArray(parsed)) {
     return [];
   }

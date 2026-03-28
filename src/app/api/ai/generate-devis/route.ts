@@ -81,7 +81,12 @@ function normalizeGeneratedLine(candidate: GeneratedAILineCandidate) {
 }
 
 function parseGeneratedLines(responseText: string) {
-  const parsed = JSON.parse(extractJsonPayload(responseText)) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(extractJsonPayload(responseText));
+  } catch {
+    return [];
+  }
 
   const rawLines = Array.isArray(parsed)
     ? parsed

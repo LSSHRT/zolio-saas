@@ -9,6 +9,7 @@ import {
   encodePrestationDescription,
   decodePrestationDescription,
 } from "../prestations";
+import { safeJsonParse, rateLimitResponse } from "../http";
 
 describe("API helpers (couverture complète)", () => {
   describe("devis-lignes", () => {
@@ -118,6 +119,41 @@ describe("API helpers (couverture complète)", () => {
       const decoded = decodePrestationDescription(encoded);
       expect(decoded.categorie).toBe("Peinture");
       expect(decoded.description).toBe("Murs 2 couches");
+    });
+  });
+
+  describe("safeJsonParse", () => {
+    it("should parse valid JSON", () => {
+      expect(safeJsonParse('["a","b"]', [])).toEqual(["a", "b"]);
+      expect(safeJsonParse('{"x":1}', {})).toEqual({ x: 1 });
+    });
+
+    it("should return fallback on invalid JSON", () => {
+      expect(safeJsonParse("not json", [])).toEqual([]);
+      expect(safeJsonParse("{broken", { default: true })).toEqual({ default: true });
+      expect(safeJsonParse("", null)).toBe(null);
+    });
+
+    it("should handle edge cases", () => {
+      expect(safeJsonParse("null", "fallback")).toBe(null);
+      expect(safeJsonParse("42", 0)).toBe(42);
+    });
+  });
+
+  describe("rateLimitResponse", () => {
+    it("should return 429 with Retry-After header", () => {
+      const futureReset = Date.now() + 30_000;
+      const response = rateLimitResponse(futureReset);
+      expect(response.status).toBe(429);
+      const retryAfter = response.headers.get("Retry-After");
+      expect(retryAfter).toBeTruthy();
+      expect(Number(retryAfter)).toBeGreaterThanOrEqual(1);
+    });
+
+    it("should return at least 1 second for Retry-After", () => {
+      const pastReset = Date.now() - 1000;
+      const response = rateLimitResponse(pastReset);
+      expect(response.headers.get("Retry-After")).toBe("1");
     });
   });
 });

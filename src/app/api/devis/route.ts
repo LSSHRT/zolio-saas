@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 import {
@@ -32,11 +32,15 @@ type CreateDevisBody = {
 
 function parsePhotos(value: unknown): string[] {
   if (typeof value === "string") {
-    return JSON.parse(value) as string[];
+    try {
+      return JSON.parse(value) as string[];
+    } catch {
+      return [];
+    }
   }
 
   if (Array.isArray(value)) {
-    return value as string[];
+    return value.filter((item): item is string => typeof item === "string");
   }
 
   return [];
@@ -49,7 +53,7 @@ export async function GET(request: Request) {
 
     // Rate limit : 60 requêtes/min par utilisateur
     const rl = rateLimit(`devis-get:${userId}`, 60, 60_000);
-    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const url = new URL(request.url);
     const searchQuery = url.searchParams.get("q")?.trim() || "";
@@ -151,7 +155,7 @@ export async function POST(request: Request) {
 
     // Rate limit : 30 créations/min par utilisateur
     const rl = rateLimit(`devis-post:${userId}`, 30, 60_000);
-    if (!rl.allowed) return new NextResponse("Trop de requêtes", { status: 429 });
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const body = (await request.json()) as CreateDevisBody;
     const { client, clientId, lignes, remise, acompte, tva, photos, sendNow } = body;
