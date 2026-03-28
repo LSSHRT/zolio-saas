@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { auth, clerkClient } from "@clerk/nextjs/server";
-import { jsonError } from "@/lib/http";
+import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 // POST — Générer un lien de parrainage
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return jsonError("Non autorisé", 401);
+
+    const rl = rateLimit(`referral-post:${userId}`, 10, 60_000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
@@ -30,16 +34,18 @@ export async function POST() {
 
     return NextResponse.json({ code, url: `https://zolio.site?ref=${code}` });
   } catch (error) {
-    console.error("referral-error", error);
-    return jsonError("Erreur lors de la génération du code", 500);
+    return internalServerError("referral-post", error, "Erreur lors de la génération du code");
   }
 }
 
 // GET — Vérifier le statut de parrainage
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return jsonError("Non autorisé", 401);
+
+    const rl = rateLimit(`referral-get:${userId}`, 30, 60_000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const client = await clerkClient();
     const user = await client.users.getUser(userId);
@@ -50,7 +56,6 @@ export async function GET() {
       isPro: user.publicMetadata?.isPro === true,
     });
   } catch (error) {
-    console.error("referral-status-error", error);
-    return jsonError("Erreur", 500);
+    return internalServerError("referral-get", error, "Erreur");
   }
 }

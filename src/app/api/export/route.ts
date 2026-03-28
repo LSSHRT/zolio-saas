@@ -5,7 +5,8 @@ import { generateDevisPDF, generateFacturePDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
 import { currentUser } from "@clerk/nextjs/server";
 import { parseLignes, normalizeLigneForOutput, computeTotals, type LignePayload } from "@/lib/devis-lignes";
-import { jsonError } from "@/lib/http";
+import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const maxDuration = 120;
 
@@ -14,6 +15,9 @@ export async function POST(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) return jsonError("Non autorisé", 401);
+
+    const rl = rateLimit(`export-post:${userId}`, 5, 60_000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const { type } = await request.json() as { type?: string };
 
@@ -93,7 +97,6 @@ export async function POST(request: Request) {
 
     return jsonError("Type non supporté. Utilisez 'devis' ou 'factures'.", 400);
   } catch (error) {
-    console.error("export-error", error);
-    return jsonError("Erreur lors de l'export", 500);
+    return internalServerError("export-post", error, "Erreur lors de l'export");
   }
 }
