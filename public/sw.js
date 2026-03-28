@@ -43,18 +43,4 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// Passer toutes les requêtes fetch au réseau (ne pas intercepter)
-// Mais ignorer les requêtes cross-origin (images Clerk, etc.)
-self.addEventListener("fetch", (event) => {
-  const url = new URL(event.request.url);
-  // Ne pas intercepter les requêtes cross-origin
-  if (url.origin !== self.location.origin) {
-    return;
-  }
-  event.respondWith(
-    fetch(event.request).catch(() => {
-      // En cas d'erreur réseau, retourner une réponse vide au lieu de crasher
-      return new Response("", { status: 503, statusText: "Service Unavailable" });
-    })
-  );
-});
+// Ne pas intercepter les requêtes fetch — le service worker sert uniquement pour les push notifications
