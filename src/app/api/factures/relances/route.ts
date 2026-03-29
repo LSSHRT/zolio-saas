@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkOverdueFactures } from "@/lib/relances";
-import { jsonError } from "@/lib/http";
-import { logError } from "@/lib/logger";
+import { internalServerError, jsonError } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +19,6 @@ export async function POST() {
       results,
     });
   } catch (error) {
-    logError("relances-factures", error);
-    return jsonError("Erreur lors de la vérification des relances", 500);
+    return internalServerError("relances-factures", error, "Erreur lors de la vérification des relances");
   }
 }

@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getProspectAnalytics } from "@/lib/prospect-analytics";
-import { jsonError } from "@/lib/http";
-import { logError } from "@/lib/logger";
+import { internalServerError, jsonError } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +14,6 @@ export async function GET() {
 
     return NextResponse.json(analytics);
   } catch (error) {
-    logError("prospect-analytics", error);
-    return jsonError("Erreur lors du chargement des analytics", 500);
+    return internalServerError("prospect-analytics", error, "Erreur lors du chargement des analytics");
   }
 }
