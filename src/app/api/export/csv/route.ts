@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { jsonError } from "@/lib/http";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
-// GET — Exporter les devis en CSV
 export async function GET() {
   try {
     const { userId } = await auth();
@@ -58,7 +58,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("export-csv-error", error);
+    logError("export-csv", error);
     return jsonError("Erreur lors de l'export CSV", 500);
   }
 }

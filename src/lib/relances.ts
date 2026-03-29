@@ -3,6 +3,7 @@ import { sendDevisEmail } from "@/lib/sendEmail";
 import { generateFacturePDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
 import { clerkClient } from "@clerk/nextjs/server";
+import { logError } from "@/lib/logger";
 
 /**
  * Vérifie les factures impayées et envoie des relances automatiques.
@@ -102,7 +103,7 @@ export async function checkOverdueFactures() {
           action: `${applicableRelance.label} envoyée à ${facture.emailClient}`,
         });
       } catch (error) {
-        console.error(`Erreur relance ${facture.numero}:`, error);
+        logError("relances-facture", error, `Erreur relance ${facture.numero}:`);
       }
     }
   }

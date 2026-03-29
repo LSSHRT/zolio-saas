@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { saveSubscription, removeSubscription } from "@/lib/push-notifications";
 import { jsonError } from "@/lib/http";
+import { logError } from "@/lib/logger";
 
 // POST — S'abonner aux notifications push
 export async function POST(request: Request) {
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: "Notifications activées" });
   } catch (error) {
-    console.error("push-subscribe-error", error);
+    logError("push-subscribe", error);
     return jsonError("Erreur lors de l'abonnement", 500);
   }
 }
@@ -37,7 +38,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true, message: "Notifications désactivées" });
   } catch (error) {
-    console.error("push-unsubscribe-error", error);
+    logError("push-unsubscribe", error);
     return jsonError("Erreur", 500);
   }
 }

@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { motion } from "framer-motion";
 import { Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileOverview,
@@ -88,7 +89,7 @@ export default function DepensesPage() {
       await mutate();
       toast.success("Dépense supprimée.");
     } catch (error) {
-      console.error(error);
+      logError("depenses-save", error);
       toast.error("Impossible de supprimer la dépense.");
     } finally {
       setDeletingId(null);

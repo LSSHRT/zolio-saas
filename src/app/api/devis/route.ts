@@ -18,6 +18,7 @@ import {
 import { rateLimit } from "@/lib/rate-limit";
 import { uploadPhotos } from "@/lib/blob-photos";
 import { sendPushNotification } from "@/lib/push-notifications";
+import { logError } from "@/lib/logger";
 
 type CreateDevisBody = {
   acompte?: number | string;
@@ -304,7 +305,7 @@ export async function POST(request: Request) {
           emailSent = true;
         }
       } catch (emailErr) {
-        console.error("Email non envoyé (erreur):", emailErr);
+        logError("devis-email", emailErr, "Email non envoyé (erreur):");
         emailSkippedReason = "send_failed";
       }
     }

@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
@@ -220,7 +221,7 @@ export default function ClientsPage() {
         const response = await fetch(`/api/clients/${id}`, { method: "DELETE" });
         if (response.ok) successCount++;
       } catch (err) {
-        console.error(err);
+        logError("clients-delete", err);
       }
     }
 
@@ -290,7 +291,7 @@ export default function ClientsPage() {
         toast.error("Erreur lors de l'importation.");
       }
     } catch (err) {
-      console.error(err);
+      logError("clients-import", err);
       toast.error("Erreur lors de la lecture du fichier.");
     } finally {
       setIsImporting(false);

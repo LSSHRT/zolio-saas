@@ -14,6 +14,7 @@ import {
   Save,
 } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileOverview,
@@ -85,7 +86,7 @@ function PlanningItem({
       await onSaved();
       toast.success(isPlanned ? "Planning mis à jour." : "Chantier planifié.");
     } catch (error) {
-      console.error(error);
+      logError("planning-save", error);
       toast.error(error instanceof Error ? error.message : "Erreur de planification.");
     } finally {
       setSaving(false);

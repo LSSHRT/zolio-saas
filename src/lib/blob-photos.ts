@@ -6,6 +6,7 @@
  */
 
 import { put, del } from "@vercel/blob";
+import { logError } from "@/lib/logger";
 
 const PHOTOS_PREFIX = "devis-photos";
 
@@ -58,7 +59,7 @@ export async function uploadPhotos(
       const url = await uploadPhoto(photo, devisNumero, i);
       urls.push(url);
     } catch (error) {
-      console.error(`Erreur upload photo ${i}:`, error);
+      logError("blob-photos-upload", error, `Erreur upload photo ${i}:`);
       // En cas d'erreur, on garde le base64 comme fallback
       urls.push(photo);
     }
@@ -76,7 +77,7 @@ export async function deletePhotos(urls: string[]): Promise<void> {
       try {
         await del(url);
       } catch (error) {
-        console.error(`Erreur suppression photo:`, error);
+        logError("blob-photos-delete", error, "Erreur suppression photo:");
       }
     }
   }
@@ -105,7 +106,7 @@ export async function fetchPhotoAsBase64(url: string): Promise<string> {
     const contentType = response.headers.get("content-type") || "image/jpeg";
     return `data:${contentType};base64,${buffer.toString("base64")}`;
   } catch (error) {
-    console.error("Erreur fetch photo:", error);
+    logError("blob-photos-fetch", error, "Erreur fetch photo:");
     return "";
   }
 }

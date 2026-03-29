@@ -9,6 +9,7 @@ import {
   setAdminSettingValue,
 } from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
+import { logError } from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   ProspectingConfigError,
@@ -169,12 +170,12 @@ async function fetchSearchViaScrapingBee(query: string): Promise<string> {
   try {
     const res = await fetch(sbUrl, { cache: "no-store" });
     if (!res.ok) {
-      console.error("scrapingbee-error", res.status, await res.text().catch(() => ""));
+      logError("scrapingbee-error", `${res.status} ${await res.text().catch(() => "")}`);
       return "";
     }
     return await res.text();
   } catch (error) {
-    console.error("scrapingbee-fetch", error);
+    logError("scrapingbee-fetch", error);
     return "";
   }
 }
@@ -260,7 +261,7 @@ async function findEmailsForDomain(domain: string): Promise<{ email: string; sco
       .sort((a, b) => b.score - a.score)
       .slice(0, 2);
   } catch (error) {
-    console.error("prospect-hunter", error);
+    logError("prospect-hunter", error);
     return [];
   }
 }

@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { ArrowUpRight, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
@@ -77,8 +78,8 @@ export default function CalepinPage() {
       setCurrentNote({});
       toast.success(currentNote.id ? "Note mise à jour." : "Note enregistrée.");
     } catch (err) {
-      console.error(err);
-      toast.error("Impossible d’enregistrer la note.");
+      logError("calepin-save", err);
+      toast.error("Impossible d'enregistrer la note.");
     } finally {
       setIsSaving(false);
     }
@@ -109,7 +110,7 @@ export default function CalepinPage() {
       setNoteToDelete(null);
       toast.success("Note supprimée.");
     } catch (err) {
-      console.error(err);
+      logError("calepin-delete", err);
       toast.error("Impossible de supprimer la note.");
     } finally {
       setIsDeleting(false);
@@ -221,7 +222,7 @@ export default function CalepinPage() {
                   Prenez une note en quelques secondes
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Ouvrez l’éditeur, saisissez vos dimensions ou une idée de chantier, puis retrouvez-la tout de suite dans la liste.
+                  Ouvrez l'éditeur, saisissez vos dimensions ou une idée de chantier, puis retrouvez-la tout de suite dans la liste.
                 </p>
               </div>
               <button
@@ -463,7 +464,7 @@ export default function CalepinPage() {
                 Aperçu
               </p>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                {notePreview ? `${notePreview.slice(0, 72)}${notePreview.length > 72 ? "…" : ""}` : "Ajoutez un contenu pour préparer votre prochaine visite."}
+                {notePreview ? `${notePreview.slice(0, 72)}${notePreview.length > 72 ? "..." : ""}` : "Ajoutez un contenu pour préparer votre prochaine visite."}
               </p>
             </div>
           </div>

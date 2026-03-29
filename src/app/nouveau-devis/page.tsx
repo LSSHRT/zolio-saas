@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, FileText, Rocket, Save, Send } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   CreationWizardFooter,
   CreationWizardPanel,
@@ -320,7 +321,7 @@ export default function NouveauDevisPage() {
         setDevisCount(Array.isArray(devisPayload) ? devisPayload.length : 0);
       } catch (error) {
         if (!cancelled) {
-          console.error("Erreur de chargement du wizard devis", error);
+          logError("devis-wizard-load", error);
           toast.error("Impossible de charger toutes les données du devis.");
         }
       } finally {
@@ -689,7 +690,7 @@ export default function NouveauDevisPage() {
       setPhotos((current) => [...current, ...compressedPhotos]);
       toast.success(`${compressedPhotos.length} photo(s) ajoutée(s) au devis.`);
     } catch (error) {
-      console.error("Erreur de compression photo", error);
+      logError("devis-photo-compress", error);
       toast.error("Impossible d’ajouter ces photos.");
     } finally {
       event.target.value = "";

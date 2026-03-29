@@ -4,6 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 import { parseLignes, computeTotals } from "@/lib/devis-lignes";
+import { logError } from "@/lib/logger";
 
 export async function POST(
   request: Request,
@@ -87,7 +88,7 @@ export async function POST(
 
     return NextResponse.json({ facture }, { status: 201 });
   } catch (error) {
-    console.error("Error converting devis:", error);
+    logError("devis-convert", error, "Error converting devis:");
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

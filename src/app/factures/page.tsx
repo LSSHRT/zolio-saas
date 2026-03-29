@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
@@ -203,7 +204,7 @@ export default function FacturesPage() {
         const response = await fetch(`/api/factures/${id}`, { method: "DELETE" });
         if (response.ok) successCount += 1;
       } catch (err) {
-        console.error(err);
+        logError("factures-action", err);
       }
     }
 

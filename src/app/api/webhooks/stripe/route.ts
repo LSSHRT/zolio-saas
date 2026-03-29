@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { internalServerError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { logError, logWarn, logInfo } from "@/lib/logger";
 
 // Stripe webhook endpoint
 export async function POST(req: Request) {
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     // Verify webhook signature (Requires STRIPE_WEBHOOK_SECRET in .env)
     const secret = process.env.STRIPE_WEBHOOK_SECRET;
     if (!secret) {
-      console.error("STRIPE_WEBHOOK_SECRET is not set.");
+      logError("stripe-webhook", "STRIPE_WEBHOOK_SECRET is not set.");
       // Allow testing without secret if not in production? No, better secure it.
       return new NextResponse("Webhook secret missing", { status: 400 });
     }
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
     event = stripe.webhooks.constructEvent(body, signature, secret);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("Webhook signature verification failed:", message);
+    logError("stripe-webhook", `Webhook signature verification failed: ${message}`);
     return new NextResponse("Webhook signature verification failed", { status: 400 });
   }
 
@@ -47,9 +48,9 @@ export async function POST(req: Request) {
               stripeCustomerId: session.customer as string,
             },
           });
-          console.log(`✅ Utilisateur ${userId} passé en Pro via Webhook.`);
+          logInfo("stripe-webhook", `Utilisateur ${userId} passé en Pro via Webhook.`);
         } else {
-          console.warn("⚠️ checkout.session.completed: userId introuvable");
+          logWarn("stripe-webhook", "checkout.session.completed: userId introuvable");
         }
         break;
       }
@@ -66,14 +67,14 @@ export async function POST(req: Request) {
               isPro: false,
             },
           });
-          console.log(`❌ Utilisateur ${userId} a perdu son abonnement Pro.`);
+          logInfo("stripe-webhook", `Utilisateur ${userId} a perdu son abonnement Pro.`);
         } else {
-          console.warn("⚠️ customer.subscription.deleted: userId introuvable");
+          logWarn("stripe-webhook", "customer.subscription.deleted: userId introuvable");
         }
         break;
       }
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        logInfo("stripe-webhook", `Unhandled event type ${event.type}`);
     }
 
     return new NextResponse(null, { status: 200 });

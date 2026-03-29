@@ -1,5 +1,6 @@
 import { jsPDF } from "jspdf";
 import { fetchRemoteImageAsDataUrl } from "@/lib/remote-image";
+import { logError } from "@/lib/logger";
 
 interface RgbColor {
   r: number;
@@ -107,7 +108,7 @@ async function fetchImageAsBase64(url: string): Promise<string | null> {
   try {
     return await fetchRemoteImageAsDataUrl(url);
   } catch (error) {
-    console.error("Erreur de récupération du logo:", error);
+    logError("pdf-logo-fetch", error, "Erreur de récupération du logo:");
     return null;
   }
 }
@@ -376,7 +377,7 @@ function drawFirstPageHeader(
       doc.addImage(logoBase64, 16, 17, 24, 24);
       brandX = 46;
     } catch (error) {
-      console.error("Erreur ajout logo:", error);
+      logError("pdf-logo-add", error, "Erreur ajout logo:");
     }
   }
 
@@ -755,7 +756,7 @@ function drawSignatureCard(doc: PdfDoc, palette: PdfPalette, data: DevisData, y:
         signatureBoxHeight - 11,
       );
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la signature au PDF:", error);
+      logError("pdf-signature-add", error, "Erreur lors de l'ajout de la signature au PDF:");
     }
   }
 
@@ -984,7 +985,7 @@ async function generateBusinessDocumentPDF(data: DevisData, options: DocumentOpt
       try {
         doc.addImage(photo, guessImageFormat(photo), 22, photoY + 12, 166, 54);
       } catch (error) {
-        console.error("Erreur d'ajout de photo:", error);
+        logError("pdf-photo-add", error, "Erreur d'ajout de photo:");
       }
 
       photoY += 80;

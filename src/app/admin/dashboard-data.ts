@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminEmail } from "@/lib/admin";
 import { getAdminAuditLogs, getAdminRuntimeState } from "@/lib/admin-settings";
 import { getProspectingRuntime } from "@/lib/prospecting";
+import { logError } from "@/lib/logger";
 import type {
   AdminActivityItem,
   AdminAlertItem,
@@ -276,7 +277,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     totalUsersCount = usersResult.value.totalUsersCount;
     users = usersResult.value.users;
   } else {
-    console.error("admin-dashboard: unable to load Clerk users", usersResult.reason);
+    logError("admin-dashboard-clerk", usersResult.reason, "unable to load Clerk users");
   }
 
   const proUsersCount = users.filter((user) => user.isPro).length;
@@ -309,7 +310,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
   if (dbLatencyResult.status === "fulfilled") {
     dbLatencyMs = dbLatencyResult.value;
   } else {
-    console.error("admin-dashboard: unable to ping Prisma", dbLatencyResult.reason);
+    logError("admin-dashboard-prisma-ping", dbLatencyResult.reason, "unable to ping Prisma");
   }
 
   if (acquisitionResult.status === "fulfilled") {
@@ -322,7 +323,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     automatedCount = Math.max(totalMailCount - manualCount, 0);
     prospectMails = acquisitionResult.value.prospectMails;
   } else {
-    console.error("admin-dashboard: unable to load Prisma data", acquisitionResult.reason);
+    logError("admin-dashboard-prisma-data", acquisitionResult.reason, "unable to load Prisma data");
   }
 
   const attemptedCount = sentCount + failedCount;
@@ -335,7 +336,7 @@ export async function getAdminDashboardData(adminUser: CurrentAdmin): Promise<Ad
     activeSubscriptions = stripeResult.value.activeSubscriptions;
     mrr = stripeResult.value.mrr;
   } else {
-    console.error("admin-dashboard: unable to load Stripe data", stripeResult.reason);
+    logError("admin-dashboard-stripe", stripeResult.reason, "unable to load Stripe data");
   }
 
   if (mrr === 0 && proUsersCount > 0) {

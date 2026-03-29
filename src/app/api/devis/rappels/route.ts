@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkExpiringDevis } from "@/lib/rappels-devis";
 import { jsonError } from "@/lib/http";
+import { logError } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -18,7 +19,7 @@ export async function POST() {
       results,
     });
   } catch (error) {
-    console.error("rappels-error", error);
+    logError("rappels-error", error);
     return jsonError("Erreur lors des rappels", 500);
   }
 }

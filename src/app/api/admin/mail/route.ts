@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { sendProspectEmail } from "@/lib/sendEmail";
 import { requireAdminUser } from "@/lib/admin";
 import { internalServerError, jsonError } from "@/lib/http";
+import { logError } from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
 import {
   ProspectingConfigError,
@@ -86,7 +87,7 @@ export async function POST(request: Request) {
         return jsonError(emailErr.message, 409);
       }
 
-      console.error("Erreur lors de l'envoi de l'email:", emailErr);
+      logError("admin-mail-send", emailErr, "Erreur lors de l'envoi de l'email");
       
       const failed = await prisma.prospectMail.create({
         data: {

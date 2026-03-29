@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileOverview,
@@ -64,7 +65,7 @@ export default function AbonnementPage() {
 
       window.location.href = payload.url;
     } catch (error) {
-      console.error(error);
+      logError("abonnement", error);
       toast.error(error instanceof Error ? error.message : "Impossible de lancer le paiement Stripe.");
     } finally {
       setLoading(false);

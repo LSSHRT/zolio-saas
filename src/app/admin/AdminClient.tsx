@@ -25,6 +25,7 @@ import {
   Users,
 } from "lucide-react";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   banUser,
   deleteUserAccount,
@@ -552,7 +553,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "billing",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-toggle-pro", error);
       toast.error("Impossible de modifier le statut PRO");
     } finally {
       setLoadingUserId(null);
@@ -579,7 +580,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-ban-user", error);
       toast.error("Impossible de modifier le statut de bannissement");
     } finally {
       setLoadingUserId(null);
@@ -605,7 +606,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-delete-user", error);
       toast.error("Impossible de supprimer ce compte");
     } finally {
       setLoadingUserId(null);
@@ -642,7 +643,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-grant-admin", error);
       toast.error("Impossible de modifier les droits admin");
     } finally {
       setLoadingUserId(null);
@@ -664,7 +665,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-set-banner", error);
       toast.error("Impossible de mettre à jour la bannière");
     } finally {
       setSavingBanner(false);
@@ -689,7 +690,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-save-maintenance", error);
       toast.error("Impossible de mettre à jour le mode maintenance");
     } finally {
       setSavingMaintenance(false);
@@ -713,7 +714,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-save-gemini", error);
       toast.error("Impossible de sauvegarder la clé Gemini");
     } finally {
       setSavingGeminiKey(false);
@@ -735,7 +736,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "acquisition",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-mark-failed", error);
       toast.error("Impossible de marquer cet envoi en échec");
     }
   }
@@ -800,7 +801,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "system",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-toggle-cron", error);
       toast.error("Impossible de modifier l'état du robot");
     } finally {
       setTogglingCron(false);
@@ -877,7 +878,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
         kind: "acquisition",
       });
     } catch (error) {
-      console.error(error);
+      logError("admin-send-prospect", error);
       const message = "Erreur lors de l'envoi des emails";
       setProspectMessage({ text: message, type: "error" });
       toast.error(message);

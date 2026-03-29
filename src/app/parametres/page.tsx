@@ -29,6 +29,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { logError } from "@/lib/logger";
 
 type SettingsFormData = {
   companyName: string;
@@ -288,7 +289,7 @@ export default function ParametresEntreprise() {
       });
       setMessage({ type: "success", text: "Paramètres enregistrés avec succès." });
     } catch (error) {
-      console.error(error);
+      logError("parametres-save", error);
       setMessage({ type: "error", text: "Une erreur est survenue lors de l'enregistrement." });
     } finally {
       setIsSaving(false);
@@ -307,7 +308,7 @@ export default function ParametresEntreprise() {
       );
       setMessage({ type: "success", text: "Message de parrainage copié." });
     } catch (error) {
-      console.error(error);
+      logError("parametres-action", error);
       setMessage({ type: "error", text: "Impossible de copier le message de parrainage." });
     }
   };

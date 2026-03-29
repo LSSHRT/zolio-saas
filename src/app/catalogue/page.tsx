@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileOverview,
@@ -266,7 +267,7 @@ export default function CataloguePage() {
 
       closeForm();
     } catch (error) {
-      console.error(error);
+      logError("catalogue-save", error);
       toast.error(error instanceof Error ? error.message : "Erreur lors de l'enregistrement de la prestation.");
     } finally {
       setSaving(false);
@@ -329,7 +330,7 @@ export default function CataloguePage() {
       toast.success("Prestation supprimée.");
       setPendingDelete(null);
     } catch (error) {
-      console.error(error);
+      logError("catalogue-delete", error);
       toast.error(error instanceof Error ? error.message : "Erreur lors de la suppression de la prestation.");
     }
   };
@@ -379,7 +380,7 @@ export default function CataloguePage() {
       const rows = parseCsvRows(text);
       setPendingImport({ fileName: file.name, rows });
     } catch (error) {
-      console.error(error);
+      logError("catalogue-import-csv", error);
       toast.error(error instanceof Error ? error.message : "Erreur lors de la lecture du fichier CSV.");
     }
   };
@@ -405,7 +406,7 @@ export default function CataloguePage() {
       toast.success(`${pendingImport.rows.length} prestation(s) importée(s) depuis ${pendingImport.fileName}.`);
       setPendingImport(null);
     } catch (error) {
-      console.error(error);
+      logError("catalogue-action", error);
       toast.error(error instanceof Error ? error.message : "Erreur lors de l'importation du fichier CSV.");
     } finally {
       setIsImportingCsv(false);

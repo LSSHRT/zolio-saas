@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { logError, logWarn } from "@/lib/logger";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
@@ -35,7 +36,7 @@ export function usePushNotifications() {
       const subscription = await registration.pushManager.getSubscription();
       setIsSubscribed(!!subscription);
     } catch (error) {
-      console.error("push-check-error", error);
+      logError("push-check", error);
     }
   }
 
@@ -51,7 +52,7 @@ export function usePushNotifications() {
       // Demander la permission
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        console.warn("Notification permission denied");
+        logWarn("push-permission", new Error("Notification permission denied"));
         setIsLoading(false);
         return false;
       }
@@ -73,7 +74,7 @@ export function usePushNotifications() {
       setIsLoading(false);
       return true;
     } catch (error) {
-      console.error("push-subscribe-error", error);
+      logError("push-subscribe", error);
       setIsLoading(false);
       return false;
     }
@@ -103,7 +104,7 @@ export function usePushNotifications() {
       setIsLoading(false);
       return true;
     } catch (error) {
-      console.error("push-unsubscribe-error", error);
+      logError("push-unsubscribe", error);
       setIsLoading(false);
       return false;
     }
