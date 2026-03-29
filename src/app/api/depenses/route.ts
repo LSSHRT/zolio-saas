@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { depenseCreateSchema, zodErrorResponse } from "@/lib/validations";
 
 type DepenseRecord = {
   id: string;
@@ -75,31 +76,24 @@ export async function POST(request: Request) {
       return jsonError("Non autorisé", 401);
     }
 
-    const body = (await request.json()) as DepensePayload;
-    const description = normalizeText(body.description);
-    const categorie = normalizeText(body.categorie);
-    const montant = parseAmount(body.montant ?? body.montantTTC);
-    const date = parseDate(body.date);
-
-    if (!description) {
-      return jsonError("La description est obligatoire", 400);
+    const json = await request.json();
+    // Backward compat: montantTTC → montant
+    if (json.montantTTC !== undefined && json.montant === undefined) {
+      json.montant = json.montantTTC;
     }
+    const parsed = depenseCreateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    if (!Number.isFinite(montant) || montant <= 0) {
-      return jsonError("Le montant doit être supérieur à 0", 400);
-    }
-
-    if (!date) {
-      return jsonError("La date de dépense est invalide", 400);
-    }
+    const { description, montant, categorie, date } = parsed.data;
+    const parsedDate = date ? new Date(date) : new Date();
 
     const depense = await prisma.depense.create({
       data: {
         userId,
         description,
         montant,
-        date,
-        categorie,
+        date: parsedDate,
+        categorie: categorie || "",
       },
     });
 

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { noteUpdateSchema, zodErrorResponse } from "@/lib/validations";
 
 type NotePayload = {
   titre?: string;
@@ -60,16 +61,12 @@ export async function PUT(
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
     const { id } = await params;
-    const data = (await req.json()) as NotePayload;
-    const titre = normalizeText(data.titre);
-    const contenu = normalizeText(data.contenu);
+    const json = await req.json();
+    const parsed = noteUpdateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
     if (!id) {
       return jsonError("ID manquant", 400);
-    }
-
-    if (!titre && !contenu) {
-      return jsonError("Titre ou contenu requis", 400);
     }
 
     const note = await prisma.note.findFirst({
@@ -83,8 +80,8 @@ export async function PUT(
     const updatedNote = await prisma.note.update({
       where: { id },
       data: {
-        titre,
-        contenu
+        titre: parsed.data.titre,
+        contenu: parsed.data.contenu,
       }
     });
 

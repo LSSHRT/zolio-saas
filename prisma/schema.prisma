@@ -133,9 +133,13 @@ model Note {
 model ProspectMail {
   id        String   @id @default(cuid())
   email     String
-  status    String   @default("Sent") // Sent, Failed, Bounced
+  status    String   @default("Sent") // Sent, Failed, Bounced, Opened, Queued, Blocked
   source    String   @default("Manual") // Manual, Automated
   createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
 }
 
 model ProspectDomain {

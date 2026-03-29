@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { clientCreateSchema, clientBulkSchema, zodErrorResponse } from "@/lib/validations";
 
 type ClientRecord = {
   id: string;
@@ -13,17 +14,6 @@ type ClientRecord = {
   createdAt: Date;
 };
 
-type ClientPayload = {
-  nom?: string;
-  email?: string;
-  telephone?: string;
-  adresse?: string;
-};
-
-function normalizeText(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
-
 function mapClient(client: ClientRecord) {
   return {
     id: client.id,
@@ -32,22 +22,6 @@ function mapClient(client: ClientRecord) {
     telephone: client.telephone || "",
     adresse: client.adresse || "",
     dateAjout: client.createdAt.toLocaleDateString("fr-FR"),
-  };
-}
-
-function toCreateInput(userId: string, payload: ClientPayload) {
-  const nom = normalizeText(payload.nom);
-
-  if (!nom) {
-    return null;
-  }
-
-  return {
-    userId,
-    nom,
-    email: normalizeText(payload.email),
-    telephone: normalizeText(payload.telephone),
-    adresse: normalizeText(payload.adresse),
   };
 }
 
@@ -78,29 +52,35 @@ export async function POST(request: Request) {
     const rl = rateLimit(`clients-post:${userId}`, 30, 60_000);
     if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
-    const body = (await request.json()) as ClientPayload | ClientPayload[];
+    const json = await request.json();
 
-    if (Array.isArray(body)) {
-      const data = body
-        .map((item) => toCreateInput(userId, item))
-        .filter((item): item is NonNullable<ReturnType<typeof toCreateInput>> => item !== null);
+    if (Array.isArray(json)) {
+      const parsed = clientBulkSchema.safeParse(json);
+      if (!parsed.success) return zodErrorResponse(parsed.error);
 
-      if (data.length === 0) {
-        return NextResponse.json({ error: "Aucun client valide à importer" }, { status: 400 });
-      }
+      const data = parsed.data.map((item) => ({
+        userId,
+        nom: item.nom,
+        email: item.email || "",
+        telephone: item.telephone || "",
+        adresse: item.adresse || "",
+      }));
 
       await prisma.client.createMany({ data });
       return NextResponse.json({ success: true, count: data.length });
     }
 
-    const createInput = toCreateInput(userId, body);
-
-    if (!createInput) {
-      return NextResponse.json({ error: "Nom du client requis" }, { status: 400 });
-    }
+    const parsed = clientCreateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
     const client = await prisma.client.create({
-      data: createInput,
+      data: {
+        userId,
+        nom: parsed.data.nom,
+        email: parsed.data.email || "",
+        telephone: parsed.data.telephone || "",
+        adresse: parsed.data.adresse || "",
+      },
     });
 
     return NextResponse.json(mapClient(client));

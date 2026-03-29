@@ -44,7 +44,7 @@ function log(
 
   if (shouldAuditLog(level)) {
     void appendAdminAuditLog({
-      level: level === "warn" ? "warn" : "error",
+      level: level === "warn" ? "warning" : "error",
       scope: "system",
       action: scope,
       actor: "Serveur",

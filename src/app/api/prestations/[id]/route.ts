@@ -3,17 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
-import { buildPrestationCreateData, mapPrestationForClient } from "@/lib/prestations";
-
-type PrestationPayload = {
-  categorie?: string | null;
-  cout?: number | string | null;
-  description?: string | null;
-  nom?: string;
-  prix?: number | string;
-  stock?: number | string | null;
-  unite?: string | null;
-};
+import { mapPrestationForClient } from "@/lib/prestations";
+import { prestationUpdateSchema, zodErrorResponse } from "@/lib/validations";
 
 export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
   try {
@@ -23,36 +14,22 @@ export async function PUT(request: Request, context: { params: Promise<{ id: str
     const resolvedParams = await context.params;
     const { id } = resolvedParams;
 
-    const body = (await request.json()) as PrestationPayload;
+    const json = await request.json();
+    const parsed = prestationUpdateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    if (typeof body.nom !== "string" || !body.nom.trim()) {
-      return jsonError("Nom de la prestation requis", 400);
-    }
-
-    if (body.prix === undefined || body.prix === null || Number.isNaN(Number(body.prix))) {
-      return jsonError("Prix invalide", 400);
-    }
-
-    const updatePayload = buildPrestationCreateData(userId, {
-      nom: body.nom,
-      prix: body.prix,
-      categorie: body.categorie,
-      cout: body.cout,
-      description: body.description,
-      stock: body.stock,
-      unite: body.unite,
-    });
+    const data = parsed.data;
+    const updateData: Record<string, unknown> = {};
+    if (data.nom !== undefined) updateData.nom = data.nom.trim();
+    if (data.description !== undefined) updateData.description = data.description?.trim() || null;
+    if (data.unite !== undefined) updateData.unite = data.unite?.trim() || null;
+    if (data.prix !== undefined) updateData.prix = Number(data.prix);
+    if (data.cout !== undefined) updateData.cout = Number(data.cout);
+    if (data.stock !== undefined) updateData.stock = Number(data.stock);
 
     const prestation = await prisma.prestation.updateMany({
       where: { id, userId },
-      data: {
-        nom: updatePayload.nom,
-        description: updatePayload.description,
-        unite: updatePayload.unite,
-        prix: updatePayload.prix,
-        cout: updatePayload.cout,
-        stock: updatePayload.stock,
-      },
+      data: updateData,
     });
 
     if (prestation.count === 0) {

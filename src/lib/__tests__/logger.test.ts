@@ -14,6 +14,7 @@ describe("logger", () => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(console, "info").mockImplementation(() => {});
     vi.spyOn(console, "log").mockImplementation(() => {});
+    vi.unstubAllEnvs();
   });
 
   describe("logError", () => {
@@ -58,25 +59,19 @@ describe("logger", () => {
 
   describe("logDebug", () => {
     it("should call console.log in non-production", () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "development";
+      vi.stubEnv("NODE_ENV", "development");
 
       logDebug("test-scope", "debug message");
 
       expect(console.log).toHaveBeenCalledWith("[LOG  ] [test-scope]", "debug message");
-
-      process.env.NODE_ENV = originalEnv;
     });
 
     it("should not log in production", () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "production";
+      vi.stubEnv("NODE_ENV", "production");
 
       logDebug("test-scope", "debug message");
 
       expect(console.log).not.toHaveBeenCalled();
-
-      process.env.NODE_ENV = originalEnv;
     });
   });
 });

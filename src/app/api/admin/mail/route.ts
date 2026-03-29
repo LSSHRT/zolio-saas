@@ -5,6 +5,7 @@ import { requireAdminUser } from "@/lib/admin";
 import { internalServerError, jsonError } from "@/lib/http";
 import { logError } from "@/lib/logger";
 import { rateLimit } from "@/lib/rate-limit";
+import { adminMailSchema, zodErrorResponse } from "@/lib/validations";
 import {
   ProspectingConfigError,
   getProspectCooldownCutoff,

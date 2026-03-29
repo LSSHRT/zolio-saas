@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { checkExpiringDevis } from "@/lib/rappels-devis";
-import { internalServerError } from "@/lib/http";
+import { internalServerError, jsonError } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 

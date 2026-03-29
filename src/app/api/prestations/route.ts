@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { buildPrestationCreateData, mapPrestationForClient } from "@/lib/prestations";
+import { prestationCreateSchema, prestationBulkSchema, zodErrorResponse } from "@/lib/validations";
 
 export async function GET() {
   try {
@@ -26,16 +27,21 @@ export async function POST(request: Request) {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const body = await request.json();
+    const json = await request.json();
 
-    if (Array.isArray(body)) {
-      const data = body.map((item) => buildPrestationCreateData(userId, item));
+    if (Array.isArray(json)) {
+      const parsed = prestationBulkSchema.safeParse(json);
+      if (!parsed.success) return zodErrorResponse(parsed.error);
+      const data = parsed.data.map((item) => buildPrestationCreateData(userId, item));
       await prisma.prestation.createMany({ data });
       return NextResponse.json({ success: true, count: data.length });
     }
 
+    const parsed = prestationCreateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
     const prestation = await prisma.prestation.create({
-      data: buildPrestationCreateData(userId, body),
+      data: buildPrestationCreateData(userId, parsed.data),
     });
 
     return NextResponse.json(mapPrestationForClient(prestation));

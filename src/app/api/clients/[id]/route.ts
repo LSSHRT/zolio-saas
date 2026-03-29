@@ -3,17 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
-
-type ClientUpdatePayload = {
-  nom?: string;
-  email?: string;
-  telephone?: string;
-  adresse?: string;
-};
-
-function normalizeText(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
+import { clientUpdateSchema, zodErrorResponse } from "@/lib/validations";
 
 function mapClient(client: {
   id: string;
@@ -66,7 +56,6 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const p = await params;
     const clientId = p.id;
-    const body = (await request.json()) as ClientUpdatePayload;
 
     const existingClient = await prisma.client.findFirst({
       where: { id: clientId, userId }
@@ -76,19 +65,17 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "Client non trouvé ou non autorisé" }, { status: 404 });
     }
 
-    const nextNom = normalizeText(body.nom);
-
-    if (!nextNom) {
-      return jsonError("Nom du client requis", 400);
-    }
+    const json = await request.json();
+    const parsed = clientUpdateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
     const updatedClient = await prisma.client.update({
       where: { id: clientId },
       data: {
-        nom: nextNom,
-        email: normalizeText(body.email),
-        telephone: normalizeText(body.telephone),
-        adresse: normalizeText(body.adresse),
+        ...(parsed.data.nom !== undefined && { nom: parsed.data.nom }),
+        ...(parsed.data.email !== undefined && { email: parsed.data.email }),
+        ...(parsed.data.telephone !== undefined && { telephone: parsed.data.telephone }),
+        ...(parsed.data.adresse !== undefined && { adresse: parsed.data.adresse }),
       }
     });
 

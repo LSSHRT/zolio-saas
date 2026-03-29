@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
+import { noteCreateSchema, zodErrorResponse } from "@/lib/validations";
 
 type NotePayload = {
   titre?: string;
@@ -43,21 +44,11 @@ export async function POST(req: Request) {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const data = (await req.json()) as NotePayload;
-    const titre = normalizeText(data.titre);
-    const contenu = normalizeText(data.contenu);
+    const json = await req.json();
+    const parsed = noteCreateSchema.safeParse(json);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    if (!titre && !contenu) {
-      return jsonError("Titre ou contenu requis", 400);
-    }
-
-    if (titre.length > 200) {
-      return jsonError("Le titre ne doit pas dépasser 200 caractères", 400);
-    }
-
-    if (contenu.length > 10000) {
-      return jsonError("Le contenu ne doit pas dépasser 10 000 caractères", 400);
-    }
+    const { titre, contenu } = parsed.data;
 
     const newNote = await prisma.note.create({
       data: {
