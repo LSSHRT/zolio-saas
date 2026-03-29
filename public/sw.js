@@ -1,46 +1,40 @@
-// Service Worker pour les notifications Web Push
-// Ce fichier doit être à la racine du domaine (/sw.js)
+const CACHE_NAME = "zolio-v1";
+const STATIC_ASSETS = ["/", "/dashboard"];
 
-self.addEventListener("push", (event) => {
-  if (!event.data) return;
-
-  try {
-    const data = event.data.json();
-    const title = data.title || "Zolio";
-    const options = {
-      body: data.body || "Nouvelle notification",
-      icon: data.icon || "/logo.png",
-      badge: "/logo.png",
-      data: data.url || "/dashboard",
-      actions: data.actions || [],
-      tag: data.tag || "zolio-notification",
-      requireInteraction: data.requireInteraction || false,
-    };
-
-    event.waitUntil(self.registration.showNotification(title, options));
-  } catch (error) {
-    console.error("Push notification error:", error);
-  }
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+  );
+  self.skipWaiting();
 });
 
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  const url = event.notification.data || "/dashboard";
-
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && "focus" in client) {
-          client.navigate(url);
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(url);
-      }
-    })
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+  
+  const url = new URL(event.request.url);
+  
+  // Network-first for API calls
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(
+      fetch(event.request).catch(() => new Response(JSON.stringify({ error: "Hors ligne" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 503,
+      }))
+    );
+    return;
+  }
+  
+  // Cache-first for static assets
+  event.respondWith(
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
-
-// Ne pas intercepter les requêtes fetch — le service worker sert uniquement pour les push notifications

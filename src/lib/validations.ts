@@ -201,6 +201,12 @@ export const recurrenteUpdateSchema = z.object({
 
 // ─── AI ───
 
+// ─── Calendar ───
+
+export const calendarSyncSchema = z.object({
+  accessToken: trimmedString.min(1, "Token d'accès requis"),
+});
+
 export const aiGenerateDevisSchema = z.object({
   description: trimmedString.min(10, "La description doit faire au moins 10 caractères").max(5000),
   clientId: trimmedString.min(1).optional(),

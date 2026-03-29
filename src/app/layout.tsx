@@ -7,8 +7,10 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SWRProvider } from "@/components/SWRProvider";
 import { SystemRuntimeLayer } from "@/components/SystemRuntimeLayer";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
+import { I18nProvider } from "@/lib/i18n/context";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: "Zolio",
   },
   title: "Zolio - Votre Partenaire Chantier Nouvelle Génération",
@@ -61,7 +63,8 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
           >
-            <SWRProvider>
+            <I18nProvider>
+              <SWRProvider>
               <SystemRuntimeLayer />
               <NotificationPrompt />
               {children}
@@ -74,8 +77,14 @@ export default function RootLayout({
                 }}
               />
             </SWRProvider>
+            </I18nProvider>
           </ThemeProvider>
           <Analytics />
+          <Script id="sw-register" strategy="afterInteractive">{`
+            if ("serviceWorker" in navigator) {
+              navigator.serviceWorker.register("/sw.js");
+            }
+          `}</Script>
         </body>
       </html>
     </ClerkProvider>

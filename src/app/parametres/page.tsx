@@ -3,6 +3,7 @@
 import { useEffect, useState, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
+import { useI18n, type Locale } from "@/lib/i18n/context";
 import {
   BadgeCheck,
   Building2,
@@ -132,6 +133,35 @@ function buildFormData(user: { unsafeMetadata: unknown; publicMetadata: unknown 
 
 function isHexColor(value: string) {
   return /^#(?:[0-9a-fA-F]{3}){1,2}$/.test(value);
+}
+
+function LanguageSelector() {
+  const { locale, setLocale } = useI18n();
+
+  return (
+    <div className="flex items-center gap-3">
+      <button
+        onClick={() => setLocale("fr")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+          locale === "fr"
+            ? "bg-violet-500/15 text-violet-700 ring-1 ring-violet-300/40 dark:text-violet-300"
+            : "text-muted-foreground hover:bg-muted"
+        }`}
+      >
+        🇫🇷 Français
+      </button>
+      <button
+        onClick={() => setLocale("en")}
+        className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+          locale === "en"
+            ? "bg-violet-500/15 text-violet-700 ring-1 ring-violet-300/40 dark:text-violet-300"
+            : "text-muted-foreground hover:bg-muted"
+        }`}
+      >
+        🇬🇧 English
+      </button>
+    </div>
+  );
 }
 
 export default function ParametresEntreprise() {
@@ -982,6 +1012,12 @@ export default function ParametresEntreprise() {
                 <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
                   Ces réglages sont réutilisés partout : devis, factures, PDF et relances associées.
                 </p>
+              </div>
+
+              {/* Langue */}
+              <div className="space-y-3 rounded-[1.25rem] border border-slate-200/80 bg-white/80 p-5 dark:border-white/10 dark:bg-white/6">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Langue</h3>
+                <LanguageSelector />
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row">

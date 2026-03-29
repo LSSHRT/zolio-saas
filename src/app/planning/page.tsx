@@ -12,6 +12,7 @@ import {
   FileText,
   Loader2,
   Save,
+  Settings,
 } from "lucide-react";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -310,6 +311,33 @@ export default function PlanningPage() {
                 Ici, vous retrouvez uniquement les devis déjà acceptés. Posez une date de début et une date de fin pour transformer votre pipeline en planning exploitable sur mobile.
               </p>
             </div>
+          </div>
+        </div>
+      </ClientSectionCard>
+
+      <ClientSectionCard>
+        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm dark:border-white/8 dark:bg-white/4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                <CalendarDays size={18} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  Synchronisation Google Calendar
+                </p>
+                <p className="mt-2 leading-6 text-slate-600 dark:text-slate-300">
+                  Bientôt disponible — synchronisez votre planning avec Google Calendar pour retrouver vos chantiers dans votre agenda.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/parametres"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+            >
+              <Settings size={16} />
+              Configurer
+            </Link>
           </div>
         </div>
       </ClientSectionCard>
