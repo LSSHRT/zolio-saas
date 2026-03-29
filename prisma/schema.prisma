@@ -8,15 +8,16 @@ generator client {
 }
 
 model Client {
-  id        String   @id @default(cuid())
-  userId    String
-  nom       String
-  email     String?
-  telephone String?
-  adresse   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  devis     Devis[]
+  id             String               @id @default(cuid())
+  userId         String
+  nom            String
+  email          String?
+  telephone      String?
+  adresse        String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  devis          Devis[]
+  facturesRecurrentes FactureRecurrente[]
 
   @@index([userId])
 }
@@ -94,24 +95,27 @@ model Depense {
 }
 
 model Facture {
-  id          String   @id @default(cuid())
-  userId      String
-  numero      String
-  devisId     String?  // Lien vers le devis source
-  devis       Devis?   @relation(fields: [devisId], references: [id], onDelete: SetNull)
-  devisRef    String?  // @deprecated - Ancien champ texte, gardé pour migration
-  nomClient   String
-  emailClient String?
-  totalHT     Float
-  tva         Float
-  totalTTC    Float
-  statut      String   @default("Émise") // Émise, Payée, En retard
-  date        DateTime @default(now())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String              @id @default(cuid())
+  userId        String
+  numero        String
+  devisId       String?             // Lien vers le devis source
+  devis         Devis?              @relation(fields: [devisId], references: [id], onDelete: SetNull)
+  devisRef      String?             // @deprecated - Ancien champ texte, gardé pour migration
+  recurrenteId  String?             // Lien vers facture récurrente
+  recurrente    FactureRecurrente?  @relation(fields: [recurrenteId], references: [id], onDelete: SetNull)
+  nomClient     String
+  emailClient   String?
+  totalHT       Float
+  tva           Float
+  totalTTC      Float
+  statut        String              @default("Émise") // Émise, Payée, En retard
+  date          DateTime            @default(now())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
 
   @@unique([userId, numero])
   @@index([devisId])
+  @@index([recurrenteId])
 }
 
 model Note {
@@ -174,4 +178,63 @@ model PushSubscription {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+// ─── Templates de devis ───
+
+model DevisTemplate {
+  id          String            @id @default(cuid())
+  userId      String
+  nom         String            // Nom du modèle (ex: "Rénovation salle de bain")
+  description String?
+  lignes      LigneTemplate[]   // Lignes du modèle
+  tva         Float             @default(20)
+  remise      Float             @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
+}
+
+model LigneTemplate {
+  id             String        @id @default(cuid())
+  templateId     String
+  template       DevisTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  nomPrestation  String
+  unite          String        @default("U")
+  quantite       Float         @default(1)
+  prixUnitaire   Float         @default(0)
+  tva            String        @default("20")
+  isOptional     Boolean       @default(false)
+  position       Int           @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([templateId])
+}
+
+// ─── Factures récurrentes ───
+
+model FactureRecurrente {
+  id            String    @id @default(cuid())
+  userId        String
+  clientId      String
+  client        Client    @relation(fields: [clientId], references: [id])
+  nom           String    // Nom du contrat (ex: "Entretien mensuel")
+  montantHT     Float
+  tva           Float     @default(20)
+  montantTTC    Float
+  frequence     String    // "mensuel", "trimestriel", "annuel"
+  jourMois      Int       @default(1) // Jour du mois pour la facturation (1-28)
+  prochaineDate DateTime  // Date de la prochaine facture
+  dateFin       DateTime? // Date de fin (null = illimité)
+  actif         Boolean   @default(true)
+  description   String?
+  factures      Facture[] // Factures générées
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([prochaineDate])
+  @@index([actif])
 }

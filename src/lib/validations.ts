@@ -174,12 +174,59 @@ export const referralSchema = z.object({
   code: trimmedString.min(1, "Le code est requis").max(50),
 });
 
+// ─── Factures récurrentes ───
+
+export const recurrenteCreateSchema = z.object({
+  clientId: trimmedString.min(1, "Le client est requis"),
+  nom: trimmedString.min(1, "Le nom est requis").max(200),
+  montantHT: positiveNumber.max(9999999),
+  tva: nonNegativeNumber.max(100).default(20),
+  frequence: z.enum(["mensuel", "trimestriel", "annuel"]),
+  jourMois: z.number().int().min(1).max(28).default(1),
+  dateFin: z.string().datetime().optional(),
+  description: optionalTrimmedString,
+});
+
+export const recurrenteUpdateSchema = z.object({
+  clientId: trimmedString.min(1).optional(),
+  nom: trimmedString.min(1).max(200).optional(),
+  montantHT: positiveNumber.max(9999999).optional(),
+  tva: nonNegativeNumber.max(100).optional(),
+  frequence: z.enum(["mensuel", "trimestriel", "annuel"]).optional(),
+  jourMois: z.number().int().min(1).max(28).optional(),
+  dateFin: z.string().datetime().nullable().optional(),
+  description: optionalTrimmedString,
+  actif: z.boolean().optional(),
+});
+
 // ─── AI ───
 
 export const aiGenerateDevisSchema = z.object({
   description: trimmedString.min(10, "La description doit faire au moins 10 caractères").max(5000),
   clientId: trimmedString.min(1).optional(),
   clientName: trimmedString.max(200).optional(),
+});
+
+// ─── Templates de devis ───
+
+export const templateCreateSchema = z.object({
+  nom: trimmedString.min(1).max(200),
+  description: optionalTrimmedString,
+  tva: nonNegativeNumber.max(100).default(20),
+  remise: nonNegativeNumber.max(100).default(0),
+  lignes: z.array(ligneDevisSchema).min(1).max(100),
+});
+
+export const templateUpdateSchema = z.object({
+  nom: trimmedString.min(1).max(200).optional(),
+  description: optionalTrimmedString,
+  tva: nonNegativeNumber.max(100).optional(),
+  remise: nonNegativeNumber.max(100).optional(),
+  lignes: z.array(ligneDevisSchema).min(1).max(100).optional(),
+});
+
+export const templateUseSchema = z.object({
+  clientId: trimmedString.min(1, "Le client est requis"),
 });
 
 // ─── Helper de réponse d'erreur ───

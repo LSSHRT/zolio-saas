@@ -248,47 +248,35 @@ export default function ClientsPage() {
     setIsImporting(true);
 
     try {
-      const text = await file.text();
-      const lines = text.split("\n").filter((line) => line.trim().length > 0);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (lines.length < 2) {
-        toast.error("Le fichier est vide ou ne contient que les en-têtes.");
-        return;
-      }
-
-      const headers = lines[0].toLowerCase().split(",").map((header) => header.trim());
-      const parsedData = [];
-
-      for (let index = 1; index < lines.length; index += 1) {
-        const values = lines[index].split(",").map((value) => value.trim());
-        const item: Record<string, string> = {};
-
-        headers.forEach((header, headerIndex) => {
-          if (header.includes("nom")) item.nom = values[headerIndex] || "";
-          else if (header.includes("email")) item.email = values[headerIndex] || "";
-          else if (header.includes("tel") || header.includes("tél")) item.telephone = values[headerIndex] || "";
-          else if (header.includes("adresse")) item.adresse = values[headerIndex] || "";
-        });
-
-        if (item.nom) parsedData.push(item);
-      }
-
-      if (parsedData.length === 0) {
-        toast.error("Aucune donnée valide trouvée. Vérifiez que la colonne 'nom' existe.");
-        return;
-      }
-
-      const response = await fetch("/api/clients", {
+      const response = await fetch("/api/clients/import", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsedData),
+        body: formData,
       });
 
-      if (response.ok) {
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        toast.error(result.error || "Erreur lors de l'importation.");
+        return;
+      }
+
+      const { imported = 0, errors = [] } = result;
+
+      if (imported > 0) {
         mutate();
-        toast.success(`${parsedData.length} client(s) importé(s) avec succès.`);
-      } else {
-        toast.error("Erreur lors de l'importation.");
+        toast.success(`${imported} client${imported > 1 ? "s" : ""} importé${imported > 1 ? "s" : ""} avec succès.`);
+      }
+
+      if (errors.length > 0) {
+        const detail = errors.slice(0, 3).map((err: { row: number; message: string }) => `Ligne ${err.row}: ${err.message}`).join(", ");
+        toast.error(`${errors.length} erreur${errors.length > 1 ? "s" : ""} : ${detail}`);
+      }
+
+      if (imported === 0 && errors.length === 0) {
+        toast.error("Aucune donnée valide trouvée dans le fichier CSV.");
       }
     } catch (err) {
       logError("clients-import", err);

@@ -4,30 +4,47 @@ import { generateFacturePDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
 import { clerkClient } from "@clerk/nextjs/server";
 import { logError } from "@/lib/logger";
+import { getAdminSettingValue, ADMIN_SETTING_KEYS } from "@/lib/admin-settings";
 
 /**
  * Vérifie les factures impayées et envoie des relances automatiques.
  *
- * Règles :
- * - Relance 1 : 7 jours après émission (si non payée)
- * - Relance 2 : 15 jours après émission
- * - Relance 3 : 30 jours après émission → passe en "En retard"
- *
- * Pour éviter les doublons, on vérifie le champ `devisRef` qui contient
- * le numéro de la dernière relance envoyée.
+ * Règles (configurables dans les paramètres admin) :
+ * - Relance 1 : 7 jours après émission (défaut)
+ * - Relance 2 : 15 jours après émission (défaut)
+ * - Relance 3 : 30 jours après émission → passe en "En retard" (défaut)
  */
 
-const RELANCE_DELAYS = [
+const DEFAULT_RELANCE_DELAYS = [
   { days: 7, label: "1ère relance" },
   { days: 15, label: "2ème relance" },
   { days: 30, label: "Mise en demeure" },
 ];
+
+async function getRelanceDelays() {
+  try {
+    const [d1, d2, d3] = await Promise.all([
+      getAdminSettingValue("relance_jour_1"),
+      getAdminSettingValue("relance_jour_2"),
+      getAdminSettingValue("relance_jour_3"),
+    ]);
+
+    return [
+      { days: parseInt(d1 || "7", 10) || 7, label: "1ère relance" },
+      { days: parseInt(d2 || "15", 10) || 15, label: "2ème relance" },
+      { days: parseInt(d3 || "30", 10) || 30, label: "Mise en demeure" },
+    ];
+  } catch {
+    return DEFAULT_RELANCE_DELAYS;
+  }
+}
 
 export async function checkOverdueFactures() {
   const now = new Date();
   const results: { numero: string; action: string }[] = [];
 
   // Récupérer toutes les factures émises non payées
+  const RELANCE_DELAYS = await getRelanceDelays();
   const factures = await prisma.facture.findMany({
     where: {
       statut: { in: ["Émise"] },

@@ -6,7 +6,9 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Calculator,
   Calendar,
+  Copy,
   CreditCard,
   FileText,
   Home,
@@ -14,6 +16,7 @@ import {
   MoreHorizontal,
   Package,
   Receipt,
+  RefreshCw,
   Settings,
   StickyNote,
   Users,
@@ -60,6 +63,9 @@ const CLIENT_TOOL_ITEMS: Array<{
   { href: "/planning", icon: Calendar, label: "Planning" },
   { href: "/catalogue", icon: Package, label: "Catalogue" },
   { href: "/depenses", icon: CreditCard, label: "Dépenses" },
+  { href: "/modeles", icon: Copy, label: "Modèles" },
+  { href: "/recurrentes", icon: RefreshCw, label: "Récurrence" },
+  { href: "/tva", icon: Calculator, label: "TVA" },
   { href: "/parametres", icon: Settings, label: "Paramètres" },
   { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
 ] as const;
