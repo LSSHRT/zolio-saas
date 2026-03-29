@@ -52,6 +52,15 @@ export const devisCreateSchema = z.object({
   photos: z.array(trimmedString).max(20).optional(),
 });
 
+export const devisUpdateSchema = devisCreateSchema
+  .extend({
+    client: trimmedString.max(200).optional(),
+    resendEmail: z.boolean().default(false),
+    statut: z.enum(["En attente", "Accepté", "Refusé", "Annulé", "Facturé", "Payé"]).optional(),
+  })
+  .partial()
+  .strict();
+
 export const devisStatutSchema = z.object({
   statut: z.enum(["En attente", "Accepté", "Refusé", "Annulé", "Facturé", "Payé"]),
 });
@@ -62,6 +71,32 @@ export const devisPlanningSchema = z.object({
 });
 
 // ─── Factures ───
+
+export const factureClientSchema = z.object({
+  nom: trimmedString.min(1, "Le nom du client est requis").max(200),
+  telephone: optionalTrimmedString,
+  email: trimmedString.email("Email invalide").optional().or(z.literal("")),
+  adresse: optionalTrimmedString,
+});
+
+export const factureLigneSchema = z.object({
+  nomPrestation: trimmedString.min(1).max(500),
+  unite: optionalTrimmedString,
+  quantite: positiveNumber.max(999999),
+  prixUnitaire: nonNegativeNumber.max(9999999),
+  tva: optionalTrimmedString,
+  isOptional: z.boolean().default(false),
+  totalLigne: nonNegativeNumber.max(99999999).optional(),
+});
+
+export const factureCreateSchema = z.object({
+  client: factureClientSchema,
+  lignes: z.array(factureLigneSchema).min(1, "Au moins une ligne est requise").max(100),
+  totalHT: nonNegativeNumber.max(99999999),
+  totalTTC: positiveNumber.max(99999999),
+  tva: nonNegativeNumber.max(100),
+  devisNumero: optionalTrimmedString,
+});
 
 export const factureUpdateSchema = z.object({
   statut: z.enum(["Émise", "Payée", "En retard"]).optional(),

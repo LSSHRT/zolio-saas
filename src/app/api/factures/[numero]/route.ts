@@ -4,12 +4,7 @@ import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendPushNotification } from "@/lib/push-notifications";
-
-const ALLOWED_FACTURE_STATUSES = new Set(["Émise", "Payée", "En retard"]);
-
-type FactureStatusPayload = {
-  statut?: string;
-};
+import { factureUpdateSchema, zodErrorResponse } from "@/lib/validations";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
@@ -20,15 +15,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
 
     const p = await params;
     const numero = p.numero;
-    const body = (await request.json()) as FactureStatusPayload;
-    const statut = typeof body.statut === "string" ? body.statut.trim() : "";
+    const parsed = factureUpdateSchema.safeParse(await request.json());
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const statut = typeof parsed.data.statut === "string" ? parsed.data.statut.trim() : "";
 
     if (!statut) {
       return jsonError("Statut manquant", 400);
-    }
-
-    if (!ALLOWED_FACTURE_STATUSES.has(statut)) {
-      return jsonError("Statut de facture invalide", 400);
     }
 
     const facture = await prisma.facture.findFirst({ where: { numero, userId } });

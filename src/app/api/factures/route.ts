@@ -8,6 +8,7 @@ import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
+import { factureCreateSchema, zodErrorResponse } from "@/lib/validations";
 
 type FactureLine = {
   isOptional?: boolean;
@@ -17,22 +18,6 @@ type FactureLine = {
   totalLigne?: unknown;
   tva?: unknown;
   unite?: unknown;
-};
-
-type FactureClientPayload = {
-  adresse?: unknown;
-  email?: unknown;
-  nom?: unknown;
-  telephone?: unknown;
-};
-
-type CreateFacturePayload = {
-  client?: unknown;
-  devisNumero?: unknown;
-  lignes?: unknown;
-  totalHT?: unknown;
-  totalTTC?: unknown;
-  tva?: unknown;
 };
 
 type FactureRecord = {
@@ -56,17 +41,6 @@ function normalizeText(value: unknown) {
 function parseNumber(value: unknown, fallback = 0) {
   const parsed = Number.parseFloat(String(value ?? fallback));
   return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function parseClient(value: unknown) {
-  const client = value && typeof value === "object" ? (value as FactureClientPayload) : {};
-
-  return {
-    adresse: normalizeText(client.adresse),
-    email: normalizeText(client.email),
-    nom: normalizeText(client.nom),
-    telephone: normalizeText(client.telephone),
-  };
 }
 
 function parseLignes(value: unknown) {
@@ -113,13 +87,22 @@ export async function POST(request: Request) {
     }
 
     const entreprise = getCompanyProfile(user);
-    const body = (await request.json()) as CreateFacturePayload;
-    const client = parseClient(body.client);
+    const rawBody = await request.json();
+    const parsed = factureCreateSchema.safeParse(rawBody);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const body = parsed.data;
+    const client = {
+      nom: body.client.nom,
+      email: body.client.email || "",
+      telephone: body.client.telephone || "",
+      adresse: body.client.adresse || "",
+    };
     const lignes = parseLignes(body.lignes);
     const devisNumero = normalizeText(body.devisNumero);
-    const totalHT = parseNumber(body.totalHT);
-    const totalTTC = parseNumber(body.totalTTC);
-    const tva = parseNumber(body.tva);
+    const totalHT = body.totalHT;
+    const totalTTC = body.totalTTC;
+    const tva = body.tva;
 
     if (!client.nom) {
       return jsonError("Le client est obligatoire", 400);
@@ -263,19 +246,32 @@ export async function POST(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return jsonError("Non autorisé", 401);
     }
 
-    const facturesDb = await prisma.facture.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
+    const url = new URL(request.url);
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)));
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(facturesDb.map(mapFacture));
+    const [facturesDb, total] = await Promise.all([
+      prisma.facture.findMany({
+        where: { userId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.facture.count({ where: { userId } }),
+    ]);
+
+    return NextResponse.json({
+      data: facturesDb.map(mapFacture),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     return internalServerError(
       "factures-get",

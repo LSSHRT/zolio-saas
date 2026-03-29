@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
 import {
@@ -23,17 +23,31 @@ interface Depense {
   montant: number;
 }
 
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface DepensesResponse {
+  data: Depense[];
+  pagination: PaginationInfo;
+}
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DepensesPage() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data, error, mutate } = useSWR<Depense[]>("/api/depenses", fetcher, {
+  const [page, setPage] = useState(1);
+  const { data, error, mutate } = useSWR<DepensesResponse>(`/api/depenses?page=${page}&limit=20`, fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });
-  const depenses = useMemo<Depense[]>(() => (Array.isArray(data) ? data : []), [data]);
+  const depenses = useMemo<Depense[]>(() => (Array.isArray(data?.data) ? data.data : []), [data]);
+  const pagination = data?.pagination ?? null;
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -253,6 +267,34 @@ export default function DepensesPage() {
                 </div>
               </motion.article>
             ))}
+          </div>
+        )}
+
+        {pagination && pagination.totalPages > 1 && (
+          <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Page {pagination.page} sur {pagination.totalPages} ({pagination.total} dépense{pagination.total > 1 ? "s" : ""})
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={pagination.page <= 1}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+              >
+                <ChevronLeft size={16} />
+                Précédent
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                disabled={pagination.page >= pagination.totalPages}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+              >
+                Suivant
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         )}
       </ClientSectionCard>

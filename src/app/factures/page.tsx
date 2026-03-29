@@ -6,6 +6,8 @@ import { motion } from "framer-motion";
 import {
   BadgeCheck,
   CheckCircle,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Download,
   FileText,
@@ -39,6 +41,18 @@ interface Facture {
   devisRef: string;
 }
 
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface FacturesResponse {
+  data: Facture[];
+  pagination: PaginationInfo;
+}
+
 const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
   "Émise": { icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
   "Payée": { icon: BadgeCheck, color: "text-blue-600", bg: "bg-blue-50" },
@@ -49,11 +63,13 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function FacturesPage() {
   const { user } = useUser();
-  const { data, isLoading, mutate } = useSWR("/api/factures", fetcher, {
+  const [page, setPage] = useState(1);
+  const { data, isLoading, mutate } = useSWR<FacturesResponse>(`/api/factures?page=${page}&limit=20`, fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });
-  const factures = useMemo<Facture[]>(() => (Array.isArray(data) ? data : []), [data]);
+  const factures = useMemo<Facture[]>(() => (Array.isArray(data?.data) ? data.data : []), [data]);
+  const pagination = data?.pagination ?? null;
   const loading = isLoading && !data;
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -113,7 +129,10 @@ export default function FacturesPage() {
       const response = await fetch(`/api/factures/${numero}`, { method: "DELETE" });
       const payload = (await response.json().catch(() => ({}))) as { error?: string };
       if (response.ok) {
-        mutate(factures.filter((facture: Facture) => facture.numero !== numero), false);
+        mutate(
+          data ? { ...data, data: factures.filter((facture: Facture) => facture.numero !== numero) } : undefined,
+          false,
+        );
         toast.success("Facture supprimée");
         setPendingDeleteFacture(null);
       } else {
@@ -209,7 +228,10 @@ export default function FacturesPage() {
     }
 
     if (successCount > 0) {
-      mutate(factures.filter((facture: Facture) => !selectedIds.has(facture.numero)), false);
+      mutate(
+        data ? { ...data, data: factures.filter((facture: Facture) => !selectedIds.has(facture.numero)) } : undefined,
+        false,
+      );
       setSelectedIds(new Set());
       setConfirmBulkDeleteOpen(false);
       toast.success(`${successCount} facture${successCount > 1 ? "s" : ""} supprimée${successCount > 1 ? "s" : ""}`);
@@ -231,9 +253,14 @@ export default function FacturesPage() {
       const payload = (await response.json().catch(() => ({}))) as { error?: string; statut?: string };
       if (response.ok) {
         mutate(
-          factures.map((facture: Facture) =>
-            facture.numero === numero ? { ...facture, statut: payload.statut || "Payée" } : facture,
-          ),
+          data
+            ? {
+                ...data,
+                data: factures.map((facture: Facture) =>
+                  facture.numero === numero ? { ...facture, statut: payload.statut || "Payée" } : facture,
+                ),
+              }
+            : undefined,
           false,
         );
         toast.success("Facture marquée comme payée !");
@@ -267,7 +294,16 @@ export default function FacturesPage() {
     window.location.href = `mailto:${facture.emailClient}?subject=${subject}&body=${body}`;
   };
 
+  const handleDownloadPDF = (facture: Facture) => {
+    window.open(`/api/factures/${facture.numero}/pdf`, "_blank");
+  };
+
   const getMobileInvoiceActions = (facture: Facture): ClientMobileAction[] => [
+    {
+      icon: Download,
+      label: "Télécharger PDF",
+      onClick: () => handleDownloadPDF(facture),
+    },
     ...(facture.statut === "Payée"
       ? []
       : [
@@ -711,6 +747,34 @@ export default function FacturesPage() {
               </div>
             )}
           </>
+        )}
+
+        {pagination && pagination.totalPages > 1 && (
+          <div className="mt-6 flex flex-col items-center justify-between gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Page {pagination.page} sur {pagination.totalPages} ({pagination.total} facture{pagination.total > 1 ? "s" : ""})
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={pagination.page <= 1}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+              >
+                <ChevronLeft size={16} />
+                Précédent
+              </button>
+              <button
+                type="button"
+                onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                disabled={pagination.page >= pagination.totalPages}
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+              >
+                Suivant
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          </div>
         )}
       </ClientSectionCard>
 

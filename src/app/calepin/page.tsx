@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { ArrowUpRight, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -23,10 +23,23 @@ interface Note {
   date: string;
 }
 
+interface PaginationInfo {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+interface NotesResponse {
+  data: Note[];
+  pagination: PaginationInfo;
+}
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CalepinPage() {
-  const { data: notes, error, isLoading, mutate } = useSWR<Note[]>("/api/notes", fetcher, {
+  const [page, setPage] = useState(1);
+  const { data, error, isLoading, mutate } = useSWR<NotesResponse>(`/api/notes?page=${page}&limit=20`, fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });
@@ -39,7 +52,8 @@ export default function CalepinPage() {
   const noteDraftLength = (currentNote.contenu || "").trim().length;
   const notePreview = (currentNote.contenu || "").trim();
 
-  const noteList = useMemo<Note[]>(() => (Array.isArray(notes) ? notes : []), [notes]);
+  const noteList = useMemo<Note[]>(() => (Array.isArray(data?.data) ? data.data : []), [data]);
+  const pagination = data?.pagination ?? null;
   const titledNotes = useMemo(
     () => noteList.filter((note) => Boolean(note.titre && note.titre.trim())).length,
     [noteList],

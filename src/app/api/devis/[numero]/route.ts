@@ -9,6 +9,7 @@ import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
+import { devisUpdateSchema, zodErrorResponse } from "@/lib/validations";
 import {
   parseLignes,
   replaceLignesForDevis,
@@ -17,18 +18,6 @@ import {
   type LignePayload,
 } from "@/lib/devis-lignes";
 import { uploadPhotos } from "@/lib/blob-photos";
-
-type UpdateDevisPayload = {
-  acompte?: unknown;
-  client?: unknown;
-  clientId?: unknown;
-  lignes?: unknown;
-  photos?: unknown;
-  remise?: unknown;
-  resendEmail?: unknown;
-  statut?: unknown;
-  tva?: unknown;
-};
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -138,7 +127,17 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
 
     const resolvedParams = await context.params;
     const { numero } = resolvedParams;
-    const body = (await request.json()) as UpdateDevisPayload;
+    let rawBody;
+    try {
+      rawBody = await request.json();
+    } catch {
+      return jsonError("Payload invalide", 400);
+    }
+
+    const parsed = devisUpdateSchema.safeParse(rawBody);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const body = parsed.data;
     const lignes = parseLignes(body.lignes);
     const photos = parsePhotos(body.photos);
     const tvaNum = parseNumber(body.tva);

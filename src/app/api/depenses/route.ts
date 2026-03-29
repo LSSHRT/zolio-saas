@@ -51,19 +51,32 @@ function mapDepense(depense: DepenseRecord) {
   };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const { userId } = await auth();
     if (!userId) {
       return jsonError("Non autorisé", 401);
     }
 
-    const depenses = await prisma.depense.findMany({
-      where: { userId },
-      orderBy: { date: "desc" },
-    });
+    const url = new URL(request.url);
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(url.searchParams.get("limit") || "20", 10)));
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json(depenses.map(mapDepense));
+    const [depenses, total] = await Promise.all([
+      prisma.depense.findMany({
+        where: { userId },
+        orderBy: { date: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.depense.count({ where: { userId } }),
+    ]);
+
+    return NextResponse.json({
+      data: depenses.map(mapDepense),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    });
   } catch (error) {
     return internalServerError("depenses-get", error, "Impossible de récupérer les dépenses");
   }

@@ -3,10 +3,7 @@ import { getAuth, clerkClient } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
-
-type GenerateDevisPayload = {
-  description?: unknown;
-};
+import { aiGenerateDevisSchema, zodErrorResponse } from "@/lib/validations";
 
 type GeneratedAILine = {
   designation: string;
@@ -188,14 +185,17 @@ export async function POST(req: NextRequest) {
     const rl = rateLimit(`ai-generate:${userId}`, 20, 60 * 60_000);
     if (!rl.allowed) return jsonError("Trop de requêtes. Réessayez plus tard.", 429);
 
-    let body: GenerateDevisPayload;
+    let body;
     try {
-      body = (await req.json()) as GenerateDevisPayload;
+      body = await req.json();
     } catch {
       return jsonError("Payload invalide", 400);
     }
 
-    const description = normalizeText(body.description);
+    const parsed = aiGenerateDevisSchema.safeParse(body);
+    if (!parsed.success) return zodErrorResponse(parsed.error);
+
+    const description = normalizeText(parsed.data.description);
     if (!description) {
       return jsonError("Description manquante", 400);
     }
