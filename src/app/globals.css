@@ -752,3 +752,19 @@
 .animate-landing-drift {
   animation: landing-drift 14s ease-in-out infinite;
 }
+
+/* Empêche le zoom auto sur iOS/Android quand on tape dans un champ */
+@supports (-webkit-touch-callout: none) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
