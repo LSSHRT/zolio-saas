@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo } from "react";
 import useSWR from "swr";
 import { useUser } from "@clerk/nextjs";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Bell, ChevronRight, Sparkles, TriangleAlert, Clock3, TrendingUp, Target } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -17,13 +19,37 @@ interface Signal {
   tone: Tone;
 }
 
-const toneColors: Record<Tone, { bg: string; badge: string }> = {
-  violet: { bg: "bg-violet-50 dark:bg-violet-500/10", badge: "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300" },
-  rose: { bg: "bg-rose-50 dark:bg-rose-500/10", badge: "bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300" },
-  amber: { bg: "bg-amber-50 dark:bg-amber-500/10", badge: "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300" },
-  emerald: { bg: "bg-emerald-50 dark:bg-emerald-500/10", badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300" },
-  slate: { bg: "bg-slate-50 dark:bg-slate-500/10", badge: "bg-slate-100 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300" },
-};
+function toneClasses(tone: Tone) {
+  switch (tone) {
+    case "emerald":
+      return { icon: "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-300 dark:ring-emerald-400/20" };
+    case "amber":
+      return { icon: "bg-amber-400/12 text-amber-700 ring-amber-300/40 dark:bg-amber-400/12 dark:text-amber-300 dark:ring-amber-400/20" };
+    case "rose":
+      return { icon: "bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-300 dark:ring-rose-400/20" };
+    case "slate":
+      return { icon: "bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10" };
+    case "violet":
+    default:
+      return { icon: "bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-200 dark:ring-violet-400/20" };
+  }
+}
+
+function renderSignalIcon(tone: Tone, size = 17) {
+  switch (tone) {
+    case "rose":
+      return <TriangleAlert size={size} />;
+    case "amber":
+      return <Clock3 size={size} />;
+    case "emerald":
+      return <TrendingUp size={size} />;
+    case "slate":
+      return <Target size={size} />;
+    case "violet":
+    default:
+      return <Sparkles size={size} />;
+  }
+}
 
 function formatCurrency(n: number) {
   return n.toLocaleString("fr-FR", { style: "currency", currency: "EUR" });
@@ -54,16 +80,19 @@ export default function NotificationsPage() {
       s.push({ id: "pipeline", title: `${data.pendingCount} devis dans le pipe`, description: `${formatCurrency(data.pipelineRevenueHT)} HT encore en attente de validation.`, href: "/devis", tone: "amber" });
     }
 
-    if (data.conversionRate != null && data.conversionRate < 30) {
+    if (data.conversionRate != null && data.conversionRate < 30 && data.totalQuotes > 0) {
       s.push({ id: "rate", title: "Taux de conversion bas", description: `${data.conversionRate}% des devis sont acceptes.`, href: "/devis", tone: "amber" });
+    }
+
+    if (data.totalTTC >= (data.objectifActif || 5000)) {
+      s.push({ id: "goal-hit", title: "Objectif atteint", description: "Le cap mensuel est atteint, vous pouvez viser plus haut.", tone: "emerald" });
+    } else if (data.totalTTC > 0) {
+      const target = data.objectifActif || 5000;
+      s.push({ id: "goal-gap", title: "Objectif a suivre", description: `${formatCurrency(Math.max(target - data.totalTTC, 0))} TTC restants pour atteindre votre cap.`, href: "/dashboard", tone: "slate" });
     }
 
     if (!isPro) {
       s.push({ id: "upgrade", title: "Mode Starter actif", description: "Passez en PRO pour aller plus loin que le devis d'essai.", href: "/abonnement", tone: "violet" });
-    }
-
-    if (data.totalTTC > 0 && data.totalTTC < 5000) {
-      s.push({ id: "goal-gap", title: "Objectif a suivre", description: `${formatCurrency(Math.max(5000 - data.totalTTC, 0))} TTC restants pour atteindre votre cap.`, tone: "slate" });
     }
 
     return s;
@@ -71,57 +100,86 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      {/* Header */}
       <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/8 dark:bg-slate-950/90">
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
-          <Link href="/dashboard" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/8 dark:hover:text-white">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          <Link href="/dashboard" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/8 dark:hover:text-white">
+            <ArrowLeft size={20} />
           </Link>
-          <h1 className="text-lg font-semibold text-slate-950 dark:text-white">Notifications</h1>
-          {signals.length > 0 && (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-violet-600 px-1.5 text-xs font-semibold text-white">{signals.length}</span>
-          )}
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg font-semibold text-slate-950 dark:text-white">Notifications</h1>
+            {signals.length > 0 && (
+              <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400 px-1.5 text-[10px] font-bold text-white">
+                {signals.length}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* Content */}
       <div className="mx-auto max-w-2xl px-4 py-6">
         {isLoading ? (
           <div className="space-y-3">
-            {[1,2,3].map(i => (
-              <div key={i} className="animate-pulse rounded-2xl border border-slate-200/70 p-4 dark:border-white/8">
-                <div className="h-4 w-3/4 rounded bg-slate-200 dark:bg-white/10 mb-2" />
-                <div className="h-3 w-1/2 rounded bg-slate-200 dark:bg-white/10" />
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse rounded-[1.5rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
+                <div className="flex gap-3">
+                  <div className="h-11 w-11 rounded-2xl bg-slate-200 dark:bg-white/10" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 rounded bg-slate-200 dark:bg-white/10" />
+                    <div className="h-3 w-1/2 rounded bg-slate-200 dark:bg-white/10" />
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         ) : signals.length === 0 ? (
           <div className="mt-20 text-center">
             <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-100 dark:bg-white/8">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-400"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <Bell size={28} className="text-slate-400" />
             </div>
             <h2 className="mt-4 text-lg font-semibold text-slate-950 dark:text-white">Aucune notification</h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Tout est calme.</p>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">Tout est calme pour le moment.</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {signals.map(signal => {
-              const colors = toneColors[signal.tone] || toneColors.slate;
-              const card = (
-                <div className={`rounded-2xl border border-slate-200/70 p-4 transition hover:shadow-sm dark:border-white/8 ${colors.bg}`}>
-                  <div className="flex items-start gap-3">
-                    <span className={`inline-flex h-8 shrink-0 items-center rounded-full px-2.5 text-xs font-semibold ${colors.badge}`}>{signal.tone}</span>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-slate-950 dark:text-white">{signal.title}</p>
-                      <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{signal.description}</p>
+            <AnimatePresence initial={false}>
+              {signals.map((signal, index) => {
+                const classes = toneClasses(signal.tone);
+                const card = (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.06 }}
+                  >
+                    <div className="rounded-[1.5rem] border border-slate-200/70 bg-white/75 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
+                      <div className="flex items-start gap-3">
+                        <div className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
+                          {renderSignalIcon(signal.tone)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
+                          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{signal.description}</p>
+                        </div>
+                        {signal.href ? (
+                          <div className="mt-1 text-violet-600 dark:text-violet-200">
+                            <ChevronRight size={16} />
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                </div>
-              );
-              return signal.href ? (
-                <Link key={signal.id} href={signal.href}>{card}</Link>
-              ) : (
-                <div key={signal.id}>{card}</div>
-              );
-            })}
+                  </motion.div>
+                );
+
+                return signal.href ? (
+                  <Link key={signal.id} href={signal.href}>
+                    {card}
+                  </Link>
+                ) : (
+                  <div key={signal.id}>{card}</div>
+                );
+              })}
+            </AnimatePresence>
           </div>
         )}
       </div>

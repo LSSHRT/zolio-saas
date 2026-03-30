@@ -1020,7 +1020,7 @@ export default function DashboardPage() {
                 <DashboardNotificationsMenu
                   dashboardSignals={dashboardSignals}
                 />
-                <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
+                <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
                   {isLoaded ? <UserButton /> : <User size={18} />}
                 </div>
               </div>
@@ -1057,7 +1057,7 @@ export default function DashboardPage() {
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
               />
-              <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
                 {isLoaded ? <UserButton /> : <User size={18} />}
               </div>
             </div>
