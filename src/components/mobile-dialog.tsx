@@ -52,22 +52,26 @@ export function MobileDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[90] flex items-stretch justify-center sm:items-center p-0 sm:p-4">
+      {/* Backdrop */}
       <button
         type="button"
         onClick={onClose}
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         aria-label="Fermer"
       />
+
+      {/* Full screen sur mobile, modal sur desktop */}
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-slate-900"
+        className="relative z-10 flex w-full h-full sm:h-auto sm:max-w-lg sm:max-h-[85vh] flex-col overflow-hidden sm:rounded-2xl border-0 sm:border sm:border-slate-200 bg-white shadow-2xl dark:sm:border-white/10 dark:bg-slate-900"
       >
-        <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
-          <div className="min-w-0">
+        {/* Header fixe */}
+        <div className={`flex items-center justify-between gap-3 shrink-0 border-b px-5 py-4 ${getToneClasses(tone)}`}>
+          <div className="min-w-0 flex-1">
             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Action rapide</p>
-            <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
+            <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white truncate">{title}</h2>
           </div>
           <button
             type="button"
@@ -79,18 +83,21 @@ export function MobileDialog({
           </button>
         </div>
 
+        {/* Description */}
         {description ? (
-          <p className="px-5 pt-3 text-sm text-slate-500 dark:text-slate-400">{description}</p>
+          <p className="shrink-0 px-5 pt-3 text-sm text-slate-500 dark:text-slate-400">{description}</p>
         ) : null}
 
+        {/* Contenu scrollable */}
         {children ? (
           <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
             {children}
           </div>
         ) : null}
 
+        {/* Actions footer */}
         {actions ? (
-          <div className="border-t px-5 py-3">
+          <div className="shrink-0 border-t px-5 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] sm:pb-3">
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">{actions}</div>
           </div>
         ) : null}
