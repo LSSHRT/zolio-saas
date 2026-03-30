@@ -33,85 +33,64 @@ export function MobileDialog({
   title: string;
   tone?: MobileDialogTone;
 }) {
-  // Lock body scroll + ESC to close
   useEffect(() => {
     if (!open) return;
-
     const prev = document.body.style.overflow;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
-
     return () => {
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose]);
 
-  // Safety: always reset overflow on unmount (page change)
   useEffect(() => {
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, []);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end sm:items-center justify-center sm:p-6">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[90] flex items-center justify-center p-4">
       <button
         type="button"
         onClick={onClose}
-        className="absolute inset-0 bg-slate-950/60 backdrop-blur-[3px]"
-        aria-label="Fermer la fenetre"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        aria-label="Fermer"
       />
-
-      {/* Dialog */}
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 flex w-full max-h-[70vh] sm:max-h-[80vh] flex-col overflow-hidden rounded-t-[1.6rem] sm:rounded-[1.6rem] border border-slate-200/80 bg-white/96 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 sm:max-w-lg"
+        className="relative z-10 flex w-full max-w-lg max-h-[85vh] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-white/10 dark:bg-slate-900"
       >
-        {/* Drag handle mobile */}
-        <div className="flex justify-center pt-2 pb-1 sm:hidden">
-          <span className="h-1 w-10 rounded-full bg-slate-300/80 dark:bg-white/12" />
-        </div>
-
-        {/* Header - toujours visible */}
-        <div className={`flex items-center justify-between gap-3 shrink-0 border-b px-4 py-3 sm:px-5 ${getToneClasses(tone)}`}>
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] opacity-70">Action rapide</p>
-            <h2 className="mt-0.5 text-base font-semibold text-slate-950 dark:text-white truncate">{title}</h2>
+        <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Action rapide</p>
+            <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:hover:text-white"
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20"
             aria-label="Fermer"
           >
-            <X size={18} />
+            <X size={20} />
           </button>
         </div>
 
-        {/* Description */}
         {description ? (
-          <p className="shrink-0 px-4 pt-3 text-sm text-slate-600 dark:text-slate-300 sm:px-5">{description}</p>
+          <p className="px-5 pt-3 text-sm text-slate-500 dark:text-slate-400">{description}</p>
         ) : null}
 
-        {/* Content scrollable */}
         {children ? (
-          <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:px-5">
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
             {children}
           </div>
         ) : null}
 
-        {/* Actions footer */}
         {actions ? (
-          <div className="shrink-0 border-t border-slate-200/80 bg-white/95 px-4 py-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] backdrop-blur sm:px-5 sm:pb-3 dark:border-white/10 dark:bg-slate-950/95">
+          <div className="border-t px-5 py-3">
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">{actions}</div>
           </div>
         ) : null}
