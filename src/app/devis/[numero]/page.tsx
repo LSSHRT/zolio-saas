@@ -657,7 +657,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               <div className="relative mb-2">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input type="text" placeholder="Rechercher..." value={searchPrestation} onChange={(e) => setSearchPrestation(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-violet-500/30" />
               </div>
               <div className="max-h-40 overflow-y-auto flex flex-col gap-1">
                 {filteredPrestations.length === 0 && (
@@ -700,7 +700,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                       value={l.nomPrestation}
                       onChange={(e) => updateNom(i, e.target.value)}
                       placeholder="Nom de la prestation..."
-                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                      className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-base font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-violet-500"
                     />
                     {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-2 shrink-0">Optionnel</span>}
                   </div>
@@ -710,12 +710,12 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
                   <div>
                     <label className="text-[10px] text-slate-400">Quantité</label>
                     <input type="number" min="0.1" step="any" inputMode="decimal" value={l.quantite} onChange={(e) => updateQty(i, parseFloat(e.target.value) || 1)}
-                      className="w-full py-2 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                      className="w-full py-2 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-base mt-0.5" />
                   </div>
                   <div>
                     <label className="text-[10px] text-slate-400">Prix/{l.unite}</label>
                     <input type="number" min="0" step="any" inputMode="decimal" value={l.prixUnitaire} onChange={(e) => updatePrice(i, parseFloat(e.target.value) || 0)}
-                      className="w-full py-2 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm mt-0.5" />
+                      className="w-full py-2 px-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-base mt-0.5" />
                   </div>
                   <div className="rounded-lg border border-slate-200/80 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-900">
                     <label className="text-[10px] text-slate-400">Total</label>
@@ -759,22 +759,22 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
             Taux TVA
             <select value={tva} onChange={(e) => setTva(e.target.value)}
-              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500">
+              className="mt-3 w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-violet-500">
               <option value="0">0%</option>
               <option value="5.5">5.5%</option>
               <option value="10">10%</option>
               <option value="20">20%</option>
             </select>
           </label>
-          <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+          <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-base font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
             Remise globale (%)
             <input type="number" placeholder="0" step="any" inputMode="decimal" value={remise} onChange={(e) => setRemise(e.target.value)}
-              className="mt-3 w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+              className="mt-3 w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-violet-500" />
           </label>
           <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
             Acompte à la signature (%)
             <input type="number" placeholder="0" step="any" inputMode="decimal" value={acompte} onChange={(e) => setAcompte(e.target.value)}
-              className="mt-3 w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500" />
+              className="mt-3 w-full px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-violet-500" />
           </label>
         </div>
 
@@ -978,7 +978,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           value={aiPrompt}
           onChange={(e) => setAiPrompt(e.target.value)}
           placeholder="Exemple : rénovation complète d’une salle de bain de 10 m² avec dépose, plomberie, carrelage et peinture."
-          className="h-40 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          className="h-40 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         />
       </MobileDialog>
 

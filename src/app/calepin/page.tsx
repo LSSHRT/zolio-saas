@@ -491,7 +491,7 @@ export default function CalepinPage() {
               placeholder="Écrivez vos notes de chantier, dimensions, idées..."
               value={currentNote.contenu || ""}
               onChange={(e) => setCurrentNote({ ...currentNote, contenu: e.target.value })}
-              className="min-h-[18rem] w-full resize-none rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-sm leading-7 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/15 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:placeholder:text-slate-600"
+              className="min-h-[18rem] w-full resize-none rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-base leading-7 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/15 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:placeholder:text-slate-600"
               autoFocus
             />
           </label>

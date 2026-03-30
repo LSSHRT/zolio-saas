@@ -252,7 +252,7 @@ export default function ModelesPage() {
             <input
               type="text"
               placeholder="Rechercher un modèle..."
-              className="w-full rounded-[1.1rem] border border-slate-200/80 bg-white/80 py-3 pl-10 pr-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+              className="w-full rounded-[1.1rem] border border-slate-200/80 bg-white/80 py-3 pl-10 pr-4 text-base text-slate-900 shadow-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -413,7 +413,7 @@ export default function ModelesPage() {
               value={newNom}
               onChange={(e) => setNewNom(e.target.value)}
               placeholder="Ex : Pose cuisine standard"
-              className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+              className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-base outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
             />
           </div>
           <div>
@@ -425,7 +425,7 @@ export default function ModelesPage() {
               onChange={(e) => setNewDescription(e.target.value)}
               placeholder="Description optionnelle..."
               rows={2}
-              className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+              className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-base outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
             />
           </div>
           <div>
@@ -453,7 +453,7 @@ export default function ModelesPage() {
                       value={ligne.description}
                       onChange={(e) => updateLigne(index, "description", e.target.value)}
                       placeholder="Description de la ligne"
-                      className="flex-1 rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-sm outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                      className="flex-1 rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-base outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
                     />
                     {newLignes.length > 1 && (
                       <button
@@ -473,7 +473,7 @@ export default function ModelesPage() {
                         min={0}
                         value={ligne.quantite}
                         onChange={(e) => updateLigne(index, "quantite", Number(e.target.value))}
-                        className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-sm outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                        className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-base outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
                       />
                     </div>
                     <div>
@@ -486,7 +486,7 @@ export default function ModelesPage() {
                         step={0.01}
                         value={ligne.prixUnitaire}
                         onChange={(e) => updateLigne(index, "prixUnitaire", Number(e.target.value))}
-                        className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-sm outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                        className="w-full rounded-lg border border-slate-200 bg-white/80 px-3 py-2 text-base outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
                       />
                     </div>
                   </div>
@@ -540,7 +540,7 @@ export default function ModelesPage() {
           <select
             value={selectedClientId}
             onChange={(e) => setSelectedClientId(e.target.value)}
-            className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-sm outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+            className="w-full rounded-xl border border-slate-200 bg-white/80 px-4 py-3 text-base outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
           >
             <option value="">Sélectionner un client...</option>
             {clients.map((client) => (
@@ -568,7 +568,7 @@ export default function ModelesPage() {
             <button
               type="button"
               onClick={() => setPendingDelete(null)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-base font-semibold text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/6 dark:text-slate-200"
             >
               Annuler
             </button>
@@ -576,7 +576,7 @@ export default function ModelesPage() {
               type="button"
               onClick={() => pendingDelete && void handleDelete(pendingDelete.id)}
               disabled={Boolean(pendingDelete && deletingId === pendingDelete.id)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-base font-semibold text-white transition hover:bg-rose-700 disabled:opacity-50"
             >
               {pendingDelete && deletingId === pendingDelete.id ? "Suppression..." : "Supprimer"}
             </button>

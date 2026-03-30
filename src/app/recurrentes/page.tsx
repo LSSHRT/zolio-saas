@@ -238,7 +238,7 @@ export default function RecurrentesPage() {
                 <select
                   value={form.clientId}
                   onChange={(e) => setForm({ ...form, clientId: e.target.value })}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                 >
                   <option value="">Sélectionner un client</option>
                   {clients.map((c) => (
@@ -248,13 +248,13 @@ export default function RecurrentesPage() {
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium">Nom du contrat *</label>
+                <label className="mb-1 block text-base font-medium">Nom du contrat *</label>
                 <input
                   type="text"
                   value={form.nom}
                   onChange={(e) => setForm({ ...form, nom: e.target.value })}
                   placeholder="Ex: Entretien mensuel"
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                 />
               </div>
 
@@ -266,7 +266,7 @@ export default function RecurrentesPage() {
                     step="0.01"
                     value={form.montantHT}
                     onChange={(e) => setForm({ ...form, montantHT: e.target.value })}
-                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                   />
                 </div>
                 <div>
@@ -275,7 +275,7 @@ export default function RecurrentesPage() {
                     type="number"
                     value={form.tva}
                     onChange={(e) => setForm({ ...form, tva: e.target.value })}
-                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                   />
                 </div>
               </div>
@@ -286,7 +286,7 @@ export default function RecurrentesPage() {
                   <select
                     value={form.frequence}
                     onChange={(e) => setForm({ ...form, frequence: e.target.value })}
-                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                   >
                     <option value="mensuel">Mensuel</option>
                     <option value="trimestriel">Trimestriel</option>
@@ -294,14 +294,14 @@ export default function RecurrentesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Jour du mois</label>
+                  <label className="mb-1 block text-base font-medium">Jour du mois</label>
                   <input
                     type="number"
                     min="1"
                     max="28"
                     value={form.jourMois}
                     onChange={(e) => setForm({ ...form, jourMois: e.target.value })}
-                    className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                    className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                   />
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function RecurrentesPage() {
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={2}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-base"
                 />
               </div>
             </div>

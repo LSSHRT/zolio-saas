@@ -1252,7 +1252,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Rechercher par nom ou email..."
-                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/30 focus:bg-white/7"
+                className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/30 focus:bg-white/7"
               />
             </div>
 
@@ -1649,7 +1649,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   value={prospectEmail}
                   onChange={(event) => setProspectEmail(event.target.value)}
                   disabled={!data.environment.canManualProspectSend}
-                  className="w-full rounded-[24px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
+                  className="w-full rounded-[24px] border border-white/10 bg-slate-950/45 px-4 py-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-slate-400">
@@ -1773,7 +1773,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   value={bannerText}
                   onChange={(event) => setBannerText(event.target.value)}
                   placeholder="Maintenance prévue ce soir à 23h..."
-                  className="mt-3 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
+                  className="mt-3 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <button
@@ -1799,7 +1799,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   value={geminiKey}
                   onChange={(event) => setGeminiKey(event.target.value)}
                   placeholder="Laisser vide pour utiliser la clé serveur"
-                  className="mt-3 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
+                  className="mt-3 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-3 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
                 <div className="mt-3 flex flex-wrap items-center gap-3">
                   <button
@@ -1848,7 +1848,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   value={maintenanceMessage}
                   onChange={(event) => setMaintenanceMessage(event.target.value)}
                   placeholder="Maintenance en cours. Retour estimé à 23h15..."
-                  className="mt-4 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-4 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
+                  className="mt-4 w-full rounded-[22px] border border-white/10 bg-slate-950/45 px-4 py-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
 
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

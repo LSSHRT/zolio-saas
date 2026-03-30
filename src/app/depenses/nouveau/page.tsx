@@ -154,13 +154,13 @@ export default function NouvelleDepensePage() {
               type="date"
               value={form.date}
               onChange={(event) => setForm((current) => ({ ...current, date: event.target.value }))}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
 
             <select
               value={form.categorie}
               onChange={(event) => setForm((current) => ({ ...current, categorie: event.target.value }))}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             >
               {CATEGORIES.map((category) => (
                 <option key={category} value={category}>
@@ -181,7 +181,7 @@ export default function NouvelleDepensePage() {
                 <h2 className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">
                   Décrivez ce que vous avez payé
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                <p className="mt-2 text-base leading-6 text-slate-600 dark:text-slate-300">
                   Fournisseur ou description, puis montant TTC. Le reste de la page dépense continue d’utiliser le modèle existant.
                 </p>
               </div>
@@ -191,7 +191,7 @@ export default function NouvelleDepensePage() {
                 value={form.description}
                 onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
                 placeholder="Ex: Matériaux Leroy Merlin"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
               />
 
               <input
@@ -201,7 +201,7 @@ export default function NouvelleDepensePage() {
                 value={form.montant}
                 onChange={(event) => setForm((current) => ({ ...current, montant: event.target.value }))}
                 placeholder="Montant TTC"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
               />
             </div>
 

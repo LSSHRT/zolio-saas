@@ -553,7 +553,7 @@ export default function ParametresEntreprise() {
                 value={formData.referredBy}
                 onChange={handleChange}
                 placeholder="Entrez le code de votre parrain"
-                className="w-full rounded-[1rem] border border-white/15 bg-white/10 px-4 py-3 text-sm text-white outline-none transition placeholder:text-violet-100/60 focus:border-white/30 focus:ring-4 focus:ring-white/10"
+                className="w-full rounded-[1rem] border border-white/15 bg-white/10 px-4 py-3 text-base text-white outline-none transition placeholder:text-violet-100/60 focus:border-white/30 focus:ring-4 focus:ring-white/10"
               />
               <button
                 type="button"

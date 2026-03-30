@@ -144,7 +144,7 @@ export default function NouvellePrestationPage() {
             <select
               value={form.categorie}
               onChange={(event) => setForm((current) => ({ ...current, categorie: event.target.value }))}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             >
               {STARTER_CATEGORIES.map((category) => (
                 <option key={category} value={category}>
@@ -156,7 +156,7 @@ export default function NouvellePrestationPage() {
             <select
               value={form.unite}
               onChange={(event) => setForm((current) => ({ ...current, unite: event.target.value }))}
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             >
               {UNITS.map((unit) => (
                 <option key={unit} value={unit}>
@@ -170,7 +170,7 @@ export default function NouvellePrestationPage() {
               value={form.nom}
               onChange={(event) => setForm((current) => ({ ...current, nom: event.target.value }))}
               placeholder="Nom de la prestation"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
             />
           </div>
         </CreationWizardPanel>
@@ -196,7 +196,7 @@ export default function NouvellePrestationPage() {
               value={form.prix}
               onChange={(event) => setForm((current) => ({ ...current, prix: event.target.value }))}
               placeholder="Prix HT"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
               type="number"
@@ -205,7 +205,7 @@ export default function NouvellePrestationPage() {
               value={form.cout}
               onChange={(event) => setForm((current) => ({ ...current, cout: event.target.value }))}
               placeholder="Coût estimé"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
               type="number"
@@ -213,7 +213,7 @@ export default function NouvellePrestationPage() {
               value={form.stock}
               onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
               placeholder="Stock initial"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
           </div>
         </CreationWizardPanel>

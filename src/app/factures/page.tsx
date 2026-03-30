@@ -435,7 +435,7 @@ export default function FacturesPage() {
             placeholder="Rechercher par client ou n° facture..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+            className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
           />
         </div>
 

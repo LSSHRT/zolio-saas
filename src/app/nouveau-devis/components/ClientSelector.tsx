@@ -186,7 +186,7 @@ export function ClientSelector({
                 value={searchValue}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder="Rechercher un client par nom, email ou téléphone..."
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
               />
             </div>
 
@@ -197,28 +197,28 @@ export function ClientSelector({
                   value={newClient.nom}
                   onChange={(event) => onNewClientChange("nom", event.target.value)}
                   placeholder="Nom du client"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
                 />
                 <input
                   type="email"
                   value={newClient.email}
                   onChange={(event) => onNewClientChange("email", event.target.value)}
                   placeholder="Email client"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
                 />
                 <input
                   type="text"
                   value={newClient.telephone}
                   onChange={(event) => onNewClientChange("telephone", event.target.value)}
                   placeholder="Téléphone"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
                 />
                 <input
                   type="text"
                   value={newClient.adresse}
                   onChange={(event) => onNewClientChange("adresse", event.target.value)}
                   placeholder="Adresse / chantier"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
                 />
                 <div className="lg:col-span-2 flex flex-col items-start gap-3 rounded-xl border border-dashed border-slate-300/70 bg-white/70 px-4 py-3 text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
                   <span>

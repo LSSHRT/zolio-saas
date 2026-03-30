@@ -452,7 +452,7 @@ export default function ClientsPage() {
               placeholder="Rechercher par nom ou email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="min-w-0 flex-1 bg-transparent py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
+              className="min-w-0 flex-1 bg-transparent py-3 text-base text-slate-900 outline-none placeholder:text-slate-400 dark:text-white dark:placeholder:text-slate-500"
             />
           </label>
 
@@ -763,7 +763,7 @@ export default function ClientsPage() {
             placeholder="Nom complet"
             value={form.nom}
             onChange={(e) => setForm({ ...form, nom: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
           />
           <input
             required
@@ -772,7 +772,7 @@ export default function ClientsPage() {
             placeholder="Email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
           />
           <input
             required
@@ -781,13 +781,13 @@ export default function ClientsPage() {
             placeholder="Téléphone"
             value={form.telephone}
             onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
           />
           <input
             placeholder="Adresse"
             value={form.adresse}
             onChange={(e) => setForm({ ...form, adresse: e.target.value })}
-            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+            className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
           />
 
           <div className="flex flex-col-reverse gap-3 pt-2 sm:col-span-2 sm:flex-row sm:justify-end">

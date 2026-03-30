@@ -299,7 +299,7 @@ export function LineEditor({
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder="Rechercher une prestation ou une catégorie..."
                 disabled={!canEdit}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6"
               />
             </div>
             <button
@@ -325,7 +325,7 @@ export function LineEditor({
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder="Rechercher une prestation ou une catégorie..."
                 disabled={!canEdit}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6"
               />
             </div>
             <button
@@ -437,7 +437,7 @@ export function LineEditor({
                           onChange={(event) => onUpdateNom(index, event.target.value)}
                           disabled={!canEdit}
                           placeholder="Nom de la prestation"
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                         />
                         <input
                           type="number"
@@ -447,7 +447,7 @@ export function LineEditor({
                           value={ligne.quantite}
                           onChange={(event) => onUpdateQty(index, Number.parseFloat(event.target.value) || 1)}
                           disabled={!canEdit}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                         />
                         <input
                           type="number"
@@ -457,13 +457,13 @@ export function LineEditor({
                           value={ligne.prixUnitaire}
                           onChange={(event) => onUpdatePrix(index, Number.parseFloat(event.target.value) || 0)}
                           disabled={!canEdit}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                         />
                         <select
                           value={ligne.tva || "10"}
                           onChange={(event) => onUpdateTva(index, event.target.value)}
                           disabled={!canEdit}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                         >
                           {TVA_OPTIONS.map((option) => (
                             <option key={option.value} value={option.value}>
@@ -471,7 +471,7 @@ export function LineEditor({
                             </option>
                           ))}
                         </select>
-                        <label className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <label className="inline-flex items-center gap-2 text-base text-slate-600 dark:text-slate-300">
                           <input
                             type="checkbox"
                             checked={Boolean(ligne.isOptional)}
@@ -548,7 +548,7 @@ export function LineEditor({
                             onChange={(event) => onUpdateNom(index, event.target.value)}
                             disabled={!canEdit}
                             placeholder="Nom de la prestation"
-                            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                            className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                           />
                         </label>
 
@@ -563,7 +563,7 @@ export function LineEditor({
                               value={ligne.quantite}
                               onChange={(event) => onUpdateQty(index, Number.parseFloat(event.target.value) || 1)}
                               disabled={!canEdit}
-                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                             />
                           </label>
 
@@ -577,7 +577,7 @@ export function LineEditor({
                               value={ligne.prixUnitaire}
                               onChange={(event) => onUpdatePrix(index, Number.parseFloat(event.target.value) || 0)}
                               disabled={!canEdit}
-                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                             />
                           </label>
 
@@ -587,7 +587,7 @@ export function LineEditor({
                               value={ligne.tva || "10"}
                               onChange={(event) => onUpdateTva(index, event.target.value)}
                               disabled={!canEdit}
-                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                             >
                               {TVA_OPTIONS.map((option) => (
                                 <option key={option.value} value={option.value}>
@@ -607,7 +607,7 @@ export function LineEditor({
                           </div>
                         </div>
 
-                        <label className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+                        <label className="inline-flex items-center gap-2 text-base text-slate-600 dark:text-slate-300">
                           <input
                             type="checkbox"
                             checked={Boolean(ligne.isOptional)}

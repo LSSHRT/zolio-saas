@@ -168,7 +168,7 @@ export default function TvaPage() {
             <select
               value={annee}
               onChange={(e) => setAnnee(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 dark:text-white"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 dark:text-white"
             >
               {YEARS.map((y) => (
                 <option key={y} value={y}>
@@ -184,7 +184,7 @@ export default function TvaPage() {
             <select
               value={trimestre}
               onChange={(e) => setTrimestre(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 dark:text-white"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 dark:text-white"
             >
               <option value="">Année complète</option>
               <option value="1">T1 (Jan - Mar)</option>

@@ -193,7 +193,7 @@ export default function NouveauClientPage() {
                 value={form.nom}
                 onChange={(event) => setForm((current) => ({ ...current, nom: event.target.value }))}
                 placeholder="Ex: Martin Dupont"
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
               />
             </label>
           </div>
@@ -219,7 +219,7 @@ export default function NouveauClientPage() {
               value={form.email}
               onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))}
               placeholder="Email"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
               type="tel"
@@ -227,14 +227,14 @@ export default function NouveauClientPage() {
               value={form.telephone}
               onChange={(event) => setForm((current) => ({ ...current, telephone: event.target.value }))}
               placeholder="Téléphone"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
               type="text"
               value={form.adresse}
               onChange={(event) => setForm((current) => ({ ...current, adresse: event.target.value }))}
               placeholder="Adresse / chantier"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
+              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
             />
           </div>
         </CreationWizardPanel>

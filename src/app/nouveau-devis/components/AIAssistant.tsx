@@ -70,7 +70,7 @@ export function AIAssistant({
             value={prompt}
             onChange={(event) => onPromptChange(event.target.value)}
             placeholder="Ex: Refaire une salle de bain de 10m² avec dépose, plomberie, faïence murale, meuble vasque et peinture plafond."
-            className="h-40 w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm leading-6 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/4 sm:h-44"
+            className="h-40 w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base leading-6 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/4 sm:h-44"
           />
 
           <p className="text-sm text-slate-500 dark:text-slate-400">

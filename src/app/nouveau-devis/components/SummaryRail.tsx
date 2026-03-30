@@ -156,7 +156,7 @@ export function SummaryRail({
               <select
                 value={tva}
                 onChange={(event) => onTvaChange(event.target.value)}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
               >
                 {TVA_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
@@ -166,14 +166,14 @@ export function SummaryRail({
               </select>
             </label>
 
-            <label className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
+            <label className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-base font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
               Remise (%)
               <input
                 type="number"
                 min="0"
                 value={remise}
                 onChange={(event) => onRemiseChange(event.target.value)}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
               />
             </label>
 
@@ -184,7 +184,7 @@ export function SummaryRail({
                 min="0"
                 value={acompte}
                 onChange={(event) => onAcompteChange(event.target.value)}
-                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
               />
             </label>
           </div>

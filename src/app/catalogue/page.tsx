@@ -615,7 +615,7 @@ export default function CataloguePage() {
                 placeholder="Rechercher une prestation ou une catégorie..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="w-full rounded-[1.25rem] border border-slate-200/80 bg-white/90 py-3 pl-12 pr-4 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                className="w-full rounded-[1.25rem] border border-slate-200/80 bg-white/90 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
               />
             </div>
 
@@ -661,7 +661,7 @@ export default function CataloguePage() {
                   <select
                     value={form.categorie}
                     onChange={(event) => setForm((current) => ({ ...current, categorie: event.target.value }))}
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   >
                     {STARTER_CATEGORIES.map((category) => (
                       <option key={category} value={category}>
@@ -671,14 +671,14 @@ export default function CataloguePage() {
                   </select>
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                <label className="flex flex-col gap-2 text-base font-medium text-slate-700 dark:text-slate-200">
                   Nom de la prestation
                   <input
                     required
                     value={form.nom}
                     onChange={(event) => setForm((current) => ({ ...current, nom: event.target.value }))}
                     placeholder="Ex: Peinture mate blanche"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
 
@@ -687,7 +687,7 @@ export default function CataloguePage() {
                   <select
                     value={form.unite}
                     onChange={(event) => setForm((current) => ({ ...current, unite: event.target.value }))}
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   >
                     <option value="m²">m²</option>
                     <option value="ml">ml</option>
@@ -697,7 +697,7 @@ export default function CataloguePage() {
                   </select>
                 </label>
 
-                <label className="flex flex-col gap-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                <label className="flex flex-col gap-2 text-base font-medium text-slate-700 dark:text-slate-200">
                   Prix HT
                   <input
                     required
@@ -707,7 +707,7 @@ export default function CataloguePage() {
                     value={form.prix}
                     onChange={(event) => setForm((current) => ({ ...current, prix: event.target.value }))}
                     placeholder="0,00"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
 
@@ -720,7 +720,7 @@ export default function CataloguePage() {
                     value={form.cout}
                     onChange={(event) => setForm((current) => ({ ...current, cout: event.target.value }))}
                     placeholder="Optionnel"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
 
@@ -733,7 +733,7 @@ export default function CataloguePage() {
                     value={form.stock}
                     onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
                     placeholder="Optionnel"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
               </div>
