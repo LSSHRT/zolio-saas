@@ -78,19 +78,21 @@ export function MobileDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 flex max-h-[80vh] w-full flex-col overflow-hidden rounded-t-[1.9rem] border border-slate-200/80 bg-white/96 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.5)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 sm:max-h-[min(82vh,44rem)] sm:max-w-lg sm:rounded-[1.9rem]"
+        className="relative z-10 flex max-h-[70vh] w-full flex-col overflow-hidden rounded-t-[1.9rem] border border-slate-200/80 bg-white/96 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.5)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 sm:max-h-[min(82vh,44rem)] sm:max-w-lg sm:rounded-[1.9rem]"
       >
-        <div className="flex justify-center pt-3 sm:hidden">
+        {/* Poignée de drag mobile */}
+        <div className="flex justify-center pt-2 pb-1 sm:hidden">
           <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
         </div>
 
-        <div className={`shrink-0 border-b px-5 py-4 sm:px-6 ${getToneClasses(tone)}`}>
-          <div className="flex items-start justify-between gap-4">
+        {/* Header sticky avec bouton fermer */}
+        <div className={`sticky top-0 z-10 shrink-0 border-b px-5 py-3 sm:px-6 ${getToneClasses(tone)}`}>
+          <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] opacity-80">Action rapide</p>
-              <h2 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
+              <h2 className="mt-1 text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
               {description ? (
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
+                <p className="mt-1 text-sm leading-5 text-slate-600 dark:text-slate-300">{description}</p>
               ) : null}
             </div>
             <button
@@ -99,15 +101,21 @@ export function MobileDialog({
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:border-violet-400/20 dark:hover:text-white"
               aria-label="Fermer"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
         </div>
 
-        {children ? <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">{children}</div> : null}
+        {/* Contenu scrollable */}
+        {children ? (
+          <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:px-6">
+            {children}
+          </div>
+        ) : null}
 
+        {/* Actions footer sticky */}
         {actions ? (
-          <div className="shrink-0 border-t border-slate-200/80 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-4 backdrop-blur sm:flex-row sm:justify-end sm:px-6 sm:pb-4 dark:border-white/10 dark:bg-slate-950/95">
+          <div className="sticky bottom-0 shrink-0 border-t border-slate-200/80 bg-white/95 px-5 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur sm:flex-row sm:justify-end sm:px-6 sm:pb-3 dark:border-white/10 dark:bg-slate-950/95">
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">{actions}</div>
           </div>
         ) : null}

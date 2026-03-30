@@ -45,12 +45,12 @@ export function NotificationPrompt() {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center p-4 sm:items-center">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm" onClick={handleDeny} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-[1.5rem] border border-slate-200/80 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-slate-900">
+      <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[1.5rem] border border-slate-200/80 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-slate-900">
         <button
           type="button"
           onClick={handleDeny}
