@@ -22,6 +22,7 @@ import {
   TriangleAlert,
   User,
   Users,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -411,21 +412,17 @@ function MobileDisclosureSection({
 
 function DashboardNotificationsMenu({
   dashboardSignals,
-  onToggle,
-  onClose,
-  showNotifications,
 }: {
   dashboardSignals: DashboardSignal[];
-  onToggle: () => void;
-  onClose: () => void;
-  showNotifications: boolean;
 }) {
+  const [open, setOpen] = useState(false);
+
   const signalList = dashboardSignals.length ? (
     <div className="space-y-3">
       {dashboardSignals.map((signal) => {
         const classes = toneClasses(signal.tone);
         const content = (
-          <div className="rounded-[1.4rem] border border-slate-200/70 bg-white/70 p-3 dark:border-white/8 dark:bg-white/4">
+          <div className="rounded-2xl border border-slate-200/70 bg-white/70 p-3 dark:border-white/8 dark:bg-white/4">
             <div className="flex items-start gap-3">
               <div className={`mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-2xl ring-1 ${classes.icon}`}>
                 {renderSignalIcon(signal.tone)}
@@ -439,7 +436,7 @@ function DashboardNotificationsMenu({
         );
 
         return signal.href ? (
-          <Link key={signal.id} href={signal.href} onClick={onClose}>
+          <Link key={signal.id} href={signal.href} onClick={() => setOpen(false)}>
             {content}
           </Link>
         ) : (
@@ -448,20 +445,18 @@ function DashboardNotificationsMenu({
       })}
     </div>
   ) : (
-    <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
-      <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucune alerte prioritaire</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-        Le cockpit est calme pour le moment. Revenez plus tard pour les prochains signaux.
-      </p>
+    <div className="rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+      <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucune alerte</p>
+      <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">Tout est calme pour le moment.</p>
     </div>
   );
 
   return (
-    <div className="relative">
+    <>
       <button
         type="button"
-        onClick={onToggle}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+        onClick={() => setOpen(true)}
+        className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
         aria-label="Notifications"
       >
         <Bell size={20} />
@@ -470,20 +465,28 @@ function DashboardNotificationsMenu({
         )}
       </button>
 
-      {showNotifications ? (
-        <MobileDialog
-          open={showNotifications}
-          onClose={onClose}
-          title="Attention du jour"
-          description="Retrouvez ici les points qui méritent un coup d'oeil."
-        >
-          {signalList}
-        </MobileDialog>
-      ) : null}
-    </div>
+      {open && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <button type="button" onClick={() => setOpen(false)} className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-label="Fermer" />
+          <div className="relative z-10 w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Alertes</p>
+                <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Attention du jour</h2>
+              </div>
+              <button type="button" onClick={() => setOpen(false)} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-white/10 dark:text-slate-300 dark:hover:bg-white/20">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {signalList}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
-
 function TradeOptionCard({
   active,
   onSelect,
@@ -557,7 +560,7 @@ export default function DashboardPage() {
   const [objectif, setObjectif] = useState(objectifInitial);
   const objectifActif =
     Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;
-  const [showNotifications, setShowNotifications] = useState(false);
+  // showNotifications removed - managed inside component
   const [objectifDialogOpen, setObjectifDialogOpen] = useState(false);
   const [objectifDraft, setObjectifDraft] = useState(() => objectifInitial.toString());
   const [runTour, setRunTour] = useState(() => {
@@ -1073,9 +1076,6 @@ export default function DashboardPage() {
                 </Link>
                 <DashboardNotificationsMenu
                   dashboardSignals={dashboardSignals}
-                  onToggle={() => setShowNotifications((value) => !value)}
-                  onClose={() => setShowNotifications(false)}
-                  showNotifications={showNotifications}
                 />
                 <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
                   {isLoaded ? <UserButton /> : <User size={18} />}
@@ -1113,9 +1113,6 @@ export default function DashboardPage() {
               <ThemeToggle />
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
-                onToggle={() => setShowNotifications((value) => !value)}
-                onClose={() => setShowNotifications(false)}
-                showNotifications={showNotifications}
               />
               <div className="inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-violet-50 ring-1 ring-violet-200/60 dark:bg-white/8 dark:ring-white/10">
                 {isLoaded ? <UserButton /> : <User size={18} />}
