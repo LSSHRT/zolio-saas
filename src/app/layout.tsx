@@ -62,6 +62,11 @@ export default function RootLayout({
         <body
           className={`${outfit.variable} font-sans antialiased`}
         >
+          {/* Fix zoom iOS : force 16px sur tous les champs pour empêcher le zoom auto */}
+          <style dangerouslySetInnerHTML={{ __html: `
+            input, select, textarea { font-size: 16px !important; }
+            body { touch-action: manipulation; }
+          ` }} />
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

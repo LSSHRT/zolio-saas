@@ -752,15 +752,3 @@
 .animate-landing-drift {
   animation: landing-drift 14s ease-in-out infinite;
 }
-
-/* Empêche le zoom auto sur iOS/Android quand on tape dans un champ */
-input,
-select,
-textarea {
-  font-size: 16px !important;
-}
-
-/* Empêche le double-tap zoom */
-body {
-  touch-action: manipulation;
-}
