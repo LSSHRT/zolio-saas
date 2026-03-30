@@ -484,7 +484,7 @@ function DashboardNotificationsMenu({
           </div>
 
           <div className="hidden md:block">
-            <div className="client-panel absolute right-0 top-14 z-50 w-[min(92vw,24rem)] rounded-[1.75rem] p-4 shadow-2xl">
+            <div className="client-panel absolute right-0 top-14 z-50 max-h-[70vh] w-[min(92vw,24rem)] overflow-y-auto rounded-[1.75rem] p-4 shadow-2xl">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-semibold text-slate-950 dark:text-white">Attention du jour</p>

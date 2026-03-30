@@ -55,12 +55,19 @@ export function MobileDialog({
     };
   }, [open, onClose]);
 
+  // Safety: reset body overflow quand le composant est démonté (changement de page)
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   if (!open) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-[90] flex items-end justify-center p-0 pt-6 sm:items-center sm:p-6">
+    <div className="fixed inset-0 z-[90] flex items-end justify-center p-0 sm:items-center sm:p-6">
       <button
         type="button"
         onClick={onClose}
@@ -71,7 +78,7 @@ export function MobileDialog({
       <div
         role="dialog"
         aria-modal="true"
-        className="relative z-10 flex max-h-[min(88vh,46rem)] w-full flex-col overflow-hidden rounded-t-[1.9rem] border border-slate-200/80 bg-white/96 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.5)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 sm:max-h-[min(82vh,44rem)] sm:max-w-lg sm:rounded-[1.9rem]"
+        className="relative z-10 flex max-h-[80vh] w-full flex-col overflow-hidden rounded-t-[1.9rem] border border-slate-200/80 bg-white/96 shadow-[0_28px_90px_-38px_rgba(15,23,42,0.5)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96 sm:max-h-[min(82vh,44rem)] sm:max-w-lg sm:rounded-[1.9rem]"
       >
         <div className="flex justify-center pt-3 sm:hidden">
           <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
