@@ -62,7 +62,7 @@ export default function RootLayout({
         <body
           className={`${outfit.variable} font-sans antialiased`}
         >
-          {/* Fix zoom iOS : force 16px sur tous les champs pour empêcher le zoom auto */}
+          {/* Fix zoom iOS : force 16px + JS anti-zoom */}
           <style dangerouslySetInnerHTML={{ __html: `
             input, select, textarea { font-size: 16px !important; }
             body { touch-action: manipulation; }
@@ -93,6 +93,29 @@ export default function RootLayout({
             if ("serviceWorker" in navigator) {
               navigator.serviceWorker.register("/sw.js");
             }
+          `}</Script>
+          {/* Anti-zoom iOS : reset le viewport dès qu'un input est focusé */}
+          <Script id="anti-zoom-ios" strategy="afterInteractive">{`
+            (function(){
+              var mq = window.matchMedia('(max-width: 768px)');
+              if(!mq.matches) return;
+              function resetZoom(){
+                var vp = document.querySelector('meta[name="viewport"]');
+                if(vp) vp.setAttribute('content','width=device-width,initial-scale=1,maximum-scale=1');
+              }
+              document.addEventListener('focusin',function(e){
+                if(e.target.matches('input,textarea,select')){
+                  resetZoom();
+                  setTimeout(resetZoom,100);
+                  setTimeout(resetZoom,300);
+                }
+              },true);
+              document.addEventListener('focusout',function(e){
+                if(e.target.matches('input,textarea,select')){
+                  setTimeout(resetZoom,100);
+                }
+              },true);
+            })();
           `}</Script>
         </body>
       </html>
