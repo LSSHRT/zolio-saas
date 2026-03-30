@@ -143,6 +143,8 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(totalCount / limit),
         hasMore: offset + limit < totalCount,
       },
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
     });
   } catch (error) {
     return internalServerError("devis-get", error, "Impossible de récupérer les devis");

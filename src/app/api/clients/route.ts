@@ -38,7 +38,9 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json(clients.map(mapClient));
+    return NextResponse.json(clients.map(mapClient), {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
+    });
   } catch (error) {
     return internalServerError("clients-get", error, "Impossible de récupérer les clients");
   }

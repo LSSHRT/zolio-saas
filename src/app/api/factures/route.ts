@@ -271,6 +271,8 @@ export async function GET(request: Request) {
     return NextResponse.json({
       data: facturesDb.map(mapFacture),
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+    }, {
+      headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
     });
   } catch (error) {
     return internalServerError(
