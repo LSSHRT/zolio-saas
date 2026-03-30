@@ -471,32 +471,14 @@ function DashboardNotificationsMenu({
       </button>
 
       {showNotifications ? (
-        <>
-          <div className="md:hidden">
-            <MobileDialog
-              open={showNotifications}
-              onClose={onClose}
-              title="Attention du jour"
-              description="Retrouvez ici les points qui méritent un coup d'œil sans comprimer le cockpit mobile."
-            >
-              {signalList}
-            </MobileDialog>
-          </div>
-
-          <div className="hidden md:block">
-            <div className="client-panel absolute right-0 top-14 z-50 max-h-[70vh] w-[min(92vw,24rem)] overflow-y-auto rounded-[1.75rem] p-4 shadow-2xl">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Attention du jour</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Les points qui méritent un coup d&apos;œil.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4">{signalList}</div>
-            </div>
-          </div>
-        </>
+        <MobileDialog
+          open={showNotifications}
+          onClose={onClose}
+          title="Attention du jour"
+          description="Retrouvez ici les points qui méritent un coup d'oeil."
+        >
+          {signalList}
+        </MobileDialog>
       ) : null}
     </div>
   );
