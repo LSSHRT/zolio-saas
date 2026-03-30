@@ -466,9 +466,9 @@ function DashboardNotificationsMenu({
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center pt-20 sm:pt-0 p-4">
           <button type="button" onClick={() => setOpen(false)} className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-label="Fermer" />
-          <div className="relative z-10 w-full max-w-md max-h-[85vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+          <div className="relative z-10 w-full max-w-md max-h-[75vh] flex flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b px-5 py-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">Alertes</p>
