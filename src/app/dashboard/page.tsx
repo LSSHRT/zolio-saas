@@ -415,6 +415,13 @@ function DashboardNotificationsMenu({
 }: {
   dashboardSignals: DashboardSignal[];
 }) {
+  const { data } = useSWR("/api/notifications", fetcher, {
+    refreshInterval: 30000,
+    dedupingInterval: 15000,
+  });
+  const unreadCount: number = data?.unreadCount ?? 0;
+  const total = dashboardSignals.length + unreadCount;
+
   return (
     <Link
       href="/notifications"
@@ -422,8 +429,10 @@ function DashboardNotificationsMenu({
       aria-label="Notifications"
     >
       <Bell size={20} />
-      {dashboardSignals.length > 0 && (
-        <span className="absolute right-2 top-2 inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400" />
+      {total > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400 px-1 text-[10px] font-bold text-white">
+          {total > 99 ? "99+" : total}
+        </span>
       )}
     </Link>
   );
