@@ -5,6 +5,11 @@ import { logError, logWarn } from "@/lib/logger";
 
 const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || "";
 
+function isPushSupported(): boolean {
+  if (typeof window === "undefined") return false;
+  return "serviceWorker" in navigator && "PushManager" in window && !!VAPID_PUBLIC_KEY;
+}
+
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
@@ -17,31 +22,27 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
 }
 
 export function usePushNotifications() {
-  const [isSupported, setIsSupported] = useState(false);
+  const supported = isPushSupported();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Vérifier abonnement au montage
   useEffect(() => {
-    const supported = "serviceWorker" in navigator && "PushManager" in window && !!VAPID_PUBLIC_KEY;
-    setIsSupported(supported);
+    if (!supported) return;
 
-    if (supported) {
-      checkSubscription();
-    }
-  }, []);
-
-  async function checkSubscription() {
-    try {
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
-      setIsSubscribed(!!subscription);
-    } catch (error) {
-      logError("push-check", error);
-    }
-  }
+    (async () => {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        setIsSubscribed(!!subscription);
+      } catch (error) {
+        logError("push-check", error);
+      }
+    })();
+  }, [supported]);
 
   async function subscribe() {
-    if (!isSupported) return;
+    if (!supported) return;
     setIsLoading(true);
 
     try {
@@ -81,7 +82,7 @@ export function usePushNotifications() {
   }
 
   async function unsubscribe() {
-    if (!isSupported) return;
+    if (!supported) return;
     setIsLoading(true);
 
     try {
@@ -110,5 +111,5 @@ export function usePushNotifications() {
     }
   }
 
-  return { isSupported, isSubscribed, isLoading, subscribe, unsubscribe };
+  return { isSupported: supported, isSubscribed, isLoading, subscribe, unsubscribe };
 }

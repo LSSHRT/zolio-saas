@@ -236,7 +236,7 @@ export default function CalepinPage() {
                   Prenez une note en quelques secondes
                 </h2>
                 <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Ouvrez l'éditeur, saisissez vos dimensions ou une idée de chantier, puis retrouvez-la tout de suite dans la liste.
+                  Ouvrez l&apos;éditeur, saisissez vos dimensions ou une idée de chantier, puis retrouvez-la tout de suite dans la liste.
                 </p>
               </div>
               <button

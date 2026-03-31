@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { Bell, BellOff, X } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 
@@ -11,12 +10,6 @@ export function NotificationPrompt() {
   const { isSupported, isSubscribed, subscribe } = usePushNotifications();
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
-  const pathname = usePathname();
-
-  // Fermer le prompt quand on change de page
-  useEffect(() => {
-    setShow(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!isSupported) return;
