@@ -51,6 +51,7 @@ export function NotificationPrompt() {
         <button
           type="button"
           onClick={handleDeny}
+          aria-label="Fermer"
           className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-400 shadow-sm hover:bg-slate-100 hover:text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           <X size={18} />

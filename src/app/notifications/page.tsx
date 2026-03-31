@@ -103,7 +103,7 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/8 dark:bg-slate-950/90">
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
-          <Link href="/dashboard" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/8 dark:hover:text-white">
+          <Link href="/dashboard" aria-label="Retour au tableau de bord" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/8 dark:hover:text-white">
             <ArrowLeft size={20} />
           </Link>
           <div className="flex items-center gap-2">
