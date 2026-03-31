@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { uploadPhoto, isPhotoUrl, fetchPhotoAsBase64 } from "../blob-photos";
+import { isPhotoUrl, fetchPhotoAsBase64 } from "../blob-photos";
 
 describe("blob-photos", () => {
   describe("isPhotoUrl", () => {

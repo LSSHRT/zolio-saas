@@ -4,7 +4,6 @@ import { sendProspectEmail } from "@/lib/sendEmail";
 import { requireAdminUser } from "@/lib/admin";
 import { internalServerError, jsonError } from "@/lib/http";
 import { logError } from "@/lib/logger";
-import { adminMailSchema } from "@/lib/validations";
 import {
   ProspectingConfigError,
   getProspectCooldownCutoff,

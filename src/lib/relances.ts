@@ -1,10 +1,6 @@
 import { prisma } from "@/lib/prisma";
-import { sendDevisEmail } from "@/lib/sendEmail";
-import { generateFacturePDF } from "@/lib/generatePdf";
-import { getCompanyProfile } from "@/lib/company";
-import { clerkClient } from "@clerk/nextjs/server";
 import { logError } from "@/lib/logger";
-import { getAdminSettingValue, ADMIN_SETTING_KEYS } from "@/lib/admin-settings";
+import { getAdminSettingValue } from "@/lib/admin-settings";
 
 /**
  * Vérifie les factures impayées et envoie des relances automatiques.

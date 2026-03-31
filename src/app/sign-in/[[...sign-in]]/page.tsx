@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { SignIn } from "@clerk/nextjs";
 
 export default function Page() {
@@ -10,9 +11,9 @@ export default function Page() {
           <p className="text-xl text-violet-100 mb-8 max-w-lg">Rejoignez des centaines d&apos;artisans qui ont déjà simplifié leur facturation avec Zolio.</p>
           <div className="flex items-center space-x-4">
             <div className="flex -space-x-2">
-              <img className="w-10 h-10 rounded-full border-2 border-violet-600" src="https://i.pravatar.cc/100?img=11" alt="User" />
-              <img className="w-10 h-10 rounded-full border-2 border-violet-600" src="https://i.pravatar.cc/100?img=32" alt="User" />
-              <img className="w-10 h-10 rounded-full border-2 border-violet-600" src="https://i.pravatar.cc/100?img=33" alt="User" />
+              <Image width={40} height={40} className="w-10 h-10 rounded-full border-2 border-violet-600" src="https://i.pravatar.cc/100?img=11" alt="User" />
+              <Image width={40} height={40} className="w-10 h-10 rounded-full border-2 border-violet-600" src="https://i.pravatar.cc/100?img=32" alt="User" />
+              <Image width={40} height={40} className="w-10 h-10 rounded-full border-2 border-violet-600" src="https://i.pravatar.cc/100?img=33" alt="User" />
             </div>
             <span className="text-sm font-medium">Recommandé par 500+ artisans</span>
           </div>

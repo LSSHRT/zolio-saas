@@ -5,16 +5,6 @@ import { X } from "lucide-react";
 
 type MobileDialogTone = "default" | "accent" | "danger";
 
-function getToneClasses(tone: MobileDialogTone) {
-  switch (tone) {
-    case "accent":
-      return "border-violet-200/80 bg-violet-50/90 text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-100";
-    case "danger":
-      return "border-rose-200/80 bg-rose-50/90 text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100";
-    default:
-      return "border-slate-200/80 bg-white/90 text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100";
-  }
-}
 
 export function MobileDialog({
   actions,

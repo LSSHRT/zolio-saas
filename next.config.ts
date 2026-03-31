@@ -49,6 +49,12 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["jspdf"],
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "i.pravatar.cc" },
+      { protocol: "https", hostname: "img.clerk.com" },
+    ],
+  },
   async headers() {
     return [
       {

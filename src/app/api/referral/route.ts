@@ -4,7 +4,7 @@ import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 
 // POST — Générer un lien de parrainage
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const { userId } = await auth();
     if (!userId) return jsonError("Non autorisé", 401);
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 }
 
 // GET — Vérifier le statut de parrainage
-export async function GET(request: Request) {
+export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return jsonError("Non autorisé", 401);

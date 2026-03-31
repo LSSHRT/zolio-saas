@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseLignes, getLineTotal, computeTotals, type LignePayload } from "../devis-lignes";
+import { computeTotals, type LignePayload } from "../devis-lignes";
 import { rateLimit } from "../rate-limit";
 import { normalizeEmail, isValidEmail, isPersonalMailbox } from "../prospecting";
 import { createPublicDevisToken, verifyPublicDevisToken } from "../public-devis-token";

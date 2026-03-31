@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   parseLignes,
-  getLineTotal,
+
   computeTotals,
   normalizeLigneForOutput,
   type LignePayload,

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
-import { getLineTotal, normalizeLigneForOutput } from "@/lib/devis-lignes";
+import { normalizeLigneForOutput } from "@/lib/devis-lignes";
 import { templateCreateSchema, zodErrorResponse } from "@/lib/validations";
 
 export async function GET() {

@@ -38,7 +38,7 @@ interface NotesResponse {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CalepinPage() {
-  const [page, setPage] = useState(1);
+  const [page, _setPage] = useState(1);
   const { data, error, isLoading, mutate } = useSWR<NotesResponse>(`/api/notes?page=${page}&limit=20`, fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
@@ -53,7 +53,7 @@ export default function CalepinPage() {
   const notePreview = (currentNote.contenu || "").trim();
 
   const noteList = useMemo<Note[]>(() => (Array.isArray(data?.data) ? data.data : []), [data]);
-  const pagination = data?.pagination ?? null;
+  const _pagination = data?.pagination ?? null;
   const titledNotes = useMemo(
     () => noteList.filter((note) => Boolean(note.titre && note.titre.trim())).length,
     [noteList],

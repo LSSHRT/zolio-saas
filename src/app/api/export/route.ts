@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
           const { totalHT, totalTTC } = computeTotals(lignes, d.tva || 0, d.remise || 0);
 
-          const pdfBuffer = await generateDevisPDF({
+          const _pdfBuffer = await generateDevisPDF({
             numeroDevis: d.numero,
             date: d.date.toLocaleDateString("fr-FR"),
             client: {
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
           });
 
           results.push({ numero: d.numero, status: "OK" });
-        } catch (error) {
+        } catch {
           results.push({ numero: d.numero, status: "Erreur" });
         }
       }
