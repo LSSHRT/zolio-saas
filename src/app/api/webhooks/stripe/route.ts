@@ -3,6 +3,7 @@ import Stripe from "stripe";
 import { clerkClient } from "@clerk/nextjs/server";
 import { internalServerError } from "@/lib/http";
 import { logError, logWarn, logInfo } from "@/lib/logger";
+import { createNotification } from "@/lib/notifications";
 
 // Stripe webhook endpoint
 export async function POST(req: Request) {
@@ -48,6 +49,15 @@ export async function POST(req: Request) {
             },
           });
           logInfo("stripe-webhook", `Utilisateur ${userId} passé en Pro via Webhook.`);
+
+          await createNotification({
+            userId,
+            type: "subscription_activated",
+            title: "Bienvenue en Pro !",
+            description: "Votre abonnement est actif. Profitez de toutes les fonctionnalités.",
+            href: "/dashboard",
+            tone: "emerald",
+          });
         } else {
           logWarn("stripe-webhook", "checkout.session.completed: userId introuvable");
         }
@@ -67,6 +77,15 @@ export async function POST(req: Request) {
             },
           });
           logInfo("stripe-webhook", `Utilisateur ${userId} a perdu son abonnement Pro.`);
+
+          await createNotification({
+            userId,
+            type: "subscription_cancelled",
+            title: "Abonnement annulé",
+            description: "Votre abonnement Pro a pris fin. Vous êtes revenu au plan Starter.",
+            href: "/abonnement",
+            tone: "amber",
+          });
         } else {
           logWarn("stripe-webhook", "customer.subscription.deleted: userId introuvable");
         }

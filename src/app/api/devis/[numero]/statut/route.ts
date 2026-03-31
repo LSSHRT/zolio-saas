@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
+import { createNotification } from "@/lib/notifications";
 import { parseLignes, type LignePayload } from "@/lib/devis-lignes";
 
 const ALLOWED_DEVIS_STATUSES = new Set([
@@ -98,6 +99,36 @@ export async function PATCH(request: Request, context: { params: Promise<{ numer
       where: { numero, userId },
       data: { statut },
     });
+
+    // Notification pour changement de statut significatif
+    if (statut === "Accepté") {
+      await createNotification({
+        userId,
+        type: "devis_signed",
+        title: `Devis ${numero} signé`,
+        description: `Votre devis ${numero} a été accepté par le client.`,
+        href: `/devis/${numero}`,
+        tone: "emerald",
+      });
+    } else if (statut === "Refusé") {
+      await createNotification({
+        userId,
+        type: "devis_refused",
+        title: `Devis ${numero} refusé`,
+        description: `Le devis ${numero} a été refusé.`,
+        href: `/devis/${numero}`,
+        tone: "rose",
+      });
+    } else if (statut === "Payé") {
+      await createNotification({
+        userId,
+        type: "facture_paid",
+        title: `Paiement reçu — ${numero}`,
+        description: `Le paiement du devis ${numero} a été confirmé.`,
+        href: `/devis/${numero}`,
+        tone: "emerald",
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
