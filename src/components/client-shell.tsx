@@ -625,6 +625,20 @@ export function ClientSubpageShell({
         </main>
       </div>
 
+      <footer className="hidden border-t border-slate-200/60 py-4 text-center text-xs text-slate-400 dark:border-white/6 md:block">
+        <div className="mx-auto flex max-w-7xl items-center justify-center gap-4 px-6">
+          <span>© {new Date().getFullYear()} Zolio</span>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
+          <Link href="/cgu" className="hover:text-slate-600 dark:hover:text-slate-200 transition">CGU</Link>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
+          <Link href="/cgv" className="hover:text-slate-600 dark:hover:text-slate-200 transition">CGV</Link>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
+          <Link href="/mentions-legales" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Mentions légales</Link>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
+          <Link href="/politique-confidentialite" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Confidentialité</Link>
+        </div>
+      </footer>
+
       {showMobileDock ? <ClientMobileDock active={activeNav} /> : null}
     </div>
   );
