@@ -8,6 +8,7 @@ import {
   ArrowLeft,
   Calculator,
   Calendar,
+  ChevronRight,
   Copy,
   CreditCard,
   FileText,
@@ -526,6 +527,7 @@ export function ClientSubpageShell({
   actions,
   activeNav,
   backHref = "/dashboard",
+  breadcrumbs,
   children,
   description,
   eyebrow = "Espace client",
@@ -539,6 +541,7 @@ export function ClientSubpageShell({
   actions?: ReactNode;
   activeNav: ClientNavKey;
   backHref?: string;
+  breadcrumbs?: { label: string; href?: string }[];
   children: ReactNode;
   description: string;
   eyebrow?: string;
@@ -604,6 +607,22 @@ export function ClientSubpageShell({
             <div className="flex flex-col gap-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="max-w-3xl">
+                  {breadcrumbs && breadcrumbs.length > 0 && (
+                    <nav aria-label="Fil d'Ariane" className="mb-2 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                      {breadcrumbs.map((crumb, i) => (
+                        <span key={i} className="flex items-center gap-1.5">
+                          {i > 0 && <ChevronRight size={12} className="shrink-0" />}
+                          {crumb.href ? (
+                            <Link href={crumb.href} className="transition hover:text-slate-600 dark:hover:text-slate-300">
+                              {crumb.label}
+                            </Link>
+                          ) : (
+                            <span className="font-medium text-slate-500 dark:text-slate-400">{crumb.label}</span>
+                          )}
+                        </span>
+                      ))}
+                    </nav>
+                  )}
                   <p className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
                     {eyebrow}
                   </p>
