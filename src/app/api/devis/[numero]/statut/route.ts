@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 import { parseLignes, type LignePayload } from "@/lib/devis-lignes";
 
 const ALLOWED_DEVIS_STATUSES = new Set([

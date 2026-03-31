@@ -113,13 +113,7 @@ function mapQuote(quote: RawDashboardQuote): ClientDashboardQuoteSummary {
   };
 }
 
-function isPendingQuote(status: string) {
-  return status === "En attente" || status === "En attente (Modifié)";
-}
 
-function isClosedQuote(status: string) {
-  return status === "Accepté" || status === "Refusé";
-}
 
 /**
  * Version optimisée du dashboard.
@@ -217,7 +211,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   ]);
 
   // Calcul des totaux uniquement sur les devis acceptés récents (pas tous les devis)
-  const allRelevantQuotes = [...recentQuotes, ...followUpQuotesRaw, ...acceptedQuotesForChart] as RawDashboardQuote[];
+  // allRelevantQuotes removed (unused)
 
   let totalHT = 0;
   let totalTTC = 0;

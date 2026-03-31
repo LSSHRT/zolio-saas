@@ -10,7 +10,6 @@ import {
 } from "@/lib/admin-settings";
 import { internalServerError, jsonError } from "@/lib/http";
 import { logError } from "@/lib/logger";
-import { rateLimit } from "@/lib/rate-limit";
 import {
   ProspectingConfigError,
   getProspectCooldownCutoff,

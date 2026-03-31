@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, jsonError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 
 export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
   try {

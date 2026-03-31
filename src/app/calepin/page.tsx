@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { ArrowUpRight, ChevronLeft, ChevronRight, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
+import { ArrowUpRight, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";

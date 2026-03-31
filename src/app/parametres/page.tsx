@@ -3,7 +3,7 @@
 import { useEffect, useState, type ChangeEvent, type CSSProperties, type FormEvent } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { useI18n, type Locale } from "@/lib/i18n/context";
+import { useI18n } from "@/lib/i18n/context";
 import {
   BadgeCheck,
   Building2,

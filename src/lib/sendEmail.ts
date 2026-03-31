@@ -261,7 +261,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
     : `Je prends contact avec des ${tradeLabel} ${city ? `sur ${city}` : ""} qui perdent du temps sur leur paperasse.`;
 
   // Lignes personnalisées selon si on a le nom de l'entreprise ou non
-  const personalLines = context?.companyName
+  const _personalLines = context?.companyName
     ? [
         `${context.companyName} a l'air de faire du bon travail.`,
         `On a créé Zolio spécifiquement pour les ${tradeLabel} comme vous.`,

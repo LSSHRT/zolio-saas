@@ -2,17 +2,9 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { internalServerError, jsonError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 import { noteUpdateSchema, zodErrorResponse } from "@/lib/validations";
 
-type NotePayload = {
-  titre?: string;
-  contenu?: string;
-};
 
-function normalizeText(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
 
 function mapNote(note: { id: string; titre: string; contenu: string; date: Date }) {
   return {

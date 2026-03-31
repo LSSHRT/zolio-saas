@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, jsonError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 import { mapPrestationForClient } from "@/lib/prestations";
 import { prestationUpdateSchema, zodErrorResponse } from "@/lib/validations";
 

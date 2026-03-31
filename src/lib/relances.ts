@@ -90,8 +90,8 @@ export async function checkOverdueFactures() {
     // Envoyer la relance par email si on a l'email du client
     if (facture.emailClient) {
       try {
-        const relanceSubject = `${applicableRelance.label} — Facture ${facture.numero} (${facture.totalTTC.toFixed(2)}€)`;
-        const relanceBody = [
+        const _relanceSubject = `${applicableRelance.label} — Facture ${facture.numero} (${facture.totalTTC.toFixed(2)}€)`;
+        const _relanceBody = [
           `Bonjour ${facture.nomClient},`,
           "",
           `Nous nous permettons de vous relancer concernant la facture ${facture.numero} d'un montant de ${facture.totalTTC.toFixed(2)}€ TTC, émise le ${facture.date.toLocaleDateString("fr-FR")}.`,

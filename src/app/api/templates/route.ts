@@ -6,7 +6,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { getLineTotal, normalizeLigneForOutput } from "@/lib/devis-lignes";
 import { templateCreateSchema, zodErrorResponse } from "@/lib/validations";
 
-export async function GET(_request: Request) {
+export async function GET() {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });

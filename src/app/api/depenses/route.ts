@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, jsonError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 import { depenseCreateSchema, zodErrorResponse } from "@/lib/validations";
 
 type DepenseRecord = {
@@ -13,31 +12,8 @@ type DepenseRecord = {
   categorie?: string | null;
 };
 
-type DepensePayload = {
-  categorie?: unknown;
-  date?: unknown;
-  description?: unknown;
-  montant?: unknown;
-  montantTTC?: unknown;
-};
 
-function normalizeText(value: unknown) {
-  return typeof value === "string" ? value.trim() : "";
-}
 
-function parseAmount(value: unknown, fallback = 0) {
-  const parsed = Number.parseFloat(String(value ?? fallback));
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function parseDate(value: unknown) {
-  if (!value) {
-    return new Date();
-  }
-
-  const parsed = new Date(String(value));
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
 
 function mapDepense(depense: DepenseRecord) {
   return {

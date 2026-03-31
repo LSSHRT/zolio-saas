@@ -3,7 +3,6 @@ import { Prisma } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 import { createLignesForDevis } from "@/lib/devis-lignes";
 

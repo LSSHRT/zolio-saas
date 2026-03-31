@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
-import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
+import { internalServerError, rateLimitResponse } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 import {

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
-import { generateDevisPDF, generateFacturePDF } from "@/lib/generatePdf";
+import { generateDevisPDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
 import { currentUser } from "@clerk/nextjs/server";
 import { parseLignes, normalizeLigneForOutput, computeTotals, type LignePayload } from "@/lib/devis-lignes";

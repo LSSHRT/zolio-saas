@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { requireAdminUser } from "@/lib/admin";
 import { internalServerError, jsonError } from "@/lib/http";
-import { rateLimit } from "@/lib/rate-limit";
 import {
   ADMIN_SETTING_KEYS,
   appendAdminAuditLog,
