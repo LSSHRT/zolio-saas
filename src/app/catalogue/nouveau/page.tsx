@@ -169,7 +169,7 @@ export default function NouvellePrestationPage() {
               type="text"
               value={form.nom}
               onChange={(event) => setForm((current) => ({ ...current, nom: event.target.value }))}
-              placeholder="Nom de la prestation"
+              aria-label="Nom de la prestation" placeholder="Nom de la prestation"
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
             />
           </div>
@@ -195,7 +195,7 @@ export default function NouvellePrestationPage() {
               min="0"
               value={form.prix}
               onChange={(event) => setForm((current) => ({ ...current, prix: event.target.value }))}
-              placeholder="Prix HT"
+              aria-label="Prix HT" placeholder="Prix HT"
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
@@ -204,7 +204,7 @@ export default function NouvellePrestationPage() {
               min="0"
               value={form.cout}
               onChange={(event) => setForm((current) => ({ ...current, cout: event.target.value }))}
-              placeholder="Coût estimé"
+              aria-label="Coût estimé" placeholder="Coût estimé"
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
             <input
@@ -212,7 +212,7 @@ export default function NouvellePrestationPage() {
               min="0"
               value={form.stock}
               onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
-              placeholder="Stock initial"
+              aria-label="Stock initial" placeholder="Stock initial"
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
           </div>

@@ -459,7 +459,7 @@ export default function CalepinPage() {
             </span>
             <input
               type="text"
-              placeholder="Titre de la note..."
+              aria-label="Titre de la note" placeholder="Titre de la note..."
               value={currentNote.titre || ""}
               onChange={(e) => setCurrentNote({ ...currentNote, titre: e.target.value })}
               className="w-full rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-3 text-base font-semibold text-slate-950 outline-none transition placeholder:text-slate-300 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/15 dark:border-white/10 dark:bg-white/6 dark:text-white dark:placeholder:text-slate-600"
@@ -488,7 +488,7 @@ export default function CalepinPage() {
               Contenu
             </span>
             <textarea
-              placeholder="Écrivez vos notes de chantier, dimensions, idées..."
+              aria-label="Notes de chantier" placeholder="Écrivez vos notes de chantier, dimensions, idées..."
               value={currentNote.contenu || ""}
               onChange={(e) => setCurrentNote({ ...currentNote, contenu: e.target.value })}
               className="min-h-[18rem] w-full resize-none rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-base leading-7 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/15 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:placeholder:text-slate-600"
