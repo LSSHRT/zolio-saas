@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, rateLimitResponse } from "@/lib/http";
+import { createNotification } from "@/lib/notifications";
 import { rateLimit } from "@/lib/rate-limit";
 import { clientCreateSchema, clientBulkSchema, zodErrorResponse } from "@/lib/validations";
 
@@ -83,6 +84,15 @@ export async function POST(request: Request) {
         telephone: parsed.data.telephone || "",
         adresse: parsed.data.adresse || "",
       },
+    });
+
+    await createNotification({
+      userId,
+      type: "client_added",
+      title: "Nouveau client ajouté",
+      description: `${client.nom} a été ajouté à votre carnet de contacts.`,
+      href: `/clients`,
+      tone: "violet",
     });
 
     return NextResponse.json(mapClient(client));

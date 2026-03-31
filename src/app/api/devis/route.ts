@@ -6,6 +6,7 @@ import { generateDevisPDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, rateLimitResponse } from "@/lib/http";
+import { createNotification } from "@/lib/notifications";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 import {
@@ -319,6 +320,15 @@ export async function POST(request: Request) {
       url: `/devis/${devis.numero}`,
       tag: `devis-created-${devis.numero}`,
     }).catch(() => {});
+
+    await createNotification({
+      userId,
+      type: "devis_created",
+      title: `Devis ${devis.numero} créé`,
+      description: `Devis de ${totalTTC.toFixed(2)}€ TTC pour ${devis.client?.nom || "un client"}.`,
+      href: `/devis/${devis.numero}`,
+      tone: "violet",
+    });
 
     return NextResponse.json({
       numero: devis.numero,

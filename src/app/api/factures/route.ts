@@ -6,6 +6,7 @@ import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
+import { createNotification } from "@/lib/notifications";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
 import { factureCreateSchema, zodErrorResponse } from "@/lib/validations";
 
@@ -227,6 +228,15 @@ export async function POST(request: Request) {
         logServerError("factures-post-email", emailError);
       }
     }
+
+    await createNotification({
+      userId,
+      type: "facture_created",
+      title: `Facture ${numeroFacture} créée`,
+      description: `Facture de ${totalTTC.toFixed(2)}€ TTC${client ? ` pour ${client}` : ""}.`,
+      href: `/factures`,
+      tone: "violet",
+    });
 
     return NextResponse.json({
       numeroFacture,
