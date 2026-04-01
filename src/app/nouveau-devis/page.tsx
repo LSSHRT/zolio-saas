@@ -147,7 +147,7 @@ const WIZARD_STEPS: CreationWizardStep[] = [
   },
   {
     title: "Validation",
-    description: "TVA, remise, acompte, photos et choix d’envoi final.",
+    description: "TVA, remise, acompte, photos et choix d'envoi final.",
   },
 ];
 
@@ -439,7 +439,7 @@ export default function NouveauDevisPage() {
   const canSubmit = hasClient && hasLines && !trialLocked;
   const emailHint =
     selectedClient && !selectedClient.email
-      ? "Ce client n’a pas d’email. Le devis sera bien créé, mais l’envoi sera naturellement ignoré."
+      ? "Ce client n'a pas d'email. Le devis sera bien créé, mais l'envoi sera naturellement ignoré."
       : null;
   const draftSavedLabel = formatDraftSavedAt(draftSavedAt);
 
@@ -617,7 +617,7 @@ export default function NouveauDevisPage() {
       }
 
       if (!Array.isArray(payload.lignes) || payload.lignes.length === 0) {
-        throw new Error(payload.error || "Aucune ligne exploitable n’a été générée");
+        throw new Error(payload.error || "Aucune ligne exploitable n'a été générée");
       }
 
       const generatedLines = payload.lignes;
@@ -639,7 +639,7 @@ export default function NouveauDevisPage() {
       setAiPrompt("");
       toast.success(`${generatedLines.length} ligne(s) IA ajoutée(s) au devis.`);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Erreur lors de la génération avec l’IA.";
+      const message = error instanceof Error ? error.message : "Erreur lors de la génération avec l'IA.";
       toast.error(message);
     } finally {
       setIsGeneratingAI(false);
@@ -691,7 +691,7 @@ export default function NouveauDevisPage() {
       toast.success(`${compressedPhotos.length} photo(s) ajoutée(s) au devis.`);
     } catch (error) {
       logError("devis-photo-compress", error);
-      toast.error("Impossible d’ajouter ces photos.");
+      toast.error("Impossible d'ajouter ces photos.");
     } finally {
       event.target.value = "";
     }
@@ -727,6 +727,16 @@ export default function NouveauDevisPage() {
       });
 
       const payload = (await response.json()) as DevisResult & { error?: string };
+
+      // Quota atteint (plan gratuit 3 devis/mois)
+      if (response.status === 429 && payload.error === "Quota atteint") {
+        toast.error("Quota de 3 devis atteint ce mois. Passez en Pro pour continuer.", {
+          action: { label: "Voir les offres", onClick: () => router.push("/abonnement") },
+        });
+        setSubmitMode(null);
+        return;
+      }
+
       if (!response.ok || !payload.numero) {
         throw new Error(payload.error || "Impossible de créer le devis");
       }
@@ -766,7 +776,7 @@ export default function NouveauDevisPage() {
     <CreationWizardShell
       backHref="/devis"
       currentStep={step}
-      description="Retour à un vrai parcours guidé: client d’abord, chiffrage ensuite, validation à la fin. Plus lisible sur téléphone, plus net sur ordinateur."
+      description="Retour à un vrai parcours guidé: client d'abord, chiffrage ensuite, validation à la fin. Plus lisible sur téléphone, plus net sur ordinateur."
       eyebrow="Wizard devis"
       steps={WIZARD_STEPS}
       title="Nouveau devis"
@@ -780,7 +790,7 @@ export default function NouveauDevisPage() {
               </div>
               <div className="font-medium text-violet-700 dark:text-violet-200">
                 {draftStatus === "saving"
-                  ? "Brouillon en cours de sauvegarde…"
+                  ? "Brouillon en cours de sauvegarde..."
                   : draftSavedLabel
                     ? `Brouillon enregistré à ${draftSavedLabel}`
                     : "Brouillon local prêt dès la première saisie"}
@@ -850,7 +860,7 @@ export default function NouveauDevisPage() {
             </div>
             <div className="font-medium text-violet-700 dark:text-violet-200">
               {draftStatus === "saving"
-                ? "Brouillon en cours de sauvegarde…"
+                ? "Brouillon en cours de sauvegarde..."
                 : draftSavedLabel
                   ? `Brouillon enregistré à ${draftSavedLabel}`
                   : "Brouillon local prêt dès la première saisie"}
@@ -918,9 +928,11 @@ export default function NouveauDevisPage() {
             <div className="flex items-start gap-3 rounded-[1.5rem] border border-rose-300/40 bg-rose-500/10 px-4 py-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
               <Rocket size={18} className="mt-0.5 shrink-0" />
               <div>
-                <p className="font-semibold">Votre essai a atteint sa limite de création</p>
+                <p className="font-semibold">Votre essai a atteint sa limite</p>
                 <p className="mt-2 leading-6 opacity-80">
-                  Le parcours reste consultable pour préparer le devis, mais les actions finales sont bloquées tant que vous n’êtes pas passé en Pro.
+                  {isPro && devisCount !== null && devisCount >= TRIAL_QUOTE_LIMIT
+                    ? "Passez en Pro pour créer des devis illimités."
+                    : "Le parcours reste consultable pour préparer le devis, mais les actions finales sont bloquées. Passez en Pro ou attendez le mois prochain."}
                 </p>
               </div>
             </div>
