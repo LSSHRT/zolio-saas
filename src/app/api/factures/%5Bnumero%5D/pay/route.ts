@@ -9,20 +9,17 @@ function getStripe(): Stripe {
   return new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2026-02-25.clover" });
 }
 
-export async function POST(
-  _request: Request,
-  { params }: { params: Promise<{ numero: string }> },
-) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function POST(_request: Request, ctx: any) {
   try {
     const { userId } = await auth();
     if (!userId) return new NextResponse("Non autorisé", { status: 401 });
 
-    const { numero } = await params;
+    const { numero } = await ctx.params;
 
     const rl = rateLimit(`stripe-pay:${userId}`, 10, 60_000);
     if (!rl.allowed) return NextResponse.json({ error: "Trop de requêtes" }, { status: 429 });
 
-    // Récupérer la facture
     const facture = await prisma.facture.findFirst({
       where: { userId, numero },
     });
@@ -59,7 +56,7 @@ export async function POST(
       ],
       success_url: `${appUrl}/factures?paid=${encodeURIComponent(numero)}`,
       cancel_url: `${appUrl}/factures`,
-      expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 90, // 90 jours
+      expires_at: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 90,
     });
 
     return NextResponse.json({ url: session.url });
