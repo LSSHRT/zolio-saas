@@ -11,6 +11,8 @@ import {
   Clock,
   Download,
   FileText,
+  LayoutGrid,
+  List,
   MessageSquareQuote,
   Search,
   Trash2,
@@ -78,6 +80,7 @@ export default function FacturesPage() {
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   const [pendingDeleteFacture, setPendingDeleteFacture] = useState<Facture | null>(null);
   const [confirmBulkDeleteOpen, setConfirmBulkDeleteOpen] = useState(false);
+const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
   const googleReviewLink =
     (user?.unsafeMetadata?.companyGoogleReview as string) ||
@@ -340,13 +343,36 @@ export default function FacturesPage() {
       }
       mobileSecondaryActions={[
         {
-          icon: FileText,
-          label: "Livre URSSAF",
-          onClick: handleExportURSSAF,
+          disabled: viewMode === "list",
+          icon: List,
+          label: viewMode === "list" ? "Vue liste active" : "Passer en vue liste",
+          onClick: () => setViewMode("list"),
+          tone: viewMode === "list" ? "accent" : "default",
+        },
+        {
+          disabled: viewMode === "kanban",
+          icon: LayoutGrid,
+          label: viewMode === "kanban" ? "Vue kanban active" : "Passer en vue kanban",
+          onClick: () => setViewMode("kanban"),
+          tone: viewMode === "kanban" ? "accent" : "default",
         },
       ]}
       actions={
         <>
+          <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-1.5 rounded-md transition ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow text-brand-violet dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <List size={16} />
+            </button>
+            <button
+              onClick={() => setViewMode("kanban")}
+              className={`p-1.5 rounded-md transition ${viewMode === 'kanban' ? 'bg-white dark:bg-slate-700 shadow text-brand-violet dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}
+            >
+              <LayoutGrid size={16} />
+            </button>
+          </div>
           <button
             type="button"
             onClick={handleExportURSSAF}
@@ -513,28 +539,30 @@ export default function FacturesPage() {
 
         {!loading && (
           <>
-            {filtered.length === 0 ? (
-              <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
-                <FileText size={48} strokeWidth={1} />
-                <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex flex-col gap-2 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
-                      Liste active
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
-                      {filtered.length} facture{filtered.length > 1 ? "s" : ""}
+            {/* Vue liste */}
+            {viewMode === "list" && (
+              filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
+                  <FileText size={48} strokeWidth={1} />
+                  <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex flex-col gap-2 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
+                        Liste active
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">
+                        {filtered.length} facture{filtered.length > 1 ? "s" : ""}
+                      </p>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs sm:text-right">
+                      Ouvrez une carte pour encaisser, relancer ou nettoyer votre vue sans quitter le mobile.
                     </p>
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 sm:max-w-xs sm:text-right">
-                    Ouvrez une carte pour encaisser, relancer ou nettoyer votre vue sans quitter le mobile.
-                  </p>
-                </div>
 
-                {filtered.map((facture: Facture, index: number) => {
+                  {filtered.map((facture: Facture, index: number) => {
                   const late = isLate(facture);
                   const displayStatut =
                     facture.statut === "Payée" ? "Payée" : late ? "En retard" : facture.statut;
@@ -745,6 +773,103 @@ export default function FacturesPage() {
                   );
                 })}
               </div>
+              )
+            )}
+
+            {/* Vue Kanban */}
+            {viewMode === "kanban" && (
+              filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
+                  <FileText size={48} strokeWidth={1} />
+                  <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
+                </div>
+              ) : (
+                <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
+                  {[
+                    { key: "émise", label: "Émise", color: "text-emerald-600" },
+                    { key: "payée", label: "Payée", color: "text-blue-600" },
+                    { key: "retard", label: "En retard", color: "text-red-500" },
+                  ].map(colStatus => {
+                    const colFactures = filtered.filter(f => {
+                      const displayStatut = f.statut === "Payée" ? "Payée" : isLate(f) ? "En retard" : f.statut;
+                      if (colStatus.key === "émise") return displayStatut === "Émise";
+                      if (colStatus.key === "payée") return displayStatut === "Payée";
+                      if (colStatus.key === "retard") return displayStatut === "En retard";
+                      return false;
+                    });
+
+                    const colConfig = statutConfig[colStatus.label] || statutConfig["Émise"];
+                    const ColIcon = colConfig.icon;
+
+                    return (
+                      <div key={colStatus.key} className="min-w-[280px] w-[280px] flex-shrink-0 flex flex-col gap-3 snap-start">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className={`font-bold ${colStatus.color} flex items-center gap-2`}>
+                            <ColIcon size={16} /> {colStatus.label}
+                          </h3>
+                          <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full text-slate-500 font-semibold">{colFactures.length}</span>
+                        </div>
+
+                        {colFactures.map((facture, i) => {
+                          const displayStatut = facture.statut === "Payée" ? "Payée" : isLate(facture) ? "En retard" : facture.statut;
+                          const config = statutConfig[displayStatut] || statutConfig["Émise"];
+                          const Icon = config.icon;
+
+                          return (
+                            <motion.div
+                              key={facture.numero || i}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="min-w-0 flex-1">
+                                  <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{facture.nomClient}</p>
+                                  <p className="text-xs text-slate-400">{facture.numero} · {facture.date}</p>
+                                </div>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white ml-2">{facture.totalTTC}€</p>
+                              </div>
+
+                              {facture.statut !== "Payée" && (
+                                <button
+                                  onClick={() => handleMarkAsPaid(facture.numero)}
+                                  disabled={markingPaid === facture.numero}
+                                  className="w-full py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-100 transition disabled:opacity-50 dark:bg-slate-700 dark:text-blue-300"
+                                >
+                                  <BadgeCheck size={14} className="inline mr-1" />
+                                  {markingPaid === facture.numero ? "..." : "Marquer payée"}
+                                </button>
+                              )}
+
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleDownloadPDF(facture)}
+                                  className="flex-1 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                                >
+                                  <Download size={14} className="inline mr-1" /> PDF
+                                </button>
+                                {facture.statut !== "Payée" && (
+                                  <button
+                                    onClick={() => handleRelance(facture)}
+                                    className="py-1.5 px-2 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
+                                    title="Relancer"
+                                  >
+                                    <Clock size={14} />
+                                  </button>
+                                )}
+                                <ClientMobileActionsMenu
+                                  items={getMobileInvoiceActions(facture)}
+                                  panelAlign="left"
+                                />
+                              </div>
+                            </motion.div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
+                </div>
+              )
             )}
           </>
         )}
