@@ -96,23 +96,26 @@ model Depense {
 }
 
 model Facture {
-  id            String              @id @default(cuid())
-  userId        String
-  numero        String
-  devisId       String?             // Lien vers le devis source
-  devis         Devis?              @relation(fields: [devisId], references: [id], onDelete: SetNull)
-  devisRef      String?             // @deprecated - Ancien champ texte, gardé pour migration
-  recurrenteId  String?             // Lien vers facture récurrente
-  recurrente    FactureRecurrente?  @relation(fields: [recurrenteId], references: [id], onDelete: SetNull)
-  nomClient     String
-  emailClient   String?
-  totalHT       Float
-  tva           Float
-  totalTTC      Float
-  statut        String              @default("Émise") // Émise, Payée, En retard
-  date          DateTime            @default(now())
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+  id                String              @id @default(cuid())
+  userId            String
+  numero            String
+  devisId           String?             // Lien vers le devis source
+  devis             Devis?              @relation(fields: [devisId], references: [id], onDelete: SetNull)
+  devisRef          String?             // @deprecated - Ancien champ texte, gardé pour migration
+  recurrenteId      String?             // Lien vers facture récurrente
+  recurrente        FactureRecurrente?  @relation(fields: [recurrenteId], references: [id], onDelete: SetNull)
+  nomClient         String
+  emailClient       String?
+  totalHT           Float
+  tva               Float
+  totalTTC          Float
+  statut            String              @default("Émise") // Émise, Payée, En retard, Annulée
+  date              DateTime            @default(now())
+  dateEcheance      DateTime?           // Date limite de paiement
+  stripePaymentLink String?             // Lien de paiement Stripe Checkout
+  stripeSessionId   String?             // Session Stripe pour suivi
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   @@unique([userId, numero])
   @@index([devisId])

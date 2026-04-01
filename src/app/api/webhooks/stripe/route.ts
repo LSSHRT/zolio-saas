@@ -4,6 +4,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { internalServerError } from "@/lib/http";
 import { logError, logWarn, logInfo } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
+import { prisma } from "@/lib/prisma";
 
 // Stripe webhook endpoint
 export async function POST(req: Request) {
@@ -37,21 +38,44 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
-        // userId was passed in client_reference_id
-        const userId = session.client_reference_id || session.metadata?.userId;
-        
-        if (userId) {
+        const userIdForSub = session.client_reference_id || session.metadata?.userId;
+        const factureNumero = session.metadata?.factureNumero;
+        const mode = session.mode;
+
+        if (factureNumero && mode === "payment") {
+          // Paiement d'une facture → marquer comme payée
+          const facture = await prisma.facture.findFirst({
+            where: { userId: userIdForSub, numero: factureNumero },
+          });
+          if (facture) {
+            await prisma.facture.update({
+              where: { id: facture.id },
+              data: { statut: "Payée" },
+            });
+            logInfo("stripe-webhook", `Facture ${factureNumero} marquée comme payée via Stripe.`);
+
+            await createNotification({
+              userId: userIdForSub as string,
+              type: "facture_paid",
+              title: "Facture payée !",
+              description: `La facture ${factureNumero} de ${facture.nomClient} a été réglée de ${facture.totalTTC}€ via Stripe.`,
+              href: `/factures`,
+              tone: "emerald",
+            });
+          }
+        } else if (userIdForSub) {
+          // C'est un abonnement
           const client = await clerkClient();
-          await client.users.updateUserMetadata(userId, {
+          await client.users.updateUserMetadata(userIdForSub, {
             publicMetadata: {
               isPro: true,
               stripeCustomerId: session.customer as string,
             },
           });
-          logInfo("stripe-webhook", `Utilisateur ${userId} passé en Pro via Webhook.`);
+          logInfo("stripe-webhook", `Utilisateur ${userIdForSub} passé en Pro via Webhook.`);
 
           await createNotification({
-            userId,
+            userId: userIdForSub,
             type: "subscription_activated",
             title: "Bienvenue en Pro !",
             description: "Votre abonnement est actif. Profitez de toutes les fonctionnalités.",

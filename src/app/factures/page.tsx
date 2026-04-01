@@ -301,29 +301,77 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
     window.open(`/api/factures/${facture.numero}/pdf`, "_blank");
   };
 
-  const getMobileInvoiceActions = (facture: Facture): ClientMobileAction[] => [
-    {
-      icon: Download,
-      label: "Télécharger PDF",
-      onClick: () => handleDownloadPDF(facture),
-    },
-    ...(facture.statut === "Payée"
-      ? []
-      : [
-          {
-            icon: Clock,
-            label: "Relancer le client",
-            onClick: () => handleRelance(facture),
+  const [creatingPayLink, setCreatingPayLink] = useState<string | null>(null);
+
+  const handlePayLink = async (facture: Facture) => {
+    setCreatingPayLink(facture.numero);
+    try {
+      const res = await fetch(`/api/factures/${facture.numero}/pay`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erreur");
+      
+      if (data.url) {
+        // Proposer d'envoyer le lien par email ou d'ouvrir
+        toast.success("Lien de paiement prêt", {
+          description: `${facture.totalTTC}€ • ${facture.numero}`,
+          action: {
+            label: "Envoyer par email",
+            onClick: () => {
+              const subject = encodeURIComponent(`Paiement facture ${facture.numero}`);
+              const body = encodeURIComponent(
+                `Bonjour ${facture.nomClient},\n\nVoici le lien pour régler votre facture ${facture.numero} d'un montant de ${facture.totalTTC}€ en ligne :\n\n${data.url}\n\nMerci de votre confiance.\n\nCordialement.`,
+              );
+              window.location.href = `mailto:${facture.emailClient}?subject=${subject}&body=${body}`;
+            },
           },
-        ]),
-    {
+        });
+        // Ouvrir le lien dans un nouvel onglet
+        window.open(data.url, "_blank");
+      }
+    } catch (err) {
+      logError("invoice-paylink", err);
+      toast.error(err instanceof Error ? err.message : "Impossible de créer le lien de paiement");
+    } finally {
+      setCreatingPayLink(null);
+    }
+  };
+
+  const getMobileInvoiceActions = (facture: Facture): ClientMobileAction[] => {
+    const actions: ClientMobileAction[] = [
+      {
+        icon: Download,
+        label: "Télécharger PDF",
+        onClick: () => handleDownloadPDF(facture),
+      },
+    ];
+
+    if (facture.statut !== "Payée") {
+      actions.push(
+        {
+          icon: Clock,
+          label: "Relancer le client",
+          onClick: () => handleRelance(facture),
+        },
+        {
+          disabled: creatingPayLink === facture.numero,
+          icon: BadgeCheck,
+          label: creatingPayLink === facture.numero ? "Création..." : "Paiement en ligne",
+          onClick: () => handlePayLink(facture),
+          tone: "accent",
+        },
+      );
+    }
+
+    actions.push({
       disabled: deleting === facture.numero,
       icon: Trash2,
       label: deleting === facture.numero ? "Suppression..." : "Supprimer",
       onClick: () => setPendingDeleteFacture(facture),
       tone: "danger",
-    },
-  ];
+    });
+
+    return actions;
+  };
 
   return (
     <ClientSubpageShell
@@ -754,6 +802,16 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                                 <Clock size={15} />
                                 Relancer
                               </button>
+                              <button
+                                type="button"
+                                onClick={() => handlePayLink(facture)}
+                                disabled={creatingPayLink === facture.numero}
+                                className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 disabled:opacity-50"
+                                title="Envoyer un lien de paiement Stripe"
+                              >
+                                <BadgeCheck size={15} />
+                                {creatingPayLink === facture.numero ? "..." : "Lien paiement"}
+                              </button>
                             </>
                           )}
 
@@ -849,13 +907,23 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                                   <Download size={14} className="inline mr-1" /> PDF
                                 </button>
                                 {facture.statut !== "Payée" && (
-                                  <button
-                                    onClick={() => handleRelance(facture)}
-                                    className="py-1.5 px-2 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
-                                    title="Relancer"
-                                  >
-                                    <Clock size={14} />
-                                  </button>
+                                  <>
+                                    <button
+                                      onClick={() => handleRelance(facture)}
+                                      className="py-1.5 px-2 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
+                                      title="Relancer"
+                                    >
+                                      <Clock size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => handlePayLink(facture)}
+                                      disabled={creatingPayLink === facture.numero}
+                                      className="py-1.5 px-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition disabled:opacity-50"
+                                      title="Lien de paiement"
+                                    >
+                                      <BadgeCheck size={14} />
+                                    </button>
+                                  </>
                                 )}
                                 <ClientMobileActionsMenu
                                   items={getMobileInvoiceActions(facture)}
