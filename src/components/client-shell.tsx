@@ -259,7 +259,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
 
   return (
-    <nav className="client-panel mt-4 hidden items-center gap-2 rounded-[1.75rem] p-2 lg:flex overflow-x-auto">
+    <nav className="client-panel mt-4 hidden items-center gap-1 rounded-[1.75rem] p-2 lg:flex overflow-x-auto">
       {CLIENT_NAV_ITEMS.map((item) => {
         const Icon = item.icon;
         const isActive = active === item.key;
@@ -280,26 +280,26 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         );
       })}
 
-      <div className="ml-auto flex items-center gap-2 rounded-[1.35rem] border border-slate-200/80 bg-slate-50/80 px-2 py-2 dark:border-white/10 dark:bg-white/4">
-        {CLIENT_TOOL_ITEMS.map((item) => {
-          const Icon = item.icon;
-          const isCurrentTool = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`inline-flex items-center gap-2 rounded-[1rem] px-3 py-2 text-sm font-semibold transition ${
-                isCurrentTool
-                  ? "bg-white text-violet-700 shadow-sm dark:bg-white/10 dark:text-white"
-                  : "text-slate-600 hover:bg-white hover:text-violet-700 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
-              }`}
-            >
-              <Icon size={16} />
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
+      <div className="w-px h-6 bg-slate-200/80 dark:bg-white/10 mx-1 shrink-0" aria-hidden="true" />
+
+      {CLIENT_TOOL_ITEMS.map((item) => {
+        const Icon = item.icon;
+        const isCurrentTool = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={`inline-flex items-center gap-2 rounded-[1.15rem] px-3.5 py-2.5 text-sm font-semibold transition ${
+              isCurrentTool
+                ? "bg-white text-violet-700 shadow-sm dark:bg-white/10 dark:text-white"
+                : "text-slate-600 hover:bg-white hover:text-violet-700 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
+            }`}
+          >
+            <Icon size={16} />
+            {item.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
