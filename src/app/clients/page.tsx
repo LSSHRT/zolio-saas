@@ -7,6 +7,7 @@ import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle,
+  Download,
   FileText,
   History,
   Mail,
@@ -285,6 +286,30 @@ export default function ClientsPage() {
       setIsImporting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleExportCSV = () => {
+    if (clients.length === 0) {
+      toast.error("Aucun client à exporter.");
+      return;
+    }
+    const headers = ["Nom", "Email", "Téléphone", "Adresse"];
+    const rows = clients.map((c: Client) => [
+      `"${(c.nom || "").replace(/"/g, '""')}"`,
+      `"${(c.email || "").replace(/"/g, '""')}"`,
+      `"${(c.telephone || "").replace(/"/g, '""')}"`,
+      `"${(c.adresse || "").replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = [headers.join(";"), ...rows.map((r) => r.join(";"))].join("\n");
+    const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `zolio-clients-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    toast.success(`${clients.length} client${clients.length > 1 ? "s" : ""} exporté${clients.length > 1 ? "s" : ""}.`);
   };
 
   const getPrimaryContact = (client: Client) => {
