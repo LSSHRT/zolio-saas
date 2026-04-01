@@ -17,6 +17,7 @@ import {
   type LignePayload,
 } from "@/lib/devis-lignes";
 import { rateLimit } from "@/lib/rate-limit";
+import { canCreateDevis } from "@/lib/quota";
 import { uploadPhotos } from "@/lib/blob-photos";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { logError } from "@/lib/logger";
@@ -56,6 +57,9 @@ export async function GET(request: Request) {
     // Rate limit : 60 requêtes/min par utilisateur
     const rl = rateLimit(`devis-get:${userId}`, 60, 60_000);
     if (!rl.allowed) return rateLimitResponse(rl.resetAt);
+
+    // Injecter quota info dans la réponse
+    const quota = await import("@/lib/quota").then((m) => m.getQuotaInfo());
 
     const url = new URL(request.url);
     const searchQuery = url.searchParams.get("q")?.trim() || "";
@@ -144,6 +148,13 @@ export async function GET(request: Request) {
         totalPages: Math.ceil(totalCount / limit),
         hasMore: offset + limit < totalCount,
       },
+      quota: {
+        isPro: quota.isPro,
+        used: quota.used,
+        limit: quota.limit,
+        remaining: quota.remaining,
+        resetAt: quota.resetAt.toISOString(),
+      },
     }, {
       headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60' },
     });
@@ -160,6 +171,15 @@ export async function POST(request: Request) {
     // Rate limit : 30 créations/min par utilisateur
     const rl = rateLimit(`devis-post:${userId}`, 30, 60_000);
     if (!rl.allowed) return rateLimitResponse(rl.resetAt);
+
+    // Quota gratuit : 3 devis/mois max
+    const quota = await canCreateDevis();
+    if (!quota.allowed) {
+      return NextResponse.json(
+        { error: "Quota atteint", remaining: quota.remaining, limit: quota.limit },
+        { status: 429 },
+      );
+    }
 
     const body = (await request.json()) as CreateDevisBody;
     const { client, clientId, lignes, remise, acompte, tva, photos, sendNow } = body;

@@ -27,6 +27,17 @@ const PLAN_FEATURES = [
   "Planning chantiers et suivi des dépenses",
   "Relances, suivi de lecture et avis Google",
   "Catalogue métier, logo et export comptable",
+  "Factures récurrentes & automatisation",
+  "Export CSV & livre URSSAF",
+  "Vue kanban pour devis et factures",
+  "Support prioritaire",
+] as const;
+
+const FREE_FEATURES = [
+  "3 devis par mois",
+  "Interface complète mobile & desktop",
+  "Signature électronique",
+  "Suivi du pipeline",
 ] as const;
 
 const ACTIVATION_STEPS = [

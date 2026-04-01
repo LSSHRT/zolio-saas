@@ -19,6 +19,7 @@ import {
   PenTool,
   Eye,
   CopyPlus,
+  Sparkles,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -96,6 +97,8 @@ function buildFollowUpMailTo(devis: Devis) {
 export default function DevisPage() {
   const router = useRouter();
   const { data, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
+  const { data: quotaData } = useSWR('/api/quota', fetcher, { revalidateOnFocus: false, refreshInterval: 30000 });
+  const quota = quotaData || { isPro: false, used: 0, limit: 3, remaining: 3 };
   const devis = useMemo<Devis[]>(() => {
     // Handle both old format (array) and new format ({ data, pagination })
     if (Array.isArray(data)) return data;
@@ -375,13 +378,23 @@ export default function DevisPage() {
       activeNav="devis"
       eyebrow="Pipeline commercial"
       mobilePrimaryAction={
-        <Link
-          href="/nouveau-devis"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
-        >
-          <FileText size={16} />
-          Nouveau
-        </Link>
+        quota.remaining <= 0 && !quota.isPro ? (
+          <Link
+            href="/abonnement"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-amber-500 px-3.5 text-sm font-semibold text-white shadow-brand"
+          >
+            <Sparkles size={16} />
+            Passer Pro
+          </Link>
+        ) : (
+          <Link
+            href="/nouveau-devis"
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
+          >
+            <FileText size={16} />
+            Nouveau
+          </Link>
+        )
       }
       mobileSecondaryActions={mobileViewActions}
       actions={
@@ -394,12 +407,21 @@ export default function DevisPage() {
               <LayoutGrid size={16} />
             </button>
           </div>
-          <Link href="/nouveau-devis">
-            <motion.button whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
-              <FileText size={16} /> Nouveau devis
-            </motion.button>
-          </Link>
+          {quota.remaining <= 0 && !quota.isPro ? (
+            <Link href="/abonnement">
+              <motion.button whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
+                <Sparkles size={16} /> Passer Pro
+              </motion.button>
+            </Link>
+          ) : (
+            <Link href="/nouveau-devis">
+              <motion.button whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
+                <FileText size={16} /> Nouveau devis
+              </motion.button>
+            </Link>
+          )}
         </>
       }
       summary={
@@ -407,7 +429,7 @@ export default function DevisPage() {
           <ClientHeroStat label="CA validé" value={`${totalValide.toFixed(0)}€`} detail={`${totalAcceptes} devis acceptés`} tone="emerald" />
           <ClientHeroStat label="En attente" value={`${totalAttente.toFixed(0)}€`} detail={`${totalEnAttente} signature${totalEnAttente > 1 ? "s" : ""} à convertir`} tone="amber" />
           <ClientHeroStat label="Total TTC" value={`${totalMois.toFixed(0)}€`} detail="Vision globale du portefeuille devis" tone="violet" />
-          <ClientHeroStat label="Volume" value={String(filtered.length)} detail={`${viewMode === "list" ? "Vue liste" : "Vue kanban"} active`} tone="slate" />
+          <ClientHeroStat label="Quota" value={quota.isPro ? "∞" : `${quota.remaining}/${quota.limit}`} detail={quota.isPro ? "Plan Pro actif" : `Devis restants ce mois`} tone={quota.remaining <= 0 && !quota.isPro ? "rose" : "slate"} />
         </div>
       }
       mobileSummary={
@@ -439,6 +461,12 @@ export default function DevisPage() {
               value: viewMode === "list" ? "Liste" : "Kanban",
               detail: "Basculez sans quitter la page",
               tone: "slate",
+            },
+            {
+              label: "Quota",
+              value: quota.isPro ? "∞" : `${quota.remaining}/${quota.limit}`,
+              detail: quota.isPro ? "Plan Pro" : "Devis restants",
+              tone: quota.remaining <= 0 && !quota.isPro ? "rose" : "slate",
             },
           ]}
         />
