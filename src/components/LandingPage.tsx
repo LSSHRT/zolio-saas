@@ -446,10 +446,12 @@ export default function LandingPage() {
                 <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row xl:items-start">
                   <Link
                     href="/sign-up?redirect_url=/dashboard"
-                    className="group flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_48px_rgba(139,92,246,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_64px_rgba(139,92,246,0.6)]"
+                    className="group relative flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_48px_rgba(139,92,246,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_64px_rgba(139,92,246,0.6)] animate-pulse-subtle"
                   >
-                    Créer mon compte — 1 devis gratuit offert
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    <span className="relative z-10 flex items-center">
+                      Créer mon compte — 1 devis gratuit offert
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </span>
                   </Link>
                   <a
                     href="#demo"
@@ -459,7 +461,7 @@ export default function LandingPage() {
                   </a>
                 </div>
 
-                <div className="mt-2 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
+                <div className="mt-3 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
                   <span className="landing-chip">
                     <CheckCircle2 className="h-4 w-4 text-emerald-300" />
                     Gratuit sans CB
@@ -470,11 +472,8 @@ export default function LandingPage() {
                   </span>
                   <span className="landing-chip">
                     <Clock className="h-4 w-4 text-orange-300" />
-                    Prêt en 3 minutes
+                    Prêt en 3 min
                   </span>
-                </div>
-
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
                   <span className="landing-chip">
                     <Shield className="h-4 w-4 text-sky-300" />
                     Données sécurisées
@@ -482,10 +481,6 @@ export default function LandingPage() {
                   <span className="landing-chip">
                     <HardHat className="h-4 w-4 text-orange-300" />
                     Conçu pour le terrain
-                  </span>
-                  <span className="landing-chip">
-                    <ReceiptText className="h-4 w-4 text-violet-300" />
-                    Devis, signature, facture
                   </span>
                 </div>
 
