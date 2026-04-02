@@ -66,6 +66,8 @@ model Devis {
   updatedAt   DateTime     @updatedAt
 
   @@unique([userId, numero])
+  @@index([userId, statut])
+  @@index([userId, createdAt])
 }
 
 model LigneDevis {
@@ -123,6 +125,9 @@ model Facture {
 
   @@unique([userId, numero])
   @@index([devisId])
+  @@index([userId, statut])
+  @@index([userId, createdAt])
+  @@index([userId, dateEcheance])
   @@index([recurrenteId])
 }
 
