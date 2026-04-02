@@ -61,6 +61,29 @@ function createTransactionalTransport() {
 }
 
 /**
+ * Envoi générique d'email — utilisé par les cron jobs et les notifications.
+ */
+export async function sendEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+  fromName?: string;
+  fromEmail?: string;
+}) {
+  const { runtime, transporter } = createTransactionalTransport();
+
+  const mailOptions = {
+    from: `"${params.fromName ?? runtime.fromName}" <${params.fromEmail ?? runtime.fromEmail}>`,
+    to: params.to,
+    replyTo: runtime.replyToEmail || undefined,
+    subject: params.subject,
+    html: params.html,
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+/**
  * Envoie un devis par email au client avec le PDF en pièce jointe.
  *
  * IMPORTANT: Pour que l'envoi fonctionne, il faut configurer les variables :
