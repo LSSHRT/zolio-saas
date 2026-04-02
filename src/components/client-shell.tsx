@@ -351,12 +351,12 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           <LifeBuoy size={15} />
           Support
         </a>
-        <div className="mt-2 flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+        <div className="mt-2 px-2.5">
           <UserButton
             appearance={{
               elements: {
-                userButtonAvatarBox: "h-7 w-7",
-                userButtonTrigger: "rounded-lg",
+                userButtonAvatarBox: "h-8 w-8",
+                userButtonTrigger: "p-0",
               },
             }}
           />

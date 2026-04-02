@@ -752,3 +752,12 @@
 .animate-landing-drift {
   animation: landing-drift 14s ease-in-out infinite;
 }
+
+/* Clerk UserButton — force l'avatar à s'afficher (cache le fallback "?") */
+.cl-avatarImage.cl-userButtonAvatarImage {
+  position: relative;
+  z-index: 1;
+}
+.cl-userButtonAvatarBox > span:last-child {
+  display: none !important;
+}

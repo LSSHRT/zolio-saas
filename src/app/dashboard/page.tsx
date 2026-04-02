@@ -1060,8 +1060,19 @@ export default function DashboardPage() {
                 dashboardSignals={dashboardSignals}
               />
               {/* Avatar — taille fixe réservée */}
-              <div className="inline-flex h-9 w-9 items-center justify-center">
-                {isLoaded ? <UserButton /> : <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />}
+              <div className="inline-flex h-9 w-9 items-center justify-center shrink-0">
+                {isLoaded ? (
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: "h-8 w-8",
+                        userButtonTrigger: "p-0",
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+                )}
               </div>
             </div>
           </div>
