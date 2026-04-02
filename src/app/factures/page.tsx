@@ -431,6 +431,14 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
           </button>
           <button
             type="button"
+            onClick={() => window.open("/api/export/fec?year=2026", "_blank")}
+            className="inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/90 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200"
+          >
+            <FileText size={16} />
+            Export FEC
+          </button>
+          <button
+            type="button"
             onClick={handleExportCSV}
             className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand"
           >
