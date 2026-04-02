@@ -1029,8 +1029,8 @@ export default function DashboardPage() {
                 <DashboardNotificationsMenu
                   dashboardSignals={dashboardSignals}
                 />
-                <div className="inline-flex items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-200/60 p-0.5 dark:bg-white/8 dark:ring-white/10">
-                  {isLoaded ? <UserButton /> : <User size={18} className="text-slate-500" />}
+                <div className="inline-flex items-center justify-center">
+                  {isLoaded ? <UserButton /> : <User size={28} className="text-slate-500" />}
                 </div>
               </div>
             </div>
@@ -1058,8 +1058,8 @@ export default function DashboardPage() {
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
               />
-              <div className="inline-flex items-center justify-center rounded-full bg-violet-50 ring-1 ring-violet-200/60 p-0.5 dark:bg-white/8 dark:ring-white/10">
-                {isLoaded ? <UserButton /> : <User size={18} className="text-slate-500" />}
+              <div className="inline-flex items-center justify-center">
+                {isLoaded ? <UserButton /> : <User size={28} className="text-slate-500" />}
               </div>
             </div>
           </div>
