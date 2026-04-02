@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
+import { UserButton } from "@clerk/nextjs";
 
 export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin" | "tools";
 type ClientTone = "violet" | "emerald" | "amber" | "rose" | "slate";
@@ -339,7 +340,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         })}
       </nav>
 
-      {/* Support */}
+      {/* Footer: Support + User */}
       <div className="mt-auto pt-4">
         <a
           href={SUPPORT_HREF}
@@ -350,6 +351,16 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           <LifeBuoy size={15} />
           Support
         </a>
+        <div className="mt-2 flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "h-7 w-7",
+                userButtonTrigger: "rounded-lg",
+              },
+            }}
+          />
+        </div>
       </div>
     </aside>
   );
