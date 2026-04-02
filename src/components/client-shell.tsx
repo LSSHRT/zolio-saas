@@ -257,95 +257,98 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
 export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
-  const mainItems = CLIENT_NAV_ITEMS;
-  const toolItems = CLIENT_TOOL_ITEMS;
 
-  const isActive = (item: typeof mainItems[number] | typeof toolItems[number]) => {
-    if ('key' in item) return active === item.key;
-    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  const mainItems = [
+    { href: "/dashboard", icon: Home, key: "dashboard" as const, label: "Accueil" },
+    { href: "/devis", icon: FileText, key: "devis" as const, label: "Devis" },
+    { href: "/factures", icon: Receipt, key: "factures" as const, label: "Factures" },
+    { href: "/clients", icon: Users, key: "clients" as const, label: "Clients" },
+    { href: "/calepin", icon: StickyNote, key: "calepin" as const, label: "Calepin" },
+  ];
+
+  const toolItems = [
+    { href: "/planning", icon: Calendar, label: "Planning" },
+    { href: "/catalogue", icon: Package, label: "Catalogue" },
+    { href: "/modeles", icon: Copy, label: "Modèles" },
+    { href: "/recurrentes", icon: RefreshCw, label: "Récurrences" },
+    { href: "/depenses", icon: CreditCard, label: "Dépenses" },
+    { href: "/tva", icon: Calculator, label: "TVA" },
+    { href: "/parametres", icon: Settings, label: "Paramètres" },
+    { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
+  ];
+
+  const isActiveNav = (item: { key?: string; href?: string }) => {
+    if (item.key) return active === item.key;
+    if (item.href) return pathname === item.href || pathname?.startsWith(item.href + "/");
+    return false;
   };
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 lg:fixed lg:left-4 lg:top-3 lg:bottom-3 lg:rounded-[2rem] lg:bg-white/60 lg:backdrop-blur-xl lg:border lg:border-white/20 lg:shadow-sm dark:lg:bg-white/[0.04] dark:lg:border-white/6">
+    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[240px] flex-col rounded-2xl border border-slate-200 bg-white p-4 lg:flex dark:border-white/10 dark:bg-slate-950/80 dark:backdrop-blur-xl">
       {/* Logo */}
-      <div className="px-5 pt-6 pb-4">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/logo.png"
-            alt="Zolio"
-            width={36}
-            height={36}
-            className="h-9 w-auto object-contain"
-            priority
-          />
-          <div>
-            <p className="text-base font-bold tracking-[0.15em] text-slate-950 dark:text-white">ZOLIO</p>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500">Chantier OS</p>
-          </div>
-        </div>
+      <div className="mb-6 flex items-center gap-3 px-2">
+        <Image src="/logo.png" alt="Zolio" width={28} height={28} className="h-7 w-auto" priority />
+        <span className="text-[13px] font-bold tracking-widest text-slate-900 dark:text-white">ZOLIO</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-none">
-        {/* Main nav */}
-        <nav className="flex flex-col gap-1">
-          {mainItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item);
-            return (
-              <Link
-                key={item.key}
-                href={item.href}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-                  active
-                    ? "bg-violet-500/10 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200 shadow-sm"
-                    : "text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
-                }`}
-              >
-                <Icon size={18} strokeWidth={active ? 2.2 : 2} className={active ? "text-violet-600 dark:text-violet-300" : "text-slate-400 dark:text-slate-500"} />
-                <span>{item.label}</span>
-                {active && <div className="ml-auto h-5 w-1 rounded-full bg-violet-500" />}
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Navigation principale */}
+      <nav className="flex flex-col gap-0.5">
+        {mainItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActiveNav(item);
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition ${
+                active
+                  ? "bg-slate-100 font-semibold text-slate-900 dark:bg-white/10 dark:text-white"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+              }`}
+            >
+              <Icon size={16} strokeWidth={active ? 2.2 : 1.8} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
-        {/* Divider */}
-        <div className="my-3 mx-3 border-t border-slate-200/60 dark:border-white/8" />
+      {/* Séparateur */}
+      <div className="my-3 border-t border-slate-100 dark:border-white/8" />
 
-        {/* Tools */}
-        <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500 mb-1">Outils</p>
-        <nav className="flex flex-col gap-0.5">
-          {toolItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
-                  active
-                    ? "bg-slate-900/6 text-slate-900 dark:bg-white/10 dark:text-white"
-                    : "text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
-                }`}
-              >
-                <Icon size={16} className={active ? "" : "text-slate-400 dark:text-slate-500"} />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
+      {/* Outils */}
+      <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">Outils</p>
+      <nav className="flex flex-col gap-0.5">
+        {toolItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActiveNav(item);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-[13px] transition ${
+                active
+                  ? "bg-slate-100 font-medium text-slate-900 dark:bg-white/10 dark:text-white"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+              }`}
+            >
+              <Icon size={15} strokeWidth={active ? 2 : 1.8} />
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {/* Support */}
-      <div className="px-3 pb-5 pt-3">
+      <div className="mt-auto pt-4">
         <a
           href={SUPPORT_HREF}
           target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
           rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
+          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-white/5 dark:hover:text-white"
         >
-          <LifeBuoy size={18} />
-          <span>Support</span>
+          <LifeBuoy size={15} />
+          Support
         </a>
       </div>
     </aside>
@@ -608,7 +611,7 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-24 pt-3 sm:px-6 sm:pb-28 sm:pt-4 lg:px-8 lg:pl-72">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-24 pt-3 sm:px-6 sm:pb-28 sm:pt-4 lg:px-8 lg:pl-[272px]">
         <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
