@@ -25,12 +25,15 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: "Zolio",
   },
-  title: "Zolio - Votre Partenaire Chantier Nouvelle Génération",
-  description: "Zolio est l'application tout-en-un pour les professionnels du bâtiment : créez des devis et factures en quelques secondes, faites signer vos clients électroniquement, et suivez vos chantiers avec intelligence artificielle.",
-  keywords: ["devis", "factures", "artisan", "bâtiment", "logiciel", "signature électronique", "btp", "auto-entrepreneur"],
+  title: {
+    default: "Zolio — Gérez vos chantiers, pas la paperasse",
+    template: "%s | Zolio",
+  },
+  description: "Le logiciel de devis et factures conçu pour les artisans du bâtiment. Devis en 3 min, signature digitale, facturation automatique. 1 devis offert, sans carte bancaire.",
+  keywords: ["devis artisan", "facture BTP", "logiciel devis", "signature électronique", "artisan bâtiment", "devis painting", "facture electricien", "logiciel plombier", "devis smartphone"],
   openGraph: {
-    title: "Zolio - Votre Partenaire Chantier Nouvelle Génération",
-    description: "L'application tout-en-un pour les pros du bâtiment. Créez vos devis avec l'IA et faites-les signer instantanément.",
+    title: "Zolio — Gérez vos chantiers, pas la paperasse",
+    description: "Devis, signature et factures depuis votre téléphone. Conçu pour les artisans du bâtiment. 1 devis gratuit.",
     url: "https://www.zolio.site",
     siteName: "Zolio",
     locale: "fr_FR",
@@ -38,8 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zolio - Devis et Factures pour Artisans",
-    description: "L'application tout-en-un pour les pros du bâtiment. Créez vos devis avec l'IA et faites-les signer instantanément.",
+    title: "Zolio — Devis & Factures pour Artisans",
+    description: "Devis en 3 min depuis le chantier. Signature digitale, facturation en 1 clic. Essayez gratuitement.",
   }
 };
 
