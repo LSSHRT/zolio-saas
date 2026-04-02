@@ -1011,7 +1011,7 @@ export default function DashboardPage() {
         />
       ) : null}
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-72">
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex flex-col gap-3 md:hidden">
             <div className="flex items-center justify-between gap-3">

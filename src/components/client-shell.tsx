@@ -257,50 +257,98 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
 export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
+  const mainItems = CLIENT_NAV_ITEMS;
+  const toolItems = CLIENT_TOOL_ITEMS;
+
+  const isActive = (item: typeof mainItems[number] | typeof toolItems[number]) => {
+    if ('key' in item) return active === item.key;
+    return pathname === item.href || pathname.startsWith(`${item.href}/`);
+  };
 
   return (
-    <nav className="client-panel mt-4 hidden items-center gap-1 rounded-[1.75rem] p-2 lg:flex overflow-x-auto">
-      {CLIENT_NAV_ITEMS.map((item) => {
-        const Icon = item.icon;
-        const isActive = active === item.key;
+    <aside className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 lg:fixed lg:left-4 lg:top-3 lg:bottom-3 lg:rounded-[2rem] lg:bg-white/60 lg:backdrop-blur-xl lg:border lg:border-white/20 lg:shadow-sm dark:lg:bg-white/[0.04] dark:lg:border-white/6">
+      {/* Logo */}
+      <div className="px-5 pt-6 pb-4">
+        <div className="flex items-center gap-3">
+          <Image
+            src="/logo.png"
+            alt="Zolio"
+            width={36}
+            height={36}
+            className="h-9 w-auto object-contain"
+            priority
+          />
+          <div>
+            <p className="text-base font-bold tracking-[0.15em] text-slate-950 dark:text-white">ZOLIO</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">Chantier OS</p>
+          </div>
+        </div>
+      </div>
 
-        return (
-          <Link
-            key={item.key}
-            href={item.href}
-            className={`inline-flex items-center gap-2 rounded-[1.15rem] px-4 py-3 text-sm font-semibold transition ${
-              isActive
-                ? "bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 text-white shadow-[0_22px_55px_-28px_rgba(124,58,237,0.65)]"
-                : "text-slate-600 hover:bg-slate-900/5 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
-            }`}
-          >
-            <Icon size={17} />
-            {item.label}
-          </Link>
-        );
-      })}
+      <div className="flex-1 overflow-y-auto px-3 py-2 scrollbar-none">
+        {/* Main nav */}
+        <nav className="flex flex-col gap-1">
+          {mainItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                  active
+                    ? "bg-violet-500/10 text-violet-700 dark:bg-violet-500/15 dark:text-violet-200 shadow-sm"
+                    : "text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
+                }`}
+              >
+                <Icon size={18} strokeWidth={active ? 2.2 : 2} className={active ? "text-violet-600 dark:text-violet-300" : "text-slate-400 dark:text-slate-500"} />
+                <span>{item.label}</span>
+                {active && <div className="ml-auto h-5 w-1 rounded-full bg-violet-500" />}
+              </Link>
+            );
+          })}
+        </nav>
 
-      <div className="w-px h-6 bg-slate-200/80 dark:bg-white/10 mx-1 shrink-0" aria-hidden="true" />
+        {/* Divider */}
+        <div className="my-3 mx-3 border-t border-slate-200/60 dark:border-white/8" />
 
-      {CLIENT_TOOL_ITEMS.map((item) => {
-        const Icon = item.icon;
-        const isCurrentTool = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`inline-flex items-center gap-2 rounded-[1.15rem] px-3.5 py-2.5 text-sm font-semibold transition ${
-              isCurrentTool
-                ? "bg-white text-violet-700 shadow-sm dark:bg-white/10 dark:text-white"
-                : "text-slate-600 hover:bg-white hover:text-violet-700 dark:text-slate-300 dark:hover:bg-white/8 dark:hover:text-white"
-            }`}
-          >
-            <Icon size={16} />
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
+        {/* Tools */}
+        <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500 mb-1">Outils</p>
+        <nav className="flex flex-col gap-0.5">
+          {toolItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
+                  active
+                    ? "bg-slate-900/6 text-slate-900 dark:bg-white/10 dark:text-white"
+                    : "text-slate-500 hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
+                }`}
+              >
+                <Icon size={16} className={active ? "" : "text-slate-400 dark:text-slate-500"} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Support */}
+      <div className="px-3 pb-5 pt-3">
+        <a
+          href={SUPPORT_HREF}
+          target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
+          rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
+        >
+          <LifeBuoy size={18} />
+          <span>Support</span>
+        </a>
+      </div>
+    </aside>
   );
 }
 
@@ -557,7 +605,10 @@ export function ClientSubpageShell({
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-24 pt-3 sm:px-6 sm:pb-28 sm:pt-4 lg:px-8 lg:pb-10">
+      {/* Fixed sidebar (desktop) */}
+      <ClientDesktopNav active={activeNav} />
+
+      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-24 pt-3 sm:px-6 sm:pb-28 sm:pt-4 lg:px-8 lg:pl-72">
         <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
@@ -599,8 +650,6 @@ export function ClientSubpageShell({
             </div>
           </div>
         </header>
-
-        <ClientDesktopNav active={activeNav} />
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <section className="client-panel-strong overflow-hidden rounded-[2.25rem] px-5 py-6 sm:px-6 lg:px-7">
