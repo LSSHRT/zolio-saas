@@ -54,11 +54,15 @@ model Devis {
   lignesNorm  LigneDevis[] // Lignes normalisées
   photos      Json?        // Array of photo base64 strings
   tags        Json?        // Array de tags (ex: ["urgent", "récurrent"])
-  notes       String?      // Notes internes sur le devis
-  dateDebut   DateTime?
-  dateFin     DateTime?
-  factures    Facture[]    // Factures générées depuis ce devis
-  createdAt   DateTime     @default(now())
+  notes         String?       // Notes internes sur le devis
+  dateDebut     DateTime?
+  dateFin       DateTime?
+  factures      Facture[]     // Factures générées depuis ce devis
+  optionLabel   String?       // Label de l'option : "basique", "standard", "premium"
+  devisParentId String?       // Lien vers le devis parent (groupe d'options)
+  devisParent   Devis?        @relation("DevisOptions", fields: [devisParentId], references: [id], onDelete: SetNull)
+  devisOptions  Devis[]       @relation("DevisOptions")
+  createdAt     DateTime      @default(now())
   updatedAt   DateTime     @updatedAt
 
   @@unique([userId, numero])
