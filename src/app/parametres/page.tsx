@@ -8,6 +8,7 @@ import {
   BadgeCheck,
   Building2,
   CheckCircle2,
+  Clock,
   Copy,
   CreditCard,
   ExternalLink,
@@ -497,6 +498,27 @@ export default function ParametresEntreprise() {
                 ? "Le lien d'avis peut être proposé après paiement."
                 : "Ajoutez le lien d'avis pour activer cette relance."}
             </p>
+          </div>
+        </div>
+
+        {/* Relances automatiques factures */}
+        <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-amber-500/12 text-amber-600 dark:bg-amber-500/12 dark:text-amber-300">
+            <Clock size={16} />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-slate-950 dark:text-white">Relances automatiques</p>
+            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Envoi automatique d&apos;un email de rappel aux clients dont la facture est en retard de 3+ jours.
+              <br />
+              <span className="text-xs text-slate-400 dark:text-slate-500">Cron Vercel 8h UTC — aucun effort manuel.</span>
+            </p>
+          </div>
+          <div className="mt-1">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Actif
+            </span>
           </div>
         </div>
       </div>
