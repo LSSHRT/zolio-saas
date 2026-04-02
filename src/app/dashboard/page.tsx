@@ -1045,7 +1045,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2 lg:gap-3">
-              <ClientSupportButton compact />
               {canAccessAdminDashboard && (
                 <Link
                   href="/admin"
@@ -1055,13 +1054,6 @@ export default function DashboardPage() {
                   <span>Admin</span>
                 </Link>
               )}
-              <Link
-                href="/parametres"
-                className="tour-parametres inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-              >
-                <Settings size={16} />
-                Paramètres
-              </Link>
               <ThemeToggle />
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
