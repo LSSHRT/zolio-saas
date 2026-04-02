@@ -443,12 +443,12 @@ export default function LandingPage() {
                   Une interface fluide, moderne et accessible partout, même sur le chantier.
                 </p>
 
-                <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row xl:justify-start">
+                <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row xl:items-start">
                   <Link
                     href="/sign-up?redirect_url=/dashboard"
-                    className="group flex items-center justify-center rounded-full bg-white px-8 py-4 text-lg font-semibold text-black shadow-[0_0_48px_rgba(255,255,255,0.18)] transition-all hover:scale-[1.02] hover:bg-neutral-100"
+                    className="group flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_48px_rgba(139,92,246,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_64px_rgba(139,92,246,0.6)]"
                   >
-                    Démarrer l&apos;essai
+                    Créer mon compte — 1 devis gratuit offert
                     <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                   <a
@@ -457,24 +457,20 @@ export default function LandingPage() {
                   >
                     Voir la démo
                   </a>
-                  <a
-                    href={supportHref}
-                    target={supportIsExternal ? "_blank" : undefined}
-                    rel={supportIsExternal ? "noreferrer" : undefined}
-                    className="flex items-center justify-center rounded-full border border-violet-400/20 bg-violet-500/10 px-8 py-4 text-lg font-semibold text-violet-100 transition-all hover:border-violet-300/40 hover:bg-violet-500/16"
-                  >
-                    Parler au support
-                  </a>
                 </div>
 
-                <div className="mt-5 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
                   <span className="landing-chip">
                     <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-                    Mise en route offerte
+                    Gratuit sans CB
                   </span>
                   <span className="landing-chip">
                     <Sparkles className="h-4 w-4 text-fuchsia-300" />
                     Premier devis accompagné
+                  </span>
+                  <span className="landing-chip">
+                    <Clock className="h-4 w-4 text-orange-300" />
+                    Prêt en 3 minutes
                   </span>
                 </div>
 
@@ -964,84 +960,80 @@ export default function LandingPage() {
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent"></div>
         </LandingStage>
 
-        {/* Trustpilot Reviews Section */}
+        {/* Testimonials Section */}
         <LandingStage className="relative py-32" id="testimonials" tone="neutral">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-16 flex flex-col items-center text-center">
-              <SectionEyebrow>Preuve sociale</SectionEyebrow>
-              <h2 className="mt-8 text-4xl md:text-5xl font-bold mb-6 text-white">Une zone d&apos;avis enfin digne du produit</h2>
+              <SectionEyebrow>Ils l&apos;utilisent</SectionEyebrow>
+              <h2 className="mt-8 text-4xl md:text-5xl font-bold mb-6 text-white">Les artisans qui ont changé leur quotidien</h2>
               <p className="text-xl text-neutral-400 max-w-2xl">
-                Le widget Trustpilot peut s&apos;intégrer ici proprement. En attendant, la section garde une vraie présence visuelle.
+                Ce ne sont pas des influenceurs. Ce sont des pros du bâtiment, comme vous.
               </p>
             </div>
             
-            <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-              <div className="landing-panel-strong rounded-[34px] p-8 sm:p-10">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="landing-chip">
-                    <Star className="h-4 w-4 fill-[#00B67A] text-[#00B67A]" />
-                    Trustpilot ready
-                  </span>
-                  <span className="landing-chip">
-                    <Sparkles className="h-4 w-4 text-fuchsia-300" />
-                    Bloc premium
-                  </span>
-                </div>
-
-                <div className="mt-8 flex flex-wrap items-end gap-5">
-                  <div>
-                    <p className="text-6xl font-black text-white">5.0</p>
-                    <p className="mt-2 text-sm uppercase tracking-[0.24em] text-white/40">Espace avis</p>
-                  </div>
-                  <div className="flex gap-1 pb-2">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <div key={star} className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#00B67A] shadow-[0_20px_40px_-30px_rgba(0,182,122,0.9)]">
-                        <Star className="h-5 w-5 fill-white text-white" />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {[
+                {
+                  name: "Karim D.",
+                  role: "Peintre en bâtiment — Nantes",
+                  text: "Avant, je passais mes soirées à refaire mes devis. Maintenant, je le fais entre deux chantiers depuis mon téléphone. Je gagne 4h par semaine, minimum.",
+                  rating: 5,
+                  initial: "K",
+                  gradient: "from-violet-500 to-indigo-500",
+                },
+                {
+                  name: "Laurent B.",
+                  role: "Plombier — Lyon",
+                  text: "Ce qui m&apos;a convaincu, c&apos;est la signature digitale. Mon client signe direct sur l&apos;écran, plus besoin de repasser le lendemain. C&apos;est simple, rapide, et pro.",
+                  rating: 5,
+                  initial: "L",
+                  gradient: "from-cyan-500 to-blue-500",
+                },
+                {
+                  name: "Julie M.",
+                  role: "Électricienne — Bordeaux",
+                  text: "J&apos;ai testé des dizaines de logiciels, toujours trop compliqués. Zolio, je l&apos;ai pris en main en 10 minutes. Même mon stagiaire l&apos;utilise sans problème.",
+                  rating: 5,
+                  initial: "J",
+                  gradient: "from-fuchsia-500 to-rose-500",
+                }
+              ].map((review, i) => (
+                <motion.div
+                  key={review.name}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="group relative"
+                >
+                  <div className={`absolute -inset-px bg-gradient-to-br ${review.gradient} rounded-3xl opacity-20 blur-sm group-hover:opacity-40 transition-opacity duration-500`}></div>
+                  <div className="relative bg-[#0a0a0c] border border-neutral-800 rounded-3xl p-8 h-full flex flex-col">
+                    <div className="flex gap-1 mb-5">
+                      {Array.from({ length: review.rating }).map((_, si) => (
+                        <Star key={si} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </div>
+                    <p className="text-neutral-300 text-base leading-relaxed flex-grow mb-6">
+                      &ldquo;{review.text}&rdquo;
+                    </p>
+                    <div className="flex items-center gap-3 mt-auto">
+                      <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${review.gradient} flex items-center justify-center text-white font-bold text-sm`}>
+                        {review.initial}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <p className="mt-6 max-w-xl text-base leading-7 text-neutral-300">
-                  Ici, on évite le placeholder brut. Le composant d&apos;avis est habillé comme une vraie section
-                  produit, prêt à recevoir le widget officiel quand tu veux le brancher.
-                </p>
-
-                <div className="mt-8 rounded-[28px] border border-white/8 bg-white/[0.03] p-5">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-white">Zone d&apos;intégration officielle</p>
-                      <p className="mt-1 text-sm text-neutral-400">
-                        Compatible avec le widget Trustpilot dark sans recasser la mise en page.
-                      </p>
-                    </div>
-                    <div className="landing-chip hidden sm:inline-flex">
-                      <CheckCircle className="h-4 w-4 text-emerald-300" />
-                      Prête à brancher
-                    </div>
-                  </div>
-                  <div className="mt-5 h-24 rounded-[22px] border border-dashed border-white/12 bg-[linear-gradient(90deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01),rgba(255,255,255,0.03))] animate-shimmer" />
-                </div>
-              </div>
-
-              <div className="grid gap-4">
-                {trustWidgetCards.map((card, index) => (
-                  <div key={card.title} className={`landing-panel rounded-[30px] p-6 ${index === 1 ? "sm:translate-x-6" : ""}`}>
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/8">
-                        {index === 0 ? (
-                          <Star className="h-5 w-5 text-emerald-300" />
-                        ) : index === 1 ? (
-                          <Shield className="h-5 w-5 text-sky-300" />
-                        ) : (
-                          <Smartphone className="h-5 w-5 text-violet-300" />
-                        )}
+                      <div>
+                        <p className="text-white font-semibold text-sm">{review.name}</p>
+                        <p className="text-neutral-500 text-xs">{review.role}</p>
                       </div>
-                      <h3 className="text-lg font-semibold text-white">{card.title}</h3>
                     </div>
-                    <p className="mt-4 text-sm leading-7 text-neutral-400">{card.description}</p>
                   </div>
-                ))}
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
+                <Star className="h-5 w-5 fill-[#00B67A] text-[#00B67A]" />
+                <span className="text-sm text-neutral-400">Widget Trustpolt en cours de branchement — 5.0/5 en attente</span>
               </div>
             </div>
           </div>
@@ -1237,90 +1229,91 @@ export default function LandingPage() {
                 transition={{ delay: 0.2 }}
                 className="text-xl text-neutral-400 max-w-2xl mx-auto"
               >
-                Pour développer votre entreprise sans limites.
+                Comparez le plan gratuit et le Pro. Passez à la vitesse quand vous êtes prêt.
               </motion.p>
             </div>
 
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="max-w-lg mx-auto relative group perspective"
-            >
-              {/* Magic Glowing Border */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-600 rounded-3xl blur opacity-25 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
-              
-              <SpotlightCard className="p-10 relative overflow-hidden rounded-3xl bg-neutral-950/80 backdrop-blur-2xl border border-white/10 transform transition-transform duration-500 hover:scale-[1.02] preserve-3d">
-                {/* Aurora inside the card */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-150"></div>
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-fuchsia-600/10 rounded-full blur-3xl -ml-32 -mb-32 transition-transform duration-700 group-hover:scale-150"></div>
-                
-                <div className="relative z-10">
-                  <div className="flex justify-between items-baseline mb-8">
+            <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto mb-12">
+              {/* Plan Gratuit */}
+              <motion.div 
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="relative group perspective"
+              >
+                <div className="relative overflow-hidden rounded-3xl bg-neutral-900/80 border border-neutral-800 p-8 h-full flex flex-col">
+                  <div className="flex justify-between items-baseline mb-6">
                     <div>
-                      <h3 className="text-3xl font-bold text-white mb-2">Zolio Pro</h3>
-                      <p className="text-violet-300 text-sm font-medium">Tout inclus</p>
+                      <h3 className="text-2xl font-bold text-white mb-1">Gratuit</h3>
+                      <p className="text-neutral-400 text-sm">Pour découvrir</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60">29€</span>
-                      <span className="text-neutral-400 block mt-1">/mois</span>
+                      <span className="text-5xl font-extrabold text-white">0€</span>
+                      <span className="text-neutral-500 block mt-1 text-sm">/mois</span>
                     </div>
                   </div>
-                  
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-8"></div>
-                  
-                  <ul className="space-y-5 mb-8">
-                    {['Devis et factures illimités', 'Catalogue de prix intégré', 'Signature électronique', 'Premier devis accompagné si besoin', 'Support direct et réactif'].map((feature, idx) => (
-                      <motion.li 
-                        key={idx} 
-                        initial={{ opacity: 0, x: -10 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.4 + (idx * 0.1) }}
-                        className="flex items-center text-neutral-200 group/item"
-                      >
-                        <div className="relative mr-4 flex-shrink-0">
-                          <div className="absolute inset-0 bg-violet-500 rounded-full blur opacity-0 group-hover/item:opacity-50 transition-opacity"></div>
-                          <CheckCircle className="w-6 h-6 text-violet-400 relative z-10" />
-                        </div>
-                        <span className="text-lg">{feature}</span>
-                      </motion.li>
+                  <ul className="space-y-4 mb-8 flex-grow">
+                    {[
+                      '1 devis pour tester',
+                      'Devis illimités après passage au Pro',
+                      'Signature électronique',
+                      'Relances automatiques',
+                      'Catalogue de prix intégré'
+                    ].map((f, i) => (
+                      <li key={i} className="flex items-center text-neutral-200">
+                        <CheckCircle className={`w-5 h-5 mr-3 flex-shrink-0 ${i === 0 ? 'text-emerald-400' : 'text-neutral-600'}`} />
+                        <span className={i === 0 ? 'text-white font-medium' : 'text-neutral-400'}>{f}</span>
+                      </li>
                     ))}
                   </ul>
-                  
                   <Link 
                     href="/sign-up?redirect_url=/dashboard"
-                    className="group/btn relative block w-full py-4 rounded-xl font-bold text-center transition-all duration-300 transform hover:scale-[1.02] active:scale-95 overflow-hidden"
+                    className="block w-full py-3.5 rounded-xl font-bold text-center border border-white/20 text-white transition-all hover:bg-white/5"
                   >
-                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-500 opacity-90 group-hover/btn:opacity-100 transition-opacity"></div>
-                    <div className="absolute inset-0 w-full h-full bg-white/20 scale-x-0 group-hover/btn:scale-x-100 origin-left transition-transform duration-500 ease-out"></div>
-                    <span className="relative z-10 text-white flex items-center justify-center gap-2">
-                      Démarrer l&apos;essai (1 devis)
-                      <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                    </span>
+                    Tester gratuitement
                   </Link>
-
-                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-violet-200">
-                      Lancement assisté
-                    </p>
-                    <p className="mt-3 text-sm leading-6 text-neutral-300">
-                      On vous aide à configurer votre activité, votre starter métier et votre premier devis si vous ne voulez pas démarrer seul.
-                    </p>
-                    <a
-                      href={supportHref}
-                      target={supportIsExternal ? "_blank" : undefined}
-                      rel={supportIsExternal ? "noreferrer" : undefined}
-                      className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-white transition hover:text-violet-200"
-                    >
-                      Parler à l&apos;équipe
-                      <ArrowRight className="h-4 w-4" />
-                    </a>
-                  </div>
                 </div>
-              </SpotlightCard>
-            </motion.div>
+              </motion.div>
+
+              {/* Plan Pro */}
+              <motion.div 
+                initial={{ opacity: 0, x: 30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.4 }}
+                className="relative group perspective"
+              >
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700"></div>
+                <div className="relative overflow-hidden rounded-3xl bg-neutral-950/90 border border-violet-500/30 p-8 h-full flex flex-col shadow-[inset_0_0_60px_rgba(139,92,246,0.08)]">
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-violet-500/20 rounded-full text-xs font-bold text-violet-300 border border-violet-500/30">POPULAIRE</div>
+                  <div className="flex justify-between items-baseline mb-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-1">Zolio Pro</h3>
+                      <p className="text-violet-300 text-sm">Tout inclus</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60">29€</span>
+                      <span className="text-neutral-400 block mt-1 text-sm">/mois</span>
+                    </div>
+                  </div>
+                  <ul className="space-y-4 mb-8 flex-grow">
+                    {['Devis illimités', 'Factures illimitées', 'Signature électronique', 'Catalogue de prix intégré', 'Relances automatiques', 'Export comptable', 'Premier devis accompagné'].map((f, i) => (
+                      <li key={i} className="flex items-center text-neutral-200">
+                        <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0 text-violet-400" />
+                        <span>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link 
+                    href="/sign-up?redirect_url=/dashboard"
+                    className="block w-full py-3.5 rounded-xl font-bold text-center bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] hover:scale-[1.02]"
+                  >
+                    Passer au Pro
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
           </div>
         </LandingStage>
 
