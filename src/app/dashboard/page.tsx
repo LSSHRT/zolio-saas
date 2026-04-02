@@ -1029,8 +1029,8 @@ export default function DashboardPage() {
                 <DashboardNotificationsMenu
                   dashboardSignals={dashboardSignals}
                 />
-                <div className="inline-flex items-center justify-center">
-                  {isLoaded ? <UserButton /> : <User size={28} className="text-slate-500" />}
+                <div className="inline-flex h-9 w-9 items-center justify-center">
+                  {isLoaded ? <UserButton /> : <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />}
                 </div>
               </div>
             </div>
@@ -1045,21 +1045,23 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2 lg:gap-3">
-              {canAccessAdminDashboard && (
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                >
-                  <ShieldCheck size={17} />
-                  <span>Admin</span>
-                </Link>
-              )}
+              {/* Admin — réservé dans le layout même pendant le chargement */}
+              <Link
+                href="/admin"
+                className={`inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100 ${
+                  !isLoaded || !canAccessAdminDashboard ? "invisible pointer-events-none" : ""
+                }`}
+              >
+                <ShieldCheck size={17} />
+                <span>Admin</span>
+              </Link>
               <ThemeToggle />
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
               />
-              <div className="inline-flex items-center justify-center">
-                {isLoaded ? <UserButton /> : <User size={28} className="text-slate-500" />}
+              {/* Avatar — taille fixe réservée */}
+              <div className="inline-flex h-9 w-9 items-center justify-center">
+                {isLoaded ? <UserButton /> : <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />}
               </div>
             </div>
           </div>
@@ -1068,6 +1070,22 @@ export default function DashboardPage() {
         <ClientDesktopNav active="dashboard" />
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
+          {!isLoaded ? (
+            // Skeleton : aucun flash de contenu pendant le chargement Clerk
+            <div className="space-y-6">
+              <div className="h-32 animate-pulse rounded-[2rem] bg-slate-200/80 dark:bg-slate-800/80" />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />
+                ))}
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="h-40 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />
+                <div className="h-40 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />
+              </div>
+            </div>
+          ) : (
+          <>
           <div className="space-y-4 md:hidden">
             <motion.section
               {...sectionMotion(0)}
@@ -1913,6 +1931,8 @@ export default function DashboardPage() {
                 </div>
             </div>
           </motion.section>
+          </>
+          )}
         </main>
       </div>
 
