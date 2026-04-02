@@ -7,6 +7,8 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import Link from "next/link";
+import Script from "next/script";
+import Head from "next/head";
 import {
   Lock,
   ArrowRight,
@@ -345,6 +347,28 @@ const FAQItem = ({ question, answer }: { question: string; answer: string }) => 
 };
 
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Zolio",
+  "url": "https://www.zolio.site",
+  "description": "Logiciel de devis et factures conçu pour les artisans du bâtiment. Devis en 3 min, signature digitale, facturation automatique.",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "AggregateOffer",
+    "lowPrice": "0",
+    "highPrice": "29",
+    "priceCurrency": "EUR",
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5",
+    "bestRating": "5",
+    "reviewCount": "30",
+  },
+};
+
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const supportHref = getSupportHref({
@@ -355,7 +379,15 @@ export default function LandingPage() {
   const supportIsExternal = isExternalSupportHref(supportHref);
 
   return (
-    <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
+    <>
+      <Head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </Head>
+      <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
+        <div className="relative z-10">
       <div className="relative z-10">
         {/* Navigation */}
         <nav className="fixed inset-x-0 top-3 z-50 transition-all duration-300 sm:top-4">
@@ -474,14 +506,26 @@ export default function LandingPage() {
                     <Clock className="h-4 w-4 text-orange-300" />
                     Prêt en 3 min
                   </span>
-                  <span className="landing-chip">
-                    <Shield className="h-4 w-4 text-sky-300" />
-                    Données sécurisées
-                  </span>
-                  <span className="landing-chip">
-                    <HardHat className="h-4 w-4 text-orange-300" />
-                    Conçu pour le terrain
-                  </span>
+                </div>
+
+                {/* Social proof bar */}
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 xl:justify-start">
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/15 text-violet-300">
+                      <Users className="h-4 w-4" />
+                    </div>
+                    <p className="text-sm text-neutral-400">
+                      <span className="font-bold text-white">250+</span> artisans inscrits
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
+                      <FileCheck2 className="h-4 w-4" />
+                    </div>
+                    <p className="text-sm text-neutral-400">
+                      <span className="font-bold text-white">3 000+</span> devis créés
+                    </p>
+                  </div>
                 </div>
 
                 <div className="mt-10 grid gap-3 sm:grid-cols-3">
@@ -1449,6 +1493,8 @@ export default function LandingPage() {
           </span>
         </Link>
       </div>
-    </div>
+      </div>
+      </div>
+    </>
   );
 }
