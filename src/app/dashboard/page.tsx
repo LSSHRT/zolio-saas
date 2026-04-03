@@ -653,6 +653,7 @@ export default function DashboardPage() {
   const devisRecents = dashboardData?.recentQuotes ?? [];
   const devisARelancer = dashboardData?.followUpQuotes ?? [];
   const monthlyData: ClientDashboardMonthlyDatum[] = dashboardData?.monthlyData ?? [];
+  const topClients = dashboardData?.topClients ?? [];
 
   let greetingText = "Bonjour";
   let GreetingIcon = CloudSun;
@@ -1406,6 +1407,47 @@ export default function DashboardPage() {
             </MobileDisclosureSection>
 
             <MobileDisclosureSection
+              title="Top Clients"
+              description="Vos meilleurs clients par chiffre d'affaires."
+              badge={topClients.length}
+            >
+              {topClients.length === 0 ? (
+                <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Pas encore de données</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Acceptez vos premiers devis pour voir vos meilleurs clients apparaître ici.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {topClients.map((client, i) => (
+                    <div
+                      key={client.nom}
+                      className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                            <Users size={16} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white">{client.nom}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                              {client.devisCount} devis{client.devisCount > 1 ? 's' : ''} acceptés
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                          {formatCurrency(client.revenueHT)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </MobileDisclosureSection>
+
+            <MobileDisclosureSection
               title="Modules de travail"
               description="Le reste de la boîte à outils, rangé plus bas."
               badge={`${quickLinks.length} accès`}
@@ -1866,6 +1908,66 @@ export default function DashboardPage() {
                             </div>
                           </div>
                         </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Top Clients — Colonne droite */}
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Top Clients</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        Vos meilleurs clients
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Classement par chiffre d'affaires généré (devis acceptés uniquement).
+                      </p>
+                    </div>
+                    <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                      Top {Math.min(topClients.length, 5)}
+                    </span>
+                  </div>
+
+                  {topClients.length === 0 ? (
+                    <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
+                      <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-600 ring-1 ring-violet-300/30 dark:text-violet-300 dark:ring-violet-400/20">
+                        <Users size={22} />
+                      </div>
+                      <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pas encore de classement</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Acceptez vos premiers devis pour voir vos meilleurs clients apparaître ici.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-5 space-y-3">
+                      {topClients.map((client) => (
+                        <div
+                          key={client.nom}
+                          className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-start gap-3">
+                              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                                <Users size={18} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                  {client.nom}
+                                </p>
+                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                  {client.devisCount} devis{client.devisCount > 1 ? 's' : ''} acceptés
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                                {formatCurrency(client.revenueHT)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   )}
