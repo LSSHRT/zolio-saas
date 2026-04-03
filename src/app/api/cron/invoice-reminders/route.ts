@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/sendEmail";
 import { logError, logInfo } from "@/lib/logger";
+import { clerkClient } from "@clerk/nextjs/server";
 
 function formatDateFR(d: Date): string {
   return d.toLocaleDateString("fr-FR", {
@@ -39,8 +40,30 @@ export async function GET(req: NextRequest) {
     });
 
     let sent = 0;
+    let skipped = 0;
+
+    // Récupérer les préférences de relance par utilisateur
+    const userPreferences = new Map<string, boolean>();
+    const uniqueUserIds = [...new Set(overdueInvoices.map((inv) => inv.userId))];
+    const clerk = await clerkClient();
+    for (const userId of uniqueUserIds) {
+      try {
+        const user = await clerk.users.getUser(userId);
+        const meta = user.unsafeMetadata as Record<string, unknown> | undefined;
+        // Par défaut activé, sauf si explicitement désactivé
+        userPreferences.set(userId, meta?.reminderEnabled !== false);
+      } catch {
+        userPreferences.set(userId, true); // Par défaut activé en cas d'erreur
+      }
+    }
 
     for (const invoice of overdueInvoices) {
+      // Vérifier si l'utilisateur a activé les relances
+      if (userPreferences.get(invoice.userId) === false) {
+        skipped++;
+        continue;
+      }
+
       try {
         const overdueDays = Math.floor(
           (now.getTime() - (invoice.dateEcheance?.getTime() ?? now.getTime())) / 86400000
@@ -73,6 +96,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       ok: true,
       sent,
+      skipped,
       checked: overdueInvoices.length,
       ranAt: now.toISOString(),
     });

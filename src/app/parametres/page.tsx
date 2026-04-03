@@ -171,6 +171,9 @@ export default function ParametresEntreprise() {
   const [message, setMessage] = useState<SettingsMessage>({ type: "", text: "" });
   const [formData, setFormData] = useState<SettingsFormData>(EMPTY_FORM_DATA);
   const [hydratedUserId, setHydratedUserId] = useState<string | null>(null);
+  const [reminderEnabled, setReminderEnabled] = useState(
+    (user?.unsafeMetadata?.reminderEnabled as boolean | undefined) ?? true
+  );
 
   useEffect(() => {
     if (!isLoaded || !user || hydratedUserId === user.id) return;
@@ -316,6 +319,7 @@ export default function ParametresEntreprise() {
           companyColor: brandColor,
           companyGoogleReview: formData.companyGoogleReview,
           referredBy: formData.referredBy,
+          reminderEnabled,
         },
       });
       setMessage({ type: "success", text: "Paramètres enregistrés avec succès." });
@@ -515,10 +519,38 @@ export default function ParametresEntreprise() {
             </p>
           </div>
           <div className="mt-1">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-300">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Actif
-            </span>
+            <button
+              type="button"
+              onClick={() => {
+                const newVal = !reminderEnabled;
+                setReminderEnabled(newVal);
+                user.update({
+                  unsafeMetadata: {
+                    ...user.unsafeMetadata,
+                    companyName: formData.companyName,
+                    companyAddress: formData.companyAddress,
+                    companyPhone: formData.companyPhone,
+                    companySiret: formData.companySiret,
+                    companyLogo: formData.companyLogo,
+                    companyIban: formData.companyIban,
+                    companyBic: formData.companyBic,
+                    companyStatut: formData.companyStatut,
+                    companyAssurance: formData.companyAssurance,
+                    companyLegal: formData.companyLegal,
+                    companyCgv: formData.companyCgv,
+                    companyColor: brandColor,
+                    companyGoogleReview: formData.companyGoogleReview,
+                    referredBy: formData.referredBy,
+                    reminderEnabled: newVal,
+                  },
+                }).catch(() => setReminderEnabled(!newVal));
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${reminderEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${reminderEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </button>
           </div>
         </div>
       </div>
