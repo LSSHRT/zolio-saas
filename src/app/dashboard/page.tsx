@@ -1030,7 +1030,15 @@ export default function DashboardPage() {
                   dashboardSignals={dashboardSignals}
                 />
                 <div className="inline-flex h-9 w-9 items-center justify-center">
-                  {isLoaded ? <UserButton /> : <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />}
+                  {isLoaded && user?.imageUrl ? (
+                    <img
+                      src={user.imageUrl}
+                      alt="Avatar"
+                      className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+                  )}
                 </div>
               </div>
             </div>
@@ -1059,21 +1067,16 @@ export default function DashboardPage() {
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
               />
-              {/* Avatar — taille fixe réservée */}
-              <div className="inline-flex h-9 w-9 items-center justify-center shrink-0">
-                {isLoaded ? (
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        userButtonAvatarBox: "h-8 w-8",
-                        userButtonTrigger: "p-0",
-                      },
-                    }}
-                  />
-                ) : (
-                  <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
-                )}
-              </div>
+              {/* Avatar — image directe via useUser() */}
+              {isLoaded && user?.imageUrl ? (
+                <img
+                  src={user.imageUrl}
+                  alt="Avatar"
+                  className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20"
+                />
+              ) : (
+                <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+              )}
             </div>
           </div>
         </header>
