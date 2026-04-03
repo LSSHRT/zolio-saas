@@ -10,6 +10,7 @@ import {
   Download,
   FileText,
   History,
+  Link2,
   Mail,
   MapPin,
   Pencil,
@@ -339,18 +340,41 @@ export default function ClientsPage() {
       label: "Voir l'historique",
       onClick: () => setHistoryClient(client),
     },
+    ...(client.email ? [{
+      icon: Link2,
+      label: "Copier le lien client",
+      onClick: async () => {
+        try {
+          const res = await fetch("/api/client-portal/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ clientEmail: client.email }),
+          });
+          const data = await res.json();
+          if (data.link) {
+            await navigator.clipboard.writeText(data.link);
+            toast.success("Lien client copié !");
+          } else {
+            toast.error(data.error || "Erreur lors de la génération");
+          }
+        } catch {
+          toast.error("Erreur réseau");
+        }
+      },
+      tone: "accent" as const,
+    }] : []),
     {
       icon: Pencil,
       label: "Modifier la fiche",
       onClick: () => handleEdit(client),
-      tone: "accent",
+      tone: "accent" as const,
     },
     {
       disabled: deletingId === client.id,
       icon: Trash2,
       label: deletingId === client.id ? "Suppression..." : "Supprimer",
       onClick: () => setPendingDeleteClient(client),
-      tone: "danger",
+      tone: "danger" as const,
     },
   ];
 
