@@ -7,7 +7,7 @@ const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: f
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import NextImage from "next/image";
-import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles, Eye } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -877,6 +877,15 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
               <ArrowLeft size={16} /> Annuler
             </motion.button>
           </Link>
+          <a
+            href={`/api/devis/${numero}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-3 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/30 dark:text-violet-300 dark:hover:bg-violet-900/40"
+          >
+            <Eye size={16} />
+            <span className="hidden sm:inline">Aperçu PDF</span>
+          </a>
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={handleSaveAndResend}

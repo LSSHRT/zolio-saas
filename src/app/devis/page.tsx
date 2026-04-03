@@ -315,6 +315,11 @@ export default function DevisPage() {
         label: "Modifier le devis",
       },
       {
+        href: `/api/devis/${quote.numero}/pdf`,
+        icon: Eye,
+        label: "Prévisualiser le PDF",
+      },
+      {
         disabled: isDuplicating,
         icon: CopyPlus,
         label: isDuplicating ? "Duplication..." : "Dupliquer",
