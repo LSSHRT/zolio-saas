@@ -48,6 +48,8 @@ interface Devis {
   lienPdf: string;
   signingToken?: string;
   lu_le?: string;
+  optionLabel?: string | null;
+  devisParentId?: string | null;
 }
 
 type DeleteDialogState =
@@ -269,6 +271,32 @@ export default function DevisPage() {
       ),
     [devis, search],
   );
+
+  // Group multi-option devis by devisParentId
+  const groupedDevis = useMemo(() => {
+    const parentMap = new Map<string, Devis[]>();
+    const standalone: Devis[] = [];
+
+    for (const d of filtered) {
+      if (d.devisParentId) {
+        const group = parentMap.get(d.devisParentId) || [];
+        group.push(d);
+        parentMap.set(d.devisParentId, group);
+      } else {
+        standalone.push(d);
+      }
+    }
+
+    return { parentMap, standalone };
+  }, [filtered]);
+
+  const optionColors: Record<string, string> = {
+    basique: "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+    standard: "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300",
+    premium: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  };
+
+  const optionOrder = ["basique", "standard", "premium"];
 
   const totalMois = devis.reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
   const totalValide = devis.filter((d) => d.statut === "Accepté").reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
@@ -597,6 +625,11 @@ export default function DevisPage() {
                               {d.lu_le && <span title={`Vu le ${new Date(d.lu_le).toLocaleDateString()}`}><Eye className="w-3 h-3 text-blue-500" /></span>}
                             </div>
                             <p className="text-xs text-slate-400">{d.numero}</p>
+                            {d.optionLabel && (
+                              <span className={`inline-block mt-1 rounded px-1.5 py-0.5 text-[9px] font-bold capitalize ${optionColors[d.optionLabel] || "bg-violet-100 text-violet-700"}`}>
+                                {d.optionLabel}
+                              </span>
+                            )}
                           </div>
                           <p className="text-sm font-bold text-slate-900 dark:text-white">{d.totalTTC}€</p>
                         </div>
@@ -697,6 +730,11 @@ export default function DevisPage() {
                             <span className={`${config.bg} ${config.color} inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold`}>
                               <Icon size={12} /> {d.statut}
                             </span>
+                            {d.optionLabel && (
+                              <span className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[10px] font-bold capitalize ${optionColors[d.optionLabel] || "bg-violet-100 text-violet-700"}`}>
+                                <Layers size={12} /> {d.optionLabel}
+                              </span>
+                            )}
                             {d.lu_le ? (
                               <span
                                 className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-semibold text-blue-600"
@@ -760,8 +798,15 @@ export default function DevisPage() {
                             <p className="text-xs text-slate-400">{d.numero} · {d.date}</p>
                           </div>
                         </div>
-                        <div className={`${config.bg} ${config.color} px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1`}>
-                          <Icon size={12} /> {d.statut}
+                        <div className="flex items-center gap-2">
+                          <div className={`${config.bg} ${config.color} px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1`}>
+                            <Icon size={12} /> {d.statut}
+                          </div>
+                          {d.optionLabel && (
+                            <span className={`px-2 py-1 rounded-lg text-[10px] font-bold capitalize flex items-center gap-1 ${optionColors[d.optionLabel] || "bg-violet-100 text-violet-700"}`}>
+                              <Layers size={12} /> {d.optionLabel}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">

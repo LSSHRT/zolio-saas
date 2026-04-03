@@ -136,6 +136,8 @@ export async function GET(request: Request) {
         photos: parsePhotos(d.photos),
         dateDebut: d.dateDebut ? d.dateDebut.toISOString().split("T")[0] : "",
         dateFin: d.dateFin ? d.dateFin.toISOString().split("T")[0] : "",
+        optionLabel: d.optionLabel || null,
+        devisParentId: d.devisParentId || null,
       };
     });
 
