@@ -37,6 +37,7 @@ import {
 import { MobileDialog } from "@/components/mobile-dialog";
 
 interface Devis {
+  id: string;
   numero: string;
   date: string;
   nomClient: string;
@@ -297,6 +298,18 @@ export default function DevisPage() {
   };
 
   const optionOrder = ["basique", "standard", "premium"];
+
+  // Liste de rendu : chaque devis standalone + ses enfants (le cas échéant)
+  const renderGroups = useMemo(() => {
+    return groupedDevis.standalone.map((d) => ({
+      parent: d,
+      children: (groupedDevis.parentMap.get(d.id) || []).sort(
+        (a, b) => optionOrder.indexOf(a.optionLabel || "") - optionOrder.indexOf(b.optionLabel || "")
+      ),
+    }));
+  }, [groupedDevis]);
+
+  const totalDisplayed = renderGroups.reduce((s, g) => s + 1 + g.children.length, 0);
 
   const totalMois = devis.reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
   const totalValide = devis.filter((d) => d.statut === "Accepté").reduce((s, d) => s + (parseFloat(d.totalTTC) || 0), 0);
@@ -696,20 +709,22 @@ export default function DevisPage() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{filtered.length} devis</p>
-              {filtered.map((d, i) => {
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{totalDisplayed} devis</p>
+              {renderGroups.map(({ parent: d, children }, i) => {
                 const config = statutConfig[d.statut] || statutConfig["En attente"];
                 const Icon = config.icon;
                 const pending = isEnAttente(d.statut);
                 const isUpdating = updatingStatut === d.numero;
+                const hasOptions = children.length > 0;
 
                 return (
+                  <div key={d.id || d.numero} className={hasOptions ? "rounded-2xl border border-violet-200/60 bg-violet-50/30 dark:border-violet-800/40 dark:bg-violet-950/20 p-2" : undefined}>
                   <motion.div
                     key={d.numero || i}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(i * 0.03, 0.15) }}
-                    className="bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-800"
+                    className={`bg-slate-50 dark:bg-slate-800 rounded-2xl border ${hasOptions ? "border-violet-300/50 dark:border-violet-700/50 shadow-sm" : "border-slate-100 dark:border-slate-800"}`}
                   >
                     <div className="p-4 md:hidden">
                       <div className="flex items-start gap-3">
@@ -899,6 +914,57 @@ export default function DevisPage() {
                       </div>
                     </div>
                   </motion.div>
+
+                  {/* Options groupées sous le devis parent */}
+                  {hasOptions && (
+                    <div className="ml-3 mt-2 flex flex-col gap-1.5 pl-4 border-l-2 border-violet-300 dark:border-violet-700">
+                      {children.map((child, ci) => {
+                        const childConfig = statutConfig[child.statut] || statutConfig["En attente"];
+                        const ChildIcon = childConfig.icon;
+                        return (
+                          <motion.div
+                            key={child.id || child.numero}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: Math.min((i * 0.03 + ci * 0.02), 0.2) }}
+                            className="bg-white/70 dark:bg-white/5 rounded-xl border border-slate-200/60 dark:border-white/8 p-3 flex items-center justify-between gap-3"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${optionColors[child.optionLabel || ""] || "bg-violet-100 text-violet-600"}`}>
+                                <Layers size={13} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-medium text-slate-800 dark:text-slate-200">{child.nomClient}</p>
+                                <div className="flex flex-wrap items-center gap-1.5">
+                                  <span className="text-[10px] text-slate-400">{child.numero}</span>
+                                  {child.optionLabel && (
+                                    <span className={`inline-flex items-center gap-0.5 rounded px-1 py-px text-[9px] font-bold capitalize ${optionColors[child.optionLabel] || "bg-violet-100 text-violet-700"}`}>
+                                      {child.optionLabel}
+                                    </span>
+                                  )}
+                                  <span className={`${childConfig.bg} ${childConfig.color} inline-flex items-center gap-0.5 rounded px-1 py-px text-[9px] font-bold`}>
+                                    <ChildIcon size={10} /> {child.statut}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">{child.totalTTC}€</p>
+                              <Link href={`/devis/${child.numero}`}>
+                                <motion.button
+                                  whileTap={{ scale: 0.96 }}
+                                  className="py-1 px-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-violet-50 hover:border-violet-300 hover:text-brand-violet transition"
+                                >
+                                  <Pencil size={12} />
+                                </motion.button>
+                              </Link>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  </div>
                 );
               })}
             </div>

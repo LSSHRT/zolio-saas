@@ -118,6 +118,7 @@ export async function GET(request: Request) {
       const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
       return {
+        id: d.id,
         numero: d.numero,
         client: d.client ? d.client.nom : "Inconnu",
         nomClient: d.client ? d.client.nom : "Inconnu",
