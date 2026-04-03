@@ -5,6 +5,47 @@ import { internalServerError, jsonError } from "@/lib/http";
 import { sendPushNotification } from "@/lib/push-notifications";
 import { factureUpdateSchema, zodErrorResponse } from "@/lib/validations";
 
+export async function GET(request: Request, { params }: { params: Promise<{ numero: string }> }) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return jsonError("Non autorisé", 401);
+    }
+
+    const p = await params;
+    const numero = p.numero;
+
+    const facture = await prisma.facture.findFirst({
+      where: { numero, userId },
+      include: { devis: { select: { numero: true, statut: true } } },
+    });
+    if (!facture) {
+      return jsonError("Facture non trouvée", 404);
+    }
+
+    return NextResponse.json({
+      id: facture.id,
+      numero: facture.numero,
+      nomClient: facture.nomClient,
+      emailClient: facture.emailClient || "",
+      totalHT: facture.totalHT,
+      tva: facture.tva,
+      totalTTC: facture.totalTTC,
+      statut: facture.statut,
+      date: facture.date.toISOString(),
+      dateEcheance: facture.dateEcheance?.toISOString() || null,
+      devisRef: facture.devisRef || facture.devis?.numero || null,
+      devisStatut: facture.devis?.statut || null,
+      stripePaymentLink: facture.stripePaymentLink || null,
+      derniereRelanceNiveau: (facture as any).derniereRelanceNiveau,
+      derniereRelanceDate: (facture as any).derniereRelanceDate?.toISOString() || null,
+      createdAt: facture.createdAt.toISOString(),
+    });
+  } catch (error) {
+    return internalServerError("facture-get", error, "Impossible de récupérer la facture");
+  }
+}
+
 export async function PATCH(request: Request, { params }: { params: Promise<{ numero: string }> }) {
   try {
     const { userId } = await auth();

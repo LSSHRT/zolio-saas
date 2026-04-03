@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import {
   BadgeCheck,
   CheckCircle,
@@ -343,6 +344,11 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const getMobileInvoiceActions = (facture: Facture): ClientMobileAction[] => {
     const actions: ClientMobileAction[] = [
       {
+        icon: FileText,
+        label: "Voir le détail",
+        href: `/factures/${facture.numero}`,
+      },
+      {
         icon: Download,
         label: "Télécharger PDF",
         onClick: () => handleDownloadPDF(facture),
@@ -644,14 +650,14 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               {(facture.nomClient || "").charAt(0).toUpperCase()}
                             </div>
 
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                            <Link href={`/factures/${facture.numero}`} className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                                 {facture.nomClient}
                               </p>
                               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 {facture.numero} · {facture.date}
                               </p>
-                            </div>
+                            </Link>
                           </div>
 
                           <div
@@ -737,14 +743,14 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               {(facture.nomClient || "").charAt(0).toUpperCase()}
                             </div>
 
-                            <div className="min-w-0">
-                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                            <Link href={`/factures/${facture.numero}`} className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white hover:text-violet-600 dark:hover:text-violet-400 transition-colors">
                                 {facture.nomClient}
                               </p>
                               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                                 {facture.numero} · {facture.date}
                               </p>
-                            </div>
+                            </Link>
                           </div>
 
                           <div
@@ -893,10 +899,10 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3"
                             >
                               <div className="flex justify-between items-start">
-                                <div className="min-w-0 flex-1">
-                                  <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">{facture.nomClient}</p>
+                                <Link href={`/factures/${facture.numero}`} className="min-w-0 flex-1">
+                                  <p className="font-semibold text-slate-900 dark:text-white text-sm truncate hover:text-violet-600 dark:hover:text-violet-400 transition-colors">{facture.nomClient}</p>
                                   <p className="text-xs text-slate-400">{facture.numero} · {facture.date}</p>
-                                </div>
+                                </Link>
                                 <p className="text-sm font-bold text-slate-900 dark:text-white ml-2">{facture.totalTTC}€</p>
                               </div>
 
