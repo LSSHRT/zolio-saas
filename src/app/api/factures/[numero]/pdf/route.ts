@@ -20,7 +20,6 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       include: {
         devis: {
           include: {
-            client: true,
             lignesNorm: { orderBy: { position: "asc" } },
           },
         },
@@ -33,15 +32,8 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
     if (!user) return jsonError("Utilisateur non trouvé", 401);
     const entreprise = getCompanyProfile(user);
 
-    // Get lignes from the linked devis if available
+    // Récupérer les lignes du Devis source lié
     let lignes: LignePayload[] = [];
-    let clientInfo = {
-      nom: facture.nomClient,
-      email: facture.emailClient || "",
-      telephone: "",
-      adresse: "",
-    };
-
     if (facture.devis) {
       if (facture.devis.lignesNorm.length > 0) {
         lignes = facture.devis.lignesNorm.map((ligne) => ({
@@ -56,15 +48,21 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       } else if (facture.devis.lignes) {
         lignes = parseLignes(facture.devis.lignes);
       }
+    }
 
-      if (facture.devis.client) {
-        clientInfo = {
-          nom: facture.devis.client.nom,
-          email: facture.devis.client.email || "",
-          telephone: facture.devis.client.telephone || "",
-          adresse: facture.devis.client.adresse || "",
-        };
-      }
+    // Fallback : une ligne récap si pas de Devis lié
+    if (lignes.length === 0) {
+      lignes = [
+        {
+          isOptional: false,
+          nomPrestation: "Prestations",
+          prixUnitaire: facture.totalHT,
+          quantite: 1,
+          totalLigne: facture.totalHT,
+          tva: facture.tva.toString(),
+          unite: "forfait",
+        },
+      ];
     }
 
     const normalizedLignes = lignes.map(normalizeLigneForOutput);
@@ -72,7 +70,12 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
     const pdfBuffer = await generateFacturePDF({
       numeroDevis: facture.numero,
       date: facture.date.toLocaleDateString("fr-FR"),
-      client: clientInfo,
+      client: {
+        nom: facture.nomClient,
+        email: facture.emailClient || "",
+        telephone: "",
+        adresse: "",
+      },
       isPro: user.publicMetadata?.isPro === true,
       entreprise: {
         nom: entreprise.nom,
@@ -87,19 +90,19 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
         legal: entreprise.legal,
         statut: entreprise.statut,
         assurance: entreprise.assurance,
-        cgv: entreprise.cgv,
       },
       lignes: normalizedLignes,
       totalHT: facture.totalHT.toFixed(2),
-      tva: String(facture.tva),
+      tva: String(facture.tva ?? 20),
       totalTTC: facture.totalTTC.toFixed(2),
+      statut: facture.statut,
     });
 
     return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${facture.numero}.pdf"`,
+        "Content-Disposition": `inline; filename="${facture.numero}.pdf"`,
       },
     });
   } catch (error) {
