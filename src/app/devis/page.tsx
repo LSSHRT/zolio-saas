@@ -20,6 +20,7 @@ import {
   Eye,
   CopyPlus,
   Sparkles,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -292,6 +293,13 @@ export default function DevisPage() {
     },
   ];
 
+  const mobileMultiOptionsAction: ClientMobileAction = {
+    icon: Layers,
+    label: "Devis multi-options",
+    href: "/nouveau-devis/options",
+    tone: "accent",
+  };
+
   const getMobileQuoteActions = (quote: Devis): ClientMobileAction[] => {
     const pending = isEnAttente(quote.statut);
     const accepted = quote.statut === "Accepté" || quote.statut === "Signé";
@@ -396,7 +404,7 @@ export default function DevisPage() {
           </Link>
         )
       }
-      mobileSecondaryActions={mobileViewActions}
+      mobileSecondaryActions={[...mobileViewActions, mobileMultiOptionsAction]}
       actions={
         <>
           <div className="flex rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
@@ -415,12 +423,20 @@ export default function DevisPage() {
               </motion.button>
             </Link>
           ) : (
-            <Link href="/nouveau-devis">
-              <motion.button whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
-                <FileText size={16} /> Nouveau devis
-              </motion.button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/nouveau-devis">
+                <motion.button whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
+                  <FileText size={16} /> Nouveau devis
+                </motion.button>
+              </Link>
+              <Link href="/nouveau-devis/options">
+                <motion.button whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center gap-2 rounded-xl border border-violet-200 bg-white px-4 py-2.5 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50 dark:border-violet-800 dark:bg-violet-950/30 dark:text-violet-300 dark:hover:bg-violet-900/40">
+                  <Layers size={16} /> Multi-options
+                </motion.button>
+              </Link>
+            </div>
           )}
         </>
       }
