@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/sendEmail";
 import { logError, logInfo } from "@/lib/logger";
 import { clerkClient } from "@clerk/nextjs/server";
+import { createClientPortalToken } from "@/lib/client-portal";
+
+const PUBLIC_URL = process.env.NEXT_PUBLIC_APP_URL || "https://zolio.site";
 
 function formatDateFR(d: Date): string {
   return d.toLocaleDateString("fr-FR", {
@@ -20,11 +23,12 @@ const REMINDER_LEVELS = [
     delayDays: 3,
     subject: (numero: string) => `Rappel amical – Facture ${numero}`,
     tone: "friendly",
-    template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number) => `
+    template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number, portalLink?: string) => `
       <h2>Rappel amical</h2>
       <p>Bonjour${client ? ` ${client}` : ""},</p>
       <p>Sauf erreur de notre part, la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> arrive à échéance ou est légèrement en retard.</p>
       <p>Échéance : ${echeance} · Retard : ${retard} jour${retard > 1 ? "s" : ""}</p>
+      ${portalLink ? `<p style="text-align:center;margin:20px 0;"><a href="${portalLink}" style="background:#0ea5e9;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Consulter mes documents →</a></p>` : ""}
       <p>Si le règlement a déjà été effectué, merci de ne pas tenir compte de ce message.</p>
       <p>Bien cordialement,</p>
     `,
@@ -35,11 +39,12 @@ const REMINDER_LEVELS = [
     delayDays: 7,
     subject: (numero: string) => `2e rappel – Facture ${numero} en retard`,
     tone: "firm",
-    template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number) => `
+    template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number, portalLink?: string) => `
       <h2>Deuxième rappel de paiement</h2>
       <p>Bonjour${client ? ` ${client}` : ""},</p>
       <p>Nous constatons que la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> reste impayée à ce jour.</p>
       <p>Échéance initiale : ${echeance} · Retard : ${retard} jours</p>
+      ${portalLink ? `<p style="text-align:center;margin:20px 0;"><a href="${portalLink}" style="background:#f59e0b;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Consulter mes documents →</a></p>` : ""}
       <p>Nous vous saurions gré de bien vouloir procéder au règlement <strong>dans les 48 heures</strong>.</p>
       <p>En cas de difficulté, n'hésitez pas à nous contacter.</p>
       <p>Cordialement,</p>
@@ -51,11 +56,12 @@ const REMINDER_LEVELS = [
     delayDays: 15,
     subject: (numero: string) => `Dernier avis avant contentieux – Facture ${numero}`,
     tone: "final",
-    template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number) => `
+    template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number, portalLink?: string) => `
       <h2 style="color: #dc2626;">Dernier avis avant contentieux</h2>
       <p>Bonjour${client ? ` ${client}` : ""},</p>
       <p>Malgré nos relances précédentes, la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> demeure impayée.</p>
       <p>Échéance initiale : ${echeance} · Retard : ${retard} jours</p>
+      ${portalLink ? `<p style="text-align:center;margin:20px 0;"><a href="${portalLink}" style="background:#dc2626;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Consulter mes documents →</a></p>` : ""}
       <p><strong>À défaut de règlement sous 8 jours</strong>, nous nous verrons dans l'obligation de transmettre votre dossier à notre service contentieux.</p>
       <p style="color: #dc2626; font-weight: bold;">Ceci est notre dernier rappel avant procédure.</p>
       <p>Cordialement,</p>
@@ -137,6 +143,17 @@ export async function GET(req: NextRequest) {
         const montant = invoice.totalTTC.toFixed(2).replace(".", ",");
         const echeance = invoice.dateEcheance ? formatDateFR(invoice.dateEcheance) : "non définie";
 
+        // Générer le lien espace client si possible
+        let portalLink: string | undefined;
+        try {
+          const token = createClientPortalToken(invoice.emailClient!, invoice.userId);
+          if (token) {
+            portalLink = `${PUBLIC_URL}/espace-client/${token}`;
+          }
+        } catch {
+          // Secret non configuré — pas de lien portail
+        }
+
         await sendEmail({
           to: invoice.emailClient!,
           subject: applicableLevel.subject(invoice.numero),
@@ -147,6 +164,7 @@ export async function GET(req: NextRequest) {
             montant,
             echeance,
             overdueDays,
+            portalLink,
           ),
         });
 
