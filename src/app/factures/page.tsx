@@ -306,7 +306,11 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const handlePayLink = async (facture: Facture) => {
     setCreatingPayLink(facture.numero);
     try {
-      const res = await fetch(`/api/factures/${facture.numero}/pay`, { method: "POST" });
+      const res = await fetch(`/api/factures/pay-checkout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeroFacture: facture.numero }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erreur");
       

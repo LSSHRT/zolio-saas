@@ -23,14 +23,30 @@ const REMINDER_LEVELS = [
     delayDays: 3,
     subject: (numero: string) => `Rappel amical – Facture ${numero}`,
     tone: "friendly",
+    accentGradient: "linear-gradient(135deg,#0ea5e9,#8b5cf6)",
+    accentColor: "#0ea5e9",
+    headerTitle: "Rappel amical",
+    headerSubtitle: "Zolio · Rappel de paiement",
     template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number, portalLink?: string) => `
-      <h2>Rappel amical</h2>
-      <p>Bonjour${client ? ` ${client}` : ""},</p>
-      <p>Sauf erreur de notre part, la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> arrive à échéance ou est légèrement en retard.</p>
-      <p>Échéance : ${echeance} · Retard : ${retard} jour${retard > 1 ? "s" : ""}</p>
-      ${portalLink ? `<p style="text-align:center;margin:20px 0;"><a href="${portalLink}" style="background:#0ea5e9;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Consulter mes documents →</a></p>` : ""}
-      <p>Si le règlement a déjà été effectué, merci de ne pas tenir compte de ce message.</p>
-      <p>Bien cordialement,</p>
+      <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);padding:30px;border-radius:16px 16px 0 0;">
+          <h1 style="color:white;margin:0;font-size:24px;">Zolio</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Rappel amical</p>
+        </div>
+        <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${client || ""}</strong>,</p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Sauf erreur de notre part, la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> arrive à échéance ou est légèrement en retard.
+          </p>
+          <div style="background:#fff;border-radius:10px;padding:16px;margin:20px 0;border-left:3px solid #0ea5e9;">
+            <p style="color:#64748b;font-size:13px;margin:0 0 4px;">Détails</p>
+            <p style="color:#1e293b;font-size:14px;margin:0;">Échéance : <strong>${echeance}</strong> · Retard : <strong>${retard} jour${retard > 1 ? "s" : ""}</strong></p>
+          </div>
+          ${portalLink ? `<div style="text-align:center;margin:24px 0;"><a href="${portalLink}" style="background:linear-gradient(135deg,#0ea5e9,#8b5cf6);color:white;padding:14px 36px;border-radius:12px;font-weight:bold;font-size:15px;text-decoration:none;display:inline-block;box-shadow:0 4px 12px -2px rgba(14,165,233,0.35);">Consulter mes documents →</a></div>` : ""}
+          <p style="color:#94a3b8;font-size:13px;line-height:1.5;margin-top:20px;">Si le règlement a déjà été effectué, merci de ne pas tenir compte de ce message.</p>
+          <p style="color:#475569;font-size:14px;margin-top:20px;">Bien cordialement,<br/><span style="color:#8b5cf6;font-weight:600;">L'équipe Zolio</span></p>
+        </div>
+      </div>
     `,
   },
   {
@@ -39,15 +55,33 @@ const REMINDER_LEVELS = [
     delayDays: 7,
     subject: (numero: string) => `2e rappel – Facture ${numero} en retard`,
     tone: "firm",
+    accentGradient: "linear-gradient(135deg,#f59e0b,#f97316)",
+    accentColor: "#f59e0b",
+    headerTitle: "Deuxième rappel",
+    headerSubtitle: "Zolio · Paiement en attente",
     template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number, portalLink?: string) => `
-      <h2>Deuxième rappel de paiement</h2>
-      <p>Bonjour${client ? ` ${client}` : ""},</p>
-      <p>Nous constatons que la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> reste impayée à ce jour.</p>
-      <p>Échéance initiale : ${echeance} · Retard : ${retard} jours</p>
-      ${portalLink ? `<p style="text-align:center;margin:20px 0;"><a href="${portalLink}" style="background:#f59e0b;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Consulter mes documents →</a></p>` : ""}
-      <p>Nous vous saurions gré de bien vouloir procéder au règlement <strong>dans les 48 heures</strong>.</p>
-      <p>En cas de difficulté, n'hésitez pas à nous contacter.</p>
-      <p>Cordialement,</p>
+      <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#f59e0b,#f97316);padding:30px;border-radius:16px 16px 0 0;">
+          <h1 style="color:white;margin:0;font-size:24px;">Zolio</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Deuxième rappel de paiement</p>
+        </div>
+        <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${client || ""}</strong>,</p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Nous constatons que la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> reste impayée à ce jour.
+          </p>
+          <div style="background:#fff;border-radius:10px;padding:16px;margin:20px 0;border-left:3px solid #f59e0b;">
+            <p style="color:#64748b;font-size:13px;margin:0 0 4px;">Détails</p>
+            <p style="color:#1e293b;font-size:14px;margin:0;">Échéance initiale : <strong>${echeance}</strong> · Retard : <strong>${retard} jours</strong></p>
+          </div>
+          ${portalLink ? `<div style="text-align:center;margin:24px 0;"><a href="${portalLink}" style="background:linear-gradient(135deg,#f59e0b,#f97316);color:white;padding:14px 36px;border-radius:12px;font-weight:bold;font-size:15px;text-decoration:none;display:inline-block;box-shadow:0 4px 12px -2px rgba(245,158,11,0.35);">Consulter mes documents →</a></div>` : ""}
+          <p style="color:#334155;font-size:14px;line-height:1.6;margin-top:20px;">
+            Nous vous saurions gré de bien vouloir procéder au règlement <strong>dans les 48 heures</strong>.
+          </p>
+          <p style="color:#64748b;font-size:14px;line-height:1.5;">En cas de difficulté, n'hésitez pas à nous contacter.</p>
+          <p style="color:#475569;font-size:14px;margin-top:20px;">Cordialement,<br/><span style="color:#8b5cf6;font-weight:600;">L'équipe Zolio</span></p>
+        </div>
+      </div>
     `,
   },
   {
@@ -56,15 +90,33 @@ const REMINDER_LEVELS = [
     delayDays: 15,
     subject: (numero: string) => `Dernier avis avant contentieux – Facture ${numero}`,
     tone: "final",
+    accentGradient: "linear-gradient(135deg,#dc2626,#991b1b)",
+    accentColor: "#dc2626",
+    headerTitle: "Dernier avis",
+    headerSubtitle: "Zolio · Avant contentieux",
     template: (client: string, numero: string, date: string, montant: string, echeance: string, retard: number, portalLink?: string) => `
-      <h2 style="color: #dc2626;">Dernier avis avant contentieux</h2>
-      <p>Bonjour${client ? ` ${client}` : ""},</p>
-      <p>Malgré nos relances précédentes, la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> demeure impayée.</p>
-      <p>Échéance initiale : ${echeance} · Retard : ${retard} jours</p>
-      ${portalLink ? `<p style="text-align:center;margin:20px 0;"><a href="${portalLink}" style="background:#dc2626;color:white;padding:10px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Consulter mes documents →</a></p>` : ""}
-      <p><strong>À défaut de règlement sous 8 jours</strong>, nous nous verrons dans l'obligation de transmettre votre dossier à notre service contentieux.</p>
-      <p style="color: #dc2626; font-weight: bold;">Ceci est notre dernier rappel avant procédure.</p>
-      <p>Cordialement,</p>
+      <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#dc2626,#991b1b);padding:30px;border-radius:16px 16px 0 0;">
+          <h1 style="color:white;margin:0;font-size:24px;">Zolio</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Dernier avis avant contentieux</p>
+        </div>
+        <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${client || ""}</strong>,</p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Malgré nos relances précédentes, la facture <strong>${numero}</strong> du ${date} d'un montant de <strong>${montant} TTC</strong> demeure impayée.
+          </p>
+          <div style="background:#fef2f2;border-radius:10px;padding:16px;margin:20px 0;border-left:3px solid #dc2626;">
+            <p style="color:#64748b;font-size:13px;margin:0 0 4px;">Détails</p>
+            <p style="color:#1e293b;font-size:14px;margin:0;">Échéance initiale : <strong>${echeance}</strong> · Retard : <strong>${retard} jours</strong></p>
+          </div>
+          ${portalLink ? `<div style="text-align:center;margin:24px 0;"><a href="${portalLink}" style="background:linear-gradient(135deg,#dc2626,#991b1b);color:white;padding:14px 36px;border-radius:12px;font-weight:bold;font-size:15px;text-decoration:none;display:inline-block;box-shadow:0 4px 12px -2px rgba(220,38,38,0.35);">Consulter mes documents →</a></div>` : ""}
+          <p style="color:#dc2626;font-size:14px;line-height:1.6;margin-top:20px;">
+            <strong>À défaut de règlement sous 8 jours</strong>, nous nous verrons dans l'obligation de transmettre votre dossier à notre service contentieux.
+          </p>
+          <p style="color:#dc2626;font-weight:bold;font-size:14px;margin-top:12px;">Ceci est notre dernier rappel avant procédure.</p>
+          <p style="color:#475569;font-size:14px;margin-top:20px;">Cordialement,<br/><span style="color:#8b5cf6;font-weight:600;">L'équipe Zolio</span></p>
+        </div>
+      </div>
     `,
   },
 ];
