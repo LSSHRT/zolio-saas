@@ -120,6 +120,8 @@ model Facture {
   dateEcheance      DateTime?           // Date limite de paiement
   stripePaymentLink String?             // Lien de paiement Stripe Checkout
   stripeSessionId   String?             // Session Stripe pour suivi
+  derniereRelanceNiveau Int             @default(0) // 0=aucune, 1=doux(J+3), 2=ferme(J+7), 3=mise en demeure(J+15)
+  derniereRelanceDate DateTime?         // Date du dernier envoi de relance
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 
