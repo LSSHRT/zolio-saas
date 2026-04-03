@@ -9,6 +9,7 @@ type RawDashboardQuote = {
   remise: number | null;
   tva: number | null;
   lignes: unknown;
+  createdAt?: Date;
   client: {
     nom: string;
     email: string | null;
@@ -37,11 +38,14 @@ export type ClientDashboardSummary = {
   totalTTC: number;
   acceptedCount: number;
   pendingCount: number;
+  refusedCount: number;
   acceptedRevenueHT: number;
   pipelineRevenueHT: number;
+  lostRevenueHT: number;
   followUpCount: number;
   conversionRate: number;
   averageTicket: number;
+  avgResponseDays: number;
   recentQuotes: ClientDashboardQuoteSummary[];
   followUpQuotes: ClientDashboardQuoteSummary[];
   monthlyData: ClientDashboardMonthlyDatum[];
@@ -136,9 +140,11 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     totalCount,
     acceptedCount,
     pendingCount,
+    refusedCount,
     recentQuotes,
     followUpQuotesRaw,
     acceptedQuotesForChart,
+    refusedQuotesForLost,
     starterCatalogCount,
   ] = await Promise.all([
     // 1. Nombre total de devis (COUNT rapide)
@@ -155,6 +161,9 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       },
     }),
 
+    // 3b. Nombre de devis refusés
+    prisma.devis.count({ where: { userId, statut: "Refusé" } }),
+
     // 4. Les 4 devis les plus récents
     prisma.devis.findMany({
       where: { userId },
@@ -165,6 +174,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         remise: true,
         tva: true,
         lignes: true,
+        createdAt: true,
         client: { select: { nom: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -200,6 +210,23 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       },
       select: {
         date: true,
+        createdAt: true,
+        remise: true,
+        tva: true,
+        lignes: true,
+      },
+    }),
+
+    // 6b. Devis refusés des 6 derniers mois (revenu perdu)
+    prisma.devis.findMany({
+      where: {
+        userId,
+        statut: "Refusé",
+        date: { gte: sixMonthsAgo },
+      },
+      select: {
+        date: true,
+        createdAt: true,
         remise: true,
         tva: true,
         lignes: true,
@@ -217,6 +244,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   let totalTTC = 0;
   let acceptedRevenueHT = 0;
   let pipelineRevenueHT = 0;
+  let lostRevenueHT = 0;
 
   // On calcule les totaux globaux en chargeant les devis par batch si nécessaire
   // Pour l'instant, on utilise les devis chargés pour une estimation rapide
@@ -233,6 +261,29 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     totalHT += totals.totalHT;
     totalTTC += totals.totalTTC;
   }
+
+  // Calcul du revenu perdu (devis refusés des 6 derniers mois)
+  for (const quote of refusedQuotesForLost as RawDashboardQuote[]) {
+    const totals = computeQuoteTotals(
+      normalizeLineItems(quote.lignes),
+      Number(quote.tva) || 0,
+      Number(quote.remise) || 0,
+    );
+    lostRevenueHT += totals.totalHT;
+  }
+
+  // Délai moyen de réponse (depuis la création jusqu'à acceptation/refus)
+  const respondedQuotes = [
+    ...(acceptedQuotesForChart as (RawDashboardQuote & { createdAt: Date })[]),
+    ...(refusedQuotesForLost as (RawDashboardQuote & { createdAt: Date })[]),
+  ].filter((q) => q.createdAt);
+  const totalResponseDays = respondedQuotes.reduce((sum, q) => {
+    const days = (q.date.getTime() - q.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    return sum + Math.max(0, days);
+  }, 0);
+  const avgResponseDays = respondedQuotes.length > 0
+    ? Math.round((totalResponseDays / respondedQuotes.length) * 10) / 10
+    : 0;
 
   // Calcul des totaux pour les devis en attente (pipeline)
   for (const quote of followUpQuotesRaw as RawDashboardQuote[]) {
@@ -296,11 +347,14 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     totalTTC,
     acceptedCount,
     pendingCount,
+    refusedCount,
     acceptedRevenueHT,
     pipelineRevenueHT,
+    lostRevenueHT,
     followUpCount: followUpQuotesRaw.length,
     conversionRate,
     averageTicket,
+    avgResponseDays,
     recentQuotes: (recentQuotes as RawDashboardQuote[]).map(mapQuote),
     followUpQuotes: (followUpQuotesRaw as RawDashboardQuote[]).map(mapQuote),
     monthlyData: months.map(({ name, CA }) => ({ name, CA })),

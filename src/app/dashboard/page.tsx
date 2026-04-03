@@ -23,6 +23,7 @@ import {
   User,
   Users,
   X,
+  XCircle,
   type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -640,10 +641,13 @@ export default function DashboardPage() {
   const CA_TTC = dashboardData?.totalTTC ?? 0;
   const acceptedQuotesCount = dashboardData?.acceptedCount ?? 0;
   const pendingQuotesCount = dashboardData?.pendingCount ?? 0;
+  const refusedQuotesCount = dashboardData?.refusedCount ?? 0;
   const acceptedRevenueHT = dashboardData?.acceptedRevenueHT ?? 0;
   const pipelineRevenueHT = dashboardData?.pipelineRevenueHT ?? 0;
+  const lostRevenueHT = dashboardData?.lostRevenueHT ?? 0;
   const conversionRate = dashboardData?.conversionRate ?? 0;
   const averageTicket = dashboardData?.averageTicket ?? 0;
+  const avgResponseDays = dashboardData?.avgResponseDays ?? 0;
   const objectifProgress = objectifActif > 0 ? Math.min((CA_TTC / objectifActif) * 100, 100) : 0;
   const remainingToGoal = Math.max(objectifActif - CA_TTC, 0);
   const devisRecents = dashboardData?.recentQuotes ?? [];
@@ -1546,7 +1550,7 @@ export default function DashboardPage() {
               </span>
             </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <MetricCard
                 label="CA validé"
                 value={formatCurrency(acceptedRevenueHT)}
@@ -1576,6 +1580,33 @@ export default function DashboardPage() {
                 icon={LineChart}
               />
             </div>
+
+            {/* Stats de conversion avancées */}
+            {avgResponseDays > 0 && (
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <MetricCard
+                  label="Délai moyen de réponse"
+                  value={`${avgResponseDays}j`}
+                  detail="Entre création et décision client"
+                  tone="slate"
+                  icon={Clock3}
+                />
+                <MetricCard
+                  label="Revenu perdu (6 mois)"
+                  value={formatCurrency(lostRevenueHT)}
+                  detail={`${refusedQuotesCount} devis refusés`}
+                  tone="rose"
+                  icon={XCircle}
+                />
+                <MetricCard
+                  label="Taux de conversion"
+                  value={`${conversionRate}%`}
+                  detail={`${acceptedQuotesCount}/${totalQuotes} devis acceptés`}
+                  tone="emerald"
+                  icon={Target}
+                />
+              </div>
+            )}
             </div>
               
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
