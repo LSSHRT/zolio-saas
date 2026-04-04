@@ -1478,6 +1478,62 @@ export default function DashboardPage() {
             </MobileDisclosureSection>
 
             <MobileDisclosureSection
+              title="Bénéfice net"
+              description="Ce qu'il vous reste dans la poche après les dépenses."
+            >
+              {!benefice || (benefice.caFacture === 0 && benefice.depenses === 0) ? (
+                <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Pas encore de données</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Payez vos premières factures et enregistrez des dépenses pour calculer votre bénéfice.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Bénéfice net */}
+                  <div className={`rounded-[1.45rem] border p-5 ${
+                    benefice.beneficeNet >= 0
+                      ? "border-emerald-200/70 bg-gradient-to-br from-emerald-50/80 to-emerald-100/40 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-transparent"
+                      : "border-rose-200/70 bg-gradient-to-br from-rose-50/80 to-rose-100/40 dark:border-rose-500/20 dark:from-rose-500/10 dark:to-transparent"
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className={`text-xs font-semibold uppercase tracking-wider ${
+                          benefice.beneficeNet >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
+                        }`}>Bénéfice net</p>
+                        <p className={`text-3xl font-bold mt-1 ${
+                          benefice.beneficeNet >= 0 ? "text-emerald-700 dark:text-emerald-200" : "text-rose-700 dark:text-rose-200"
+                        }`}>
+                          {benefice.beneficeNet >= 0 ? "+" : ""}{formatCurrency(benefice.beneficeNet)}
+                        </p>
+                      </div>
+                      <div className={`rounded-full px-4 py-2 text-sm font-bold ${
+                        benefice.margePct >= 70
+                          ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+                          : benefice.margePct >= 40
+                          ? "bg-amber-500/20 text-amber-700 dark:text-amber-300"
+                          : "bg-rose-500/20 text-rose-700 dark:text-rose-300"
+                      }`}>
+                        {benefice.margePct}% marge
+                      </div>
+                    </div>
+                  </div>
+                  {/* Détail */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-[1.2rem] border border-emerald-200/50 bg-emerald-50/50 p-3 dark:border-emerald-500/10 dark:bg-emerald-500/5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CA encaissé</p>
+                      <p className="mt-1 text-lg font-bold text-emerald-800 dark:text-emerald-200">{formatCurrency(benefice.caFacture)}</p>
+                    </div>
+                    <div className="rounded-[1.2rem] border border-rose-200/50 bg-rose-50/50 p-3 dark:border-rose-500/10 dark:bg-rose-500/5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">Dépenses</p>
+                      <p className="mt-1 text-lg font-bold text-rose-800 dark:text-rose-200">{formatCurrency(benefice.depenses)}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </MobileDisclosureSection>
+
+            <MobileDisclosureSection
               title="Top Clients"
               description="Vos meilleurs clients par chiffre d'affaires."
               badge={topClients.length}
@@ -2058,6 +2114,49 @@ export default function DashboardPage() {
                             {formatCurrency(tresorerie.enRetard)}
                           </p>
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )}
+
+                {/* Bénéfice net — Colonne droite */}
+                {benefice && (benefice.caFacture > 0 || benefice.depenses > 0) && (
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Bénéfice net</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        Votre résultat
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        CA encaissé moins vos dépenses — ce qui reste vraiment.
+                      </p>
+                    </div>
+                    <span className={`rounded-full px-4 py-2 text-sm font-bold ${
+                      benefice.margePct >= 70
+                        ? "bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20"
+                        : benefice.margePct >= 40
+                        ? "bg-amber-500/12 text-amber-700 ring-1 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20"
+                        : "bg-rose-500/12 text-rose-700 ring-1 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-100 dark:ring-rose-400/20"
+                    }`}>
+                      {benefice.margePct}% marge
+                    </span>
+                  </div>
+
+                  <div className={`mt-5 rounded-[1.65rem] border p-6 ${benefice.beneficeNet >= 0 ? "border-emerald-200/70 bg-gradient-to-br from-emerald-50/80 to-emerald-100/40 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-transparent" : "border-rose-200/70 bg-gradient-to-br from-rose-50/80 to-rose-100/40 dark:border-rose-500/20 dark:from-rose-500/10 dark:to-transparent"}`}>
+                    <p className={`text-[10px] font-semibold uppercase tracking-wider ${benefice.beneficeNet >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>Bénéfice net</p>
+                    <p className={`mt-1 text-4xl font-bold ${benefice.beneficeNet >= 0 ? "text-emerald-700 dark:text-emerald-200" : "text-rose-700 dark:text-rose-200"}`}>
+                      {benefice.beneficeNet >= 0 ? "+" : ""}{formatCurrency(benefice.beneficeNet)}
+                    </p>
+                    <div className="mt-6 grid grid-cols-2 gap-4">
+                      <div className="rounded-2xl border border-emerald-200/50 bg-white/60 p-4 dark:border-emerald-500/10 dark:bg-white/5">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CA encaissé</p>
+                        <p className="mt-1 text-xl font-bold text-emerald-800 dark:text-emerald-200">{formatCurrency(benefice.caFacture)}</p>
+                      </div>
+                      <div className="rounded-2xl border border-rose-200/50 bg-white/60 p-4 dark:border-rose-500/10 dark:bg-white/5">
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">Dépenses</p>
+                        <p className="mt-1 text-xl font-bold text-rose-800 dark:text-rose-200">{formatCurrency(benefice.depenses)}</p>
                       </div>
                     </div>
                   </div>
