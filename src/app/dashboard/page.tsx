@@ -43,7 +43,7 @@ import {
   ClientMobileDock,
   ClientSupportButton,
 } from "@/components/client-shell";
-import type { ClientDashboardMonthlyDatum, ClientDashboardSummary } from "@/lib/client-dashboard";
+import type { ClientDashboardMonthlyDatum, ClientDashboardSummary, TresorerieSummary } from "@/lib/client-dashboard";
 import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
@@ -654,6 +654,7 @@ export default function DashboardPage() {
   const devisARelancer = dashboardData?.followUpQuotes ?? [];
   const monthlyData: ClientDashboardMonthlyDatum[] = dashboardData?.monthlyData ?? [];
   const topClients = dashboardData?.topClients ?? [];
+  const tresorerie = dashboardData?.tresorerie;
 
   let greetingText = "Bonjour";
   let GreetingIcon = CloudSun;
@@ -1407,6 +1408,75 @@ export default function DashboardPage() {
             </MobileDisclosureSection>
 
             <MobileDisclosureSection
+              title="Trésorerie"
+              description="Factures encaissées, à venir et en retard."
+              badge={tresorerie?.nombreFactures ?? 0}
+            >
+              {tresorerie?.nombreFactures === 0 || !tresorerie ? (
+                <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucune facture</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    Transformez vos devis acceptés en factures pour suivre votre trésorerie.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="rounded-[1.45rem] border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                          <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Encaissé</p>
+                          <p className="text-lg font-bold text-emerald-800 dark:text-emerald-200">
+                            {formatCurrency(tresorerie.encaisse)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="rounded-[1.45rem] border border-violet-200/70 bg-violet-50/50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-violet-500/15 flex items-center justify-center">
+                          <Clock3 size={16} className="text-violet-600 dark:text-violet-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">À encaisser</p>
+                          <p className="text-lg font-bold text-violet-800 dark:text-violet-200">
+                            {formatCurrency(tresorerie.aEncaisser)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={`rounded-[1.45rem] border p-4 ${tresorerie.enRetard > 0 ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10" : "border-slate-200/70 bg-slate-50/50 dark:border-white/8 dark:bg-white/4"}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${tresorerie.enRetard > 0 ? "bg-rose-500/15" : "bg-slate-500/15"}`}>
+                          <TriangleAlert size={16} className={tresorerie.enRetard > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-400"} />
+                        </div>
+                        <div>
+                          <p className={`text-xs font-semibold ${tresorerie.enRetard > 0 ? "text-rose-700 dark:text-rose-300" : "text-slate-500 dark:text-slate-400"}`}>En retard</p>
+                          <p className={`text-lg font-bold ${tresorerie.enRetard > 0 ? "text-rose-800 dark:text-rose-200" : "text-slate-400"}`}>
+                            {formatCurrency(tresorerie.enRetard)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[10px] text-slate-400">Recouvrement</p>
+                        <p className={`text-lg font-bold ${tresorerie.tauxRecouvrement >= 80 ? "text-emerald-600 dark:text-emerald-400" : tresorerie.tauxRecouvrement >= 50 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"}`}>
+                          {tresorerie.tauxRecouvrement}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </MobileDisclosureSection>
+
+            <MobileDisclosureSection
               title="Top Clients"
               description="Vos meilleurs clients par chiffre d'affaires."
               badge={topClients.length}
@@ -1912,6 +1982,86 @@ export default function DashboardPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Trésorerie — Colonne droite */}
+                {tresorerie && tresorerie.nombreFactures > 0 && (
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Trésorerie</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        État de vos factures
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        Encaissé, à venir et impayés — votre santé financière en un coup d'œil.
+                      </p>
+                    </div>
+                    <span className={`client-chip ring-1 ${
+                      tresorerie.tauxRecouvrement >= 80
+                        ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20"
+                        : tresorerie.tauxRecouvrement >= 50
+                        ? "bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20"
+                        : "bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-100 dark:ring-rose-400/20"
+                    }`}>
+                      {tresorerie.tauxRecouvrement}% rec.
+                    </span>
+                  </div>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                    {/* Encaissé */}
+                    <div className="rounded-[1.45rem] border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                      <div className="flex items-center gap-2">
+                        <div className="h-9 w-9 rounded-full bg-emerald-500/15 flex items-center justify-center">
+                          <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Encaissé</p>
+                          <p className="text-xl font-bold text-emerald-800 dark:text-emerald-200">
+                            {formatCurrency(tresorerie.encaisse)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* À encaisser */}
+                    <div className="rounded-[1.45rem] border border-violet-200/70 bg-violet-50/50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+                      <div className="flex items-center gap-2">
+                        <div className="h-9 w-9 rounded-full bg-violet-500/15 flex items-center justify-center">
+                          <Clock3 size={16} className="text-violet-600 dark:text-violet-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-600 dark:text-violet-400">À encaisser</p>
+                          <p className="text-xl font-bold text-violet-800 dark:text-violet-200">
+                            {formatCurrency(tresorerie.aEncaisser)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    {/* En retard */}
+                    <div className={`rounded-[1.45rem] border p-4 ${
+                      tresorerie.enRetard > 0
+                        ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10"
+                        : "border-slate-200/70 bg-slate-50/50 dark:border-white/8 dark:bg-white/4"
+                    }`}>
+                      <div className="flex items-center gap-2">
+                        <div className={`h-9 w-9 rounded-full flex items-center justify-center ${
+                          tresorerie.enRetard > 0 ? "bg-rose-500/15" : "bg-slate-500/15"
+                        }`}>
+                          <TriangleAlert size={16} className={tresorerie.enRetard > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-400"} />
+                        </div>
+                        <div>
+                          <p className={`text-[10px] font-semibold uppercase tracking-wider ${
+                            tresorerie.enRetard > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-500 dark:text-slate-400"
+                          }`}>En retard</p>
+                          <p className={`text-xl font-bold ${
+                            tresorerie.enRetard > 0 ? "text-rose-800 dark:text-rose-200" : "text-slate-400"
+                          }`}>
+                            {formatCurrency(tresorerie.enRetard)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )}
 
                 {/* Top Clients — Colonne droite */}
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">

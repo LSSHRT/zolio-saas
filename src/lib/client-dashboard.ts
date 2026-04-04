@@ -31,6 +31,14 @@ export type ClientDashboardMonthlyDatum = {
   CA: number;
 };
 
+export type TresorerieSummary = {
+  encaisse: number;     // factures "Payée"
+  aEncaisser: number;   // factures "Émise" / "En attente" non échues
+  enRetard: number;     // factures "En retard" ou échues non payées
+  nombreFactures: number;
+  tauxRecouvrement: number; // encaissé / (encaissé + enRetard) * 100
+};
+
 export type ClientDashboardSummary = {
   starterCatalogCount: number;
   totalQuotes: number;
@@ -50,6 +58,7 @@ export type ClientDashboardSummary = {
   followUpQuotes: ClientDashboardQuoteSummary[];
   monthlyData: ClientDashboardMonthlyDatum[];
   topClients: Array<{ nom: string; devisCount: number; revenueHT: number }>;
+  tresorerie: TresorerieSummary;
 };
 
 type DashboardLineItem = {
@@ -135,6 +144,8 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
+  const today = new Date();
+
   // Requêtes parallèles ciblées (beaucoup plus rapide que tout charger)
   const [
     totalCount,
@@ -146,6 +157,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     acceptedQuotesForChart,
     refusedQuotesForLost,
     starterCatalogCount,
+    factures,
   ] = await Promise.all([
     // 1. Nombre total de devis (COUNT rapide)
     prisma.devis.count({ where: { userId } }),
@@ -235,6 +247,16 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
 
     // 7. Nombre de prestations dans le catalogue
     prisma.prestation.count({ where: { userId } }),
+
+    // 8. Factures pour trésorerie
+    prisma.facture.findMany({
+      where: { userId },
+      select: {
+        totalTTC: true,
+        statut: true,
+        dateEcheance: true,
+      },
+    }),
   ]);
 
   // Calcul des totaux uniquement sur les devis acceptés récents (pas tous les devis)
@@ -340,6 +362,37 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     .sort((a, b) => b.revenueHT - a.revenueHT)
     .slice(0, 5);
 
+  // Trésorerie depuis les factures
+  let encaisse = 0;
+  let aEncaisser = 0;
+  let enRetard = 0;
+  let nombreFactures = factures.length;
+
+  for (const f of factures) {
+    if (f.statut === "Payée") {
+      encaisse += f.totalTTC;
+    } else if (f.statut === "En retard") {
+      enRetard += f.totalTTC;
+    } else if (f.statut !== "Annulée") {
+      if (f.dateEcheance && f.dateEcheance < today) {
+        enRetard += f.totalTTC;
+      } else {
+        aEncaisser += f.totalTTC;
+      }
+    }
+  }
+
+  const totalRecouvrable = encaisse + enRetard;
+  const tauxRecouvrement = totalRecouvrable > 0 ? Math.round((encaisse / totalRecouvrable) * 100) : 100;
+
+  const tresorerie: TresorerieSummary = {
+    encaisse,
+    aEncaisser,
+    enRetard,
+    nombreFactures,
+    tauxRecouvrement,
+  };
+
   return {
     starterCatalogCount,
     totalQuotes: totalCount,
@@ -359,5 +412,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     followUpQuotes: (followUpQuotesRaw as RawDashboardQuote[]).map(mapQuote),
     monthlyData: months.map(({ name, CA }) => ({ name, CA })),
     topClients,
+    tresorerie,
   };
 }
