@@ -39,6 +39,13 @@ export type TresorerieSummary = {
   tauxRecouvrement: number; // encaissé / (encaissé + enRetard) * 100
 };
 
+export type BeneficeSummary = {
+  caFacture: number;    // totalTTC factures payées
+  depenses: number;     // total dépenses
+  beneficeNet: number;  // caFacture - depenses
+  margePct: number;     // beneficeNet / caFacture * 100
+};
+
 export type ClientDashboardSummary = {
   starterCatalogCount: number;
   totalQuotes: number;
@@ -59,6 +66,7 @@ export type ClientDashboardSummary = {
   monthlyData: ClientDashboardMonthlyDatum[];
   topClients: Array<{ nom: string; devisCount: number; revenueHT: number }>;
   tresorerie: TresorerieSummary;
+  benefice: BeneficeSummary;
 };
 
 type DashboardLineItem = {
@@ -158,6 +166,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     refusedQuotesForLost,
     starterCatalogCount,
     factures,
+    depenses,
   ] = await Promise.all([
     // 1. Nombre total de devis (COUNT rapide)
     prisma.devis.count({ where: { userId } }),
@@ -256,6 +265,12 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         statut: true,
         dateEcheance: true,
       },
+    }),
+
+    // 9. Dépenses pour bénéfice net
+    prisma.depense.findMany({
+      where: { userId },
+      select: { montant: true },
     }),
   ]);
 
@@ -393,6 +408,19 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     tauxRecouvrement,
   };
 
+  // Bénéfice net
+  const caFacture = encaisse; // factures payées = CA réel
+  const totalDepenses = depenses.reduce((sum, d) => sum + d.montant, 0);
+  const beneficeNet = caFacture - totalDepenses;
+  const margePct = caFacture > 0 ? Math.round((beneficeNet / caFacture) * 100) : 0;
+
+  const benefice: BeneficeSummary = {
+    caFacture,
+    depenses: totalDepenses,
+    beneficeNet,
+    margePct,
+  };
+
   return {
     starterCatalogCount,
     totalQuotes: totalCount,
@@ -413,5 +441,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     monthlyData: months.map(({ name, CA }) => ({ name, CA })),
     topClients,
     tresorerie,
+    benefice,
   };
 }

@@ -43,7 +43,7 @@ import {
   ClientMobileDock,
   ClientSupportButton,
 } from "@/components/client-shell";
-import type { ClientDashboardMonthlyDatum, ClientDashboardSummary, TresorerieSummary } from "@/lib/client-dashboard";
+import type { ClientDashboardMonthlyDatum, ClientDashboardSummary, TresorerieSummary, BeneficeSummary } from "@/lib/client-dashboard";
 import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
@@ -655,6 +655,7 @@ export default function DashboardPage() {
   const monthlyData: ClientDashboardMonthlyDatum[] = dashboardData?.monthlyData ?? [];
   const topClients = dashboardData?.topClients ?? [];
   const tresorerie = dashboardData?.tresorerie;
+  const benefice = dashboardData?.benefice;
 
   let greetingText = "Bonjour";
   let GreetingIcon = CloudSun;
