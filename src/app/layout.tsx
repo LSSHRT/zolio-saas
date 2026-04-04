@@ -11,6 +11,7 @@ import { I18nProvider } from "@/lib/i18n/context";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import Script from "next/script";
+import { CmdKWrapper } from "@/components/cmdk-wrapper";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -106,6 +107,7 @@ export default function RootLayout({
                   },
                 }}
               />
+              <CmdKWrapper />
             </SWRProvider>
             </I18nProvider>
           </ThemeProvider>
