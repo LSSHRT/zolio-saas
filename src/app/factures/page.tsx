@@ -15,6 +15,7 @@ import {
   LayoutGrid,
   List,
   MessageSquareQuote,
+  Plus,
   Search,
   Trash2,
   type LucideIcon,
@@ -389,17 +390,13 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
       description="Suivez votre facturation, vos encaissements et vos relances dans un cockpit plus lisible, plus dense et pensé pour une vraie consultation terrain."
       activeNav="factures"
       eyebrow="Suivi de trésorerie"
-      mobilePrimaryAction={
-        <button
-          type="button"
-          onClick={handleExportCSV}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
-        >
-          <Download size={16} />
-          Export
-        </button>
-      }
       mobileSecondaryActions={[
+        {
+          href: "/nouvelle-facture" as any,
+          icon: Plus,
+          label: "Nouvelle facture",
+          tone: "accent",
+        },
         {
           disabled: viewMode === "list",
           icon: List,

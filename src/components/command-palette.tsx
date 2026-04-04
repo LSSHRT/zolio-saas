@@ -110,7 +110,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           "depenses": "/depenses",
           "dashboard": "/dashboard",
           "parametres": "/parametres",
-          "new-facture": "/depenses/nouveau",
+          "new-facture": "/nouvelle-facture",
           "new-depense": "/depenses/nouveau",
         };
         const route = routes[item.id] ?? "/dashboard";
