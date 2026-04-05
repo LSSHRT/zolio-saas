@@ -14,6 +14,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface Depense {
   categorie: string;
@@ -88,6 +89,21 @@ export default function DepensesPage() {
   const latestExpenseLabel = filteredDepenses[0]?.date
     ? new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short" }).format(new Date(filteredDepenses[0].date))
     : "Aucune";
+
+  // Répartition par catégorie pour le graphique
+  const categorieBreakdown = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const d of filteredDepenses) {
+      const cat = d.categorie || "Autre";
+      map.set(cat, (map.get(cat) || 0) + d.montant);
+    }
+    return Array.from(map.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  }, [filteredDepenses]);
+
+  const COLORS = ["#7c3aed", "#a855f7", "#c084fc", "#6366f1", "#818cf8", "#3b82f6", "#06b6d4", "#10b981"];
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Voulez-vous vraiment supprimer cette dépense ?")) {
@@ -203,6 +219,46 @@ export default function DepensesPage() {
           />
         </div>
       </ClientSectionCard>
+
+      {/* Graphique répartition par catégorie */}
+      {categorieBreakdown.length > 0 && (
+        <ClientSectionCard>
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-white mb-4">Répartition par catégorie</h2>
+          <div className="h-[220px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={categorieBreakdown}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={55}
+                  outerRadius={80}
+                  paddingAngle={3}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {categorieBreakdown.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ payload }) => {
+                    if (!payload || !payload[0]) return null;
+                    const val = payload[0].value as number;
+                    const name = payload[0].name as string;
+                    return (
+                      <div className="rounded-lg bg-slate-900 px-3 py-2 text-xs text-white shadow-lg">
+                        <span className="text-slate-300">{name}</span>: <span className="font-bold">{val.toFixed(2)}€</span>
+                      </div>
+                    );
+                  }}
+                />
+                <Legend verticalAlign="bottom" height={36} iconType="circle" />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </ClientSectionCard>
+      )}
 
       <ClientSectionCard>
         {!data ? (
