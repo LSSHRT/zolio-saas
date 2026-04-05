@@ -741,6 +741,16 @@ export default function DashboardPage() {
       });
     }
 
+    if (tresorerie && tresorerie.enRetard > 0) {
+      signals.push({
+        id: "overdue",
+        title: `${formatCurrency(tresorerie.enRetard)} en retard de paiement`,
+        description: `${tresorerie.tauxRecouvrement}% de recouvrement — relancez les impayés en priorité.`,
+        href: "/factures",
+        tone: "rose",
+      });
+    }
+
     return signals.slice(0, 4);
   }, [
     CA_TTC,
