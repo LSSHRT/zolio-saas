@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   CheckCircle,
   Clock,
+  CreditCard,
   FileText,
   Loader2,
   XCircle,
@@ -15,7 +16,9 @@ import {
   MapPin,
   ShieldCheck,
   Euro,
+  ExternalLink,
 } from "lucide-react";
+import { toast } from "sonner";
 
 type DevisItem = {
   numero: string;
@@ -63,6 +66,7 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
   const [data, setData] = useState<ClientData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [paying, setPaying] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/espace-client?token=${encodeURIComponent(token)}`)
@@ -80,6 +84,35 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
         setLoading(false);
       });
   }, [token]);
+
+  const handlePayInvoice = async (numero: string) => {
+    setPaying(numero);
+    try {
+      const res = await fetch("/api/factures/public-pay-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeroFacture: numero, portalToken: token }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? "Erreur");
+      }
+      const { url } = await res.json();
+      window.location.href = url;
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Erreur paiement");
+    } finally {
+      setPaying(null);
+    }
+  };
+
+  const unpaidCount = data?.factures.filter(
+    (f) => f.statut !== "Payée" && f.statut !== "Annulée"
+  ).length ?? 0;
+
+  const totalUnpaid = data?.factures
+    .filter((f) => f.statut !== "Payée" && f.statut !== "Annulée")
+    .reduce((s, f) => s + f.totalTTC, 0) ?? 0;
 
   if (loading) {
     return (
@@ -133,10 +166,29 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
             <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(totalDevis)}</p>
           </div>
           <div className="rounded-2xl border border-slate-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/5">
-            <p className="text-xs text-slate-500 dark:text-slate-400">Factures</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Total factures</p>
             <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{formatCurrency(totalFactures)}</p>
           </div>
         </div>
+
+        {/* Impayés — alert box */}
+        {unpaidCount > 0 && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-500/20 dark:bg-amber-500/10">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 shrink-0 rounded-full bg-amber-500/15 flex items-center justify-center">
+                <CreditCard size={20} className="text-amber-600 dark:text-amber-400" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                  {unpaidCount} facture{unpaidCount > 1 ? "s" : ""} en attente de règlement
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  Montant restant : {formatCurrency(totalUnpaid)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Devis */}
         {data?.devis && data.devis.length > 0 && (
@@ -194,6 +246,7 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
               {data.factures.map((f) => {
                 const cfg = statutConfig[f.statut] || statutConfig["Émise"];
                 const Icon = cfg.icon;
+                const canPay = f.statut !== "Payée" && f.statut !== "Annulée";
                 return (
                   <motion.div
                     key={f.numero}
@@ -201,7 +254,7 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
                     animate={{ opacity: 1, y: 0 }}
                     className="rounded-xl border border-slate-200/60 bg-white p-4 transition hover:border-violet-200 dark:border-white/8 dark:bg-white/5 dark:hover:border-violet-800"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
                         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${cfg.bg} ${cfg.color}`}>
                           <Icon size={16} />
@@ -219,9 +272,29 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
                       </div>
                     </div>
                     {f.dateEcheance && f.statut !== "Payée" && (
-                      <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                      <p className="text-xs text-amber-600 dark:text-amber-400">
                         Échéance : {formatDate(f.dateEcheance)}
                       </p>
+                    )}
+                    {canPay && (
+                      <button
+                        onClick={() => handlePayInvoice(f.numero)}
+                        disabled={paying !== null}
+                        className="mt-3 w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio py-2.5 text-sm font-semibold text-white disabled:opacity-50 transition hover:opacity-90"
+                      >
+                        {paying === f.numero ? (
+                          <>
+                            <Loader2 size={16} className="animate-spin" />
+                            Chargement...
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard size={16} />
+                            Payer en ligne
+                            <ExternalLink size={14} />
+                          </>
+                        )}
+                      </button>
                     )}
                   </motion.div>
                 );
@@ -240,7 +313,7 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
           <ShieldCheck size={12} />
-          <span>Espace sécurisé — Propulsé par Zolio</span>
+          <span>Espace sécurisé — Paiement par Stripe — Propulsé par Zolio</span>
         </div>
       </div>
     </div>
