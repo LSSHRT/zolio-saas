@@ -26,6 +26,13 @@ export async function GET(req: NextRequest) {
           userId: payload.userId,
           emailClient: payload.email,
         },
+        include: {
+          devis: {
+            include: {
+              lignesNorm: { orderBy: { position: "asc" } },
+            },
+          },
+        },
         orderBy: { createdAt: "desc" },
       }),
     ]);
@@ -44,7 +51,16 @@ export async function GET(req: NextRequest) {
         date: f.date.toISOString(),
         statut: f.statut,
         totalTTC: f.totalTTC,
+        totalHT: f.totalHT,
+        tva: f.tva,
         dateEcheance: f.dateEcheance?.toISOString(),
+        lignes: f.devis?.lignesNorm?.map((l) => ({
+          nomPrestation: l.nomPrestation,
+          quantite: l.quantite,
+          unite: l.unite,
+          prixUnitaire: l.prixUnitaire,
+          totalLigne: l.totalLigne,
+        })) ?? [],
       })),
     });
   } catch (err) {

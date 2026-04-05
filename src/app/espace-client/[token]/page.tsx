@@ -33,7 +33,10 @@ type FactureItem = {
   date: string;
   statut: string;
   totalTTC: number;
+  totalHT: number;
+  tva: number;
   dateEcheance?: string | null;
+  lignes?: { nomPrestation: string; quantite: number; unite: string; prixUnitaire: number; totalLigne: number }[];
 };
 
 type ClientData = {
@@ -67,6 +70,7 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [paying, setPaying] = useState<string | null>(null);
+  const [expandedFacture, setExpandedFacture] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/espace-client?token=${encodeURIComponent(token)}`)
@@ -276,6 +280,44 @@ export default function EspaceClientPage({ params }: { params: Promise<{ token: 
                         Échéance : {formatDate(f.dateEcheance)}
                       </p>
                     )}
+                    
+                    {/* Lignes détaillées (expandable) */}
+                    {f.lignes && f.lignes.length > 0 && (
+                      <button
+                        onClick={() => setExpandedFacture(expandedFacture === f.numero ? null : f.numero)}
+                        className="mt-2 w-full text-left text-xs font-medium text-violet-600 dark:text-violet-400 hover:underline"
+                      >
+                        {expandedFacture === f.numero ? "▾ Masquer le détail" : "▸ Voir le détail"}
+                      </button>
+                    )}
+                    {expandedFacture === f.numero && f.lignes && (
+                      <div className="mt-3 rounded-xl bg-slate-50 dark:bg-white/5 p-3 space-y-2">
+                        {f.lignes.map((l, i) => (
+                          <div key={i} className="flex items-start justify-between text-xs">
+                            <div className="flex-1 min-w-0 pr-2">
+                              <p className="font-medium text-slate-800 dark:text-slate-200 truncate">{l.nomPrestation}</p>
+                              <p className="text-slate-500 dark:text-slate-400">{l.quantite} {l.unite} × {l.prixUnitaire.toFixed(2)}€</p>
+                            </div>
+                            <p className="font-semibold text-slate-900 dark:text-white shrink-0">{l.totalLigne.toFixed(2)}€</p>
+                          </div>
+                        ))}
+                        <div className="border-t border-slate-200 dark:border-white/10 pt-2 mt-2">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-500 dark:text-slate-400">Total HT</span>
+                            <span className="text-slate-700 dark:text-slate-200 font-medium">{f.totalHT.toFixed(2)}€</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-slate-500 dark:text-slate-400">TVA ({f.tva}%)</span>
+                            <span className="text-slate-700 dark:text-slate-200 font-medium">{(f.totalTTC - f.totalHT).toFixed(2)}€</span>
+                          </div>
+                          <div className="flex justify-between text-xs mt-1">
+                            <span className="font-semibold text-slate-800 dark:text-white">Total TTC</span>
+                            <span className="font-bold text-slate-900 dark:text-white">{f.totalTTC.toFixed(2)}€</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {canPay && (
                       <button
                         onClick={() => handlePayInvoice(f.numero)}
