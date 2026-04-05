@@ -2220,6 +2220,56 @@ export default function DashboardPage() {
                 </div>
                 )}
 
+                {/* Prochaines échéances — Colonne droite */}
+                {echeances.length > 0 && (
+                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Échéances</p>
+                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                        Prochains paiements attendus
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {echeances.length} facture{echeances.length > 1 ? 's' : ''} à échéance dans les 14 jours.
+                      </p>
+                    </div>
+                    <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20">
+                      {echeances.length} à venir
+                    </span>
+                  </div>
+                  <div className="mt-5 space-y-3">
+                    {echeances.slice(0, 5).map((ech) => (
+                      <Link key={ech.numero} href={`/factures/${ech.numero}`}>
+                        <div className={`rounded-[1.45rem] border p-4 transition hover:-translate-y-0.5 ${
+                          ech.joursRestants <= 3
+                            ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10"
+                            : ech.joursRestants <= 7
+                            ? "border-amber-200/70 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/10"
+                            : "border-violet-200/70 bg-violet-50/50 dark:border-violet-500/20 dark:bg-violet-500/10"
+                        }`}>
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-slate-950 dark:text-white truncate">{ech.nomClient}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">{ech.numero}</p>
+                            </div>
+                            <div className="text-right shrink-0">
+                              <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ech.totalTTC)}</p>
+                              <p className={`text-xs font-semibold ${
+                                ech.joursRestants <= 3 ? "text-rose-600 dark:text-rose-400" :
+                                ech.joursRestants <= 7 ? "text-amber-600 dark:text-amber-400" :
+                                "text-violet-600 dark:text-violet-400"
+                              }`}>
+                                {ech.joursRestants === 0 ? "Aujourd'hui" : `J+${ech.joursRestants}j`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+                )}
+
                 {/* Top Clients — Colonne droite */}
                 <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex items-center justify-between gap-3">
