@@ -947,6 +947,20 @@ export default function DashboardPage() {
       });
     }
 
+    if (tresorerie && tresorerie.enRetard > 0) {
+      items.push({
+        id: "overdue-invoices",
+        eyebrow: "Priorité",
+        title: `${formatCurrency(tresorerie.enRetard)} en retard de paiement`,
+        description: `${tresorerie.nombreFactures - (tresorerie.encaisse > 0 ? 1 : 0)} facture${tresorerie.nombreFactures > 1 ? 's' : ''} impayée${tresorerie.nombreFactures > 1 ? 's' : ''}. Relancez les clients avant que ça traîne.`,
+        href: "/factures",
+        icon: TriangleAlert,
+        tone: "rose",
+        value: formatCurrency(tresorerie.enRetard),
+        ctaLabel: "Voir les impayés",
+      });
+    }
+
     if (setupIsRequired) {
       items.push({
         id: "setup",
@@ -996,6 +1010,7 @@ export default function DashboardPage() {
     remainingToGoal,
     setupIsRequired,
     totalQuotes,
+    tresorerie,
   ]);
 
   const actionPlanSecondary = actionPlan.slice(1, 3);
