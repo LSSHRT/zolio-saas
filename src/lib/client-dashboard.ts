@@ -46,6 +46,14 @@ export type BeneficeSummary = {
   margePct: number;     // beneficeNet / caFacture * 100
 };
 
+export type EcheanceItem = {
+  numero: string;
+  nomClient: string;
+  totalTTC: number;
+  dateEcheance: string;
+  joursRestants: number;
+};
+
 export type ClientDashboardSummary = {
   starterCatalogCount: number;
   totalQuotes: number;
@@ -67,6 +75,7 @@ export type ClientDashboardSummary = {
   topClients: Array<{ nom: string; devisCount: number; revenueHT: number }>;
   tresorerie: TresorerieSummary;
   benefice: BeneficeSummary;
+  echeances: EcheanceItem[];
 };
 
 type DashboardLineItem = {
@@ -153,6 +162,8 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
   const today = new Date();
+  const inFourteenDays = new Date();
+  inFourteenDays.setDate(today.getDate() + 14);
 
   // Requêtes parallèles ciblées (beaucoup plus rapide que tout charger)
   const [
@@ -166,6 +177,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     refusedQuotesForLost,
     starterCatalogCount,
     factures,
+    echeances,
     depenses,
   ] = await Promise.all([
     // 1. Nombre total de devis (COUNT rapide)
@@ -267,7 +279,23 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       },
     }),
 
-    // 9. Dépenses pour bénéfice net
+    // 9. Échéances à venir (7-14 jours)
+    prisma.facture.findMany({
+      where: {
+        userId,
+        dateEcheance: { gte: today, lte: inFourteenDays },
+        statut: { notIn: ["Payée", "Annulée"] },
+      },
+      select: {
+        numero: true,
+        nomClient: true,
+        totalTTC: true,
+        dateEcheance: true
+      },
+      orderBy: { dateEcheance: "asc" },
+    }),
+
+    // 10. Dépenses pour bénéfice net
     prisma.depense.findMany({
       where: { userId },
       select: { montant: true },
@@ -421,6 +449,17 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     margePct,
   };
 
+  // Prochaines échéances
+  const echeancesProchaines = echeances
+    .filter((e) => e.dateEcheance)
+    .map((e) => ({
+      numero: e.numero,
+      nomClient: e.nomClient,
+      totalTTC: e.totalTTC,
+      dateEcheance: e.dateEcheance!.toISOString(),
+      joursRestants: Math.ceil((e.dateEcheance!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
+    }));
+
   return {
     starterCatalogCount,
     totalQuotes: totalCount,
@@ -442,5 +481,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     topClients,
     tresorerie,
     benefice,
+    echeances: echeancesProchaines,
   };
 }
