@@ -146,6 +146,63 @@ export async function sendDevisEmail(
 }
 
 /**
+ * Envoie un email de confirmation au client quand sa facture est payée.
+ */
+export async function sendFacturePaidEmail(
+  toEmail: string,
+  toName: string,
+  numeroFacture: string,
+  totalTTC: string,
+  pdfBuffer: Buffer
+) {
+  const safeName = escapeHtml(toName);
+  const safeNumero = escapeHtml(numeroFacture);
+  const safeTotal = escapeHtml(totalTTC);
+  const { runtime, transporter } = createTransactionalTransport();
+
+  const mailOptions = {
+    from: `"${runtime.fromName}" <${runtime.fromEmail}>`,
+    to: toEmail,
+    replyTo: runtime.replyToEmail || undefined,
+    subject: `Facture ${numeroFacture} — Paiement confirmé ✓`,
+    html: `
+      <div style="font-family:'Helvetica Neue',Arial,sans-serif;max-width:600px;margin:0 auto;">
+        <div style="background:linear-gradient(135deg,#10b981,#059669);padding:30px;border-radius:16px 16px 0 0;">
+          <h1 style="color:white;margin:0;font-size:24px;">Zolio</h1>
+          <p style="color:rgba(255,255,255,0.8);margin:5px 0 0;">Paiement confirmé</p>
+        </div>
+        <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 16px 16px;">
+          <p style="color:#334155;font-size:16px;">Bonjour <strong>${safeName}</strong>,</p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Nous confirmons la réception de votre paiement pour la facture <strong>${safeNumero}</strong>
+          </p>
+          <p style="color:#64748b;font-size:14px;line-height:1.6;">
+            Un reçu a été généré automatiquement. Vous le trouverez ci-joint.
+          </p>
+          <div style="text-align:center;margin:25px 0;">
+            <span style="background:linear-gradient(135deg,#10b981,#059669);color:white;padding:12px 30px;border-radius:10px;font-weight:bold;font-size:14px;display:inline-block;">
+              ${safeTotal}€ TTC — Réglé ✓
+            </span>
+          </div>
+          <p style="color:#94a3b8;font-size:12px;text-align:center;margin-top:20px;">
+            Merci pour votre confiance · Document généré par Zolio · zolio.site
+          </p>
+        </div>
+      </div>
+    `,
+    attachments: [
+      {
+        filename: `${numeroFacture}_recu.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+/**
  * Envoie un email au client avec le devis signé en pièce jointe.
  */
 export async function sendDevisSignedEmail(

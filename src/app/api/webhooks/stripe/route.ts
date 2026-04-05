@@ -5,6 +5,10 @@ import { internalServerError } from "@/lib/http";
 import { logError, logWarn, logInfo } from "@/lib/logger";
 import { createNotification } from "@/lib/notifications";
 import { prisma } from "@/lib/prisma";
+import { sendFacturePaidEmail } from "@/lib/sendEmail";
+import { generateFacturePDF } from "@/lib/generatePdf";
+import { getCompanyProfile } from "@/lib/company";
+import { parseLignes, normalizeLigneForOutput, type LignePayload } from "@/lib/devis-lignes";
 
 // Stripe webhook endpoint
 export async function POST(req: Request) {
@@ -43,9 +47,16 @@ export async function POST(req: Request) {
         const mode = session.mode;
 
         if (factureNumero && mode === "payment") {
-          // Paiement d'une facture → marquer comme payée
+          // Paiement d'une facture → marquer comme payée + email client
           const facture = await prisma.facture.findFirst({
             where: { userId: userIdForSub, numero: factureNumero },
+            include: {
+              devis: {
+                include: {
+                  lignesNorm: { orderBy: { position: "asc" } },
+                },
+              },
+            },
           });
           if (facture) {
             await prisma.facture.update({
@@ -53,6 +64,71 @@ export async function POST(req: Request) {
               data: { statut: "Payée" },
             });
             logInfo("stripe-webhook", `Facture ${factureNumero} marquée comme payée via Stripe.`);
+
+            // Email de confirmation au client avec reçu PDF
+            if (facture.emailClient) {
+              try {
+                // Fetch user for company profile
+                const client = await clerkClient();
+                const clerkUser = await client.users.getUser(userIdForSub as string);
+                const entreprise = getCompanyProfile(clerkUser);
+
+                // Récupérer les lignes du Devis ou fallback
+                let lignes: LignePayload[] = [];
+                if (facture.devis?.lignesNorm?.length) {
+                  lignes = facture.devis.lignesNorm.map((l) => ({
+                    isOptional: l.isOptional,
+                    nomPrestation: l.nomPrestation,
+                    prixUnitaire: l.prixUnitaire,
+                    quantite: l.quantite,
+                    totalLigne: l.totalLigne,
+                    tva: l.tva,
+                    unite: l.unite,
+                  }));
+                } else if (facture.devis?.lignes) {
+                  lignes = parseLignes(facture.devis.lignes);
+                } else {
+                  lignes = [{
+                    isOptional: false,
+                    nomPrestation: "Prestations",
+                    prixUnitaire: facture.totalHT,
+                    quantite: 1,
+                    totalLigne: facture.totalHT,
+                    tva: String(facture.tva),
+                    unite: "forfait",
+                  }];
+                }
+
+                const pdfBuffer = await generateFacturePDF({
+                  numeroDevis: facture.numero,
+                  date: facture.date.toLocaleDateString("fr-FR"),
+                  client: {
+                    nom: facture.nomClient,
+                    email: facture.emailClient || "",
+                    telephone: "",
+                    adresse: "",
+                  },
+                  isPro: clerkUser.publicMetadata?.isPro === true,
+                  entreprise,
+                  lignes: lignes.map(normalizeLigneForOutput),
+                  totalHT: facture.totalHT.toFixed(2),
+                  tva: String(facture.tva ?? 20),
+                  totalTTC: facture.totalTTC.toFixed(2),
+                  statut: "Payée",
+                });
+
+                await sendFacturePaidEmail(
+                  facture.emailClient,
+                  facture.nomClient,
+                  facture.numero,
+                  facture.totalTTC.toFixed(2),
+                  pdfBuffer
+                );
+                logInfo("stripe-webhook", `Email de confirmation envoyé à ${facture.emailClient}`);
+              } catch (emailError) {
+                logError("stripe-webhook-email", emailError);
+              }
+            }
 
             await createNotification({
               userId: userIdForSub as string,
