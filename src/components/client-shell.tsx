@@ -16,6 +16,7 @@ import {
   LifeBuoy,
   MoreHorizontal,
   Package,
+  Plus,
   Receipt,
   RefreshCw,
   Settings,
@@ -62,6 +63,7 @@ const CLIENT_TOOL_ITEMS: Array<{
   icon: LucideIcon;
   label: string;
 }> = [
+  { href: "/nouvelle-facture", icon: Plus, label: "Nouvelle facture" },
   { href: "/planning", icon: Calendar, label: "Planning" },
   { href: "/catalogue", icon: Package, label: "Catalogue" },
   { href: "/depenses", icon: CreditCard, label: "Dépenses" },
@@ -268,6 +270,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   ];
 
   const toolItems = [
+    { href: "/nouvelle-facture", icon: FileText, label: "Nouvelle facture" },
     { href: "/planning", icon: Calendar, label: "Planning" },
     { href: "/catalogue", icon: Package, label: "Catalogue" },
     { href: "/modeles", icon: Copy, label: "Modèles" },
