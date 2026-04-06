@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
 import {
@@ -51,6 +51,7 @@ export default function DepensesPage() {
   const pagination = data?.pagination ?? null;
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (searchParams.get("created") !== "1") {
@@ -104,6 +105,15 @@ export default function DepensesPage() {
   }, [filteredDepenses]);
 
   const COLORS = ["#7c3aed", "#a855f7", "#c084fc", "#6366f1", "#818cf8", "#3b82f6", "#06b6d4", "#10b981"];
+
+  const handleExportCSV = () => {
+    setExporting(true);
+    const a = document.createElement("a");
+    a.href = "/api/export/depenses-csv";
+    a.download = `depenses_export_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    setTimeout(() => setExporting(false), 1000);
+  };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Voulez-vous vraiment supprimer cette dépense ?")) {
@@ -171,6 +181,16 @@ export default function DepensesPage() {
             detail="Dernière date visible"
             tone="slate"
           />
+          <div className="flex items-center justify-center">
+            <button
+              onClick={handleExportCSV}
+              disabled={exporting}
+              className="flex h-full w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-60 dark:border-slate-600 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              <Download size={16} />
+              {exporting ? "..." : "Export CSV"}
+            </button>
+          </div>
         </div>
       }
       mobileSummary={
