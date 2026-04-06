@@ -1885,9 +1885,9 @@ export default function DashboardPage() {
                 <ConversionFunnel funnel={funnel} />
               </div>
             )}
-            </div>
-              
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+
+            {/* Pilotage semaine */}
+            <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage semaine</p>
@@ -1970,9 +1970,11 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
+              </div>
 
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+              {/* Derniers devis */}
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
                       <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
@@ -2111,9 +2113,10 @@ export default function DashboardPage() {
                   </div>
                 )}
               </div>
-              
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex items-center justify-between">
+
+              {/* Relances */}
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between">
                     <div>
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
                       <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
