@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import useSWR from "swr";
 import {
   ArrowLeft,
   Bell,
@@ -30,6 +31,15 @@ import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/su
 import { GlobalSearch } from "@/components/global-search";
 import { ShortcutsModal } from "@/components/shortcuts-modal";
 import { UserButton } from "@clerk/nextjs";
+
+function useUnreadNotificationsCount() {
+  const { data } = useSWR<{ unreadCount: number }>(
+    "/api/notifications",
+    (url: string) => fetch(url).then((r) => (r.ok ? r.json() : { unreadCount: 0 })),
+    { refreshInterval: 30_000, revalidateOnFocus: false },
+  );
+  return data?.unreadCount ?? 0;
+}
 
 export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin" | "tools";
 type ClientTone = "violet" | "emerald" | "amber" | "rose" | "slate";
@@ -173,6 +183,7 @@ export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
   const [toolsOpen, setToolsOpen] = useState(false);
+  const unreadCount = useUnreadNotificationsCount();
 
   useBodyScrollLock(toolsOpen);
   useOverlayCloseSignal(() => setToolsOpen(false));
@@ -197,11 +208,16 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         <button
           type="button"
           onClick={() => setToolsOpen(true)}
-          className={`client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
+          className={`relative client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
           aria-label="Plus d'outils"
         >
           <MoreHorizontal size={20} strokeWidth={active === "tools" ? 2.4 : 2} />
           <span className="text-[11px] font-semibold">Plus</span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold text-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </button>
       </nav>
 
@@ -241,17 +257,23 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             <div className="grid grid-cols-2 gap-2.5">
               {CLIENT_TOOL_ITEMS.map((item) => {
                 const Icon = item.icon;
+                const isNotif = item.href === "/notifications";
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={() => setToolsOpen(false)}
-                    className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
+                    className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
                       pathname === item.href ? "accent" : "default",
                     )}`}
                   >
                     <Icon size={18} />
                     <span className="leading-5">{item.label}</span>
+                    {isNotif && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-lg">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    )}
                   </Link>
                 );
               })}
@@ -265,6 +287,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
 export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
+  const unreadCount = useUnreadNotificationsCount();
 
   const mainItems = [
     { href: "/dashboard", icon: Home, key: "dashboard" as const, label: "Accueil" },
@@ -276,6 +299,8 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
 
   const toolItems = [
     { href: "/nouvelle-facture", icon: FileText, label: "Nouvelle facture" },
+    { href: "/notifications", icon: Bell, label: "Notifications" },
+    { href: "/rapports", icon: FileText, label: "Rapports" },
     { href: "/planning", icon: Calendar, label: "Planning" },
     { href: "/catalogue", icon: Package, label: "Catalogue" },
     { href: "/modeles", icon: Copy, label: "Modèles" },
@@ -331,11 +356,12 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         {toolItems.map((item) => {
           const Icon = item.icon;
           const active = isActiveNav(item);
+          const isNotif = item.href === "/notifications";
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-[13px] transition ${
+              className={`relative flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-[13px] transition ${
                 active
                   ? "bg-slate-100 font-medium text-slate-900 dark:bg-white/10 dark:text-white"
                   : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
@@ -343,6 +369,11 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
             >
               <Icon size={15} strokeWidth={active ? 2 : 1.8} />
               {item.label}
+              {isNotif && unreadCount > 0 && (
+                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </Link>
           );
         })}
