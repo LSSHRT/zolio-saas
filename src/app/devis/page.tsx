@@ -26,6 +26,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   ClientHeroStat,
   ClientMobileActionsMenu,
@@ -114,6 +115,7 @@ export default function DevisPage() {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [updatingStatut, setUpdatingStatut] = useState<string | null>(null);
   const [duplicating, setDuplicating] = useState<string | null>(null);
@@ -211,6 +213,29 @@ export default function DevisPage() {
     } finally {
       setIsDeletingBulk(false);
       setDeleting(null);
+    }
+  };
+
+  const handleBulkStatut = async (statut: string) => {
+    setIsBulkUpdating(true);
+    let successCount = 0;
+    for (const numero of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/devis/${numero}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ statut, lignes: [] }),
+        });
+        if (res.ok) successCount++;
+      } catch (err) {
+        logError("devis-bulk-statut", err);
+      }
+    }
+    setIsBulkUpdating(false);
+    if (successCount > 0) {
+      mutate();
+      setSelectedIds(new Set());
+      toast.success(`${successCount} devis marqué${successCount > 1 ? "s" : ""} comme ${statut}`);
     }
   };
 
@@ -558,15 +583,35 @@ export default function DevisPage() {
             Sélectionner tout ({filtered.length})
           </label>
           {selectedIds.size > 0 ? (
-            <button
-              type="button"
-              onClick={handleBulkDelete}
-              disabled={isDeletingBulk}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200 sm:w-auto"
-            >
-              <Trash2 size={15} />
-              {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => handleBulkStatut("Accepté")}
+                disabled={isBulkUpdating}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-400/20 dark:bg-emerald-500/8 dark:text-emerald-200"
+              >
+                <CheckCircle size={13} />
+                Accepter ({selectedIds.size})
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBulkStatut("Refusé")}
+                disabled={isBulkUpdating}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+              >
+                <XCircle size={13} />
+                Refuser ({selectedIds.size})
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                disabled={isDeletingBulk}
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-50 dark:border-slate-400/20 dark:bg-slate-500/8 dark:text-slate-200"
+              >
+                <Trash2 size={13} />
+                {isDeletingBulk ? "..." : `Supprimer (${selectedIds.size})`}
+              </button>
+            </div>
           ) : (
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {devis.length} devis suivis
