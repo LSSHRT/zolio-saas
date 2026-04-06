@@ -81,6 +81,7 @@ export default function FacturesPage() {
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
   const [isBulkMarkingPaid, setIsBulkMarkingPaid] = useState(false);
   const [isBulkRelancing, setIsBulkRelancing] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   const [pendingDeleteFacture, setPendingDeleteFacture] = useState<Facture | null>(null);
@@ -288,6 +289,32 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
     }
 
     setIsDeletingBulk(false);
+  };
+
+  const handleBatchPdfExport = async () => {
+    setIsExportingPdf(true);
+    try {
+      const response = await fetch("/api/factures/batch-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ numeros: Array.from(selectedIds) }),
+      });
+      if (!response.ok) throw new Error("Échec de l'export");
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `factures_zolio_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`${selectedIds.size} facture${selectedIds.size > 1 ? "s" : ""} exportée${selectedIds.size > 1 ? "s" : ""}`);
+    } catch (err) {
+      logError("batch-pdf", err);
+      toast.error("Erreur lors de l'export PDF");
+    } finally {
+      setIsExportingPdf(false);
+    }
   };
 
   const handleMarkAsPaid = async (numero: string) => {
@@ -607,6 +634,15 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
               >
                 <Send size={15} />
                 {isBulkRelancing ? "..." : `Relancer (${selectedIds.size})`}
+              </button>
+              <button
+                type="button"
+                onClick={handleBatchPdfExport}
+                disabled={isExportingPdf}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-600 transition hover:bg-violet-100 disabled:opacity-50 dark:border-violet-400/20 dark:bg-violet-500/8 dark:text-violet-200"
+              >
+                <FileText size={15} />
+                {isExportingPdf ? "..." : `Export PDF (${selectedIds.size})`}
               </button>
               <button
                 type="button"
