@@ -17,6 +17,7 @@ import {
   MessageSquareQuote,
   Plus,
   Search,
+  Send,
   Trash2,
   type LucideIcon,
 } from "lucide-react";
@@ -78,6 +79,8 @@ export default function FacturesPage() {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const [isBulkMarkingPaid, setIsBulkMarkingPaid] = useState(false);
+  const [isBulkRelancing, setIsBulkRelancing] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [markingPaid, setMarkingPaid] = useState<string | null>(null);
   const [pendingDeleteFacture, setPendingDeleteFacture] = useState<Facture | null>(null);
@@ -217,6 +220,46 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleBulkMarkPaid = async () => {
+    setIsBulkMarkingPaid(true);
+    let successCount = 0;
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/factures/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ statut: "Payée" }),
+        });
+        if (res.ok) successCount++;
+      } catch (err) {
+        logError("factures-bulk-paid", err);
+      }
+    }
+    setIsBulkMarkingPaid(false);
+    if (successCount > 0) {
+      mutate();
+      setSelectedIds(new Set());
+      toast.success(`${successCount} facture${successCount > 1 ? "s" : ""} marquée${successCount > 1 ? "s" : ""} payée`);
+    }
+  };
+
+  const handleBulkSendRelance = async () => {
+    setIsBulkRelancing(true);
+    let successCount = 0;
+    for (const id of Array.from(selectedIds)) {
+      try {
+        const res = await fetch(`/api/factures/${id}/relances`, { method: "POST" });
+        if (res.ok) successCount++;
+      } catch (err) {
+        logError("factures-bulk-relance", err);
+      }
+    }
+    setIsBulkRelancing(false);
+    if (successCount > 0) {
+      toast.success(`${successCount} relance${successCount > 1 ? "s" : ""} envoyée${successCount > 1 ? "s" : ""}`);
+    }
   };
 
   const handleBulkDelete = async () => {
@@ -546,18 +589,33 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
           </label>
 
           {selectedIds.size > 0 ? (
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 sm:text-right">
-                {selectedIds.size} facture{selectedIds.size > 1 ? "s" : ""} prête{selectedIds.size > 1 ? "s" : ""} à être supprimée{selectedIds.size > 1 ? "s" : ""}
-              </p>
+            <div className="flex flex-wrap gap-2 sm:items-center sm:justify-end">
+              <button
+                type="button"
+                onClick={handleBulkMarkPaid}
+                disabled={isBulkMarkingPaid}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-400/20 dark:bg-emerald-500/8 dark:text-emerald-200"
+              >
+                <BadgeCheck size={15} />
+                {isBulkMarkingPaid ? "..." : `Marquer payées (${selectedIds.size})`}
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkSendRelance}
+                disabled={isBulkRelancing}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-600 transition hover:bg-amber-100 disabled:opacity-50 dark:border-amber-400/20 dark:bg-amber-500/8 dark:text-amber-200"
+              >
+                <Send size={15} />
+                {isBulkRelancing ? "..." : `Relancer (${selectedIds.size})`}
+              </button>
               <button
                 type="button"
                 onClick={() => setConfirmBulkDeleteOpen(true)}
                 disabled={isDeletingBulk}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-100 disabled:opacity-50 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200"
               >
                 <Trash2 size={15} />
-                {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
+                {isDeletingBulk ? "..." : `Supprimer (${selectedIds.size})`}
               </button>
             </div>
           ) : (
