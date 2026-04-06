@@ -39,8 +39,8 @@ export async function GET() {
 
       months.push({
         month: monthLabel,
-        revenue: factures._sum.totalTTC || 0,
-        expenses: depenses._sum.montant || 0,
+        revenue: (factures._sum.totalTTC as any)?.toNumber() || 0,
+        expenses: (depenses._sum.montant as any)?.toNumber() || 0,
       });
     }
 

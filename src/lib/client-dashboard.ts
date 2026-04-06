@@ -5,6 +5,7 @@ const MONTH_NAMES = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août"
 type RawDashboardQuote = {
   numero: string;
   date: Date;
+  lignesNorm?: any[];
   statut: string;
   remise: number | null;
   tva: number | null;
@@ -146,7 +147,7 @@ function computeQuoteTotals(lines: DashboardLineItem[], globalTva: number, globa
 
 function mapQuote(quote: RawDashboardQuote): ClientDashboardQuoteSummary {
   const totals = computeQuoteTotals(
-    normalizeLineItems(quote.lignes),
+    normalizeLineItems(quote.lignesNorm),
     Number(quote.tva) || 0,
     Number(quote.remise) || 0,
   );
@@ -225,7 +226,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         statut: true,
         remise: true,
         tva: true,
-        lignes: true,
+        
         createdAt: true,
         client: { select: { nom: true, email: true } },
       },
@@ -246,7 +247,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         statut: true,
         remise: true,
         tva: true,
-        lignes: true,
+        
         client: { select: { nom: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -265,7 +266,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         createdAt: true,
         remise: true,
         tva: true,
-        lignes: true,
+        
       },
     }),
 
@@ -281,7 +282,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         createdAt: true,
         remise: true,
         tva: true,
-        lignes: true,
+        
       },
     }),
 
@@ -337,7 +338,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   // Calcul des totaux pour les devis acceptés (revenus validés)
   for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
     const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignes),
+      normalizeLineItems(quote.lignesNorm),
       Number(quote.tva) || 0,
       Number(quote.remise) || 0,
     );
@@ -349,7 +350,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   // Calcul du revenu perdu (devis refusés des 6 derniers mois)
   for (const quote of refusedQuotesForLost as RawDashboardQuote[]) {
     const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignes),
+      normalizeLineItems(quote.lignesNorm),
       Number(quote.tva) || 0,
       Number(quote.remise) || 0,
     );
@@ -372,7 +373,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   // Calcul des totaux pour les devis en attente (pipeline)
   for (const quote of followUpQuotesRaw as RawDashboardQuote[]) {
     const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignes),
+      normalizeLineItems(quote.lignesNorm),
       Number(quote.tva) || 0,
       Number(quote.remise) || 0,
     );
@@ -397,7 +398,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
     const quoteDate = parseQuoteDate(quote.date);
     const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignes),
+      normalizeLineItems(quote.lignesNorm),
       Number(quote.tva) || 0,
       Number(quote.remise) || 0,
     );
@@ -414,7 +415,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
     const nom = quote.client?.nom || "Inconnu";
     const existing = clientRevenue.get(nom) || { nom, devisCount: 0, revenueHT: 0 };
-    const lines = Array.isArray(quote.lignes) ? (quote.lignes as DashboardLineItem[]) : [];
+    const lines = Array.isArray(quote.lignesNorm) ? (quote.lignesNorm as DashboardLineItem[]) : [];
     const totals = computeQuoteTotals(lines, quote.tva || 0, quote.remise || 0);
     existing.devisCount++;
     existing.revenueHT += totals.totalHT;

@@ -62,7 +62,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
           tva: ligne.tva,
           unite: ligne.unite,
         }))
-      : parseLignes(devis.lignes);
+      : parseLignes(devis.lignesNorm);
 
     const remiseGlobale = devis.remise || 0;
     const tvaGlobale = devis.tva || 0;
@@ -172,7 +172,7 @@ export async function POST(request: Request, context: { params: Promise<{ numero
               tva: ligne.tva,
               unite: ligne.unite,
             }))
-          : parseLignes(devis.lignes);
+          : parseLignes(devis.lignesNorm);
 
         const lignesPdf = lignes.map(normalizeLigneForOutput);
         const tvaGlobale = devis.tva || 0;

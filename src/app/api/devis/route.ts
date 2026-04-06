@@ -110,7 +110,7 @@ export async function GET(request: Request) {
           unite: ligne.unite,
         }));
       } else {
-        lignes = parseLignes(d.lignes);
+        lignes = parseLignes(d.lignesNorm);
       }
 
       const remiseGlobale = d.remise || 0;

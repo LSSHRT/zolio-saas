@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Decimal } from "@/lib/prisma";
 import { internalServerError, jsonError } from "@/lib/http";
 import { depenseCreateSchema, zodErrorResponse } from "@/lib/validations";
 
 type DepenseRecord = {
   id: string;
   description: string;
-  montant: number;
+  montant: number | Decimal;
   date: Date;
   categorie?: string | null;
 };
@@ -16,11 +16,12 @@ type DepenseRecord = {
 
 
 function mapDepense(depense: DepenseRecord) {
+  const montant = depense.montant instanceof Decimal ? depense.montant.toNumber() : depense.montant;
   return {
     id: depense.id,
     description: depense.description,
-    montant: depense.montant,
-    montantTTC: depense.montant,
+    montant: montant,
+    montantTTC: montant,
     tvaDeductible: 0,
     date: depense.date.toISOString().split("T")[0],
     categorie: depense.categorie || "",

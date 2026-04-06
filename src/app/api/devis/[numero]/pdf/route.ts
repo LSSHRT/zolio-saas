@@ -40,8 +40,8 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
         tva: ligne.tva,
         unite: ligne.unite,
       }));
-    } else if (devis.lignes) {
-      lignes = parseLignes(devis.lignes);
+    } else if (devis.lignesNorm) {
+      lignes = parseLignes(devis.lignesNorm);
     }
 
     const normalizedLignes = lignes.map(normalizeLigneForOutput);

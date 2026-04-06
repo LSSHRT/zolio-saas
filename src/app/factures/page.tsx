@@ -43,7 +43,7 @@ interface Facture {
   tva: string;
   totalTTC: string;
   statut: string;
-  devisRef: string;
+  
 }
 
 interface PaginationInfo {
@@ -765,7 +765,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               Réf devis
                             </p>
                             <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
-                              {facture.devisRef || "-"}
+                              {"-"}
                             </p>
                           </div>
                           <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
@@ -858,7 +858,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               Réf devis
                             </p>
                             <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">
-                              {facture.devisRef || "-"}
+                              {"-"}
                             </p>
                           </div>
                           <div>

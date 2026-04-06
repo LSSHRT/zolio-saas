@@ -55,7 +55,7 @@ export async function POST(
     // Récupérer les lignes (normalisées en priorité, sinon JSON)
     const lignes = devis.lignesNorm.length > 0
       ? devis.lignesNorm
-      : parseLignes(devis.lignes);
+      : parseLignes(devis.lignesNorm);
 
     const { totalHT, totalTTC } = computeTotals(
       lignes,
@@ -70,7 +70,7 @@ export async function POST(
           userId,
           numero: newNumero,
           devisId: devis.id,
-          devisRef: devis.numero,
+          // "": devis.numero,
           nomClient: devis.client.nom,
           emailClient: devis.client.email,
           totalHT,

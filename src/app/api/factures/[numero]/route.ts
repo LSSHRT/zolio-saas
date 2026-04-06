@@ -34,7 +34,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       statut: facture.statut,
       date: facture.date.toISOString(),
       dateEcheance: facture.dateEcheance?.toISOString() || null,
-      devisRef: facture.devisRef || facture.devis?.numero || null,
+      // "": "" || facture.devis?.numero || null,
       devisStatut: facture.devis?.statut || null,
       stripePaymentLink: facture.stripePaymentLink || null,
       stripeSessionId: facture.stripeSessionId || null,

@@ -2,15 +2,15 @@
  * Helpers pour la gestion des lignes de devis normalisées
  */
 
-import { prisma } from "@/lib/prisma";
+import { prisma, Decimal } from "@/lib/prisma";
 
 export type LignePayload = {
   isOptional?: boolean;
   nomPrestation?: string;
-  prixUnitaire?: number | string;
-  quantite?: number | string;
-  totalLigne?: number | string;
-  tva?: string | number;
+  prixUnitaire?: number | string | Decimal;
+  quantite?: number | string | Decimal;
+  totalLigne?: number | string | Decimal;
+  tva?: string | number | Decimal;
   unite?: string;
 };
 
@@ -31,12 +31,17 @@ export function parseLignes(value: unknown): LignePayload[] {
 }
 
 export function getLineTotal(line: LignePayload): number {
+  if (line.totalLigne instanceof Decimal) return line.totalLigne.toNumber();
   const total = Number(line.totalLigne);
   if (Number.isFinite(total) && total !== 0) return total;
-  return Number(line.quantite ?? 0) * Number(line.prixUnitaire ?? 0);
+  
+  const q = line.quantite instanceof Decimal ? line.quantite.toNumber() : Number(line.quantite ?? 0);
+  const p = line.prixUnitaire instanceof Decimal ? line.prixUnitaire.toNumber() : Number(line.prixUnitaire ?? 0);
+  return q * p;
 }
 
 export function parseNumber(value: unknown, fallback = 0): number {
+  if (value instanceof Decimal) return value.toNumber();
   const parsed = Number.parseFloat(String(value ?? fallback));
   return Number.isFinite(parsed) ? parsed : fallback;
 }

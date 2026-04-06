@@ -67,7 +67,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ numer
           tva: ligne.tva,
           unite: ligne.unite,
         }))
-      : parseLignes(devis.lignes);
+      : parseLignes(devis.lignesNorm);
 
     if (isNewSale || isCancelSale) {
       for (const ligne of lignes) {

@@ -17,6 +17,7 @@ model Client {
   adresse        String?
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
   devis          Devis[]
   facturesRecurrentes FactureRecurrente[]
 
@@ -24,46 +25,47 @@ model Client {
 }
 
 model Prestation {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   nom         String
   description String?
   unite       String?
-  prix        Float
-  cout        Float?   @default(0) // Cost price for margin
-  stock       Int?     @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  prix        Decimal   @db.Decimal(10, 2)
+  cout        Decimal?  @default(0) @db.Decimal(10, 2)
+  stock       Int?      @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   @@index([userId])
 }
 
 model Devis {
-  id          String       @id @default(cuid())
-  userId      String
-  numero      String
-  clientId    String
-  client      Client       @relation(fields: [clientId], references: [id])
-  date        DateTime     @default(now())
-  statut      String       @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
-  remise      Float?       @default(0)
-  acompte     Float?       @default(0)
-  tva         Float?       @default(0)
-  signature   String?      // Base64 signature image
-  lignes      Json?        // @deprecated — migré vers LigneDevis
-  lignesNorm  LigneDevis[] // Lignes normalisées
-  photos      Json?        // Array of photo base64 strings
-  tags        Json?        // Array de tags (ex: ["urgent", "récurrent"])
-  notes         String?       // Notes internes sur le devis
+  id            String       @id @default(cuid())
+  userId        String
+  numero        String
+  clientId      String
+  client        Client       @relation(fields: [clientId], references: [id])
+  date          DateTime     @default(now())
+  statut        String       @default("En attente") // En attente, Accepté, Refusé, Annulé, Facturé, Payé
+  remise        Decimal?     @default(0) @db.Decimal(10, 2)
+  acompte       Decimal?     @default(0) @db.Decimal(10, 2)
+  tva           Decimal?     @default(0) @db.Decimal(10, 2)
+  signature     String?      // URL de la signature image (migré depuis base64)
+  lignesNorm    LigneDevis[] // Lignes normalisées
+  photos        Json?        // Array of photo URLs
+  tags          Json?        // Array de tags (ex: ["urgent", "récurrent"])
+  notes         String?      // Notes internes sur le devis
   dateDebut     DateTime?
   dateFin       DateTime?
-  factures      Facture[]     // Factures générées depuis ce devis
-  optionLabel   String?       // Label de l'option : "basique", "standard", "premium"
-  devisParentId String?       // Lien vers le devis parent (groupe d'options)
-  devisParent   Devis?        @relation("DevisOptions", fields: [devisParentId], references: [id], onDelete: SetNull)
-  devisOptions  Devis[]       @relation("DevisOptions")
-  createdAt     DateTime      @default(now())
-  updatedAt   DateTime     @updatedAt
+  factures      Facture[]    // Factures générées depuis ce devis
+  optionLabel   String?      // Label de l'option : "basique", "standard", "premium"
+  devisParentId String?      // Lien vers le devis parent (groupe d'options)
+  devisParent   Devis?       @relation("DevisOptions", fields: [devisParentId], references: [id], onDelete: SetNull)
+  devisOptions  Devis[]      @relation("DevisOptions")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
 
   @@unique([userId, numero])
   @@index([userId, statut])
@@ -71,17 +73,17 @@ model Devis {
 }
 
 model LigneDevis {
-  id             String @id @default(cuid())
+  id             String   @id @default(cuid())
   devisId        String
-  devis          Devis  @relation(fields: [devisId], references: [id], onDelete: Cascade)
+  devis          Devis    @relation(fields: [devisId], references: [id], onDelete: Cascade)
   nomPrestation  String
-  unite          String @default("U")
-  quantite       Float  @default(1)
-  prixUnitaire   Float  @default(0)
-  totalLigne     Float  @default(0)
-  tva            String @default("20")
-  isOptional     Boolean @default(false)
-  position       Int    @default(0) // Ordre d'affichage
+  unite          String   @default("U")
+  quantite       Decimal  @default(1) @db.Decimal(10, 2)
+  prixUnitaire   Decimal  @default(0) @db.Decimal(10, 2)
+  totalLigne     Decimal  @default(0) @db.Decimal(10, 2)
+  tva            String   @default("20")
+  isOptional     Boolean  @default(false)
+  position       Int      @default(0) // Ordre d'affichage
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -89,42 +91,43 @@ model LigneDevis {
 }
 
 model Depense {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   userId      String
   description String
-  montant     Float
-  date        DateTime @default(now())
+  montant     Decimal   @db.Decimal(10, 2)
+  date        DateTime  @default(now())
   categorie   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
 
   @@index([userId])
 }
 
 model Facture {
-  id                String              @id @default(cuid())
-  userId            String
-  numero            String
-  devisId           String?             // Lien vers le devis source
-  devis             Devis?              @relation(fields: [devisId], references: [id], onDelete: SetNull)
-  devisRef          String?             // @deprecated - Ancien champ texte, gardé pour migration
-  recurrenteId      String?             // Lien vers facture récurrente
-  recurrente        FactureRecurrente?  @relation(fields: [recurrenteId], references: [id], onDelete: SetNull)
-  nomClient         String
-  emailClient       String?
-  totalHT           Float
-  tva               Float
-  totalTTC          Float
-  statut            String              @default("Émise") // Émise, Payée, En retard, Annulée
-  date              DateTime            @default(now())
-  dateEcheance      DateTime?           // Date limite de paiement
-  stripePaymentLink String?             // Lien de paiement Stripe Checkout
-  stripeSessionId   String?             // Session Stripe pour suivi
-  derniereRelanceNiveau Int             @default(0) // 0=aucune, 1=doux(J+3), 2=ferme(J+7), 3=mise en demeure(J+15)
-  derniereRelanceDate DateTime?         // Date du dernier envoi de relance
-  notes             String?             // Notes internes sur la facture
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  id                    String             @id @default(cuid())
+  userId                String
+  numero                String
+  devisId               String?            // Lien vers le devis source
+  devis                 Devis?             @relation(fields: [devisId], references: [id], onDelete: SetNull)
+  recurrenteId          String?            // Lien vers facture récurrente
+  recurrente            FactureRecurrente? @relation(fields: [recurrenteId], references: [id], onDelete: SetNull)
+  nomClient             String
+  emailClient           String?
+  totalHT               Decimal            @db.Decimal(10, 2)
+  tva                   Decimal            @db.Decimal(10, 2)
+  totalTTC              Decimal            @db.Decimal(10, 2)
+  statut                String             @default("Émise") // Émise, Payée, En retard, Annulée
+  date                  DateTime           @default(now())
+  dateEcheance          DateTime?          // Date limite de paiement
+  stripePaymentLink     String?            // Lien de paiement Stripe Checkout
+  stripeSessionId       String?            // Session Stripe pour suivi
+  derniereRelanceNiveau Int                @default(0) // 0=aucune, 1=doux(J+3), 2=ferme(J+7), 3=mise en demeure(J+15)
+  derniereRelanceDate   DateTime?          // Date du dernier envoi de relance
+  notes                 String?            // Notes internes sur la facture
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  deletedAt             DateTime?
 
   @@unique([userId, numero])
   @@index([devisId])
@@ -135,16 +138,17 @@ model Facture {
 }
 
 model Note {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
   titre     String
   contenu   String
-  categorie String?  // Chantier, Personnel, Idée, À faire
-  couleur   String?  // violet, emerald, rose, amber
-  epingle   Boolean  @default(false)
-  date      DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  categorie String?   // Chantier, Personnel, Idée, À faire
+  couleur   String?   // violet, emerald, rose, amber
+  epingle   Boolean   @default(false)
+  date      DateTime  @default(now())
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@index([userId])
   @@index([categorie])
@@ -199,32 +203,33 @@ model PushSubscription {
 // ─── Templates de devis ───
 
 model DevisTemplate {
-  id          String            @id @default(cuid())
+  id          String          @id @default(cuid())
   userId      String
-  nom         String            // Nom du modèle (ex: "Rénovation salle de bain")
+  nom         String          // Nom du modèle (ex: "Rénovation salle de bain")
   description String?
-  lignes      LigneTemplate[]   // Lignes du modèle
-  tva         Float             @default(20)
-  remise      Float             @default(0)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  lignes      LigneTemplate[] // Lignes du modèle
+  tva         Decimal         @default(20) @db.Decimal(10, 2)
+  remise      Decimal         @default(0) @db.Decimal(10, 2)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
 
   @@index([userId])
 }
 
 model LigneTemplate {
-  id             String        @id @default(cuid())
-  templateId     String
-  template       DevisTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
-  nomPrestation  String
-  unite          String        @default("U")
-  quantite       Float         @default(1)
-  prixUnitaire   Float         @default(0)
-  tva            String        @default("20")
-  isOptional     Boolean       @default(false)
-  position       Int           @default(0)
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id            String        @id @default(cuid())
+  templateId    String
+  template      DevisTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  nomPrestation String
+  unite         String        @default("U")
+  quantite      Decimal       @default(1) @db.Decimal(10, 2)
+  prixUnitaire  Decimal       @default(0) @db.Decimal(10, 2)
+  tva           String        @default("20")
+  isOptional    Boolean       @default(false)
+  position      Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   @@index([templateId])
 }
@@ -237,9 +242,9 @@ model FactureRecurrente {
   clientId      String
   client        Client    @relation(fields: [clientId], references: [id])
   nom           String    // Nom du contrat (ex: "Entretien mensuel")
-  montantHT     Float
-  tva           Float     @default(20)
-  montantTTC    Float
+  montantHT     Decimal   @db.Decimal(10, 2)
+  tva           Decimal   @default(20) @db.Decimal(10, 2)
+  montantTTC    Decimal   @db.Decimal(10, 2)
   frequence     String    // "mensuel", "trimestriel", "annuel"
   jourMois      Int       @default(1) // Jour du mois pour la facturation (1-28)
   prochaineDate DateTime  // Date de la prochaine facture
@@ -249,6 +254,7 @@ model FactureRecurrente {
   factures      Facture[] // Factures générées
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
   @@index([userId])
   @@index([prochaineDate])
@@ -287,4 +293,20 @@ model CalendarEvent {
 
   @@index([userId])
   @@index([userId, date])
+}
+
+// ─── Logs d'Audit ───
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // "CREATE", "UPDATE", "DELETE", "RESTORE"
+  entity    String   // "Client", "Devis", "Facture", etc.
+  entityId  String
+  details   Json?    // Détails des changements effectués
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
 }

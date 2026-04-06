@@ -45,8 +45,8 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
           tva: ligne.tva,
           unite: ligne.unite,
         }));
-      } else if (facture.devis.lignes) {
-        lignes = parseLignes(facture.devis.lignes);
+      } else if (facture.devis.lignesNorm) {
+        lignes = parseLignes(facture.devis.lignesNorm);
       }
     }
 

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Decimal } from "@/lib/prisma";
 import { generateFacturePDF } from "@/lib/generatePdf";
 import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
@@ -24,21 +24,22 @@ type FactureRecord = {
   createdAt: Date;
   date: Date;
   devisId: string | null;
-  devisRef: string | null;
+  //  | null;
   emailClient: string | null;
   nomClient: string;
   numero: string;
   statut: string;
-  totalHT: number;
-  totalTTC: number;
-  tva: number;
+  totalHT: number | Decimal;
+  totalTTC: number | Decimal;
+  tva: number | Decimal;
 };
 
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function parseNumber(value: unknown, fallback = 0) {
+function parseNumber(value: unknown, fallback = 0): number {
+  if (value instanceof Decimal) return value.toNumber();
   const parsed = Number.parseFloat(String(value ?? fallback));
   return Number.isFinite(parsed) ? parsed : fallback;
 }
@@ -69,11 +70,11 @@ function mapFacture(facture: FactureRecord) {
     date: facture.date.toLocaleDateString("fr-FR"),
     nomClient: facture.nomClient,
     emailClient: facture.emailClient || "",
-    totalHT: facture.totalHT,
-    tva: facture.tva,
-    totalTTC: facture.totalTTC,
+    totalHT: parseNumber(facture.totalHT),
+    tva: parseNumber(facture.tva),
+    totalTTC: parseNumber(facture.totalTTC),
     statut: facture.statut,
-    devisRef: facture.devisRef || "",
+    // "": "" || "",
     devisId: facture.devisId || "",
   };
 }
@@ -98,7 +99,7 @@ export async function POST(request: Request) {
       telephone: body.client.telephone || "",
       adresse: body.client.adresse || "",
     };
-    const lignes = parseLignes(body.lignes);
+    const lignes = parseLignes(body.lignesNorm || body.lignes);
     const devisNumero = normalizeText(body.devisNumero);
     const totalHT = body.totalHT;
     const totalTTC = body.totalTTC;
@@ -161,7 +162,7 @@ export async function POST(request: Request) {
             totalTTC,
             statut: "Émise",
             devisId: linkedDevisId,
-            devisRef: devisNumero || null,
+            // "": devisNumero || null,
             date,
           },
         });

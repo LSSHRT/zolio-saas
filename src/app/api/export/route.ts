@@ -46,7 +46,7 @@ export async function POST(request: Request) {
                 tva: ligne.tva,
                 unite: ligne.unite,
               }))
-            : parseLignes(d.lignes);
+            : parseLignes(d.lignesNorm);
 
           const { totalHT, totalTTC } = computeTotals(lignes, d.tva || 0, d.remise || 0);
 

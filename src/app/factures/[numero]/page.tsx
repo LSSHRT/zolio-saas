@@ -40,7 +40,7 @@ interface FactureDetail {
   statut: string;
   date: string;
   dateEcheance: string | null;
-  devisRef: string | null;
+  //  | null;
   devisStatut: string | null;
   stripePaymentLink: string | null;
   stripeSessionId: string | null;
@@ -426,14 +426,14 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
                 {formatDateFR(facture.dateEcheance)}
               </span>
             </div>
-            {facture.devisRef && (
+            {"" && (
               <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800/50 sm:col-span-2">
                 <span className="text-sm text-slate-500 dark:text-slate-400">Devis lié</span>
                 <Link
-                  href={`/devis/${facture.devisRef}`}
+                  href={`/devis/${""}`}
                   className="text-sm font-semibold text-violet-600 hover:text-violet-700 dark:text-violet-400"
                 >
-                  {facture.devisRef}
+                  {""}
                   {facture.devisStatut && (
                     <span className="ml-2 text-xs text-slate-400">({facture.devisStatut})</span>
                   )}

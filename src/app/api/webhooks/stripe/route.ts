@@ -85,8 +85,8 @@ export async function POST(req: Request) {
                     tva: l.tva,
                     unite: l.unite,
                   }));
-                } else if (facture.devis?.lignes) {
-                  lignes = parseLignes(facture.devis.lignes);
+                } else if (facture.devis?.lignesNorm) {
+                  lignes = parseLignes(facture.devis.lignesNorm);
                 } else {
                   lignes = [{
                     isOptional: false,

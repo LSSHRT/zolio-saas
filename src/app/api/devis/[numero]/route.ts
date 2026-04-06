@@ -85,11 +85,11 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
         unite: ligne.unite,
       }));
     } else {
-      lignes = parseLignes(devis.lignes);
+      lignes = parseLignes(devis.lignesNorm);
     }
 
-    const remiseGlobale = devis.remise || 0;
-    const tvaGlobale = devis.tva || 0;
+    const remiseGlobale = parseNumber(devis.remise);
+    const tvaGlobale = parseNumber(devis.tva);
     const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
@@ -102,7 +102,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       statut: devis.statut,
       lignes: lignes.map(normalizeLigneForOutput),
       remise: remiseGlobale,
-      acompte: devis.acompte,
+      acompte: parseNumber(devis.acompte),
       tva: `${tvaGlobale}%`,
       totalHT: totalHT.toFixed(2),
       totalTTC: totalTTC.toFixed(2),
@@ -142,8 +142,8 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     const parsed = devisUpdateSchema.safeParse(rawBody);
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const body = parsed.data;
-    const lignes = parseLignes(body.lignes);
+    const body = parsed.data as any;
+    const lignes = parseLignes(body.lignesNorm || body.lignes);
     const photos = parsePhotos(body.photos);
     const tvaNum = parseNumber(body.tva);
     const remiseNum = parseNumber(body.remise);

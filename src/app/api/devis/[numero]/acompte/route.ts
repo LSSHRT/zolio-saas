@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { parseNumber } from "@/lib/devis-lignes";
 
 export async function POST(
   request: NextRequest,
@@ -46,8 +47,8 @@ export async function POST(
     }
 
     const taux = tauxAcompte / 100;
-    const tvaPct = devis.tva ?? 0;
-    const totalHT = devis.lignesNorm?.reduce((s, l) => s + l.prixUnitaire * l.quantite, 0) ?? 0;
+    const tvaPct = parseNumber(devis.tva);
+    const totalHT = devis.lignesNorm?.reduce((s, l) => s + parseNumber(l.prixUnitaire) * parseNumber(l.quantite), 0) ?? 0;
     const totalTTC = +(totalHT * (1 + tvaPct / 100)).toFixed(2);
 
     const acompteHT = +(+totalHT * taux).toFixed(2);
