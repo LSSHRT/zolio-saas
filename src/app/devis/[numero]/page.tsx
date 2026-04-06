@@ -512,7 +512,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   return (
     <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
       {/* Header */}
-      <header className="flex items-center gap-4 p-6 pt-12 sm:pt-10">
+      <header className="flex items-center gap-3 p-4 pt-10 sm:gap-4 sm:p-6 sm:pt-10">
         <Link href="/devis">
           <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
             <ArrowLeft size={20} />
@@ -547,7 +547,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
         ) : null}
       </header>
 
-      <main className="flex-1 px-6 flex flex-col gap-5 overflow-y-auto">
+      <main className="flex-1 px-4 flex flex-col gap-4 overflow-y-auto sm:px-6 sm:gap-5">
         {/* Client info */}
         <div className="bg-violet-50 rounded-2xl p-4 border border-violet-200 flex items-center gap-3 dark:bg-slate-800 dark:border-slate-700 dark:text-white">
           <div className="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center font-bold text-sm">

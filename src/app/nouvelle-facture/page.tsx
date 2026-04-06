@@ -394,7 +394,7 @@ export default function NouvelleFacturePage() {
                 />
                 <button onClick={() => removeLine(l.id)} className="text-red-400"><Trash2 size={14} /></button>
               </div>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-[10px] text-slate-400">Qté</label>
                   <input type="number" value={l.quantite} min="0.1" step="any"
@@ -407,10 +407,10 @@ export default function NouvelleFacturePage() {
                     onChange={(e) => updateLine(l.id, { prixUnitaire: parseFloat(e.target.value) || 0 })}
                     className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
                 </div>
-                <div className="rounded-lg bg-violet-50 px-2 py-1.5 dark:bg-violet-500/10">
-                  <label className="text-[10px] text-violet-400">Total</label>
-                  <p className="text-sm font-bold text-slate-800 dark:text-white">{l.totalLigne.toFixed(2)}€</p>
-                </div>
+              </div>
+              <div className="mt-1 flex items-center justify-between rounded-lg bg-violet-50 px-3 py-1.5 dark:bg-violet-500/10">
+                <span className="text-[10px] text-violet-400">Total ligne</span>
+                <p className="text-sm font-bold text-slate-800 dark:text-white">{l.totalLigne.toFixed(2)}€</p>
               </div>
             </ClientSectionCard>
           ))}
@@ -427,7 +427,7 @@ export default function NouvelleFacturePage() {
       {step === 3 && (
         <ClientSectionCard>
           <div className="flex flex-col gap-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <label className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/60">
                 <span className="text-xs font-medium text-slate-600 dark:text-slate-300">TVA (%)</span>
                 <select value={tva} onChange={(e) => setTva(e.target.value)}

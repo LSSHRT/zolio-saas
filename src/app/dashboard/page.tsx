@@ -1325,7 +1325,7 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 {/* Activité de la semaine */}
                 {semaine && (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
                     <div className="rounded-xl bg-violet-50 px-3 py-2.5 text-center dark:bg-violet-500/10">
                       <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
                       <p className="mt-1 text-lg font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
@@ -1893,7 +1893,7 @@ export default function DashboardPage() {
 
                   {/* Activité de la semaine */}
                   {semaine && (
-                    <div className="mt-5 grid grid-cols-3 gap-3">
+                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       <div className="rounded-2xl border border-violet-200/60 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-500/20 dark:bg-violet-500/10">
                         <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
                         <p className="mt-1 text-2xl font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
