@@ -1,5 +1,6 @@
 "use client";
 
+import ConversionFunnel from "@/components/conversion-funnel";
 import {
   Bell,
   BriefcaseBusiness,
@@ -661,6 +662,7 @@ export default function DashboardPage() {
   const benefice = dashboardData?.benefice;
   const echeances = dashboardData?.echeances ?? [];
   const semaine = dashboardData?.semaine;
+  const funnel = dashboardData?.funnel;
 
   let greetingText = "Bonjour";
   let GreetingIcon = CloudSun;
@@ -1870,6 +1872,17 @@ export default function DashboardPage() {
                   tone="emerald"
                   icon={Target}
                 />
+              </div>
+            )}
+
+            {/* Funnel de conversion */}
+            {funnel && funnel.length > 0 && (
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <Target size={18} className="text-violet-500" />
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel de conversion</h3>
+                </div>
+                <ConversionFunnel funnel={funnel} />
               </div>
             )}
             </div>

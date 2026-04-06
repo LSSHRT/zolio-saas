@@ -54,6 +54,14 @@ export type EcheanceItem = {
   joursRestants: number;
 };
 
+export type FunnelEtape = {
+  label: string;
+  count: number;
+  amount: number;
+  pct: number; // par rapport au total devis
+  color: string;
+};
+
 export type ClientDashboardSummary = {
   starterCatalogCount: number;
   totalQuotes: number;
@@ -77,6 +85,7 @@ export type ClientDashboardSummary = {
   benefice: BeneficeSummary;
   echeances: EcheanceItem[];
   semaine: SemaineSummary;
+  funnel: FunnelEtape[];
 };
 
 export type SemaineSummary = {
@@ -491,6 +500,24 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   });
   const caEncaisse = facturesPayeesSemaine.reduce((s, f) => s + f.totalTTC, 0);
 
+  // Funnel de conversion : Devis créés → Acceptés → Facturés → Payés
+  const facturesFromDevis = await prisma.facture.findMany({
+    where: { userId, devisId: { not: null } },
+    select: { totalTTC: true, statut: true, devisId: true },
+  });
+  const devisFacturesIds = new Set(facturesFromDevis.map((f) => f.devisId));
+  const nbFacturesFromDevis = facturesFromDevis.length;
+  const facturesPayeesFromDevis = facturesFromDevis.filter((f) => f.statut === "Payée");
+  const nbFactureesPayees = facturesPayeesFromDevis.length;
+  const montantFacturesPayees = facturesPayeesFromDevis.reduce((s, f) => s + f.totalTTC, 0);
+
+  const funnel: FunnelEtape[] = [
+    { label: "Devis créés", count: totalCount, amount: totalTTC, pct: 100, color: "violet" },
+    { label: "Acceptés", count: acceptedCount, amount: acceptedRevenueHT, pct: totalCount > 0 ? Math.round((acceptedCount / totalCount) * 100) : 0, color: "emerald" },
+    { label: "Facturés", count: nbFacturesFromDevis, amount: facturesFromDevis.reduce((s, f) => s + f.totalTTC, 0), pct: totalCount > 0 ? Math.round((nbFacturesFromDevis / totalCount) * 100) : 0, color: "blue" },
+    { label: "Payés", count: nbFactureesPayees, amount: montantFacturesPayees, pct: totalCount > 0 ? Math.round((nbFactureesPayees / totalCount) * 100) : 0, color: "amber" },
+  ];
+
   return {
     starterCatalogCount,
     totalQuotes: totalCount,
@@ -521,5 +548,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       caEncaisse,
       depensesSemaine: depensesAgg._sum.montant ?? 0,
     },
+    funnel,
   };
 }
