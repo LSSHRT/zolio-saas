@@ -864,6 +864,47 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Comment ça marche */}
+        <LandingStage className="relative z-10 py-24 sm:py-32" tone="neutral">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-16 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-300 backdrop-blur-md">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-violet-500"></span>
+                Simple comme 1, 2, 3
+              </div>
+              <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                Prêt en <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">5 minutes</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400">
+                Pas de configuration complexe. Choisissez votre métier, c'est prêt.
+              </p>
+            </div>
+
+            <div className="grid gap-8 sm:grid-cols-3">
+              {[
+                { step: "01", title: "Choisissez votre métier", desc: "On importe automatiquement un catalogue de prestations types adaptées à votre activité.", gradient: "from-violet-600 to-violet-500" },
+                { step: "02", title: "Créez votre premier devis", desc: "Sélectionnez un client, ajoutez des prestations, envoyez. C'est fait en 3 minutes.", gradient: "from-fuchsia-600 to-fuchsia-500" },
+                { step: "03", title: "Encaissez vos paiements", desc: "Vos clients paient en ligne. Vous suivez votre trésorerie en temps réel.", gradient: "from-orange-500 to-amber-500" },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  className="group relative rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition hover:bg-white/[0.06]"
+                >
+                  <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} text-2xl font-black text-white shadow-lg`}>
+                    {item.step}
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                  <p className="mt-3 leading-relaxed text-neutral-400">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </LandingStage>
+
         {/* Nouveautés Section */}
         <LandingStage className="relative z-10 py-24 sm:py-32" tone="neutral">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
