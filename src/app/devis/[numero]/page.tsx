@@ -16,6 +16,8 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import AcompteModal from "@/components/acompte-modal";
+import { Banknote } from "lucide-react";
 import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
@@ -74,6 +76,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [showAcompteModal, setShowAcompteModal] = useState(false);
   const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
   const creationToastHandled = useRef(false);
 
@@ -852,6 +855,18 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           </div>
         </div>
 
+        {/* Facture d'acompte (si accepté/signé) */}
+        {(devisInfo?.statut === "Accepté" || devisInfo?.statut === "Signé") && (
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={() => setShowAcompteModal(true)}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 py-3 text-sm font-bold text-violet-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          >
+            <Banknote size={16} />
+            Créer facture d'acompte
+          </motion.button>
+        )}
+
         {/* Transformer en facture (si accepté) */}
         {devisInfo?.statut === "Accepté" && (
           <motion.button
@@ -1020,6 +1035,27 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
           ))}
         </div>
       </MobileDialog>
+
+      <AcompteModal
+        open={showAcompteModal}
+        onClose={() => setShowAcompteModal(false)}
+        devisNumero={numero}
+        onSuccess={(facture) => {
+          toast.success(`Facture d'acompte ${facture.numero} créée — ${facture.totalTTC.toFixed(2)}€ (${facture.tauxAcompte}%)`);
+          // Recharger les infos du devis pour afficher le lien vers la facture
+          fetch(`/api/devis/${numero}`)
+            .then((r) => r.json())
+            .then((data) => {
+              setDevisInfo(data);
+              setLignes(data.lignes || []);
+              const tauxStr = (data.tva || "10%").replace("%", "");
+              setTva(tauxStr);
+              setAcompte(data.acompte || "");
+              setRemise(data.remise || "");
+              setPhotos(data.photos || []);
+            });
+        }}
+      />
     </div>
   );
 }
