@@ -1,393 +1,286 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import useSWR from "swr";
 import { motion } from "framer-motion";
 import {
-  CalendarDays,
-  CalendarRange,
-  CheckCircle2,
-  Clock3,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
   FileText,
-  Loader2,
-  Save,
-  Settings,
+  RefreshCw,
+  TrendingUp,
 } from "lucide-react";
-import { toast } from "sonner";
-import { logError } from "@/lib/logger";
+import Link from "next/link";
 import {
-  ClientHeroStat,
-  ClientMobileOverview,
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
 
-type PlanningQuote = {
-  dateDebut?: string | null;
-  dateFin?: string | null;
-  nomClient: string;
-  numero: string;
-  statut: string;
-  totalTTC: string;
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+const JOURS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+
+const MOIS_LABELS = [
+  "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+  "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre",
+];
+
+const TONE_DOT: Record<string, string> = {
+  emerald: "bg-emerald-500",
+  rose: "bg-rose-500",
+  amber: "bg-amber-500",
+  violet: "bg-violet-500",
+  slate: "bg-slate-400",
 };
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-function formatCurrency(value: string) {
-  const amount = Number.parseFloat(value || "0");
-  return `${Number.isFinite(amount) ? amount.toFixed(0) : "0"}€`;
+interface PlanningEvent {
+  id: string;
+  type: "facture" | "devis" | "recurrente";
+  date: string;
+  title: string;
+  subtitle: string;
+  amount: number | null;
+  statut: string;
+  href: string;
+  tone: string;
 }
 
-function formatDateLabel(value?: string | null) {
-  if (!value) {
-    return "Non défini";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat("fr-FR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  }).format(date);
+function getDaysInMonth(year: number, month: number) {
+  return new Date(year, month, 0).getDate();
 }
 
-function PlanningItem({
-  devis,
-  onSaved,
-}: {
-  devis: PlanningQuote;
-  onSaved: () => Promise<unknown>;
-}) {
-  const [dateDebut, setDateDebut] = useState(devis.dateDebut || "");
-  const [dateFin, setDateFin] = useState(devis.dateFin || "");
-  const [saving, setSaving] = useState(false);
-
-  const isPlanned = Boolean(devis.dateDebut || devis.dateFin);
-  const hasChanged = dateDebut !== (devis.dateDebut || "") || dateFin !== (devis.dateFin || "");
-
-  const handleSave = async () => {
-    setSaving(true);
-
-    try {
-      const response = await fetch(`/api/devis/${devis.numero}/planning`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dateDebut, dateFin }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Impossible d'enregistrer les dates du chantier.");
-      }
-
-      await onSaved();
-      toast.success(isPlanned ? "Planning mis à jour." : "Chantier planifié.");
-    } catch (error) {
-      logError("planning-save", error);
-      toast.error(error instanceof Error ? error.message : "Erreur de planification.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-[1.85rem] border border-slate-200/70 bg-slate-50/85 p-5 dark:border-white/8 dark:bg-white/4"
-    >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center rounded-full border border-slate-200/80 bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:border-white/10 dark:bg-white/8 dark:text-slate-300">
-              {devis.numero}
-            </span>
-            <span
-              className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold ${
-                isPlanned
-                  ? "bg-emerald-500/12 text-emerald-700 dark:bg-emerald-500/12 dark:text-emerald-300"
-                  : "bg-amber-400/12 text-amber-700 dark:bg-amber-400/12 dark:text-amber-300"
-              }`}
-            >
-              {isPlanned ? <CheckCircle2 size={14} /> : <Clock3 size={14} />}
-              {isPlanned ? "Planifié" : "À planifier"}
-            </span>
-          </div>
-
-          <h2 className="mt-4 text-xl font-semibold text-slate-950 dark:text-white">{devis.nomClient}</h2>
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
-            <span className="inline-flex items-center gap-2">
-              <FileText size={15} />
-              {formatCurrency(devis.totalTTC)} TTC
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <CalendarRange size={15} />
-              {dateDebut ? formatDateLabel(dateDebut) : "Début à définir"}
-              <span aria-hidden="true">→</span>
-              {dateFin ? formatDateLabel(dateFin) : "Fin à définir"}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto_1fr] lg:min-w-[360px]">
-          <label className="flex flex-col gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm dark:border-white/10 dark:bg-slate-950/20">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Début chantier
-            </span>
-            <input
-              type="date"
-              value={dateDebut}
-              onChange={(event) => setDateDebut(event.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
-            />
-          </label>
-
-          <div className="hidden items-center justify-center text-slate-300 sm:flex dark:text-slate-600">—</div>
-
-          <label className="flex flex-col gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm dark:border-white/10 dark:bg-slate-950/20">
-            <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              Fin chantier
-            </span>
-            <input
-              type="date"
-              value={dateFin}
-              onChange={(event) => setDateFin(event.target.value)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
-            />
-          </label>
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200/70 pt-4 dark:border-white/8">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Commencez par les devis acceptés sans date, puis ajustez vos semaines au fil du terrain.
-        </p>
-
-        <button
-          type="button"
-          onClick={() => void handleSave()}
-          disabled={!hasChanged || saving}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          {saving ? "Enregistrement..." : "Enregistrer"}
-        </button>
-      </div>
-    </motion.article>
-  );
+function getFirstDayOfMonth(year: number, month: number) {
+  const day = new Date(year, month - 1, 1).getDay();
+  return day === 0 ? 6 : day - 1; // Lundi = 0
 }
 
 export default function PlanningPage() {
-  const { data, mutate, isLoading } = useSWR<PlanningQuote[]>("/api/devis", fetcher, {
-    revalidateOnFocus: false,
-    keepPreviousData: true,
-  });
+  const today = new Date();
+  const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  const devis = useMemo(() => (Array.isArray(data) ? data : []), [data]);
-  const devisAcceptes = useMemo(() => devis.filter((item) => item.statut === "Accepté"), [devis]);
-  const sortedDevis = useMemo(
-    () =>
-      [...devisAcceptes].sort((a, b) => {
-        if (!a.dateDebut && b.dateDebut) return -1;
-        if (a.dateDebut && !b.dateDebut) return 1;
-        if (a.dateDebut && b.dateDebut) return a.dateDebut.localeCompare(b.dateDebut);
-        return 0;
-      }),
-    [devisAcceptes],
+  const { data, isLoading } = useSWR<{ events: PlanningEvent[]; month: number; year: number }>(
+    `/api/planning?month=${viewMonth}&year=${viewYear}`,
+    fetcher,
+    { refreshInterval: 60000 },
   );
 
-  const plannedCount = useMemo(
-    () => devisAcceptes.filter((item) => Boolean(item.dateDebut || item.dateFin)).length,
-    [devisAcceptes],
-  );
-  const toScheduleCount = devisAcceptes.length - plannedCount;
-  const upcomingCount = useMemo(() => {
-    const today = new Date();
-    const nextWeek = new Date();
-    nextWeek.setDate(today.getDate() + 7);
+  const events = useMemo(() => data?.events ?? [], [data]);
 
-    return devisAcceptes.filter((item) => {
-      if (!item.dateDebut) {
-        return false;
-      }
+  const eventsByDate = useMemo(() => {
+    const map: Record<string, PlanningEvent[]> = {};
+    for (const e of events) {
+      const dateKey = e.date.split("T")[0];
+      if (!map[dateKey]) map[dateKey] = [];
+      map[dateKey].push(e);
+    }
+    return map;
+  }, [events]);
 
-      const startDate = new Date(item.dateDebut);
-      return startDate >= today && startDate <= nextWeek;
-    }).length;
-  }, [devisAcceptes]);
+  const daysInMonth = getDaysInMonth(viewYear, viewMonth);
+  const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
+
+  const prevMonth = () => {
+    if (viewMonth === 1) {
+      setViewMonth(12);
+      setViewYear((y) => y - 1);
+    } else {
+      setViewMonth((m) => m - 1);
+    }
+  };
+
+  const nextMonth = () => {
+    if (viewMonth === 12) {
+      setViewMonth(1);
+      setViewYear((y) => y + 1);
+    } else {
+      setViewMonth((m) => m + 1);
+    }
+  };
+
+  const goToday = () => {
+    setViewMonth(today.getMonth() + 1);
+    setViewYear(today.getFullYear());
+    setSelectedDate(null);
+  };
+
+  const selectedEvents = selectedDate ? eventsByDate[selectedDate] ?? [] : [];
+
+  const todayStr = today.toISOString().split("T")[0];
 
   return (
     <ClientSubpageShell
-      title="Planning & chantiers"
-      description="Regroupez ici vos devis acceptés, posez des dates en quelques gestes et gardez une vue claire sur les prochaines semaines terrain."
-      eyebrow="Organisation chantier"
+      title="Planning"
+      description="Vue mensuelle de vos échéances, fins de devis et factures récurrentes."
+      eyebrow="Calendrier"
       activeNav="tools"
       mobilePrimaryAction={
-        <Link
-          href="/devis"
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
+        <button
+          onClick={goToday}
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
         >
-          <CalendarDays size={16} />
-          Devis
-        </Link>
-      }
-      summary={
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <ClientHeroStat
-            label="Chantiers"
-            value={String(devisAcceptes.length)}
-            detail="Devis acceptés à planifier"
-            tone="violet"
-          />
-          <ClientHeroStat
-            label="Planifiés"
-            value={String(plannedCount)}
-            detail="Avec au moins une date définie"
-            tone="emerald"
-          />
-          <ClientHeroStat
-            label="À caler"
-            value={String(toScheduleCount)}
-            detail="Priorité de la semaine"
-            tone="amber"
-          />
-          <ClientHeroStat
-            label="7 jours"
-            value={String(upcomingCount)}
-            detail="Démarrent bientôt"
-            tone="slate"
-          />
-        </div>
-      }
-      mobileSummary={
-        <ClientMobileOverview
-          title="Vue terrain"
-          description="Commencez par les chantiers sans date, puis affinez votre semaine selon les confirmations client."
-          badge={`${devisAcceptes.length} chantiers`}
-          items={[
-            {
-              label: "Planifiés",
-              value: String(plannedCount),
-              detail: "Dates posées",
-              tone: "emerald",
-            },
-            {
-              label: "À caler",
-              value: String(toScheduleCount),
-              detail: "À traiter vite",
-              tone: "amber",
-            },
-            {
-              label: "7 jours",
-              value: String(upcomingCount),
-              detail: "Prochains départs",
-              tone: "violet",
-            },
-            {
-              label: "Source",
-              value: String(devisAcceptes.length),
-              detail: "Devis acceptés",
-              tone: "slate",
-            },
-          ]}
-        />
+          <Calendar size={16} />
+          Aujourd'hui
+        </button>
       }
     >
+      {/* Calendrier */}
       <ClientSectionCard>
-        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-violet-200/70 bg-violet-50/80 p-4 text-sm text-violet-900 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-100">
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-violet-700 dark:bg-white/10 dark:text-violet-100">
-              <CalendarDays size={18} />
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
-                Vue rapide
-              </p>
-              <p className="mt-2 leading-6">
-                Ici, vous retrouvez uniquement les devis déjà acceptés. Posez une date de début et une date de fin pour transformer votre pipeline en planning exploitable sur mobile.
-              </p>
-            </div>
-          </div>
+        <div className="mb-4 flex items-center justify-between">
+          <button onClick={prevMonth} className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <ChevronLeft size={20} />
+          </button>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+            {MOIS_LABELS[viewMonth - 1]} {viewYear}
+          </h2>
+          <button onClick={nextMonth} className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <ChevronRight size={20} />
+          </button>
         </div>
-      </ClientSectionCard>
 
-      <ClientSectionCard>
-        <div className="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm dark:border-white/8 dark:bg-white/4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/80 text-slate-600 dark:bg-white/10 dark:text-slate-300">
-                <CalendarDays size={18} />
-              </div>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
-                  Synchronisation Google Calendar
-                </p>
-                <p className="mt-2 leading-6 text-slate-600 dark:text-slate-300">
-                  Bientôt disponible — synchronisez votre planning avec Google Calendar pour retrouver vos chantiers dans votre agenda.
-                </p>
-              </div>
+        {/* Grille */}
+        <div className="grid grid-cols-7 gap-1">
+          {JOURS.map((j) => (
+            <div key={j} className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              {j}
             </div>
-            <Link
-              href="/parametres"
-              className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-            >
-              <Settings size={16} />
-              Configurer
-            </Link>
-          </div>
-        </div>
-      </ClientSectionCard>
+          ))}
+          {Array.from({ length: firstDay }).map((_, i) => (
+            <div key={`empty-${i}`} />
+          ))}
+          {Array.from({ length: daysInMonth }).map((_, i) => {
+            const day = i + 1;
+            const dateStr = `${viewYear}-${String(viewMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const dayEvents = eventsByDate[dateStr] ?? [];
+            const isToday = dateStr === todayStr;
+            const isSelected = dateStr === selectedDate;
 
-      <ClientSectionCard>
-        {isLoading ? (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="animate-pulse rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
+            return (
+              <button
+                key={dateStr}
+                onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+                className={`relative flex aspect-square flex-col items-center justify-start rounded-xl p-1 text-xs transition ${
+                  isSelected
+                    ? "bg-violet-100 ring-2 ring-violet-500 dark:bg-violet-500/15 dark:ring-violet-400"
+                    : isToday
+                    ? "bg-violet-50 ring-1 ring-violet-300 dark:bg-violet-500/10 dark:ring-violet-500/30"
+                    : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                }`}
               >
-                <div className="h-5 w-28 rounded bg-slate-200 dark:bg-slate-700" />
-                <div className="mt-4 h-6 w-40 rounded bg-slate-200 dark:bg-slate-700" />
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <div className="h-20 rounded-[1.25rem] bg-slate-200 dark:bg-slate-700" />
-                  <div className="h-20 rounded-[1.25rem] bg-slate-200 dark:bg-slate-700" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : sortedDevis.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-[1.85rem] border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
-            <CalendarDays size={46} className="text-slate-300 dark:text-slate-600" />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Aucun chantier à planifier</h2>
-            <p className="max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-              Les devis acceptés apparaîtront ici automatiquement. Validez un devis, puis revenez poser les dates de chantier.
-            </p>
-            <Link
-              href="/devis"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-            >
-              <FileText size={16} />
-              Voir mes devis
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                {sortedDevis.length} chantier{sortedDevis.length > 1 ? "s" : ""} à organiser
-              </p>
-              <p className="text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                Les non planifiés remontent en premier
-              </p>
-            </div>
+                <span className={`font-semibold ${isToday ? "text-violet-700 dark:text-violet-300" : "text-slate-700 dark:text-slate-300"}`}>
+                  {day}
+                </span>
+                {dayEvents.length > 0 && (
+                  <div className="mt-0.5 flex gap-0.5">
+                    {dayEvents.slice(0, 3).map((e) => (
+                      <div key={e.id} className={`h-1 w-1 rounded-full ${TONE_DOT[e.tone] || "bg-slate-400"}`} />
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <span className="text-[8px] text-slate-400">+{dayEvents.length - 3}</span>
+                    )}
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </ClientSectionCard>
 
-            {sortedDevis.map((item) => (
-              <PlanningItem key={item.numero} devis={item} onSaved={mutate} />
+      {/* Événements du jour sélectionné */}
+      {selectedDate && (
+        <ClientSectionCard>
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white">
+              {new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+              })}
+            </h3>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+              {selectedEvents.length} événement{selectedEvents.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+          {selectedEvents.length === 0 ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">Aucun événement ce jour.</p>
+          ) : (
+            <div className="space-y-2">
+              {selectedEvents.map((e) => {
+                const Icon = e.type === "facture" ? FileText : e.type === "recurrente" ? RefreshCw : Clock;
+                return (
+                  <Link key={e.id} href={e.href}>
+                    <motion.div
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-violet-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-violet-500/30"
+                    >
+                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${TONE_DOT[e.tone] ? `bg-${e.tone}-50 dark:bg-${e.tone}-500/10` : "bg-slate-100 dark:bg-slate-700"}`}>
+                        <Icon size={16} className={e.tone === "emerald" ? "text-emerald-600 dark:text-emerald-400" : e.tone === "rose" ? "text-rose-600 dark:text-rose-400" : e.tone === "amber" ? "text-amber-600 dark:text-amber-400" : e.tone === "violet" ? "text-violet-600 dark:text-violet-400" : "text-slate-500 dark:text-slate-400"} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-semibold text-slate-800 dark:text-white">{e.title}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{e.subtitle}</p>
+                      </div>
+                      {e.amount !== null && (
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                          {e.amount.toFixed(2)}€
+                        </span>
+                      )}
+                    </motion.div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </ClientSectionCard>
+      )}
+
+      {/* Liste complète du mois */}
+      <ClientSectionCard>
+        <h3 className="mb-3 text-sm font-bold text-slate-800 dark:text-white">
+          Tous les événements du mois
+        </h3>
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-14 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
             ))}
+          </div>
+        ) : events.length === 0 ? (
+          <p className="text-sm text-slate-500 dark:text-slate-400">Aucun événement ce mois-ci.</p>
+        ) : (
+          <div className="space-y-2">
+            {events.map((e) => {
+              const Icon = e.type === "facture" ? FileText : e.type === "recurrente" ? RefreshCw : Clock;
+              const eventDate = new Date(e.date);
+              return (
+                <Link key={e.id} href={e.href}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 transition hover:border-violet-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-violet-500/30"
+                  >
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${TONE_DOT[e.tone] ? `bg-${e.tone}-50 dark:bg-${e.tone}-500/10` : "bg-slate-100 dark:bg-slate-700"}`}>
+                      <Icon size={16} className={e.tone === "emerald" ? "text-emerald-600 dark:text-emerald-400" : e.tone === "rose" ? "text-rose-600 dark:text-rose-400" : e.tone === "amber" ? "text-amber-600 dark:text-amber-400" : e.tone === "violet" ? "text-violet-600 dark:text-violet-400" : "text-slate-500 dark:text-slate-400"} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-white">{e.title}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {e.subtitle} · {eventDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                      </p>
+                    </div>
+                    {e.amount !== null && (
+                      <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                        {e.amount.toFixed(2)}€
+                      </span>
+                    )}
+                  </motion.div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </ClientSectionCard>
