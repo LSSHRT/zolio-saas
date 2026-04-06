@@ -106,24 +106,26 @@ export default function NotificationsPage() {
     >
       {/* Stats rapides */}
       <ClientSectionCard>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Bell size={24} className="text-violet-600 dark:text-violet-400" />
-            {data?.unreadCount ? (
-              <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
-                {data.unreadCount}
-              </span>
-            ) : null}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Bell size={24} className="text-violet-600 dark:text-violet-400" />
+              {data?.unreadCount ? (
+                <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+                  {data.unreadCount}
+                </span>
+              ) : null}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-800 dark:text-white">
+                {data?.unreadCount ?? 0} notification{data?.unreadCount !== 1 ? "s" : ""} non lue{data?.unreadCount !== 1 ? "s" : ""}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {filter === "unread" ? "Affichées : non lues" : "Affichées : toutes"}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-slate-800 dark:text-white">
-              {data?.unreadCount ?? 0} notification{data?.unreadCount !== 1 ? "s" : ""} non lue{data?.unreadCount !== 1 ? "s" : ""}
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              {filter === "unread" ? "Affichées : non lues" : "Affichées : toutes"}
-            </p>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:ml-auto">
             <button
               onClick={() => setFilter(filter === "all" ? "unread" : "all")}
               className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition ${

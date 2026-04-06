@@ -512,15 +512,15 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   return (
     <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
       {/* Header */}
-      <header className="flex items-center gap-3 p-4 pt-10 sm:gap-4 sm:p-6 sm:pt-10">
+      <header className="flex items-center gap-2 p-4 pt-8 sm:gap-4 sm:p-6 sm:pt-10">
         <Link href="/devis">
-          <motion.div whileTap={{ scale: 0.9 }} className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <ArrowLeft size={20} />
+          <motion.div whileTap={{ scale: 0.9 }} className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
+            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
           </motion.div>
         </Link>
         <div className="flex-1 min-w-0">
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white truncate">Modifier le devis</h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{numero} · {devisInfo?.nomClient}</p>
+          <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate sm:text-xl">Modifier le devis</h1>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate sm:text-xs">{numero} · {devisInfo?.nomClient}</p>
         </div>
         {devisInfo?.statut === "En attente" ? (
           <>

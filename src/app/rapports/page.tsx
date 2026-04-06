@@ -261,9 +261,9 @@ export default function RapportsPage() {
     >
       {/* Sélecteur année */}
       <ClientSectionCard>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Année :</p>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {annees.map((a) => (
               <button
                 key={a}
