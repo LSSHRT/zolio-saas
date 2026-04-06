@@ -943,6 +943,43 @@ export default function LandingPage() {
           </div>
         </LandingStage>
 
+        {/* Comparatif Section */}
+        <LandingStage className="relative z-10 py-24 sm:py-32" tone="violet">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                Pourquoi les artisans quittent Excel</h2>
+              <p className="mx-auto mt-3 max-w-xl text-neutral-400">Une comparaison honnête entre votre méthode actuelle et Zolio.</p>
+            </div>
+
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
+              <div className="grid grid-cols-3 border-b border-white/10">
+                {["Fonctionnalité", "Excel / Papier", "Zolio"].map((h, i) => (
+                  <div key={h} className={`px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider sm:px-6 ${i === 2 ? "bg-violet-600/20 text-violet-300" : i === 1 ? "text-neutral-500" : "text-neutral-400"}`}>
+                    {h}
+                  </div>
+                ))}
+              </div>
+              {[
+                ["Devis sur le chantier", "❌", "✅"],
+                ["Relances automatiques", "❌", "✅"],
+                ["Paiement en ligne", "❌", "✅"],
+                ["Suivi trésorerie", "🟡 Manuel", "✅ Temps réel"],
+                ["Export comptable", "🟡 Complexe", "✅ 1 clic"],
+                ["Accessible mobile", "🟡 Galère", "✅ Natif"],
+                ["Notes internes", "❌", "✅"],
+                ["Calendrier échéances", "❌", "✅"],
+              ].map((row, i) => (
+                <div key={i} className={`grid grid-cols-3 border-b border-white/5 last:border-0 ${i % 2 === 0 ? "bg-white/[0.02]" : ""}`}>
+                  <div className="px-4 py-3 text-sm text-neutral-300 sm:px-6">{row[0]}</div>
+                  <div className="px-4 py-3 text-center text-sm text-neutral-500 sm:px-6">{row[1]}</div>
+                  <div className="px-4 py-3 text-center text-sm text-emerald-400 sm:px-6">{row[2]}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </LandingStage>
+
         {/* Avant/Après Section */}
         <LandingStage className="relative z-10 -mt-6 py-32 sm:-mt-10" tone="violet">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
