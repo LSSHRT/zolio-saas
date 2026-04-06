@@ -42,6 +42,7 @@ interface FactureDetail {
   devisRef: string | null;
   devisStatut: string | null;
   stripePaymentLink: string | null;
+  stripeSessionId: string | null;
   derniereRelanceNiveau: number;
   derniereRelanceDate: string | null;
   createdAt: string;
@@ -416,6 +417,32 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
           </div>
         </ClientSectionCard>
       </motion.div>
+
+      {/* Paiement Stripe */}
+      {facture.stripeSessionId && (
+        <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.12 }}>
+          <ClientSectionCard>
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
+              <BadgeCheck size={16} />
+              Paiement Stripe
+            </div>
+            <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-3 dark:bg-emerald-500/10">
+              <div>
+                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Payé via Stripe</p>
+                <p className="text-xs text-emerald-600/70 dark:text-emerald-400/60">Session : {facture.stripeSessionId.slice(0, 20)}...</p>
+              </div>
+              <a
+                href={`https://dashboard.stripe.com/payments/${facture.stripeSessionId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+              >
+                Voir sur Stripe
+              </a>
+            </div>
+          </ClientSectionCard>
+        </motion.div>
+      )}
 
       {/* Relances */}
       {facture.derniereRelanceNiveau > 0 && (
