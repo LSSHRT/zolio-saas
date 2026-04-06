@@ -110,6 +110,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       signingToken: createPublicDevisToken(devis.numero, userId),
       factures: devis.factures,
       photos: parsePhotos(devis.photos),
+      notes: devis.notes || "",
       dateDebut: devis.dateDebut ? devis.dateDebut.toISOString().split("T")[0] : "",
       dateFin: devis.dateFin ? devis.dateFin.toISOString().split("T")[0] : "",
     });

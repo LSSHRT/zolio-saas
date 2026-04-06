@@ -46,6 +46,7 @@ interface DevisInfo {
   lignes?: LigneDevis[];
   signingToken?: string;
   factures?: Array<{ id: string; numero: string; totalTTC: number; statut: string; date: string }>;
+  notes?: string;
 }
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
@@ -78,6 +79,9 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
   const [showAcompteModal, setShowAcompteModal] = useState(false);
+  const [editNotes, setEditNotes] = useState(false);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
   const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
   const creationToastHandled = useRef(false);
 
@@ -101,6 +105,7 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       setAcompte(devisData.acompte || "");
       setRemise(devisData.remise || "");
       setPhotos(devisData.photos || []);
+      setNotesDraft(devisData.notes || "");
       setPrestations(Array.isArray(prestData) ? prestData : []);
       setLoading(false);
     }).catch(() => setLoading(false));
@@ -374,6 +379,26 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
       toast.error("Erreur lors de l’enregistrement de la signature.");
     } finally {
       setSignLoading(false);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    if (savingNotes || !devisInfo?.numero) return;
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/devis/${devisInfo.numero}/notes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: notesDraft }),
+      });
+      if (!res.ok) throw new Error("Erreur serveur");
+      setDevisInfo((prev) => (prev ? { ...prev, notes: notesDraft } : null));
+      setEditNotes(false);
+      toast.success("Notes enregistrées");
+    } catch {
+      toast.error("Impossible de sauvegarder les notes");
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -880,6 +905,45 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             ))}
           </div>
         )}
+
+        {/* Notes internes */}
+        <div className="mt-3">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Notes internes</p>
+            <button onClick={() => setEditNotes(!editNotes)} className="text-xs text-violet-500 hover:text-violet-600">
+              {editNotes ? "Annuler" : "Modifier"}
+            </button>
+          </div>
+          {editNotes ? (
+            <div className="space-y-2">
+              <textarea
+                value={notesDraft}
+                onChange={(e) => setNotesDraft(e.target.value)}
+                rows={4}
+                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="Ajouter une note interne..."
+              />
+              <div className="flex gap-2">
+                <motion.button
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleSaveNotes}
+                  disabled={savingNotes}
+                  className="flex-1 rounded-lg bg-violet-600 py-2 text-xs font-bold text-white disabled:opacity-60"
+                >
+                  {savingNotes ? "..." : "Enregistrer"}
+                </motion.button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+              {devisInfo?.notes ? (
+                <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{devisInfo.notes}</p>
+              ) : (
+                <p className="text-sm italic text-slate-400">Aucune note pour ce devis.</p>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Facture d'acompte (si accepté/signé) */}
         {(devisInfo?.statut === "Accepté" || devisInfo?.statut === "Signé") && (
