@@ -2060,23 +2060,20 @@ export default function DashboardPage() {
 
             {/* Colonne Secondaire (Droite) */}
             <div className="space-y-4 xl:self-start">
+              {/* Actions prioritaires */}
               <div className="client-panel rounded-[2.2rem] p-5 sm:p-6">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Action principale</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Une priorité claire, puis les suivantes juste en dessous.
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Actions</p>
                   </div>
                   <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
                     {actionPlan.length} priorités
                   </span>
                 </div>
-
-                <div className="mt-5 grid gap-3">
+                <div className="mt-4 grid gap-3">
                   <DashboardActionCard item={actionPlan[0]} compact />
                   {actionPlanSecondary.length > 0 ? (
-                    <div className="grid gap-3 xl:grid-cols-1">
+                    <div className="grid gap-3">
                       {actionPlanSecondary.map((item) => (
                         <DashboardActionCard key={item.id} item={item} compact />
                       ))}
@@ -2085,118 +2082,76 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="client-panel rounded-[2.2rem] p-5 sm:p-6">
-                <div className="flex items-center justify-between gap-3">
+              {/* Relances */}
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">À surveiller</p>
-                    <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-                      Les points secondaires à garder visibles sans parasiter le haut du cockpit.
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      À traiter sans tarder
+                    </h2>
                   </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                    {secondarySignals.length}
+                  <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
+                    {devisARelancer.length}
                   </span>
                 </div>
 
-                {secondarySignals.length > 0 ? (
-                  <div className="mt-5 space-y-3">
-                    {secondarySignals.map((signal) => (
-                      <FocusSignalCard key={signal.id} signal={signal} />
-                    ))}
+                {devisARelancer.length === 0 ? (
+                  <div className="mt-4 rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+                    <FileCheck2 size={20} className="mx-auto text-emerald-500" />
+                    <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
                   </div>
                 ) : (
-                  <div className="mt-5 rounded-[1.55rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-5 dark:border-white/10 dark:bg-white/4">
-                    <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucun second signal à traiter</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Le cockpit reste volontairement simple : une priorité claire, puis le suivi utile seulement.
-                    </p>
+                  <div className="mt-4 space-y-2">
+                    {devisARelancer.slice(0, 3).map((item) => (
+                      <Link href={`/devis/${item.numero}`} key={item.numero}>
+                        <div className="rounded-xl border border-rose-200/70 bg-rose-50/80 p-3 transition hover:border-rose-400/20 dark:border-rose-400/12 dark:bg-rose-500/8">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
+                                {item.nomClient}
+                              </p>
+                              <p className="text-xs text-rose-700 dark:text-rose-200">
+                                {item.numero} · {formatDateLabel(item.date)}
+                              </p>
+                            </div>
+                            <p className="shrink-0 text-sm font-bold text-slate-950 dark:text-white">
+                              {formatCurrency(item.totalTTC || 0)}
+                            </p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
+                    {devisARelancer.length > 3 && (
+                      <Link href="/devis" className="text-center text-xs font-semibold text-violet-600 dark:text-violet-400 hover:underline">
+                        Voir les {devisARelancer.length} relances →
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
 
-              {/* Relances */}
+              {/* Trésorerie */}
+              {tresorerie && tresorerie.nombreFactures > 0 && (
               <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Relances</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        À traiter sans tarder
-                      </h2>
-                    </div>
-                    <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
-                      {devisARelancer.length}
-                    </span>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Trésorerie</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      État de vos factures
+                    </h2>
                   </div>
-
-                  {devisARelancer.length === 0 ? (
-                    <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
-                      <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-300/30 dark:text-emerald-300 dark:ring-emerald-400/20">
-                        <FileCheck2 size={22} />
-                      </div>
-                      <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Aucun devis âgé de plus de 7 jours n&apos;attend une relance pour le moment.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-5 space-y-3">
-                      {devisARelancer.map((item) => (
-                        <Link href={`/devis/${item.numero}`} key={item.numero}>
-                          <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 transition hover:-translate-y-0.5 dark:border-rose-400/12 dark:bg-rose-500/8">
-                            <div className="flex items-start gap-3">
-                              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/80 text-rose-600 ring-1 ring-rose-200/80 dark:bg-white/10 dark:text-rose-200 dark:ring-white/10">
-                                <Bell size={17} />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                                      {item.nomClient}
-                                    </p>
-                                    <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
-                                      {item.numero} · {formatDateLabel(item.date)}
-                                    </p>
-                                  </div>
-                                  <p className="text-sm font-semibold text-slate-950 dark:text-white">
-                                    {formatCurrency(item.totalTTC || 0)}
-                                  </p>
-                                </div>
-                                <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                                  En attente depuis plus de 7 jours. Un rappel rapide peut faire la différence.
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
+                  <span className={`client-chip ring-1 ${
+                    tresorerie.tauxRecouvrement >= 80
+                      ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20"
+                      : tresorerie.tauxRecouvrement >= 50
+                      ? "bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20"
+                      : "bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-100 dark:ring-rose-400/20"
+                  }`}>
+                    {tresorerie.tauxRecouvrement}% rec.
+                  </span>
                 </div>
-
-                {/* Trésorerie — Colonne droite */}
-                {tresorerie && tresorerie.nombreFactures > 0 && (
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Trésorerie</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        État de vos factures
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Encaissé, à venir et impayés — votre santé financière en un coup d'œil.
-                      </p>
-                    </div>
-                    <span className={`client-chip ring-1 ${
-                      tresorerie.tauxRecouvrement >= 80
-                        ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20"
-                        : tresorerie.tauxRecouvrement >= 50
-                        ? "bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20"
-                        : "bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-100 dark:ring-rose-400/20"
-                    }`}>
-                      {tresorerie.tauxRecouvrement}% rec.
-                    </span>
-                  </div>
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     {/* Encaissé */}
                     <div className="rounded-[1.45rem] border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
                       <div className="flex items-center gap-2">
@@ -2249,266 +2204,229 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
+                </div>
+              </div>
+              )}
+
+              {/* Bénéfice net */}
+              {benefice && (benefice.caFacture > 0 || benefice.depenses > 0) && (
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Bénéfice net</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Votre résultat
+                    </h2>
+                  </div>
+                  <span className={`rounded-full px-3 py-1.5 text-sm font-bold ${
+                    benefice.margePct >= 70
+                      ? "bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20"
+                      : benefice.margePct >= 40
+                      ? "bg-amber-500/12 text-amber-700 ring-1 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20"
+                      : "bg-rose-500/12 text-rose-700 ring-1 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-100 dark:ring-rose-400/20"
+                  }`}>
+                    {benefice.margePct}% marge
+                  </span>
+                </div>
+
+                <div className={`mt-4 rounded-[1.45rem] border p-4 ${benefice.beneficeNet >= 0 ? "border-emerald-200/70 bg-gradient-to-br from-emerald-50/80 to-emerald-100/40 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-transparent" : "border-rose-200/70 bg-gradient-to-br from-rose-50/80 to-rose-100/40 dark:border-rose-500/20 dark:from-rose-500/10 dark:to-transparent"}`}>
+                  <p className={`text-[10px] font-semibold uppercase tracking-wider ${benefice.beneficeNet >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>Bénéfice net</p>
+                  <p className={`mt-1 text-3xl font-bold ${benefice.beneficeNet >= 0 ? "text-emerald-700 dark:text-emerald-200" : "text-rose-700 dark:text-rose-200"}`}>
+                    {benefice.beneficeNet >= 0 ? "+" : ""}{formatCurrency(benefice.beneficeNet)}
+                  </p>
+                  <div className="mt-4 grid grid-cols-2 gap-3">
+                    <div className="rounded-xl border border-emerald-200/50 bg-white/60 p-3 dark:border-emerald-500/10 dark:bg-white/5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CA encaissé</p>
+                      <p className="mt-1 text-lg font-bold text-emerald-800 dark:text-emerald-200">{formatCurrency(benefice.caFacture)}</p>
+                    </div>
+                    <div className="rounded-xl border border-rose-200/50 bg-white/60 p-3 dark:border-rose-500/10 dark:bg-white/5">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">Dépenses</p>
+                      <p className="mt-1 text-lg font-bold text-rose-800 dark:text-rose-200">{formatCurrency(benefice.depenses)}</p>
+                    </div>
                   </div>
                 </div>
-                )}
+              </div>
+              )}
 
-                {/* Bénéfice net — Colonne droite */}
-                {benefice && (benefice.caFacture > 0 || benefice.depenses > 0) && (
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Bénéfice net</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Votre résultat
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        CA encaissé moins vos dépenses — ce qui reste vraiment.
-                      </p>
-                    </div>
-                    <span className={`rounded-full px-4 py-2 text-sm font-bold ${
-                      benefice.margePct >= 70
-                        ? "bg-emerald-500/12 text-emerald-700 ring-1 ring-emerald-300/40 dark:bg-emerald-500/12 dark:text-emerald-100 dark:ring-emerald-400/20"
-                        : benefice.margePct >= 40
-                        ? "bg-amber-500/12 text-amber-700 ring-1 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20"
-                        : "bg-rose-500/12 text-rose-700 ring-1 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-100 dark:ring-rose-400/20"
-                    }`}>
-                      {benefice.margePct}% marge
-                    </span>
+              {/* Échéances */}
+              {echeances.length > 0 && (
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Échéances</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Prochains paiements
+                    </h2>
                   </div>
+                  <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20">
+                    {echeances.length}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {echeances.slice(0, 4).map((ech) => (
+                    <Link key={ech.numero} href={`/factures/${ech.numero}`}>
+                      <div className={`rounded-xl border p-3 transition hover:-translate-y-0.5 ${
+                        ech.joursRestants <= 3
+                          ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10"
+                          : ech.joursRestants <= 7
+                          ? "border-amber-200/70 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/10"
+                          : "border-violet-200/70 bg-violet-50/50 dark:border-violet-500/20 dark:bg-violet-500/10"
+                      }`}>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white truncate">{ech.nomClient}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{ech.numero}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ech.totalTTC)}</p>
+                            <p className={`text-xs font-semibold ${
+                              ech.joursRestants <= 3 ? "text-rose-600 dark:text-rose-400" :
+                              ech.joursRestants <= 7 ? "text-amber-600 dark:text-amber-400" :
+                              "text-violet-600 dark:text-violet-400"
+                            }`}>
+                              {ech.joursRestants === 0 ? "Aujourd'hui" : `J+${ech.joursRestants}j`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              )}
 
-                  <div className={`mt-5 rounded-[1.65rem] border p-6 ${benefice.beneficeNet >= 0 ? "border-emerald-200/70 bg-gradient-to-br from-emerald-50/80 to-emerald-100/40 dark:border-emerald-500/20 dark:from-emerald-500/10 dark:to-transparent" : "border-rose-200/70 bg-gradient-to-br from-rose-50/80 to-rose-100/40 dark:border-rose-500/20 dark:from-rose-500/10 dark:to-transparent"}`}>
-                    <p className={`text-[10px] font-semibold uppercase tracking-wider ${benefice.beneficeNet >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>Bénéfice net</p>
-                    <p className={`mt-1 text-4xl font-bold ${benefice.beneficeNet >= 0 ? "text-emerald-700 dark:text-emerald-200" : "text-rose-700 dark:text-rose-200"}`}>
-                      {benefice.beneficeNet >= 0 ? "+" : ""}{formatCurrency(benefice.beneficeNet)}
+              {/* Top Clients */}
+              {topClients.length > 0 && (
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Top Clients</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Meilleurs clients
+                    </h2>
+                  </div>
+                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                    Top {Math.min(topClients.length, 5)}
+                  </span>
+                </div>
+                <div className="mt-4 space-y-2">
+                  {topClients.slice(0, 5).map((client) => (
+                    <div
+                      key={client.nom}
+                      className="rounded-xl border border-slate-200/70 bg-white/75 p-3 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{client.nom}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {client.devisCount} devis{client.devisCount > 1 ? 's' : ''} acceptés
+                          </p>
+                        </div>
+                        <p className="shrink-0 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                          {formatCurrency(client.revenueHT)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              )}
+
+              {/* Starter métier */}
+              {setupIsRequired && selectedTradeDefinition ? (
+              <div
+                id="dashboard-setup-panel"
+                className="client-panel rounded-[2.1rem] p-5 sm:p-6"
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Starter métier</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Branchez votre activité
+                    </h2>
+                  </div>
+                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                    {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} en base
+                  </span>
+                </div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {TRADE_OPTIONS.map((option) => (
+                    <TradeOptionCard
+                      key={option.key}
+                      option={option}
+                      active={selectedTrade === option.key}
+                      onSelect={setSelectedTrade}
+                    />
+                  ))}
+                </div>
+                <div className="mt-4 grid gap-3">
+                  <div className="rounded-xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+                    <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDefinition.label} prêt à démarrer</p>
+                    <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      {selectedTradeDefinition.pitch} {selectedStarterCount} prestations starter injectées.
                     </p>
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <div className="rounded-2xl border border-emerald-200/50 bg-white/60 p-4 dark:border-emerald-500/10 dark:bg-white/5">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CA encaissé</p>
-                        <p className="mt-1 text-xl font-bold text-emerald-800 dark:text-emerald-200">{formatCurrency(benefice.caFacture)}</p>
-                      </div>
-                      <div className="rounded-2xl border border-rose-200/50 bg-white/60 p-4 dark:border-rose-500/10 dark:bg-white/5">
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">Dépenses</p>
-                        <p className="mt-1 text-xl font-bold text-rose-800 dark:text-rose-200">{formatCurrency(benefice.depenses)}</p>
-                      </div>
-                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={handleBootstrapTrade}
+                      disabled={isBootstrappingTrade}
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-2.5 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+                    >
+                      {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
+                    </button>
+                    <Link
+                      href="/parametres"
+                      className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                    >
+                      Finaliser mes paramètres
+                    </Link>
                   </div>
                 </div>
-                )}
+              </div>
+              ) : null}
 
-                {/* Prochaines échéances — Colonne droite */}
-                {echeances.length > 0 && (
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Échéances</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Prochains paiements attendus
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        {echeances.length} facture{echeances.length > 1 ? 's' : ''} à échéance dans les 14 jours.
-                      </p>
-                    </div>
-                    <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-100 dark:ring-amber-400/20">
-                      {echeances.length} à venir
-                    </span>
+              {/* Modules */}
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules</p>
+                    <h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Accès rapides
+                    </h2>
                   </div>
-                  <div className="mt-5 space-y-3">
-                    {echeances.slice(0, 5).map((ech) => (
-                      <Link key={ech.numero} href={`/factures/${ech.numero}`}>
-                        <div className={`rounded-[1.45rem] border p-4 transition hover:-translate-y-0.5 ${
-                          ech.joursRestants <= 3
-                            ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10"
-                            : ech.joursRestants <= 7
-                            ? "border-amber-200/70 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/10"
-                            : "border-violet-200/70 bg-violet-50/50 dark:border-violet-500/20 dark:bg-violet-500/10"
-                        }`}>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-semibold text-slate-950 dark:text-white truncate">{ech.nomClient}</p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">{ech.numero}</p>
-                            </div>
-                            <div className="text-right shrink-0">
-                              <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ech.totalTTC)}</p>
-                              <p className={`text-xs font-semibold ${
-                                ech.joursRestants <= 3 ? "text-rose-600 dark:text-rose-400" :
-                                ech.joursRestants <= 7 ? "text-amber-600 dark:text-amber-400" :
-                                "text-violet-600 dark:text-violet-400"
-                              }`}>
-                                {ech.joursRestants === 0 ? "Aujourd'hui" : `J+${ech.joursRestants}j`}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+                  <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
+                    {quickLinks.length} accès
+                  </span>
                 </div>
-                )}
 
-                {/* Top Clients — Colonne droite */}
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Top Clients</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Vos meilleurs clients
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Classement par chiffre d'affaires généré (devis acceptés uniquement).
-                      </p>
-                    </div>
-                    <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                      Top {Math.min(topClients.length, 5)}
-                    </span>
-                  </div>
-
-                  {topClients.length === 0 ? (
-                    <div className="mt-5 rounded-[1.65rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-5 py-8 text-center dark:border-white/10 dark:bg-white/4">
-                      <div className="mx-auto inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-600 ring-1 ring-violet-300/30 dark:text-violet-300 dark:ring-violet-400/20">
-                        <Users size={22} />
-                      </div>
-                      <p className="mt-4 text-sm font-semibold text-slate-950 dark:text-white">Pas encore de classement</p>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Acceptez vos premiers devis pour voir vos meilleurs clients apparaître ici.
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="mt-5 space-y-3">
-                      {topClients.map((client) => (
-                        <div
-                          key={client.nom}
-                          className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="flex items-start gap-3">
-                              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
-                                <Users size={18} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">
-                                  {client.nom}
-                                </p>
-                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                  {client.devisCount} devis{client.devisCount > 1 ? 's' : ''} acceptés
-                                </p>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-                                {formatCurrency(client.revenueHT)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                  {quickLinks.map((item) => (
+                    <QuickLinkCard key={item.href} item={item} />
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <ClientSupportButton />
+                  {!isPro && (
+                    <Link
+                      href="/abonnement"
+                      className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                    >
+                      <Sparkles size={16} />
+                      Passer en PRO
+                    </Link>
+                  )}
+                  {canAccessAdminDashboard && (
+                    <Link
+                      href="/admin"
+                      className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                    >
+                      <ShieldCheck size={16} />
+                      Ouvrir le cockpit admin
+                    </Link>
                   )}
                 </div>
-
-                {setupIsRequired && selectedTradeDefinition ? (
-                  <div
-                    id="dashboard-setup-panel"
-                    className="client-panel rounded-[2.1rem] p-5 sm:p-6"
-                  >
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Starter métier</p>
-                        <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                          Branchez votre activité une fois
-                        </h2>
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Ce setup reste visible, mais rangé dans les outils secondaires pour ne plus polluer le haut du dashboard.
-                        </p>
-                      </div>
-                      <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                        {starterCatalogCount} ligne{starterCatalogCount > 1 ? "s" : ""} déjà en base
-                      </span>
-                    </div>
-
-                    <div className="mt-5 grid gap-3 md:grid-cols-2">
-                      {TRADE_OPTIONS.map((option) => (
-                        <TradeOptionCard
-                          key={option.key}
-                          option={option}
-                          active={selectedTrade === option.key}
-                          onSelect={setSelectedTrade}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="mt-5 grid gap-3">
-                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDefinition.label} prêt à démarrer</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          {selectedTradeDefinition.pitch} {selectedStarterCount} prestations starter seront injectées dans le catalogue.
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap gap-3">
-                        <button
-                          type="button"
-                          onClick={handleBootstrapTrade}
-                          disabled={isBootstrappingTrade}
-                          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
-                        >
-                          {isBootstrappingTrade ? "Préparation..." : "Activer mon starter"}
-                        </button>
-                        <Link
-                          href="/parametres"
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                        >
-                          Finaliser mes paramètres
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-
-                <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Modules de travail</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Les outils utiles, enfin à leur place
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Les accès `Clients`, `Factures`, `Calepin` et `Paramètres` restent visibles sans remonter au-dessus des priorités.
-                      </p>
-                    </div>
-                    <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-100 dark:ring-violet-400/20">
-                      {quickLinks.length} accès directs
-                    </span>
-                  </div>
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                    {quickLinks.map((item) => (
-                      <QuickLinkCard key={item.href} item={item} />
-                    ))}
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-3">
-                    <ClientSupportButton />
-                    {!isPro && (
-                      <Link
-                        href="/abonnement"
-                        className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                      >
-                        <Sparkles size={16} />
-                        Passer en PRO
-                      </Link>
-                    )}
-                    {canAccessAdminDashboard && (
-                      <Link
-                        href="/admin"
-                        className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                      >
-                        <ShieldCheck size={16} />
-                        Ouvrir le cockpit admin
-                      </Link>
-                    )}
-                  </div>
-                </div>
+              </div>
             </div>
           </motion.section>
           </>
