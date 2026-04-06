@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
 import { GlobalSearch } from "@/components/global-search";
+import { ShortcutsModal } from "@/components/shortcuts-modal";
 import { UserButton } from "@clerk/nextjs";
 
 export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin" | "tools";
@@ -725,6 +726,8 @@ export function ClientSubpageShell({
           <Link href="/mentions-legales" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Mentions légales</Link>
           <span className="text-slate-300 dark:text-slate-600">·</span>
           <Link href="/politique-confidentialite" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Confidentialité</Link>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
+          <ShortcutsModal />
         </div>
       </footer>
 
