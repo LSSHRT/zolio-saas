@@ -122,6 +122,7 @@ model Facture {
   stripeSessionId   String?             // Session Stripe pour suivi
   derniereRelanceNiveau Int             @default(0) // 0=aucune, 1=doux(J+3), 2=ferme(J+7), 3=mise en demeure(J+15)
   derniereRelanceDate DateTime?         // Date du dernier envoi de relance
+  notes             String?             // Notes internes sur la facture
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
 

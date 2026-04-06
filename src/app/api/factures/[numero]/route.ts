@@ -38,6 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       devisStatut: facture.devis?.statut || null,
       stripePaymentLink: facture.stripePaymentLink || null,
       stripeSessionId: facture.stripeSessionId || null,
+      notes: facture.notes || "",
       derniereRelanceNiveau: (facture as any).derniereRelanceNiveau,
       derniereRelanceDate: (facture as any).derniereRelanceDate?.toISOString() || null,
       createdAt: facture.createdAt.toISOString(),

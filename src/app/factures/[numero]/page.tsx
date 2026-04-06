@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   BadgeCheck,
+  BookOpen,
   Clock,
   Download,
   FileText,
@@ -43,6 +44,7 @@ interface FactureDetail {
   devisStatut: string | null;
   stripePaymentLink: string | null;
   stripeSessionId: string | null;
+  notes: string;
   derniereRelanceNiveau: number;
   derniereRelanceDate: string | null;
   createdAt: string;
@@ -67,6 +69,9 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
   const [sendingRelance, setSendingRelance] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editNotes, setEditNotes] = useState(false);
+  const [notesDraft, setNotesDraft] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const googleReviewLink =
     (user?.unsafeMetadata?.companyGoogleReview as string) ||
@@ -78,6 +83,7 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
       .then((data) => {
         if (data.error) throw new Error(data.error);
         setFacture(data);
+        setNotesDraft(data.notes || "");
       })
       .catch(() => {
         toast.error("Facture introuvable");
@@ -85,6 +91,26 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
       })
       .finally(() => setLoading(false));
   }, [numero, router]);
+
+  const handleSaveNotes = async () => {
+    if (savingNotes || !facture) return;
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/factures/${numero}/notes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: notesDraft }),
+      });
+      if (!res.ok) throw new Error("Erreur serveur");
+      setFacture((prev) => (prev ? { ...prev, notes: notesDraft } : null));
+      setEditNotes(false);
+      toast.success("Notes enregistrées");
+    } catch {
+      toast.error("Impossible de sauvegarder les notes");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
 
   const handleMarkAsPaid = async () => {
     setMarkingPaid(true);
@@ -443,6 +469,46 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
           </ClientSectionCard>
         </motion.div>
       )}
+
+      {/* Notes internes */}
+      <motion.div {...sectionMotion} transition={{ ...sectionMotion.transition, delay: 0.17 }}>
+        <ClientSectionCard>
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-semibold text-slate-500 dark:text-slate-400">
+              <BookOpen size={16} />
+              Notes internes
+            </div>
+            <button onClick={() => setEditNotes(!editNotes)} className="text-xs text-violet-500 hover:text-violet-600">
+              {editNotes ? "Annuler" : "Modifier"}
+            </button>
+          </div>
+          {editNotes ? (
+            <div className="space-y-2">
+              <textarea
+                value={notesDraft}
+                onChange={(e) => setNotesDraft(e.target.value)}
+                rows={3}
+                className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                placeholder="Ajouter une note interne..."
+              />
+              <motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={handleSaveNotes}
+                disabled={savingNotes}
+                className="rounded-lg bg-violet-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-60"
+              >
+                {savingNotes ? "..." : "Enregistrer"}
+              </motion.button>
+            </div>
+          ) : facture.notes ? (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+              <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{facture.notes}</p>
+            </div>
+          ) : (
+            <p className="text-sm italic text-slate-400">Aucune note pour cette facture.</p>
+          )}
+        </ClientSectionCard>
+      </motion.div>
 
       {/* Relances */}
       {facture.derniereRelanceNiveau > 0 && (
