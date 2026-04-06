@@ -41,6 +41,15 @@ import {
 import Image from "next/image";
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
+const NOUVEAUTES = [
+  { badge: "Nouveau", title: "Planning mensuel", desc: "Calendrier interactif avec vos échéances, fins de devis et factures récurrentes en un coup d'œil.", icon: Zap, tone: "violet" as const },
+  { badge: "Nouveau", title: "Notes internes", desc: "Ajoutez des notes privées sur chaque devis pour suivre les détails importants.", icon: BookOpen, tone: "emerald" as const },
+  { badge: "Nouveau", title: "Paiement en ligne", desc: "Vos clients paient leurs factures directement depuis l'espace client via Stripe.", icon: ReceiptText, tone: "amber" as const },
+  { badge: "Nouveau", title: "RÉsumé de semaine", desc: "Vue d'activité hebdo : nouveaux devis, factures payées, CA encaissé et dépenses.", icon: TrendingUp, tone: "violet" as const },
+  { badge: "Nouveau", title: "Export comptable CSV", desc: "Téléchargez vos factures et dépenses en CSV pour votre comptable.", icon: Calculator, tone: "emerald" as const },
+  { badge: "Nouveau", title: "Comparaison d'options", desc: "Comparez côte à côte les options basique/standard/premium de vos devis multi-offres.", icon: CheckCircle2, tone: "amber" as const },
+];
+
 
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
   const shouldReduceMotion = useReducedMotion();
@@ -854,6 +863,44 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Nouveautés Section */}
+        <LandingStage className="relative z-10 py-24 sm:py-32" tone="neutral">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-16 text-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-300 backdrop-blur-md">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+                Mises à jour récentes
+              </div>
+              <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+                Un produit qui évolue <span className="bg-gradient-to-r from-emerald-400 to-violet-400 bg-clip-text text-transparent">chaque semaine</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400">
+                On écoute les artisans, on livre vite. Voici les dernières fonctionnalités ajoutées.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {NOUVEAUTES.map((n, i) => (
+                <motion.div
+                  key={n.badge}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="group relative rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition hover:border-white/20 hover:bg-white/[0.06]"
+                >
+                  <div className={`mb-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${n.tone === "emerald" ? "bg-emerald-500/15 text-emerald-400" : n.tone === "violet" ? "bg-violet-500/15 text-violet-400" : n.tone === "amber" ? "bg-amber-500/15 text-amber-400" : "bg-white/10 text-neutral-400"}`}>
+                    <n.icon size={12} />
+                    {n.badge}
+                  </div>
+                  <h3 className="text-base font-semibold text-white">{n.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-neutral-400">{n.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </LandingStage>
 
         {/* Avant/Après Section */}
         <LandingStage className="relative z-10 -mt-6 py-32 sm:-mt-10" tone="violet">
