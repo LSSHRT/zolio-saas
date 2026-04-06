@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
+  Bell,
   Calculator,
   Calendar,
   ChevronRight,
@@ -66,6 +67,8 @@ const CLIENT_TOOL_ITEMS: Array<{
   label: string;
 }> = [
   { href: "/nouvelle-facture", icon: Plus, label: "Nouvelle facture" },
+  { href: "/notifications", icon: Bell, label: "Notifications" },
+  { href: "/rapports", icon: FileText, label: "Rapports" },
   { href: "/planning", icon: Calendar, label: "Planning" },
   { href: "/catalogue", icon: Package, label: "Catalogue" },
   { href: "/depenses", icon: CreditCard, label: "Dépenses" },
