@@ -730,6 +730,8 @@ export function ClientSubpageShell({
           <span className="text-slate-300 dark:text-slate-600">·</span>
           <Link href="/politique-confidentialite" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Confidentialité</Link>
           <span className="text-slate-300 dark:text-slate-600">·</span>
+          <Link href="/changelog" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Changelog</Link>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
           <ShortcutsModal />
         </div>
       </footer>
