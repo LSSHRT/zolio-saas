@@ -26,6 +26,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
+import { GlobalSearch } from "@/components/global-search";
 import { UserButton } from "@clerk/nextjs";
 
 export type ClientNavKey = "dashboard" | "devis" | "clients" | "factures" | "calepin" | "tools";
@@ -703,6 +704,9 @@ export function ClientSubpageShell({
 
               {mobileSummary ? <div className="md:hidden">{mobileSummary}</div> : null}
               {summary ? <div className={mobileSummary ? "hidden md:block" : ""}>{summary}</div> : null}
+
+              {/* Recherche globale */}
+              <GlobalSearch />
             </div>
           </section>
 
