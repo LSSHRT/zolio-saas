@@ -9,10 +9,14 @@ import {
   ChevronRight,
   Clock,
   FileText,
+  Plus,
   RefreshCw,
+  Trash2,
   TrendingUp,
+  X,
 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import {
   ClientSectionCard,
   ClientSubpageShell,
@@ -61,14 +65,28 @@ export default function PlanningPage() {
   const [viewMonth, setViewMonth] = useState(today.getMonth() + 1);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
+  // Données planning auto
   const { data, isLoading } = useSWR<{ events: PlanningEvent[]; month: number; year: number }>(
     `/api/planning?month=${viewMonth}&year=${viewYear}`,
     fetcher,
     { refreshInterval: 60000 },
   );
 
-  const events = useMemo(() => data?.events ?? [], [data]);
+  // Événements manuels
+  const { data: manualData, mutate: mutateManual } = useSWR<{ events: PlanningEvent[] }>(
+    `/api/calendar-events?month=${viewMonth}&year=${viewYear}`,
+    fetcher,
+    { refreshInterval: 60000 },
+  );
+
+  const events = useMemo(() => {
+    const auto = data?.events ?? [];
+    const manual = manualData?.events ?? [];
+    return [...auto, ...manual];
+  }, [data, manualData]);
 
   const eventsByDate = useMemo(() => {
     const map: Record<string, PlanningEvent[]> = {};
@@ -109,6 +127,36 @@ export default function PlanningPage() {
 
   const selectedEvents = selectedDate ? eventsByDate[selectedDate] ?? [] : [];
 
+  const handleCreateEvent = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsCreating(true);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/api/calendar-events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          titre: formData.get("titre"),
+          date: formData.get("date"),
+          heure: formData.get("heure") || null,
+          type: formData.get("type") || "rdv",
+          couleur: formData.get("couleur") || "violet",
+          notes: formData.get("notes") || null,
+        }),
+      });
+      if (!res.ok) throw new Error("Erreur");
+      await mutateManual();
+      setShowCreateModal(false);
+      toast.success("Événement ajouté");
+    } catch {
+      toast.error("Erreur lors de la création");
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const todayStr = today.toISOString().split("T")[0];
 
   return (
@@ -118,13 +166,22 @@ export default function PlanningPage() {
       eyebrow="Calendrier"
       activeNav="tools"
       mobilePrimaryAction={
-        <button
-          onClick={goToday}
-          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
-        >
-          <Calendar size={16} />
-          Aujourd'hui
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-zolio px-3.5 text-sm font-semibold text-white shadow-brand"
+          >
+            <Plus size={16} />
+            Ajouter
+          </button>
+          <button
+            onClick={goToday}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          >
+            <Calendar size={16} />
+            Aujourd'hui
+          </button>
+        </div>
       }
     >
       {/* Calendrier */}
@@ -284,6 +341,73 @@ export default function PlanningPage() {
           </div>
         )}
       </ClientSectionCard>
+
+      {/* Modal création événement */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 backdrop-blur-sm sm:items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Nouvel événement</h3>
+              <button onClick={() => setShowCreateModal(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <X size={18} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateEvent} className="space-y-4">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Titre</label>
+                <input name="titre" required placeholder="RDV Chantier, Rappel..." className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Date</label>
+                  <input name="date" type="date" required defaultValue={selectedDate || todayStr} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Heure (opt.)</label>
+                  <input name="heure" type="time" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Type</label>
+                  <select name="type" defaultValue="rdv" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <option value="rdv">🗓 RDV</option>
+                    <option value="rappel">⏰ Rappel</option>
+                    <option value="note">📝 Note</option>
+                    <option value="echeance">💰 Échéance</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Couleur</label>
+                  <select name="couleur" defaultValue="violet" className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                    <option value="violet">🟣 Violet</option>
+                    <option value="emerald">🟢 Vert</option>
+                    <option value="amber">🟠 Orange</option>
+                    <option value="rose">🔴 Rose</option>
+                    <option value="blue">🔵 Bleu</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">Notes (opt.)</label>
+                <textarea name="notes" rows={2} placeholder="Détails..." className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm focus:border-violet-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowCreateModal(false)} className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                  Annuler
+                </button>
+                <button type="submit" disabled={isCreating} className="flex-1 rounded-xl bg-gradient-zolio px-4 py-2.5 text-sm font-semibold text-white shadow-brand disabled:opacity-50">
+                  {isCreating ? "..." : "Créer"}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </ClientSubpageShell>
   );
 }

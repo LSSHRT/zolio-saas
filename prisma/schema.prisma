@@ -270,3 +270,21 @@ model Notification {
   @@index([userId, read])
   @@index([userId, createdAt(sort: Desc)])
 }
+
+// ─── Événements manuels du planning ───
+
+model CalendarEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  titre     String   // "RDV Chantier", "Rappel", etc.
+  date      DateTime // Date de l'événement
+  heure     String?  // Optionnel (ex: "14:00")
+  type      String   @default("rdv") // "rdv" | "rappel" | "note" | "echeance"
+  couleur   String   @default("violet") // "violet" | "emerald" | "amber" | "rose" | "blue"
+  notes     String?  // Détails
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([userId, date])
+}
