@@ -35,6 +35,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import CompareOptions from "@/components/compare-options";
 
 interface Devis {
   id: string;
@@ -962,6 +963,8 @@ export default function DevisPage() {
                           </motion.div>
                         );
                       })}
+                      {/* Bouton Comparer */}
+                      <CompareOptions parentId={d.id} />
                     </div>
                   )}
                   </div>
