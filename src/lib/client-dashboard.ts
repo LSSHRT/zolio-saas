@@ -76,6 +76,16 @@ export type ClientDashboardSummary = {
   tresorerie: TresorerieSummary;
   benefice: BeneficeSummary;
   echeances: EcheanceItem[];
+  semaine: SemaineSummary;
+};
+
+export type SemaineSummary = {
+  nouveauxDevis: number;
+  devisAcceptes: number;
+  facturesEmises: number;
+  facturesPayees: number;
+  caEncaisse: number;
+  depensesSemaine: number;
 };
 
 type DashboardLineItem = {
@@ -460,6 +470,27 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       joursRestants: Math.ceil((e.dateEcheance!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
     }));
 
+  // Résumé de la semaine
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+  startOfWeek.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+  const [nouveauxDevis, devisAcceptesSemaine, facturesEmises, facturesPayees, depensesAgg] = await Promise.all([
+    prisma.devis.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.devis.count({ where: { userId, statut: "Accepté", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.facture.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.facture.count({ where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.depense.aggregate({ where: { userId, date: { gte: startOfWeek, lt: endOfWeek } }, _sum: { montant: true } }),
+  ]);
+
+  const facturesPayeesSemaine = await prisma.facture.findMany({
+    where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } },
+    select: { totalTTC: true },
+  });
+  const caEncaisse = facturesPayeesSemaine.reduce((s, f) => s + f.totalTTC, 0);
+
   return {
     starterCatalogCount,
     totalQuotes: totalCount,
@@ -482,5 +513,13 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     tresorerie,
     benefice,
     echeances: echeancesProchaines,
+    semaine: {
+      nouveauxDevis,
+      devisAcceptes: devisAcceptesSemaine,
+      facturesEmises,
+      facturesPayees,
+      caEncaisse,
+      depensesSemaine: depensesAgg._sum.montant ?? 0,
+    },
   };
 }

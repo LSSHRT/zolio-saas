@@ -660,6 +660,7 @@ export default function DashboardPage() {
   const tresorerie = dashboardData?.tresorerie;
   const benefice = dashboardData?.benefice;
   const echeances = dashboardData?.echeances ?? [];
+  const semaine = dashboardData?.semaine;
 
   let greetingText = "Bonjour";
   let GreetingIcon = CloudSun;
@@ -1322,6 +1323,26 @@ export default function DashboardPage() {
               badge={`${objectifProgress.toFixed(0)}%`}
             >
               <div className="space-y-4">
+                {/* Activité de la semaine */}
+                {semaine && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-xl bg-violet-50 px-3 py-2.5 text-center dark:bg-violet-500/10">
+                      <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
+                      <p className="mt-1 text-lg font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
+                      <p className="text-[9px] text-violet-400 dark:text-violet-500">{semaine.devisAcceptes} accepté{semaine.devisAcceptes !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center dark:bg-emerald-500/10">
+                      <p className="text-[10px] uppercase tracking-wider text-emerald-500 dark:text-emerald-400">Factures</p>
+                      <p className="mt-1 text-lg font-black text-emerald-700 dark:text-emerald-300">{semaine.facturesEmises}</p>
+                      <p className="text-[9px] text-emerald-400 dark:text-emerald-500">{semaine.facturesPayees} payée{semaine.facturesPayees !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div className="rounded-xl bg-amber-50 px-3 py-2.5 text-center dark:bg-amber-500/10">
+                      <p className="text-[10px] uppercase tracking-wider text-amber-500 dark:text-amber-400">Encaissé</p>
+                      <p className="mt-1 text-lg font-black text-amber-700 dark:text-amber-300">{formatCurrency(semaine.caEncaisse)}</p>
+                      <p className="text-[9px] text-amber-400 dark:text-amber-500">{formatCurrency(semaine.depensesSemaine)} dép.</p>
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
                     <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Cap restant</p>
@@ -1869,6 +1890,27 @@ export default function DashboardPage() {
                       <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{objectifProgress.toFixed(0)}%</p>
                     </div>
                   </div>
+
+                  {/* Activité de la semaine */}
+                  {semaine && (
+                    <div className="mt-5 grid grid-cols-3 gap-3">
+                      <div className="rounded-2xl border border-violet-200/60 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-500/20 dark:bg-violet-500/10">
+                        <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
+                        <p className="mt-1 text-2xl font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
+                        <p className="text-xs text-violet-400 dark:text-violet-500">{semaine.devisAcceptes} accepté{semaine.devisAcceptes !== 1 ? 's' : ''}</p>
+                      </div>
+                      <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 px-4 py-4 text-center dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                        <p className="text-[10px] uppercase tracking-wider text-emerald-500 dark:text-emerald-400">Factures</p>
+                        <p className="mt-1 text-2xl font-black text-emerald-700 dark:text-emerald-300">{semaine.facturesEmises}</p>
+                        <p className="text-xs text-emerald-400 dark:text-emerald-500">{semaine.facturesPayees} payée{semaine.facturesPayees !== 1 ? 's' : ''}</p>
+                      </div>
+                      <div className="rounded-2xl border border-amber-200/60 bg-amber-50/50 px-4 py-4 text-center dark:border-amber-500/20 dark:bg-amber-500/10">
+                        <p className="text-[10px] uppercase tracking-wider text-amber-500 dark:text-amber-400">Encaissé</p>
+                        <p className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300">{formatCurrency(semaine.caEncaisse)}</p>
+                        <p className="text-xs text-amber-400 dark:text-amber-500">{formatCurrency(semaine.depensesSemaine)} dép.</p>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="mt-5 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
