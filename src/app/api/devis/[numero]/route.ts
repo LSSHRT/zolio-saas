@@ -61,7 +61,11 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
 
     const devis = await prisma.devis.findFirst({
       where: { numero, userId },
-      include: { client: true, lignesNorm: { orderBy: { position: "asc" } } },
+      include: {
+        client: true,
+        lignesNorm: { orderBy: { position: "asc" } },
+        factures: { select: { id: true, numero: true, totalTTC: true, statut: true, date: true } },
+      },
     });
 
     if (!devis) {
@@ -104,6 +108,7 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       totalTTC: totalTTC.toFixed(2),
       signature: devis.signature || "",
       signingToken: createPublicDevisToken(devis.numero, userId),
+      factures: devis.factures,
       photos: parsePhotos(devis.photos),
       dateDebut: devis.dateDebut ? devis.dateDebut.toISOString().split("T")[0] : "",
       dateFin: devis.dateFin ? devis.dateFin.toISOString().split("T")[0] : "",

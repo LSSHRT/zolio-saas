@@ -7,7 +7,7 @@ const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: f
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import NextImage from "next/image";
-import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles, Eye } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles, Eye, FileText } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -45,6 +45,7 @@ interface DevisInfo {
   photos?: string[];
   lignes?: LigneDevis[];
   signingToken?: string;
+  factures?: Array<{ id: string; numero: string; totalTTC: number; statut: string; date: string }>;
 }
 
 export default function EditDevisPage({ params }: { params: Promise<{ numero: string }> }) {
@@ -854,6 +855,31 @@ export default function EditDevisPage({ params }: { params: Promise<{ numero: st
             </div>
           </div>
         </div>
+
+        {/* Factures liées */}
+        {devisInfo?.factures && devisInfo.factures.length > 0 && (
+          <div className="mt-3 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Factures liées</p>
+            {devisInfo.factures.map((f: any) => (
+              <Link
+                key={f.numero}
+                href={`/factures/${f.numero}`}
+                className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-3 transition hover:border-violet-300 dark:border-slate-700 dark:bg-slate-800/50 dark:hover:border-violet-500/30"
+              >
+                <div className="flex items-center gap-2">
+                  <FileText size={16} className="text-violet-500" />
+                  <span className="text-sm font-semibold text-slate-800 dark:text-white">{f.numero}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    f.statut === "Payée" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                    : f.statut === "En retard" ? "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"
+                    : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+                  }`}>{f.statut}</span>
+                </div>
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{Number(f.totalTTC).toFixed(2)}€</span>
+              </Link>
+            ))}
+          </div>
+        )}
 
         {/* Facture d'acompte (si accepté/signé) */}
         {(devisInfo?.statut === "Accepté" || devisInfo?.statut === "Signé") && (
