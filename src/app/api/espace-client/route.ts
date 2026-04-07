@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
         numero: d.numero,
         date: d.date.toISOString(),
         statut: d.statut,
-        totalTTC: d.lignesNorm.reduce((s, l) => s + l.totalLigne, 0),
+        totalTTC: d.lignesNorm.reduce((s, l) => s + Number(l.totalLigne), 0),
         optionLabel: d.optionLabel,
       })),
       factures: factures.map((f) => ({

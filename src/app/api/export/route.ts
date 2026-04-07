@@ -48,7 +48,7 @@ export async function POST(request: Request) {
               }))
             : parseLignes(d.lignesNorm);
 
-          const { totalHT, totalTTC } = computeTotals(lignes, d.tva || 0, d.remise || 0);
+          const { totalHT, totalTTC } = computeTotals(lignes, Number(d.tva) || 0, Number(d.remise) || 0);
 
           const _pdfBuffer = await generateDevisPDF({
             numeroDevis: d.numero,

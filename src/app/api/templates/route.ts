@@ -31,7 +31,7 @@ export async function GET() {
       }));
       const totalHT = lignesNorm
         .filter((l) => !l.isOptional)
-        .reduce((sum, l) => sum + l.totalLigne, 0);
+        .reduce((sum, l) => sum + Number(l.totalLigne), 0);
       return {
         id: tpl.id,
         nom: tpl.nom,
