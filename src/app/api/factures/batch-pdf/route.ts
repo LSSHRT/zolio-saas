@@ -94,7 +94,7 @@ export async function POST(request: Request) {
       // Montant
       doc.setFontSize(14);
       doc.setTextColor(30, 30, 40);
-      doc.text(`${facture.totalTTC.toFixed(2)} €`, 195, y, { align: "right" });
+      doc.text(`${Number(facture.totalTTC).toFixed(2)} €`, 195, y, { align: "right" });
 
       // Info client
       y += 7;

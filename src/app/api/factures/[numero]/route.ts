@@ -80,7 +80,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ nu
     if (statut === "Payée" && facture.statut !== "Payée") {
       sendPushNotification(userId, {
         title: "💰 Facture payée !",
-        body: `Facture ${numero} — ${facture.totalTTC.toFixed(2)}€ reçus`,
+        body: `Facture ${numero} — ${Number(facture.totalTTC).toFixed(2)}€ reçus`,
         url: `/factures`,
         tag: `facture-paid-${numero}`,
       }).catch(() => {});

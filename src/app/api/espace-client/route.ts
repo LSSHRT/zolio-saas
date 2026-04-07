@@ -50,9 +50,9 @@ export async function GET(req: NextRequest) {
         numero: f.numero,
         date: f.date.toISOString(),
         statut: f.statut,
-        totalTTC: f.totalTTC,
-        totalHT: f.totalHT,
-        tva: f.tva,
+        totalTTC: Number(f.totalTTC),
+        totalHT: Number(f.totalHT),
+        tva: Number(f.tva),
         dateEcheance: f.dateEcheance?.toISOString(),
         lignes: f.devis?.lignesNorm?.map((l) => ({
           nomPrestation: l.nomPrestation,

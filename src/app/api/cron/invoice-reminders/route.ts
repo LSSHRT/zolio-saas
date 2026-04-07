@@ -192,7 +192,7 @@ export async function GET(req: NextRequest) {
           continue;
         }
 
-        const montant = invoice.totalTTC.toFixed(2).replace(".", ",");
+        const montant = Number(invoice.totalTTC).toFixed(2).replace(".", ",");
         const echeance = invoice.dateEcheance ? formatDateFR(invoice.dateEcheance) : "non définie";
 
         // Générer le lien espace client si possible

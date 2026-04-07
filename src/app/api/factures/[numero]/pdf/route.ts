@@ -92,9 +92,9 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
         assurance: entreprise.assurance,
       },
       lignes: normalizedLignes,
-      totalHT: facture.totalHT.toFixed(2),
+      totalHT: Number(facture.totalHT).toFixed(2),
       tva: String(facture.tva ?? 20),
-      totalTTC: facture.totalTTC.toFixed(2),
+      totalTTC: Number(facture.totalTTC).toFixed(2),
       statut: facture.statut,
     });
 

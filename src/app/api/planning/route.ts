@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         date: f.dateEcheance!.toISOString(),
         title: `Échéance ${f.numero}`,
         subtitle: f.nomClient,
-        amount: f.totalTTC,
+        amount: Number(f.totalTTC),
         statut: f.statut,
         href: `/factures/${f.numero}`,
         tone: f.statut === "Payée" ? "emerald" : f.statut === "En retard" ? "rose" : "amber",

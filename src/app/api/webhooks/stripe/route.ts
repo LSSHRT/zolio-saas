@@ -111,9 +111,9 @@ export async function POST(req: Request) {
                   isPro: clerkUser.publicMetadata?.isPro === true,
                   entreprise,
                   lignes: lignes.map(normalizeLigneForOutput),
-                  totalHT: facture.totalHT.toFixed(2),
+                  totalHT: Number(facture.totalHT).toFixed(2),
                   tva: String(facture.tva ?? 20),
-                  totalTTC: facture.totalTTC.toFixed(2),
+                  totalTTC: Number(facture.totalTTC).toFixed(2),
                   statut: "Payée",
                 });
 
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
                   facture.emailClient,
                   facture.nomClient,
                   facture.numero,
-                  facture.totalTTC.toFixed(2),
+                  Number(facture.totalTTC).toFixed(2),
                   pdfBuffer
                 );
                 logInfo("stripe-webhook", `Email de confirmation envoyé à ${facture.emailClient}`);

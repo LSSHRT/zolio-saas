@@ -67,7 +67,7 @@ export async function POST(
       // Secret non configuré
     }
 
-    const montant = facture.totalTTC.toFixed(2).replace(".", ",");
+    const montant = Number(facture.totalTTC).toFixed(2).replace(".", ",");
     const echeance = facture.dateEcheance ? formatDateFR(facture.dateEcheance) : "non définie";
 
     const subject = `Rappel – Facture ${facture.numero}`;

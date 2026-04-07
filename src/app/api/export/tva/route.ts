@@ -54,7 +54,7 @@ export async function GET(request: Request) {
     });
 
     const tvaCollectee = facturesPayees.reduce(
-      (sum, f) => sum + (f.totalTTC - f.totalHT),
+      (sum, f) => sum + (Number(f.totalTTC) - Number(f.totalHT)),
       0
     );
 

@@ -84,7 +84,7 @@ export async function GET(request: Request) {
         title: f.numero,
         subtitle: f.nomClient,
         href: `/factures/${f.numero}`,
-        amount: f.totalTTC,
+        amount: Number(f.totalTTC),
         badge: f.statut,
         date: f.date.toISOString().split("T")[0],
       })),
