@@ -1801,57 +1801,62 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-              <div className="client-panel rounded-[2.15rem] p-5 sm:p-6">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
-                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                  Les chiffres à lire sans détour
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                  Une seule ligne KPI, directement après la priorité du jour.
-                </p>
-              </div>
-              <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                {totalQuotes} devis monitorés
-              </span>
-            </div>
 
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricCard
-                label="CA validé"
-                value={formatCurrency(acceptedRevenueHT)}
-                detail={`${acceptedQuotesCount} devis acceptés`}
-                tone="emerald"
-                icon={TrendingUp}
-              />
-              <MetricCard
-                label="Pipeline"
-                value={formatCurrency(pipelineRevenueHT)}
-                detail={`${pendingQuotesCount} devis en attente`}
-                tone="amber"
-                icon={Clock3}
-              />
-              <MetricCard
-                label="Relances"
-                value={String(devisARelancer.length)}
-                detail="Clients à relancer cette semaine"
-                tone="rose"
-                icon={Bell}
-              />
-              <MetricCard
-                label="Ticket moyen"
-                value={formatCurrency(averageTicket)}
-                detail={`${conversionRate}% de conversion sur les devis suivis`}
-                tone="violet"
-                icon={LineChart}
-              />
+              {/* KPI */}
+            <div className="client-panel rounded-[2.15rem] p-5 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                    Lecture rapide
+                  </h2>
+                </div>
+                <span className="client-chip bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+                  {totalQuotes} devis
+                </span>
+              </div>
+
+              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <MetricCard
+                  label="CA validé"
+                  value={formatCurrency(acceptedRevenueHT)}
+                  detail={`${acceptedQuotesCount} devis acceptés`}
+                  tone="emerald"
+                  icon={TrendingUp}
+                />
+                <MetricCard
+                  label="Pipeline"
+                  value={formatCurrency(pipelineRevenueHT)}
+                  detail={`${pendingQuotesCount} devis en attente`}
+                  tone="amber"
+                  icon={Clock3}
+                />
+                <MetricCard
+                  label="Relances"
+                  value={String(devisARelancer.length)}
+                  detail="Clients à relancer cette semaine"
+                  tone="rose"
+                  icon={Bell}
+                />
+                <MetricCard
+                  label="Ticket moyen"
+                  value={formatCurrency(averageTicket)}
+                  detail={`${conversionRate}% de conversion sur les devis suivis`}
+                  tone="violet"
+                  icon={LineChart}
+                />
+              </div>
             </div>
 
             {/* Stats de conversion avancées */}
             {avgResponseDays > 0 && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <MetricCard
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="mb-4 flex items-center gap-2">
+                  <Target size={18} className="text-violet-500" />
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Stats de conversion</h3>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <MetricCard
                   label="Délai moyen de réponse"
                   value={`${avgResponseDays}j`}
                   detail="Entre création et décision client"
@@ -1873,6 +1878,7 @@ export default function DashboardPage() {
                   icon={Target}
                 />
               </div>
+              </div>
             )}
 
             {/* Funnel de conversion */}
@@ -1888,44 +1894,41 @@ export default function DashboardPage() {
 
             {/* Pilotage semaine */}
             <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage semaine</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Vision chiffre d&apos;affaires
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Le cap mensuel et la tendance restent ici, dans un bloc unique de pilotage.
-                      </p>
-                    </div>
-                    <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/80 px-4 py-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-white/4">
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Progression</p>
-                      <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{objectifProgress.toFixed(0)}%</p>
-                    </div>
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage semaine</p>
+                  <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                    Vision chiffre d&apos;affaires
+                  </h2>
+                </div>
+                <div className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 shadow-sm dark:border-white/8 dark:bg-white/4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Progression</p>
+                  <p className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">{objectifProgress.toFixed(0)}%</p>
+                </div>
+              </div>
+
+              {/* Activité de la semaine */}
+              {semaine && (
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <div className="rounded-2xl border border-violet-200/60 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-500/20 dark:bg-violet-500/10">
+                    <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
+                    <p className="mt-1 text-2xl font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
+                    <p className="text-xs text-violet-400 dark:text-violet-500">{semaine.devisAcceptes} accepté{semaine.devisAcceptes !== 1 ? 's' : ''}</p>
                   </div>
+                  <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 px-4 py-4 text-center dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                    <p className="text-[10px] uppercase tracking-wider text-emerald-500 dark:text-emerald-400">Factures</p>
+                    <p className="mt-1 text-2xl font-black text-emerald-700 dark:text-emerald-300">{semaine.facturesEmises}</p>
+                    <p className="text-xs text-emerald-400 dark:text-emerald-500">{semaine.facturesPayees} payée{semaine.facturesPayees !== 1 ? 's' : ''}</p>
+                  </div>
+                  <div className="rounded-2xl border border-amber-200/60 bg-amber-50/50 px-4 py-4 text-center dark:border-amber-500/20 dark:bg-amber-500/10">
+                    <p className="text-[10px] uppercase tracking-wider text-amber-500 dark:text-amber-400">Encaissé</p>
+                    <p className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300">{formatCurrency(semaine.caEncaisse)}</p>
+                    <p className="text-xs text-amber-400 dark:text-amber-500">{formatCurrency(semaine.depensesSemaine)} dép.</p>
+                  </div>
+                </div>
+              )}
 
-                  {/* Activité de la semaine */}
-                  {semaine && (
-                    <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                      <div className="rounded-2xl border border-violet-200/60 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-500/20 dark:bg-violet-500/10">
-                        <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
-                        <p className="mt-1 text-2xl font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
-                        <p className="text-xs text-violet-400 dark:text-violet-500">{semaine.devisAcceptes} accepté{semaine.devisAcceptes !== 1 ? 's' : ''}</p>
-                      </div>
-                      <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/50 px-4 py-4 text-center dark:border-emerald-500/20 dark:bg-emerald-500/10">
-                        <p className="text-[10px] uppercase tracking-wider text-emerald-500 dark:text-emerald-400">Factures</p>
-                        <p className="mt-1 text-2xl font-black text-emerald-700 dark:text-emerald-300">{semaine.facturesEmises}</p>
-                        <p className="text-xs text-emerald-400 dark:text-emerald-500">{semaine.facturesPayees} payée{semaine.facturesPayees !== 1 ? 's' : ''}</p>
-                      </div>
-                      <div className="rounded-2xl border border-amber-200/60 bg-amber-50/50 px-4 py-4 text-center dark:border-amber-500/20 dark:bg-amber-500/10">
-                        <p className="text-[10px] uppercase tracking-wider text-amber-500 dark:text-amber-400">Encaissé</p>
-                        <p className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300">{formatCurrency(semaine.caEncaisse)}</p>
-                        <p className="text-xs text-amber-400 dark:text-amber-500">{formatCurrency(semaine.depensesSemaine)} dép.</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-5 grid gap-3 sm:grid-cols-3">
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
                       <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cap restant</p>
                       <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
@@ -1969,7 +1972,6 @@ export default function DashboardPage() {
                       <DashboardChart monthlyData={monthlyData} />
                     )}
                   </div>
-                </div>
               </div>
 
               {/* Derniers devis */}
@@ -2055,8 +2057,8 @@ export default function DashboardPage() {
                       ))}
                     </div>
                   )}
-                </div>
               </div>
+            </div>
 
             {/* Colonne Secondaire (Droite) */}
             <div className="space-y-4 xl:self-start">
