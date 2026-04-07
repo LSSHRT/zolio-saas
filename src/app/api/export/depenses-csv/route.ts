@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       esc(d.date.toLocaleDateString("fr-FR")),
       esc(d.description),
       esc(d.categorie),
-      esc(d.montant.toFixed(2)),
+      esc(Number(d.montant).toFixed(2)),
     ]);
 
     const BOM = "\uFEFF";

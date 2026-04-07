@@ -67,7 +67,7 @@ export async function GET(request: Request) {
       select: { montant: true },
     });
 
-    const totalDepenses = depenses.reduce((sum, d) => sum + d.montant, 0);
+    const totalDepenses = depenses.reduce((sum, d) => sum + Number(d.montant), 0);
     const tvaDepenses = totalDepenses * 0.2;
 
     const solde = Math.round((tvaCollectee - tvaDepenses) * 100) / 100;

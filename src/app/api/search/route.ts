@@ -104,7 +104,7 @@ export async function GET(request: Request) {
         title: d.description,
         subtitle: d.categorie || "",
         href: `/depenses`,
-        amount: d.montant,
+        amount: Number(d.montant),
         badge: d.categorie || "Dépense",
         date: d.date.toISOString().split("T")[0],
       })),

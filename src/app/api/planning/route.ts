@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
         date: r.prochaineDate.toISOString(),
         title: `Facture récurrente — ${r.nom}`,
         subtitle: r.client?.nom || "",
-        amount: r.montantTTC,
+        amount: Number(r.montantTTC),
         statut: "active",
         href: `/recurrentes`,
         tone: "violet",
