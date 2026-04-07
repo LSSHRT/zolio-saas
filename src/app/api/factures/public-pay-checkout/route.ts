@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       return jsonError("Cette facture est déjà payée", 400);
     }
 
-    const amountCents = Math.round(facture.totalTTC * 100);
+    const amountCents = Math.round(Number(facture.totalTTC) * 100);
 
     const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
