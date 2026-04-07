@@ -21,6 +21,7 @@ import {
   Plus,
   Receipt,
   RefreshCw,
+  Search,
   Settings,
   StickyNote,
   Users,
@@ -183,10 +184,11 @@ export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const unreadCount = useUnreadNotificationsCount();
 
-  useBodyScrollLock(toolsOpen);
-  useOverlayCloseSignal(() => setToolsOpen(false));
+  useBodyScrollLock(toolsOpen || searchOpen);
+  useOverlayCloseSignal(() => { setToolsOpen(false); setSearchOpen(false); });
 
   return (
     <>
@@ -207,6 +209,16 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
         <button
           type="button"
+          onClick={() => setSearchOpen(true)}
+          className="client-nav-link"
+          aria-label="Rechercher"
+        >
+          <Search size={20} />
+          <span className="text-[11px] font-semibold">Recherche</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => setToolsOpen(true)}
           className={`relative client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
           aria-label="Plus d'outils"
@@ -220,6 +232,26 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
           )}
         </button>
       </nav>
+
+      {/* Search modal mobile */}
+      {searchOpen ? (
+        <div className="fixed inset-0 z-[80] bg-white dark:bg-slate-950 lg:hidden">
+          <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(false)}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/8"
+              aria-label="Fermer"
+            >
+              <X size={20} />
+            </button>
+            <p className="text-sm font-semibold text-slate-950 dark:text-white">Rechercher</p>
+          </div>
+          <div className="p-4">
+            <GlobalSearch />
+          </div>
+        </div>
+      ) : null}
 
       {toolsOpen ? (
         <div className="fixed inset-0 z-[70] lg:hidden">
@@ -740,8 +772,10 @@ export function ClientSubpageShell({
               {mobileSummary ? <div className="md:hidden">{mobileSummary}</div> : null}
               {summary ? <div className={mobileSummary ? "hidden md:block" : ""}>{summary}</div> : null}
 
-              {/* Recherche globale */}
-              <GlobalSearch />
+              {/* Recherche globale (desktop uniquement) */}
+              <div className="hidden md:block">
+                <GlobalSearch />
+              </div>
             </div>
           </section>
 

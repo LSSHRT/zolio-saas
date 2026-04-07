@@ -2451,7 +2451,7 @@ export default function DashboardPage() {
       </MobileDialog>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-20 right-4 z-50 sm:bottom-8 sm:right-8">
+      <div className="fixed bottom-72 lg:bottom-8 lg:right-8">
         <AnimatePresence>
           {fabOpen && (
             <motion.div
