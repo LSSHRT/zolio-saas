@@ -1713,12 +1713,13 @@ export default function DashboardPage() {
           >
             {/* Colonne Principale (Gauche) */}
             <div className="space-y-4">
-              <div className="client-panel-strong relative overflow-hidden rounded-[2.35rem] px-5 py-6 sm:px-6 lg:px-7">
+              {/* Hero panel */}
+              <div className="client-panel-strong relative overflow-hidden rounded-[2rem] px-5 py-6 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-fuchsia-500/14 blur-[80px]" />
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
 
-              <div className="relative max-w-4xl space-y-6">
+              <div className="relative max-w-4xl space-y-5">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
                     <GreetingIcon size={15} />
@@ -1976,24 +1977,20 @@ export default function DashboardPage() {
 
               {/* Derniers devis */}
               <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                        Les affaires les plus récentes
-                      </h2>
-                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        Une lecture simple : client, statut, montant, puis ouverture directe.
-                      </p>
-                    </div>
-                    <Link
-                      href="/devis"
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition hover:text-violet-800 dark:text-violet-200 dark:hover:text-white"
-                    >
-                      Voir tous les devis
-                      <ChevronRight size={16} />
-                    </Link>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Derniers devis</p>
+                    <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      Affaires récentes
+                    </h2>
                   </div>
+                  <Link
+                    href="/devis"
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-violet-700 transition hover:text-violet-800 dark:text-violet-200 dark:hover:text-white">
+                    Voir tous
+                    <ChevronRight size={16} />
+                  </Link>
+                </div>
 
                   {loading ? (
                     <div className="mt-5 space-y-3">
