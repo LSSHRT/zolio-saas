@@ -1882,24 +1882,24 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Funnel de conversion */}
+            {/* Funnel */}
             {funnel && funnel.length > 0 && (
               <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="mb-4 flex items-center gap-2">
+                <div className="mb-3 flex items-center gap-2">
                   <Target size={18} className="text-violet-500" />
-                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel de conversion</h3>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
                 </div>
                 <ConversionFunnel funnel={funnel} />
               </div>
             )}
 
-            {/* Pilotage semaine */}
+            {/* Pilotage */}
             <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Pilotage semaine</p>
+                  <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Objectif</p>
                   <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                    Vision chiffre d&apos;affaires
+                    Pilotage mensuel
                   </h2>
                 </div>
                 <div className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 shadow-sm dark:border-white/8 dark:bg-white/4">
