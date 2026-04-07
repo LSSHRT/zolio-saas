@@ -1,0 +1,185 @@
+"use client";
+
+import { TrendingUp, Clock3, Bell, TriangleAlert, type LucideIcon } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { toneClasses, type Tone, type DashboardSignal, type DashboardActionPlanItem, type DashboardHeroIndicator, type QuickLinkItem } from "./shared";
+
+// ─── Signal Icon ──────────────────────────────────────────────────────
+
+export function renderSignalIcon(tone: Tone, size = 16) {
+  const cls = toneClasses(tone).icon;
+  const IconMap: Record<Tone, LucideIcon> = {
+    violet: Bell,
+    emerald: TrendingUp,
+    amber: Clock3,
+    rose: TriangleAlert,
+    slate: Clock3,
+  };
+  const Icon = IconMap[tone];
+  return (
+    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ring-1 ${cls}`}>
+      <Icon size={size} />
+    </span>
+  );
+}
+
+// ─── Focus Signal Card ────────────────────────────────────────────────
+
+export function FocusSignalCard({ signal }: { signal: DashboardSignal }) {
+  return (
+    <div className={`rounded-[1.45rem] border p-4 ${signal.href ? "cursor-pointer transition hover:-translate-y-0.5" : ""}`}>
+      <div className="flex items-start gap-3">
+        {renderSignalIcon(signal.tone)}
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{signal.description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Dashboard Action Card ────────────────────────────────────────────
+
+export function DashboardActionCard({ item, compact = false }: { item: DashboardActionPlanItem; compact?: boolean }) {
+  const Icon = item.icon;
+  const content = (
+    <div
+      className={`rounded-[1.45rem] border p-4 transition hover:-translate-y-0.5 ${
+        item.tone === "rose"
+          ? "border-rose-200/70 bg-rose-50/80 dark:border-rose-400/12 dark:bg-rose-500/8"
+          : item.tone === "amber"
+          ? "border-amber-200/70 bg-amber-50/80 dark:border-amber-400/12 dark:bg-amber-500/8"
+          : item.tone === "emerald"
+          ? "border-emerald-200/70 bg-emerald-50/80 dark:border-emerald-400/12 dark:bg-emerald-500/8"
+          : "border-violet-200/70 bg-violet-50/80 dark:border-violet-400/12 dark:bg-violet-500/8"
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <div className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ${toneClasses(item.tone).icon}`}>
+          <Icon size={18} />
+        </div>
+        <div className="min-w-0 flex-1">
+          {compact ? null : (
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              {item.eyebrow}
+            </p>
+          )}
+          <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.title}</p>
+          {compact ? null : (
+            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+          )}
+          {item.ctaLabel && (
+            <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700 dark:text-violet-300">
+              {item.ctaLabel} →
+            </span>
+          )}
+        </div>
+        {item.value && (
+          <span className="shrink-0 text-lg font-bold text-slate-900 dark:text-white">{item.value}</span>
+        )}
+      </div>
+    </div>
+  );
+
+  return item.href ? <Link href={item.href}>{content}</Link> : content;
+}
+
+// ─── Metric Card ──────────────────────────────────────────────────────
+
+export function CompactMetricCard({
+  label,
+  value,
+  detail,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  tone: Tone;
+  icon: LucideIcon;
+}) {
+  return (
+    <div className="rounded-[1.35rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
+      <div className="flex items-center gap-2">
+        <div className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ring-1 ${toneClasses(tone).icon}`}>
+          <Icon size={15} />
+        </div>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{label}</span>
+      </div>
+      <p className="mt-2 text-xl font-bold text-slate-950 dark:text-white">{value}</p>
+      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{detail}</p>
+    </div>
+  );
+}
+
+// ─── Hero Indicator Pill ──────────────────────────────────────────────
+
+export function HeroIndicatorPill({ indicator }: { indicator: DashboardHeroIndicator }) {
+  return (
+    <div className={`rounded-full px-3 py-2 ring-1 ${toneClasses(indicator.tone).chip}`}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-inherit/70">{indicator.label}</p>
+      <p className="text-sm font-bold text-inherit">{indicator.value}</p>
+    </div>
+  );
+}
+
+// ─── Quick Link Card ──────────────────────────────────────────────────
+
+export function QuickLinkCard({ item }: { item: QuickLinkItem }) {
+  const Icon = item.icon;
+  return (
+    <Link
+      href={item.href}
+      className={`rounded-[1.35rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:border-violet-300 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 ${item.tourClass ?? ""}`}
+    >
+      <div className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${toneClasses(item.tone).icon}`}>
+        <Icon size={17} />
+      </div>
+      <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.label}</p>
+      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.description}</p>
+    </Link>
+  );
+}
+
+// ─── Mobile Disclosure Section ────────────────────────────────────────
+
+export function MobileDisclosureSection({
+  title,
+  description,
+  badge,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  description: string;
+  badge?: string | number;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      className="client-panel rounded-[1.9rem] p-4"
+    >
+      <details open={defaultOpen} className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">{title}</p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{description}</p>
+          </div>
+          {badge !== undefined && (
+            <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+              {badge}
+            </span>
+          )}
+        </summary>
+        <div className="mt-4">{children}</div>
+      </details>
+    </motion.section>
+  );
+}
