@@ -1849,39 +1849,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Stats conversion + Funnel — fusionnés */}
-            {avgResponseDays > 0 && (
-              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <Target size={18} className="text-violet-500" />
-                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Stats de conversion</h3>
-                </div>
-                <div className="grid gap-4 sm:grid-cols-3">
-                  <MetricCard
-                  label="Délai moyen de réponse"
-                  value={`${avgResponseDays}j`}
-                  detail="Entre création et décision client"
-                  tone="slate"
-                  icon={Clock3}
-                />
-                <MetricCard
-                  label="Revenu perdu (6 mois)"
-                  value={formatCurrency(lostRevenueHT)}
-                  detail={`${refusedQuotesCount} devis refusés`}
-                  tone="rose"
-                  icon={XCircle}
-                />
-                <MetricCard
-                  label="Taux de conversion"
-                  value={`${conversionRate}%`}
-                  detail={`${acceptedQuotesCount}/${totalQuotes} devis acceptés`}
-                  tone="emerald"
-                  icon={Target}
-                />
-              </div>
-              </div>
-            )}
-
             {/* Funnel */}
             {funnel && funnel.length > 0 && (
               <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
