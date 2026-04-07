@@ -752,7 +752,7 @@ export default function DashboardPage() {
       signals.push({
         id: "overdue",
         title: `${formatCurrency(tresorerie.enRetard)} en retard de paiement`,
-        description: `${tresorerie.tauxRecouvrement}% de recouvrement — relancez les impayés en priorité.`,
+        description: `${tresorerie.tauxRecouvrement}% de recouvrement - relancez les impayés en priorité.`,
         href: "/factures",
         tone: "rose",
       });
@@ -835,7 +835,7 @@ export default function DashboardPage() {
       return {
         id: "followup-focus",
         title: "Relances à faire aujourd'hui",
-        description: `${devisARelancer.length} devis attendent un rappel. C’est votre levier de conversion le plus direct.`,
+        description: `${devisARelancer.length} devis attendent un rappel. C'est votre levier de conversion le plus direct.`,
         href: "/devis",
         tone: "rose",
       };
@@ -855,7 +855,7 @@ export default function DashboardPage() {
       return {
         id: "upgrade-focus",
         title: "Passer en PRO",
-        description: "Déverrouillez le flux complet pour ne plus rester limité au mode d’essai.",
+        description: "Déverrouillez le flux complet pour ne plus rester limité au mode d'essai.",
         href: "/abonnement",
         tone: "violet",
       };
@@ -1092,7 +1092,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-end gap-2 lg:gap-3">
-              {/* Admin — réservé dans le layout même pendant le chargement */}
+              {/* Admin - réservé dans le layout même pendant le chargement */}
               <Link
                 href="/admin"
                 className={`inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100 ${
@@ -1106,7 +1106,7 @@ export default function DashboardPage() {
               <DashboardNotificationsMenu
                 dashboardSignals={dashboardSignals}
               />
-              {/* Avatar — image directe via useUser() */}
+              {/* Avatar - image directe via useUser() */}
               {isLoaded && user?.imageUrl ? (
                 <img
                   src={user.imageUrl}
@@ -1398,7 +1398,7 @@ export default function DashboardPage() {
                 <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
                   <p className="text-sm font-semibold text-slate-950 dark:text-white">Pipeline propre</p>
                   <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                    Aucun devis âgé de plus de 7 jours n’attend une relance pour le moment.
+                    Aucun devis âgé de plus de 7 jours n'attend une relance pour le moment.
                   </p>
                 </div>
               ) : (
@@ -1714,12 +1714,12 @@ export default function DashboardPage() {
             {/* Colonne Principale (Gauche) */}
             <div className="space-y-4">
               {/* Hero panel */}
-              <div className="client-panel-strong relative overflow-hidden rounded-[2rem] px-5 py-6 sm:px-6 lg:px-7">
+              <div className="client-panel-strong relative overflow-hidden rounded-[2rem] px-5 py-5 sm:px-6 lg:px-7">
               <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
               <div className="pointer-events-none absolute -right-16 top-12 h-40 w-40 rounded-full bg-fuchsia-500/14 blur-[80px]" />
               <div className="pointer-events-none absolute -left-12 bottom-0 h-28 w-28 rounded-full bg-orange-400/10 blur-[70px]" />
 
-              <div className="relative max-w-4xl space-y-5">
+              <div className="relative max-w-4xl space-y-4">
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-xs font-semibold tracking-[0.24em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
                     <GreetingIcon size={15} />
@@ -1734,24 +1734,18 @@ export default function DashboardPage() {
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-                    Cockpit du jour
-                  </p>
+                <div>
                   <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl lg:text-[3.05rem]">
                     {greetingText}
                     {user?.firstName ? `, ${user.firstName}` : ""}.
                   </h1>
-                  <p className="max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                    Le desktop revient à l’essentiel : une priorité claire, vos actions directes, puis le suivi business plus bas.
-                  </p>
                 </div>
 
                 <div className="rounded-[2rem] border border-white/55 bg-white/78 p-5 shadow-[0_30px_80px_-46px_rgba(15,23,42,0.22)] backdrop-blur dark:border-white/10 dark:bg-white/6">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Priorité du jour</p>
-                      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Priorité</p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
                         {todayFocus.title}
                       </h2>
                     </div>
@@ -1760,7 +1754,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
 
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
                     {todayFocus.description}
                   </p>
 
@@ -1775,7 +1769,7 @@ export default function DashboardPage() {
                   ) : null}
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2">
                   <Link href="/nouveau-devis" className="tour-nouveau-devis">
                     <motion.div
                       whileTap={{ scale: 0.98 }}
@@ -1804,7 +1798,7 @@ export default function DashboardPage() {
             </div>
 
             {/* KPI */}
-            <div className="client-panel rounded-[2.15rem] p-5 sm:p-6">
+            <div className="client-panel rounded-[2rem] p-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
@@ -1817,7 +1811,7 @@ export default function DashboardPage() {
                 </span>
               </div>
 
-              <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <MetricCard
                   label="CA validé"
                   value={formatCurrency(acceptedRevenueHT)}
@@ -1851,8 +1845,8 @@ export default function DashboardPage() {
 
             {/* Funnel */}
             {funnel && funnel.length > 0 && (
-              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="mb-3 flex items-center gap-2">
+              <div className="client-panel rounded-[2rem] p-5">
+                <div className="mb-2 flex items-center gap-2">
                   <Target size={18} className="text-violet-500" />
                   <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
                 </div>
@@ -1861,7 +1855,7 @@ export default function DashboardPage() {
             )}
 
             {/* Pilotage */}
-            <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+            <div className="client-panel rounded-[2rem] p-5">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Objectif</p>
@@ -1877,7 +1871,7 @@ export default function DashboardPage() {
 
               {/* Activité semaine */}
               {semaine && (
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <div className="rounded-2xl border border-violet-200/60 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-500/20 dark:bg-violet-500/10">
                     <p className="text-[10px] uppercase tracking-wider text-violet-500 dark:text-violet-400">Devis</p>
                     <p className="mt-1 text-2xl font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
@@ -1896,7 +1890,7 @@ export default function DashboardPage() {
                 </div>
               )}
 
-              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div className="mt-3 grid gap-3 sm:grid-cols-3">
                     <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
                       <p className="text-xs uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Cap restant</p>
                       <p className="mt-2 text-xl font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
@@ -1911,7 +1905,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div className="mt-5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+                  <div className="mt-4 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
                     <div
                       className="h-3 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
                       style={{ width: `${objectifProgress}%` }}
@@ -1933,7 +1927,7 @@ export default function DashboardPage() {
                     </button>
                   </div>
 
-                  <div className="mt-5 h-64 w-full overflow-hidden rounded-[1.9rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
+                  <div className="mt-4 h-64 w-full overflow-hidden rounded-[1.9rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4">
                     {loading ? (
                       <ChartSkeleton />
                     ) : (
@@ -2117,7 +2111,7 @@ export default function DashboardPage() {
                     {tresorerie.tauxRecouvrement}% rec.
                   </span>
                 </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <div className="mt-3 grid gap-3 sm:grid-cols-3">
                     {/* Encaissé */}
                     <div className="rounded-[1.45rem] border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
                       <div className="flex items-center gap-2">
