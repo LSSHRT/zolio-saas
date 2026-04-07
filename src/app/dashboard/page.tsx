@@ -672,8 +672,8 @@ export default function DashboardPage() {
         </div>
       </MobileDialog>
 
-      {/* ─── FAB ─────────────────────────────────────────────────── */}
-      <div className="fixed bottom-72 lg:bottom-8 lg:right-8">
+      {/* ─── FAB (desktop only) ──────────────────────────────── */}
+      <div className="hidden lg:block fixed bottom-8 right-8">
         <AnimatePresence>
           {fabOpen && (
             <motion.div initial={{ opacity: 0, scale: 0.8, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 16 }} className="mb-3 flex flex-col items-end gap-2">

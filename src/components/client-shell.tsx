@@ -67,21 +67,23 @@ const CLIENT_NAV_ITEMS: Array<{
 }> = [
   { href: "/dashboard", icon: Home, key: "dashboard", label: "Accueil" },
   { href: "/devis", icon: FileText, key: "devis", label: "Devis" },
-  { href: "/clients", icon: Users, key: "clients", label: "Clients" },
   { href: "/factures", icon: Receipt, key: "factures", label: "Factures" },
-  { href: "/calepin", icon: StickyNote, key: "calepin", label: "Calepin" },
+  { href: "/clients", icon: Users, key: "clients", label: "Clients" },
 ] as const;
 
 const CLIENT_TOOL_ITEMS: Array<{
   href: string;
   icon: LucideIcon;
   label: string;
+  isSearch?: boolean;
 }> = [
   { href: "/nouvelle-facture", icon: Plus, label: "Nouvelle facture" },
   { href: "/notifications", icon: Bell, label: "Notifications" },
+  { href: "", icon: Search, label: "Rechercher", isSearch: true },
   { href: "/rapports", icon: FileText, label: "Rapports" },
   { href: "/planning", icon: Calendar, label: "Planning" },
   { href: "/catalogue", icon: Package, label: "Catalogue" },
+  { href: "/calepin", icon: StickyNote, label: "Calepin" },
   { href: "/depenses", icon: CreditCard, label: "Dépenses" },
   { href: "/modeles", icon: Copy, label: "Modèles" },
   { href: "/recurrentes", icon: RefreshCw, label: "Récurrence" },
@@ -192,8 +194,9 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
   return (
     <>
-      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-sm items-center justify-between gap-1.5 rounded-[1.75rem] px-2.5 py-2.5 lg:hidden">
-        {CLIENT_NAV_ITEMS.map((item) => {
+      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-sm items-center justify-between gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden">
+        {/* 4 liens principaux */}
+        {CLIENT_NAV_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
           return (
             <Link
@@ -202,21 +205,36 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
             >
               <Icon size={20} strokeWidth={active === item.key ? 2.4 : 2} />
-              <span className="text-[11px] font-semibold">{item.label}</span>
+              <span className="text-[10px] font-semibold">{item.label}</span>
             </Link>
           );
         })}
 
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
-          className="client-nav-link"
-          aria-label="Rechercher"
+        {/* Bouton central + Nouveau */}
+        <Link
+          href="/nouveau-devis"
+          className="relative -mt-7 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-xl shadow-violet-500/30"
         >
-          <Search size={20} />
-          <span className="text-[11px] font-semibold">Recherche</span>
-        </button>
+          <Plus size={22} />
+          <span className="mt-0.5 text-[8px] font-bold">Nouveau</span>
+        </Link>
 
+        {/* 2 liens restants */}
+        {CLIENT_NAV_ITEMS.slice(2).map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.key}
+              href={item.href}
+              className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
+            >
+              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 2} />
+              <span className="text-[10px] font-semibold">{item.label}</span>
+            </Link>
+          );
+        })}
+
+        {/* Bouton Plus */}
         <button
           type="button"
           onClick={() => setToolsOpen(true)}
@@ -224,7 +242,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
           aria-label="Plus d'outils"
         >
           <MoreHorizontal size={20} strokeWidth={active === "tools" ? 2.4 : 2} />
-          <span className="text-[11px] font-semibold">Plus</span>
+          <span className="text-[10px] font-semibold">Plus</span>
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -290,6 +308,19 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               {CLIENT_TOOL_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const isNotif = item.href === "/notifications";
+                if (item.isSearch) {
+                  return (
+                    <button
+                      key="search-tool"
+                      type="button"
+                      onClick={() => { setToolsOpen(false); setSearchOpen(true); }}
+                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses("default")}`}
+                    >
+                      <Icon size={18} />
+                      <span className="leading-5">{item.label}</span>
+                    </button>
+                  );
+                }
                 return (
                   <Link
                     key={item.href}
