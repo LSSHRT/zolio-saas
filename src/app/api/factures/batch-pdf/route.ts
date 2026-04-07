@@ -71,8 +71,8 @@ export async function POST(request: Request) {
         y += 8;
       }
 
-      totalGlobal += facture.totalTTC;
-      if (facture.statut === "Payée") totalPaye += facture.totalTTC;
+      totalGlobal += Number(facture.totalTTC);
+      if (facture.statut === "Payée") totalPaye += Number(facture.totalTTC);
 
       // Couleur selon statut
       let statutColor: [number, number, number] = [100, 100, 116];

@@ -95,9 +95,9 @@ export async function GET(req: NextRequest) {
     if (!byMonth[monthKey]) {
       byMonth[monthKey] = { ht: 0, tva: 0, ttc: 0, invoices: [] };
     }
-    byMonth[monthKey].ht += inv.totalHT;
-    byMonth[monthKey].tva += inv.tva;
-    byMonth[monthKey].ttc += inv.totalTTC;
+    byMonth[monthKey].ht += Number(inv.totalHT);
+    byMonth[monthKey].tva += Number(inv.tva);
+    byMonth[monthKey].ttc += Number(inv.totalTTC);
     byMonth[monthKey].invoices.push(inv.numero);
   }
 
