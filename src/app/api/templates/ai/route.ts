@@ -117,13 +117,13 @@ Génère les lignes de devis appropriées.`;
 
       // Nettoyer les lignes
       const lignes: AILigne[] = parsed.lignes
-        .filter((l) => l.nomPrestation && l.quantite > 0 && l.prixUnitaire > 0)
+        .filter((l) => l.nomPrestation && Number(l.quantite) > 0 && Number(l.prixUnitaire) > 0)
         .map((l) => ({
           nomPrestation: l.nomPrestation.trim(),
           description: l.description?.trim(),
-          quantite: Math.round(l.quantite * 100) / 100,
+          quantite: Math.round(Number(l.quantite) * 100) / 100,
           unite: l.unite || "unité",
-          prixUnitaire: Math.round(l.prixUnitaire * 100) / 100,
+          prixUnitaire: Math.round(Number(l.prixUnitaire) * 100) / 100,
         }));
 
       if (lignes.length === 0) {
@@ -140,9 +140,9 @@ Génère les lignes de devis appropriées.`;
           const lignes: AILigne[] = parsed.lignes?.map((l) => ({
             nomPrestation: l.nomPrestation.trim(),
             description: l.description?.trim(),
-            quantite: Math.round(l.quantite * 100) / 100,
+            quantite: Math.round(Number(l.quantite) * 100) / 100,
             unite: l.unite || "unité",
-            prixUnitaire: Math.round(l.prixUnitaire * 100) / 100,
+            prixUnitaire: Math.round(Number(l.prixUnitaire) * 100) / 100,
           })) || [];
 
           return NextResponse.json({ titre: parsed.titre || "Devis IA", lignes });
