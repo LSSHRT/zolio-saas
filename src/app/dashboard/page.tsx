@@ -1849,10 +1849,10 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Stats de conversion avancées */}
+            {/* Stats conversion + Funnel — fusionnés */}
             {avgResponseDays > 0 && (
               <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="mb-4 flex items-center gap-2">
+                <div className="mb-3 flex items-center gap-2">
                   <Target size={18} className="text-violet-500" />
                   <h3 className="text-sm font-bold text-slate-800 dark:text-white">Stats de conversion</h3>
                 </div>
