@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { Decimal } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, Decimal } from "@/lib/prisma";
 import { internalServerError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { recurrenteUpdateSchema, zodErrorResponse } from "@/lib/validations";

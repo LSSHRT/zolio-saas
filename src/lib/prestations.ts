@@ -1,4 +1,4 @@
-import { Decimal } from "@prisma/client";
+import { Decimal } from "@/lib/prisma";
 
 type PrestationRecord = {
   id: string;
