@@ -59,8 +59,8 @@ export async function POST(
 
     const { totalHT, totalTTC } = computeTotals(
       lignes,
-      devis.tva || 0,
-      devis.remise || 0,
+      Number(devis.tva) || 0,
+      Number(devis.remise) || 0,
     );
 
     // Create Facture and update Devis in a transaction

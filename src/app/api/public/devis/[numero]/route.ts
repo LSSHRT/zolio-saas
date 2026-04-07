@@ -64,8 +64,8 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
         }))
       : parseLignes(devis.lignesNorm);
 
-    const remiseGlobale = devis.remise || 0;
-    const tvaGlobale = devis.tva || 0;
+    const remiseGlobale = Number(devis.remise) || 0;
+    const tvaGlobale = Number(devis.tva) || 0;
     const { totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
@@ -175,8 +175,8 @@ export async function POST(request: Request, context: { params: Promise<{ numero
           : parseLignes(devis.lignesNorm);
 
         const lignesPdf = lignes.map(normalizeLigneForOutput);
-        const tvaGlobale = devis.tva || 0;
-        const remiseGlobale = devis.remise || 0;
+        const tvaGlobale = Number(devis.tva) || 0;
+        const remiseGlobale = Number(devis.remise) || 0;
         const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
         const pdfBuffer = await generateDevisPDF({
