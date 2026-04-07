@@ -4,7 +4,6 @@
  * - Serveur : console + audit admin log
  * - Client : console seulement (Sentry capture les erreurs automatiquement)
  */
-import { appendAdminAuditLog } from "@/lib/admin-settings";
 
 type LogLevel = "error" | "warn" | "info" | "log";
 
@@ -15,8 +14,23 @@ function formatPrefix(level: LogLevel, scope: string): string {
   return `[${tag}] [${scope}]`;
 }
 
-function shouldAuditLog(level: LogLevel): boolean {
-  return isServer && (level === "error" || level === "warn");
+async function tryAuditLog(level: LogLevel, scope: string, message: string, meta?: string) {
+  if (!isServer || (level !== "error" && level !== "warn")) return;
+
+  try {
+    // Import dynamique uniquement côté serveur
+    const { appendAdminAuditLog } = await import("@/lib/admin-settings");
+    await appendAdminAuditLog({
+      level: level === "warn" ? "warning" : "error",
+      scope: "system",
+      action: scope,
+      actor: "Serveur",
+      message,
+      meta,
+    });
+  } catch {
+    // On ne boucle pas si l'audit log échoue
+  }
 }
 
 function log(
@@ -42,18 +56,8 @@ function log(
       console.log(prefix, error);
   }
 
-  if (shouldAuditLog(level)) {
-    void appendAdminAuditLog({
-      level: level === "warn" ? "warning" : "error",
-      scope: "system",
-      action: scope,
-      actor: "Serveur",
-      message,
-      meta: error instanceof Error ? error.name : undefined,
-    }).catch(() => {
-      // On ne boucle pas si l'audit log échoue
-    });
-  }
+  const meta = error instanceof Error ? error.name : undefined;
+  void tryAuditLog(level, scope, message, meta);
 }
 
 export function logError(scope: string, error: unknown, message?: string) {
