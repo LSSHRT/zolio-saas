@@ -113,8 +113,8 @@ export async function GET(request: Request) {
         lignes = parseLignes(d.lignesNorm);
       }
 
-      const remiseGlobale = d.remise || 0;
-      const tvaGlobale = d.tva || 0;
+      const remiseGlobale = Number(d.remise) || 0;
+      const tvaGlobale = Number(d.tva) || 0;
       const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
       return {
