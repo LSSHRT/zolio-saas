@@ -433,14 +433,14 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
 
   for (const f of factures) {
     if (f.statut === "Payée") {
-      encaisse += f.totalTTC;
+      encaisse += Number(f.totalTTC);
     } else if (f.statut === "En retard") {
-      enRetard += f.totalTTC;
+      enRetard += Number(f.totalTTC);
     } else if (f.statut !== "Annulée") {
       if (f.dateEcheance && f.dateEcheance < today) {
-        enRetard += f.totalTTC;
+        enRetard += Number(f.totalTTC);
       } else {
-        aEncaisser += f.totalTTC;
+        aEncaisser += Number(f.totalTTC);
       }
     }
   }
@@ -458,7 +458,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
 
   // Bénéfice net
   const caFacture = encaisse; // factures payées = CA réel
-  const totalDepenses = depenses.reduce((sum, d) => sum + d.montant, 0);
+  const totalDepenses = depenses.reduce((sum, d) => sum + Number(d.montant), 0);
   const beneficeNet = caFacture - totalDepenses;
   const margePct = caFacture > 0 ? Math.round((beneficeNet / caFacture) * 100) : 0;
 
@@ -475,7 +475,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     .map((e) => ({
       numero: e.numero,
       nomClient: e.nomClient,
-      totalTTC: e.totalTTC,
+      totalTTC: Number(e.totalTTC),
       dateEcheance: e.dateEcheance!.toISOString(),
       joursRestants: Math.ceil((e.dateEcheance!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
     }));
@@ -499,7 +499,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } },
     select: { totalTTC: true },
   });
-  const caEncaisse = facturesPayeesSemaine.reduce((s, f) => s + f.totalTTC, 0);
+  const caEncaisse = facturesPayeesSemaine.reduce((s, f) => s + Number(f.totalTTC), 0);
 
   // Funnel de conversion : Devis créés → Acceptés → Facturés → Payés
   const facturesFromDevis = await prisma.facture.findMany({
@@ -510,12 +510,12 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   const nbFacturesFromDevis = facturesFromDevis.length;
   const facturesPayeesFromDevis = facturesFromDevis.filter((f) => f.statut === "Payée");
   const nbFactureesPayees = facturesPayeesFromDevis.length;
-  const montantFacturesPayees = facturesPayeesFromDevis.reduce((s, f) => s + f.totalTTC, 0);
+  const montantFacturesPayees = facturesPayeesFromDevis.reduce((s, f) => s + Number(f.totalTTC), 0);
 
   const funnel: FunnelEtape[] = [
     { label: "Devis créés", count: totalCount, amount: totalTTC, pct: 100, color: "violet" },
     { label: "Acceptés", count: acceptedCount, amount: acceptedRevenueHT, pct: totalCount > 0 ? Math.round((acceptedCount / totalCount) * 100) : 0, color: "emerald" },
-    { label: "Facturés", count: nbFacturesFromDevis, amount: facturesFromDevis.reduce((s, f) => s + f.totalTTC, 0), pct: totalCount > 0 ? Math.round((nbFacturesFromDevis / totalCount) * 100) : 0, color: "blue" },
+    { label: "Facturés", count: nbFacturesFromDevis, amount: facturesFromDevis.reduce((s, f) => s + Number(f.totalTTC), 0), pct: totalCount > 0 ? Math.round((nbFacturesFromDevis / totalCount) * 100) : 0, color: "blue" },
     { label: "Payés", count: nbFactureesPayees, amount: montantFacturesPayees, pct: totalCount > 0 ? Math.round((nbFactureesPayees / totalCount) * 100) : 0, color: "amber" },
   ];
 
@@ -547,7 +547,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       facturesEmises,
       facturesPayees,
       caEncaisse,
-      depensesSemaine: depensesAgg._sum.montant ?? 0,
+      depensesSemaine: Number(depensesAgg._sum.montant ?? 0),
     },
     funnel,
   };
