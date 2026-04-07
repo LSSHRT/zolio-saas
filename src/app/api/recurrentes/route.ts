@@ -28,9 +28,9 @@ function mapRecurrente(r: RecurrenteRecord) {
     nom: r.nom,
     client: r.client.nom,
     clientId: r.id, // not exposed directly but available if needed
-    montantHT: r.montantHT,
-    tva: r.tva,
-    montantTTC: r.montantTTC,
+    montantHT: Number(r.montantHT),
+    tva: Number(r.tva),
+    montantTTC: Number(r.montantTTC),
     frequence: r.frequence,
     jourMois: r.jourMois,
     prochaineDate: r.prochaineDate.toISOString(),

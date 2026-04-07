@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       telephone: body.client.telephone || "",
       adresse: body.client.adresse || "",
     };
-    const lignes = parseLignes(body.lignesNorm || body.lignes);
+    const lignes = parseLignes((body as Record<string, unknown>).lignesNorm || body.lignes);
     const devisNumero = normalizeText(body.devisNumero);
     const totalHT = body.totalHT;
     const totalTTC = body.totalTTC;
