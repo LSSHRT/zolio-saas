@@ -33,7 +33,7 @@ export async function GET(
     }
 
     const options = parent.devisOptions.map((d) => {
-      const totalHT = d.lignesNorm?.reduce((s, l) => s + l.prixUnitaire * l.quantite, 0) ?? 0;
+      const totalHT = d.lignesNorm?.reduce((s, l) => s + Number(l.prixUnitaire) * Number(l.quantite), 0) ?? 0;
       const tvaPct = d.tva ?? 0;
       const totalTTC = +(totalHT * (1 + tvaPct / 100)).toFixed(2);
 

@@ -128,7 +128,7 @@ export async function POST(request: Request) {
               unite: l.unite,
               quantite: l.quantite,
               prixUnitaire: l.prixUnitaire,
-              totalLigne: l.quantite * l.prixUnitaire,
+              totalLigne: Number(l.quantite) * Number(l.prixUnitaire),
               tva: l.tva,
               isOptional: l.isOptional,
               position: l.position,
