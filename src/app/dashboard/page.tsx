@@ -1802,7 +1802,7 @@ export default function DashboardPage() {
               </div>
             </div>
 
-              {/* KPI */}
+            {/* KPI */}
             <div className="client-panel rounded-[2.15rem] p-5 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                 <div>
