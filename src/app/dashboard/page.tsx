@@ -1882,19 +1882,15 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Funnel */}
-            {funnel && funnel.length > 0 && (
-              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-                <div className="mb-3 flex items-center gap-2">
-                  <Target size={18} className="text-violet-500" />
-                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
-                </div>
-                <ConversionFunnel funnel={funnel} />
-              </div>
-            )}
-
-            {/* Pilotage */}
+            {/* Performance (Stats + Funnel) */}
             <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+              <div className="mb-3 flex items-center gap-2">
+                <Target size={18} className="text-violet-500" />
+                <h3 className="text-sm font-bold text-slate-800 dark:text-white">Performance</h3>
+              </div>
+
+              {avgResponseDays > 0 && (
+                <div className="grid gap-4 sm:grid-cols-3 mb-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Objectif</p>
