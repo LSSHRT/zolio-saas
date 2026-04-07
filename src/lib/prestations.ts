@@ -1,10 +1,12 @@
+import { Decimal } from "@prisma/client";
+
 type PrestationRecord = {
   id: string;
   nom: string;
   description?: string | null;
   unite?: string | null;
-  prix: number;
-  cout?: number | null;
+  prix: Decimal | number;
+  cout?: Decimal | number | null;
   stock?: number | null;
 };
 
@@ -89,8 +91,8 @@ export function mapPrestationForClient(record: PrestationRecord) {
     nom: record.nom,
     description: decoded.description,
     unite: record.unite || "",
-    prix: record.prix,
-    cout: record.cout || 0,
+    prix: Number(record.prix),
+    cout: Number(record.cout || 0),
     stock: record.stock || 0,
   };
 }
