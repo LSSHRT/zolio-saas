@@ -110,8 +110,8 @@ export async function PUT(
     }
 
     // Recalculer montantTTC si montantHT ou tva changent
-    const montantHT = data.montantHT ?? existing.montantHT;
-    const tva = data.tva ?? existing.tva;
+    const montantHT = Number(data.montantHT ?? existing.montantHT);
+    const tva = Number(data.tva ?? existing.tva);
     const montantTTC = Number((montantHT * (1 + tva / 100)).toFixed(2));
 
     // Recalculer prochaineDate si frequence ou jourMois changent
