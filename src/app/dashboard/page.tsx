@@ -1882,15 +1882,19 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Performance (Stats + Funnel) */}
-            <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
-              <div className="mb-3 flex items-center gap-2">
-                <Target size={18} className="text-violet-500" />
-                <h3 className="text-sm font-bold text-slate-800 dark:text-white">Performance</h3>
+            {/* Funnel */}
+            {funnel && funnel.length > 0 && (
+              <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
+                <div className="mb-3 flex items-center gap-2">
+                  <Target size={18} className="text-violet-500" />
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
+                </div>
+                <ConversionFunnel funnel={funnel} />
               </div>
+            )}
 
-              {avgResponseDays > 0 && (
-                <div className="grid gap-4 sm:grid-cols-3 mb-4">
+            {/* Pilotage */}
+            <div className="client-panel rounded-[2.1rem] p-5 sm:p-6">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Objectif</p>
@@ -1904,7 +1908,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Activité de la semaine */}
+              {/* Activité semaine */}
               {semaine && (
                 <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                   <div className="rounded-2xl border border-violet-200/60 bg-violet-50/50 px-4 py-4 text-center dark:border-violet-500/20 dark:bg-violet-500/10">
