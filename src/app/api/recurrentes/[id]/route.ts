@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Decimal } from "@prisma/client";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { internalServerError, rateLimitResponse } from "@/lib/http";
@@ -10,9 +11,9 @@ type RecurrenteRecord = {
   id: string;
   userId: string;
   nom: string;
-  montantHT: number;
-  tva: number;
-  montantTTC: number;
+  montantHT: Decimal | number;
+  tva: Decimal | number;
+  montantTTC: Decimal | number;
   frequence: string;
   jourMois: number;
   prochaineDate: Date;
