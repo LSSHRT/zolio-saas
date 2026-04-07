@@ -20,7 +20,7 @@ function createExtendedClient(context?: PrismaContext) {
   return baseClient.$extends({
     query: {
       $allModels: {
-        async $allOperations({ model, operation, args, query }) {
+        async $allOperations({ model, operation, args, query }: { model: string; operation: string; args: Record<string, any>; query: (args: any) => Promise<any> }) {
           // 1. Soft Delete - Filter out deleted records by default
           if (
             ['findMany', 'findFirst', 'findUnique', 'count', 'aggregate', 'groupBy'].includes(operation)
