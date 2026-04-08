@@ -22,8 +22,8 @@ import {
   type TradeKey,
 } from "@/lib/trades";
 import { AIAssistant } from "./components/AIAssistant";
-import { ClientSelector } from "./components/ClientSelector";
-import { LineEditor } from "./components/LineEditor";
+import { ClientSelector } from "@/components/document-form/ClientSelector";
+import { LineEditor } from "@/components/document-form/LineEditor";
 import { SummaryRail } from "./components/SummaryRail";
 import type {
   Client,

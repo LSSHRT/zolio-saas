@@ -194,8 +194,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
   return (
     <>
-      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-sm items-center justify-between gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden">
-        {/* 4 liens principaux */}
+      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-1 rounded-[1.75rem] px-3 py-2.5 lg:hidden">
+        {/* 2 liens gauche */}
         {CLIENT_NAV_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
           return (
@@ -204,22 +204,21 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               href={item.href}
               className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
             >
-              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 2} />
-              <span className="text-[10px] font-semibold">{item.label}</span>
+              <Icon size={19} strokeWidth={active === item.key ? 2.4 : 1.8} />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}
 
-        {/* Bouton central + Nouveau */}
+        {/* Bouton central Nouveau */}
         <Link
           href="/nouveau-devis"
-          className="relative -mt-7 flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-xl shadow-violet-500/30"
+          className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
         >
-          <Plus size={22} />
-          <span className="mt-0.5 text-[8px] font-bold">Nouveau</span>
+          <Plus size={22} strokeWidth={2.5} />
         </Link>
 
-        {/* 2 liens restants */}
+        {/* 2 liens droite */}
         {CLIENT_NAV_ITEMS.slice(2).map((item) => {
           const Icon = item.icon;
           return (
@@ -228,8 +227,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               href={item.href}
               className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
             >
-              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 2} />
-              <span className="text-[10px] font-semibold">{item.label}</span>
+              <Icon size={19} strokeWidth={active === item.key ? 2.4 : 1.8} />
+              <span className="text-[10px] font-medium">{item.label}</span>
             </Link>
           );
         })}
@@ -241,10 +240,10 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
           className={`relative client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
           aria-label="Plus d'outils"
         >
-          <MoreHorizontal size={20} strokeWidth={active === "tools" ? 2.4 : 2} />
-          <span className="text-[10px] font-semibold">Plus</span>
+          <MoreHorizontal size={19} strokeWidth={active === "tools" ? 2.4 : 1.8} />
+          <span className="text-[10px] font-medium">Plus</span>
           {unreadCount > 0 && (
-            <span className="absolute -top-0.5 right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold text-white">
+            <span className="absolute -top-0.5 right-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[7px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -360,18 +359,33 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
     { href: "/calepin", icon: StickyNote, key: "calepin" as const, label: "Calepin" },
   ];
 
-  const toolItems = [
-    { href: "/nouvelle-facture", icon: FileText, label: "Nouvelle facture" },
-    { href: "/notifications", icon: Bell, label: "Notifications" },
-    { href: "/rapports", icon: FileText, label: "Rapports" },
-    { href: "/planning", icon: Calendar, label: "Planning" },
-    { href: "/catalogue", icon: Package, label: "Catalogue" },
-    { href: "/modeles", icon: Copy, label: "Modèles" },
-    { href: "/recurrentes", icon: RefreshCw, label: "Récurrences" },
-    { href: "/depenses", icon: CreditCard, label: "Dépenses" },
-    { href: "/tva", icon: Calculator, label: "TVA" },
-    { href: "/parametres", icon: Settings, label: "Paramètres" },
-    { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
+  const toolGroups = [
+    {
+      label: "Commercial",
+      items: [
+        { href: "/nouvelle-facture", icon: FileText, label: "Nouvelle facture" },
+        { href: "/notifications", icon: Bell, label: "Notifications" },
+        { href: "/planning", icon: Calendar, label: "Planning" },
+        { href: "/catalogue", icon: Package, label: "Catalogue" },
+        { href: "/modeles", icon: Copy, label: "Modèles" },
+      ],
+    },
+    {
+      label: "Finance",
+      items: [
+        { href: "/rapports", icon: FileText, label: "Rapports" },
+        { href: "/depenses", icon: CreditCard, label: "Dépenses" },
+        { href: "/recurrentes", icon: RefreshCw, label: "Récurrences" },
+        { href: "/tva", icon: Calculator, label: "TVA" },
+      ],
+    },
+    {
+      label: "Config",
+      items: [
+        { href: "/parametres", icon: Settings, label: "Paramètres" },
+        { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
+      ],
+    },
   ];
 
   const isActiveNav = (item: { key?: string; href?: string }) => {
@@ -413,34 +427,38 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
       {/* Séparateur */}
       <div className="my-3 border-t border-slate-100 dark:border-white/8" />
 
-      {/* Outils */}
-      <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">Outils</p>
-      <nav className="flex flex-col gap-0.5">
-        {toolItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActiveNav(item);
-          const isNotif = item.href === "/notifications";
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`relative flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-[13px] transition ${
-                active
-                  ? "bg-slate-100 font-medium text-slate-900 dark:bg-white/10 dark:text-white"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-              }`}
-            >
-              <Icon size={15} strokeWidth={active ? 2 : 1.8} />
-              {item.label}
-              {isNotif && unreadCount > 0 && (
-                <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Groupes d'outils */}
+      {toolGroups.map((group) => (
+        <div key={group.label} className="mb-2">
+          <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">{group.label}</p>
+          <nav className="flex flex-col gap-0.5">
+            {group.items.map((item) => {
+              const Icon = item.icon;
+              const itemActive = isActiveNav(item);
+              const isNotif = item.href === "/notifications";
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-[13px] transition ${
+                    itemActive
+                      ? "bg-slate-100 font-medium text-slate-900 dark:bg-white/10 dark:text-white"
+                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+                  }`}
+                >
+                  <Icon size={15} strokeWidth={itemActive ? 2 : 1.8} />
+                  {item.label}
+                  {isNotif && unreadCount > 0 && (
+                    <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      ))}
 
       {/* Footer: Support + User */}
       <div className="mt-auto pt-4">
