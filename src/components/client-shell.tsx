@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import useSWR from "swr";
 import {
   ArrowLeft,
@@ -411,97 +411,145 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[240px] flex-col rounded-2xl border border-slate-200 bg-white p-4 lg:flex dark:border-white/10 dark:bg-slate-950/80 dark:backdrop-blur-xl">
-      {/* Logo */}
-      <div className="mb-6 flex items-center gap-3 px-2">
-        <Image src="/logo.png" alt="Zolio" width={28} height={28} className="h-7 w-auto" priority />
-        <span className="text-[13px] font-bold tracking-widest text-slate-900 dark:text-white">ZOLIO</span>
-      </div>
-
-      <div className="mb-6 px-2">
-        <Link
-          href="/nouveau-devis"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:opacity-90"
-        >
-          <Plus size={18} strokeWidth={2.5} />
-          Nouveau devis
-        </Link>
-      </div>
-
-      {/* Navigation principale */}
-      <nav className="flex flex-col gap-0.5">
-        {mainItems.map((item) => {
-          const Icon = item.icon;
-          const active = isActiveNav(item);
-          return (
+    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[304px] flex-col rounded-[2rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
+      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
+          <ClientBrandMark />
+          <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            Un cockpit bureau pour piloter devis, encaissements et fiches clients sans friction.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2">
             <Link
-              key={item.key}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-2.5 py-2 text-[13px] font-medium transition ${
-                active
-                  ? "bg-slate-100 font-semibold text-slate-900 dark:bg-white/10 dark:text-white"
-                  : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-              }`}
+              href="/nouveau-devis"
+              className="inline-flex items-center justify-center gap-2 rounded-[1.15rem] bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:translate-y-[-1px]"
             >
-              <Icon size={16} strokeWidth={active ? 2.2 : 1.8} />
-              {item.label}
+              <Plus size={16} />
+              Nouveau devis
             </Link>
-          );
-        })}
-      </nav>
+            <Link
+              href="/nouvelle-facture"
+              className="inline-flex items-center justify-center gap-2 rounded-[1.15rem] border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+            >
+              <Receipt size={16} />
+              Facture
+            </Link>
+          </div>
+        </div>
 
-      {/* Séparateur */}
-      <div className="my-3 border-t border-slate-100 dark:border-white/8" />
-
-      {/* Groupes d'outils */}
-      {toolGroups.map((group) => (
-        <div key={group.label} className="mb-2">
-          <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">{group.label}</p>
-          <nav className="flex flex-col gap-0.5">
-            {group.items.map((item) => {
+        <div className="mt-4 rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
+          <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+            Pilotage
+          </p>
+          <nav className="mt-3 flex flex-col gap-1">
+            {mainItems.map((item) => {
               const Icon = item.icon;
               const itemActive = isActiveNav(item);
-              const isNotif = item.href === "/notifications";
               return (
                 <Link
-                  key={item.href}
+                  key={item.key}
                   href={item.href}
-                  className={`relative flex items-center gap-3 rounded-lg px-2.5 py-1.5 text-[13px] transition ${
+                  className={`flex min-h-11 items-center gap-3 rounded-[1.15rem] px-3 py-2.5 text-[13px] font-medium transition ${
                     itemActive
-                      ? "bg-slate-100 font-medium text-slate-900 dark:bg-white/10 dark:text-white"
+                      ? "bg-[linear-gradient(135deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08))] text-slate-950 shadow-[0_16px_30px_-22px_rgba(124,58,237,0.55)] ring-1 ring-violet-300/50 dark:text-white dark:ring-violet-400/20"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
                   }`}
                 >
-                  <Icon size={15} strokeWidth={itemActive ? 2 : 1.8} />
-                  {item.label}
-                  {isNotif && unreadCount > 0 && (
-                    <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                      {unreadCount > 99 ? "99+" : unreadCount}
-                    </span>
-                  )}
+                  <Icon size={16} strokeWidth={itemActive ? 2.2 : 1.8} />
+                  <span className="flex-1">{item.label}</span>
                 </Link>
               );
             })}
           </nav>
         </div>
-      ))}
 
-      {/* Footer: Support + User */}
-      <div className="mt-auto pt-4">
-        <a
-          href={SUPPORT_HREF}
-          target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
-          rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-          className="flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-400 transition hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-white/5 dark:hover:text-white"
-        >
-          <LifeBuoy size={15} />
-          Support
-        </a>
-        <div className="mt-2 px-2.5">
+        {toolGroups.map((group) => (
+          <div key={group.label} className="mt-4 rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
+            <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+              {group.label}
+            </p>
+            <nav className="mt-3 flex flex-col gap-1">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const itemActive = isActiveNav(item);
+                const isNotif = item.href === "/notifications";
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`relative flex min-h-10 items-center gap-3 rounded-[1.15rem] px-3 py-2.5 text-[13px] transition ${
+                      itemActive
+                        ? "bg-slate-100 font-medium text-slate-950 ring-1 ring-slate-200/80 dark:bg-white/10 dark:text-white dark:ring-white/12"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+                    }`}
+                  >
+                    <Icon size={15} strokeWidth={itemActive ? 2 : 1.8} />
+                    <span className="flex-1">{item.label}</span>
+                    {isNotif && unreadCount > 0 ? (
+                      <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                        {unreadCount > 99 ? "99+" : unreadCount}
+                      </span>
+                    ) : null}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4 space-y-3">
+        <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                Raccourcis
+              </p>
+              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Support, notifications et recherche globale restent à portée de clavier.
+              </p>
+            </div>
+            <span className="inline-flex rounded-full bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-300/40 dark:text-rose-200 dark:ring-rose-400/20">
+              {unreadCount}
+            </span>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/notifications"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+            >
+              <Bell size={15} />
+              Notifications
+            </Link>
+            <a
+              href={SUPPORT_HREF}
+              target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
+              rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+            >
+              <LifeBuoy size={15} />
+              Support
+            </a>
+          </div>
+
+          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            Astuce: utilisez <span className="font-semibold">⌘K</span> pour lancer la recherche globale.
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between rounded-[1.5rem] border border-slate-200/80 bg-white/84 p-3 dark:border-white/10 dark:bg-white/4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+              Compte
+            </p>
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+              Session et réglages
+            </p>
+          </div>
           <UserButton
             appearance={{
               elements: {
-                userButtonAvatarBox: "h-8 w-8",
+                userButtonAvatarBox: "h-9 w-9",
                 userButtonTrigger: "p-0",
               },
             }}
@@ -656,14 +704,18 @@ export function ClientHeroStat({
 }) {
   return (
     <div className="client-kpi-card">
-      <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
-        {label}
-      </p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:mt-4 sm:text-3xl">
-        {value}
-      </p>
-      <div className={`mt-2 inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ring-1 sm:mt-4 ${toneClasses(tone)}`}>
-        {detail}
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+            {label}
+          </p>
+          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+            {value}
+          </p>
+        </div>
+        <div className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${toneClasses(tone)}`}>
+          {detail}
+        </div>
       </div>
     </div>
   );
@@ -758,7 +810,7 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[272px]">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[336px] xl:px-10">
         <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
@@ -792,7 +844,12 @@ export function ClientSubpageShell({
               >
                 <ArrowLeft size={20} />
               </Link>
-              <ClientBrandMark />
+              <div className="min-w-0">
+                <ClientBrandMark />
+                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                  Navigation desktop
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 md:justify-end">
@@ -805,7 +862,7 @@ export function ClientSubpageShell({
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           <section className="client-panel-strong overflow-hidden rounded-[2.25rem] px-5 py-6 sm:px-6 lg:px-7">
             <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
                 <div className="max-w-3xl">
                   {breadcrumbs && breadcrumbs.length > 0 && (
                     <nav aria-label="Fil d'Ariane" className="mb-2 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
@@ -833,14 +890,50 @@ export function ClientSubpageShell({
                     {description}
                   </p>
                 </div>
+
+                <div className="hidden xl:grid gap-3">
+                  <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                      Recherche globale
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                      Retrouvez un client, un devis, une facture ou une dépense sans quitter cette page.
+                    </p>
+                    <GlobalSearch className="mt-0 max-w-none" />
+                  </div>
+
+                  <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
+                          Utilitaires
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          Gardez le support et les raccourcis à proximité pendant vos tâches bureau.
+                        </p>
+                      </div>
+                      <ShortcutsModal />
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <ClientSupportButton compact />
+                      <Link
+                        href="/notifications"
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+                      >
+                        <Bell size={15} />
+                        Notifications
+                      </Link>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {mobileSummary ? <div className="md:hidden">{mobileSummary}</div> : null}
               {summary ? <div className={mobileSummary ? "hidden md:block" : ""}>{summary}</div> : null}
 
-              {/* Recherche globale (desktop uniquement) */}
-              <div className="hidden md:block">
-                <GlobalSearch />
+              <div className="hidden md:block xl:hidden">
+                <GlobalSearch className="max-w-none" />
               </div>
             </div>
           </section>
