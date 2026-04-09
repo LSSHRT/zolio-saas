@@ -240,8 +240,9 @@ export default function DepensesPage() {
         </div>
       </ClientSectionCard>
 
-      {/* Graphique répartition par catégorie */}
+      {/* Graphique répartition par catégorie — desktop only */}
       {categorieBreakdown.length > 0 && (
+        <div className="hidden sm:block">
         <ClientSectionCard>
           <h2 className="text-sm font-semibold text-slate-700 dark:text-white mb-4">Répartition par catégorie</h2>
           <div className="h-[220px]">
@@ -278,6 +279,7 @@ export default function DepensesPage() {
             </ResponsiveContainer>
           </div>
         </ClientSectionCard>
+        </div>
       )}
 
       <ClientSectionCard>

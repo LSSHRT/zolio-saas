@@ -634,10 +634,10 @@ export function ClientHeroStat({
       <p className="text-[11px] uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
         {label}
       </p>
-      <p className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:mt-4 sm:text-3xl">
         {value}
       </p>
-      <div className={`mt-4 inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ${toneClasses(tone)}`}>
+      <div className={`mt-2 inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ring-1 sm:mt-4 ${toneClasses(tone)}`}>
         {detail}
       </div>
     </div>
@@ -673,7 +673,7 @@ export function ClientMobileOverview({
             key={`${item.label}-${item.value}`}
             className="rounded-[1.1rem] border border-slate-200/70 bg-slate-50/80 px-3 py-2.5 dark:border-white/8 dark:bg-white/4"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
               {item.label}
             </p>
             <p className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
@@ -693,7 +693,7 @@ export function ClientSectionCard({
   children: ReactNode;
   className?: string;
 }) {
-  return <section className={`client-panel rounded-[2rem] p-5 sm:p-6 ${className}`}>{children}</section>;
+  return <section className={`client-panel rounded-[2rem] p-4 sm:p-5 md:p-6 ${className}`}>{children}</section>;
 }
 
 export function ClientSubpageShell({

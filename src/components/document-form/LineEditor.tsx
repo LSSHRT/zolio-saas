@@ -400,11 +400,8 @@ export function LineEditor({
           <div className="rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                <h3 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
                   Lignes du devis
-                </p>
-                <h3 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
-                  Les lignes qui feront le devis final
                 </h3>
               </div>
               <span className="inline-flex items-center rounded-full bg-slate-900/6 px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
@@ -525,7 +522,7 @@ export function LineEditor({
                         </div>
 
                         <div className="shrink-0 text-right">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Total
                           </p>
                           <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">

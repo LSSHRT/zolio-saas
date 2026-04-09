@@ -50,11 +50,11 @@ export function DashboardBenefice({ data }: { data: BeneficeSummary }) {
 
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-[1.2rem] border border-emerald-200/50 bg-emerald-50/50 p-3 dark:border-emerald-500/10 dark:bg-emerald-500/5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CA encaissé</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">CA encaissé</p>
           <p className="mt-1 text-lg font-bold text-emerald-800 dark:text-emerald-200">{formatCurrency(data.caFacture)}</p>
         </div>
         <div className="rounded-[1.2rem] border border-rose-200/50 bg-rose-50/50 p-3 dark:border-rose-500/10 dark:bg-rose-500/5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">Dépenses</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">Dépenses</p>
           <p className="mt-1 text-lg font-bold text-rose-800 dark:text-rose-200">{formatCurrency(data.depenses)}</p>
         </div>
       </div>

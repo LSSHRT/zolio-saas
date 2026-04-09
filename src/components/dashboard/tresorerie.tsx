@@ -67,7 +67,7 @@ export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-slate-400">Recouvrement</p>
+            <p className="text-[11px] text-slate-400">Recouvrement</p>
             <p className={`text-lg font-bold ${data.tauxRecouvrement >= 80 ? "text-emerald-600 dark:text-emerald-400" : data.tauxRecouvrement >= 50 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"}`}>
               {data.tauxRecouvrement}%
             </p>

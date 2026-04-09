@@ -46,7 +46,7 @@ export function CreationWizardShell({
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href={backHref}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
                 aria-label="Retour"
               >
                 <ArrowLeft size={18} />
@@ -79,29 +79,19 @@ export function CreationWizardShell({
 
         <main className="mt-3 flex-1 space-y-4 sm:mt-4 lg:mt-6 lg:space-y-6">
           <section className="client-panel-strong overflow-hidden rounded-[1.9rem] px-4 py-4 sm:rounded-[2.25rem] sm:px-6 sm:py-6 lg:px-7 md:hidden">
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
-                    {eyebrow}
-                  </p>
-                  <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+                  <h1 className="text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
                     {title}
                   </h1>
                 </div>
                 <div className="rounded-[1.2rem] border border-violet-300/40 bg-violet-500/10 px-3 py-2 text-right dark:border-violet-400/20 dark:bg-violet-500/12">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-violet-700 dark:text-violet-100">
-                    Étape active
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                  <p className="text-sm font-semibold text-slate-950 dark:text-white">
                     {steps[currentStep]?.title}
                   </p>
                 </div>
               </div>
-
-              <p className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                {steps[currentStep]?.description}
-              </p>
 
               <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 pb-1">
                 {steps.map((step, index) => {

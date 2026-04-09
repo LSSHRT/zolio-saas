@@ -306,9 +306,9 @@ export default function RapportsPage() {
                       }`}
                     />
                   </div>
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400">{m.name}</span>
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400">{m.name}</span>
                   {m.CA > 0 && (
-                    <span className="text-[10px] text-slate-400 dark:text-slate-500">
+                    <span className="text-[11px] text-slate-400 dark:text-slate-500">
                       {Math.round(m.CA)}€
                     </span>
                   )}
@@ -319,8 +319,9 @@ export default function RapportsPage() {
         </ClientSectionCard>
       )}
 
-      {/* Top clients */}
+      {/* Top clients — desktop only */}
       {dashboard?.topClients && dashboard.topClients.length > 0 && (
+        <div className="hidden sm:block">
         <ClientSectionCard>
           <h2 className="text-sm font-semibold text-slate-700 dark:text-white mb-4 flex items-center gap-2">
             <Users size={16} />
@@ -339,10 +340,12 @@ export default function RapportsPage() {
             ))}
           </div>
         </ClientSectionCard>
+        </div>
       )}
 
-      {/* Top dépenses par catégorie */}
+      {/* Top dépenses par catégorie — desktop only */}
       {depenseSummary.parCategorie.length > 0 && (
+        <div className="hidden sm:block">
         <ClientSectionCard>
           <h2 className="text-sm font-semibold text-slate-700 dark:text-white mb-4 flex items-center gap-2">
             <BarChart3 size={16} />
@@ -365,11 +368,12 @@ export default function RapportsPage() {
                     }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">{cat.count} opération{cat.count > 1 ? "s" : ""} · {depenseSummary.totalTTC > 0 ? Math.round((cat.total / depenseSummary.totalTTC) * 100) : 0}%</p>
+                <p className="text-[11px] text-slate-400 mt-1">{cat.count} opération{cat.count > 1 ? "s" : ""} · {depenseSummary.totalTTC > 0 ? Math.round((cat.total / depenseSummary.totalTTC) * 100) : 0}%</p>
               </div>
             ))}
           </div>
         </ClientSectionCard>
+        </div>
       )}
 
       {/* Exports */}

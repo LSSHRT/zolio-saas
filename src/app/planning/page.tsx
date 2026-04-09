@@ -219,7 +219,7 @@ export default function PlanningPage() {
               <button
                 key={dateStr}
                 onClick={() => setSelectedDate(isSelected ? null : dateStr)}
-                className={`relative flex aspect-square flex-col items-center justify-start rounded-xl p-1 text-xs transition ${
+                className={`relative flex aspect-square flex-col items-center justify-start rounded-xl p-1.5 text-sm transition ${
                   isSelected
                     ? "bg-violet-100 ring-2 ring-violet-500 dark:bg-violet-500/15 dark:ring-violet-400"
                     : isToday
@@ -233,11 +233,8 @@ export default function PlanningPage() {
                 {dayEvents.length > 0 && (
                   <div className="mt-0.5 flex gap-0.5">
                     {dayEvents.slice(0, 3).map((e) => (
-                      <div key={e.id} className={`h-1 w-1 rounded-full ${TONE_DOT[e.tone] || "bg-slate-400"}`} />
+                      <div key={e.id} className={`h-1.5 w-1.5 rounded-full ${TONE_DOT[e.tone] || "bg-slate-400"}`} />
                     ))}
-                    {dayEvents.length > 3 && (
-                      <span className="text-[8px] text-slate-400">+{dayEvents.length - 3}</span>
-                    )}
                   </div>
                 )}
               </button>

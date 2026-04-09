@@ -440,14 +440,14 @@ export default function ParametresEntreprise() {
   const statusCard = (
     <ClientSectionCard>
       <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">État du dossier</p>
-      <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+      <h2 className="mt-2 text-lg font-semibold tracking-tight text-slate-950 dark:text-white sm:text-xl">
         Lecture rapide
       </h2>
 
-      <div className="mt-5 space-y-3">
-        <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+      <div className="mt-4 space-y-3">
+        <div className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
           <div
-            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
               documentReady
                 ? "bg-emerald-500/12 text-emerald-600 dark:bg-emerald-500/12 dark:text-emerald-300"
                 : "bg-amber-400/12 text-amber-600 dark:bg-amber-400/12 dark:text-amber-300"
@@ -455,19 +455,22 @@ export default function ParametresEntreprise() {
           >
             {documentReady ? <CheckCircle2 size={17} /> : <Sparkles size={17} />}
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Base entreprise</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <p className="hidden text-sm leading-6 text-slate-600 dark:text-slate-300 sm:block">
               {documentReady
                 ? "Nom, adresse, téléphone et SIRET sont prêts."
                 : "Complétez l'identité de base pour fiabiliser vos documents."}
             </p>
           </div>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${documentReady ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"}`}>
+            {documentReady ? "OK" : "À faire"}
+          </span>
         </div>
 
-        <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+        <div className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
           <div
-            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
               payoutReady
                 ? "bg-emerald-500/12 text-emerald-600 dark:bg-emerald-500/12 dark:text-emerald-300"
                 : "bg-slate-900/6 text-slate-600 dark:bg-white/8 dark:text-slate-300"
@@ -475,19 +478,22 @@ export default function ParametresEntreprise() {
           >
             <Landmark size={17} />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Coordonnées bancaires</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <p className="hidden text-sm leading-6 text-slate-600 dark:text-slate-300 sm:block">
               {payoutReady
                 ? "IBAN et BIC seront visibles sur les factures."
                 : "Ajoutez IBAN et BIC pour les règlements."}
             </p>
           </div>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${payoutReady ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-400"}`}>
+            {payoutReady ? "OK" : "À faire"}
+          </span>
         </div>
 
-        <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+        <div className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
           <div
-            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
               reviewReady
                 ? "bg-violet-500/12 text-violet-600 dark:bg-violet-500/12 dark:text-violet-300"
                 : "bg-slate-900/6 text-slate-600 dark:bg-white/8 dark:text-slate-300"
@@ -495,27 +501,28 @@ export default function ParametresEntreprise() {
           >
             <Star size={17} />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Relance avis Google</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <p className="hidden text-sm leading-6 text-slate-600 dark:text-slate-300 sm:block">
               {reviewReady
                 ? "Le lien d'avis peut être proposé après paiement."
                 : "Ajoutez le lien d'avis pour activer cette relance."}
             </p>
           </div>
+          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${reviewReady ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300" : "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-400"}`}>
+            {reviewReady ? "OK" : "À faire"}
+          </span>
         </div>
 
         {/* Relances automatiques factures */}
-        <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
-          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-amber-500/12 text-amber-600 dark:bg-amber-500/12 dark:text-amber-300">
+        <div className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-amber-500/12 text-amber-600 dark:bg-amber-500/12 dark:text-amber-300">
             <Clock size={17} />
           </div>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Relances automatiques</p>
-            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            <p className="hidden text-sm leading-6 text-slate-600 dark:text-slate-300 sm:block">
               Envoi automatique d&apos;un email de rappel aux clients dont la facture est en retard de 3+ jours.
-              <br />
-              <span className="text-xs text-slate-400 dark:text-slate-500">Cron Vercel 8h UTC — aucun effort manuel.</span>
             </p>
           </div>
           <div className="mt-1">

@@ -540,7 +540,7 @@ export default function ClientsPage() {
                 {isDeletingBulk ? "Suppression..." : `Supprimer (${selectedIds.size})`}
               </button>
             ) : (
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+              <span className="hidden text-xs font-medium text-slate-500 dark:text-slate-400 sm:inline">
                 Importez un CSV ou enrichissez chaque fiche au fil des chantiers.
               </span>
             )}
@@ -584,7 +584,7 @@ export default function ClientsPage() {
                     <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                       {filtered.length} client{filtered.length > 1 ? "s" : ""}
                     </p>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                    <p className="hidden text-xs text-slate-400 dark:text-slate-500 sm:block">
                       Ouvrez la fiche seulement quand vous en avez besoin.
                     </p>
                   </div>

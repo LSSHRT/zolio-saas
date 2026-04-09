@@ -62,7 +62,7 @@ export function DashboardActionCard({ item, compact = false }: { item: Dashboard
         </div>
         <div className="min-w-0 flex-1">
           {compact ? null : (
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
               {item.eyebrow}
             </p>
           )}
