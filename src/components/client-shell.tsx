@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import useSWR from "swr";
 import {
   ArrowLeft,
@@ -194,50 +195,64 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
   return (
     <>
-      <nav className="client-nav-dock fixed inset-x-3 bottom-5 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden" data-testid="mobile-nav-dock">
+      <motion.nav
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+        className="client-nav-dock fixed inset-x-3 bottom-5 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden"
+        data-testid="mobile-nav-dock"
+      >
         {/* 2 liens gauche */}
         {CLIENT_NAV_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
           return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
-            >
-              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
-              <span className="text-[11px] font-medium leading-tight">{item.label}</span>
-            </Link>
+            <motion.div key={item.key} whileTap={{ scale: 0.9 }}>
+              <Link
+                href={item.href}
+                className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
+              >
+                <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
+                <span className="text-[11px] font-medium leading-tight">{item.label}</span>
+              </Link>
+            </motion.div>
           );
         })}
 
         {/* Bouton central Nouveau */}
-        <Link
-          href="/nouveau-devis"
-          className="relative -mt-4 flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
-          data-testid="mobile-new-devis-btn"
-        >
-          <Plus size={22} strokeWidth={2.5} />
-        </Link>
+        <motion.div whileTap={{ scale: 0.9 }}>
+          <Link
+            href="/nouveau-devis"
+            className="relative -mt-4 flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
+            data-testid="mobile-new-devis-btn"
+          >
+            <Plus size={22} strokeWidth={2.5} />
+          </Link>
+        </motion.div>
 
         {/* 2 liens droite */}
         {CLIENT_NAV_ITEMS.slice(2).map((item) => {
           const Icon = item.icon;
           return (
-            <Link
-              key={item.key}
-              href={item.href}
-              className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
-            >
-              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
-              <span className="text-[11px] font-medium leading-tight">{item.label}</span>
-            </Link>
+            <motion.div key={item.key} whileTap={{ scale: 0.9 }}>
+              <Link
+                href={item.href}
+                className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
+              >
+                <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
+                <span className="text-[11px] font-medium leading-tight">{item.label}</span>
+              </Link>
+            </motion.div>
           );
         })}
-      </nav>
+      </motion.nav>
 
       {/* Bouton Plus (flottant à droite, au-dessus du dock) */}
-      <button
+      <motion.button
         type="button"
+        whileTap={{ scale: 0.9 }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
         onClick={() => setToolsOpen(true)}
         className="fixed bottom-[5.5rem] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
         aria-label="Plus d'outils"
@@ -249,7 +264,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
-      </button>
+      </motion.button>
 
       {/* Search modal mobile */}
       {searchOpen ? (

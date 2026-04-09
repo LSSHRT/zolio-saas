@@ -43,6 +43,7 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import ConversionFunnel from "@/components/conversion-funnel";
+import { PullToRefresh } from "@/components/pull-to-refresh";
 
 // Dashboard components
 import {
@@ -309,7 +310,8 @@ export default function DashboardPage() {
 
       {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[272px]">
+      <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
+        <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[272px]">
         {/* ─── Header ────────────────────────────────────────────── */}
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center justify-between gap-3">
@@ -656,6 +658,7 @@ export default function DashboardPage() {
           )}
         </main>
       </div>
+      </PullToRefresh>
 
       {/* ─── Objectif Dialog ─────────────────────────────────────── */}
       <MobileDialog open={objectifDialogOpen} onClose={() => setObjectifDialogOpen(false)} title="Objectif mensuel">
