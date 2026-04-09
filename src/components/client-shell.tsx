@@ -646,49 +646,39 @@ export function ClientHeroStat({
 
 export function ClientMobileOverview({
   badge,
-  description,
   items,
   title,
 }: {
   badge?: string;
-  description: string;
+  description?: string;
   items: ClientMobileOverviewItem[];
   title: string;
 }) {
+  // Show max 3 items on mobile for clarity
+  const visibleItems = items.slice(0, 3);
   return (
     <section className="client-panel rounded-[1.85rem] p-4 md:hidden">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
-            Vue rapide
-          </p>
-          <h2 className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
-        </div>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
         {badge ? (
-          <span className="inline-flex shrink-0 rounded-full border border-violet-300/40 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-200">
+          <span className="inline-flex shrink-0 rounded-full border border-violet-300/40 bg-violet-500/10 px-2.5 py-1 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-200">
             {badge}
           </span>
         ) : null}
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {items.map((item) => (
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {visibleItems.map((item) => (
           <div
             key={`${item.label}-${item.value}`}
-            className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 p-3 dark:border-white/8 dark:bg-white/4"
+            className="rounded-[1.1rem] border border-slate-200/70 bg-slate-50/80 px-3 py-2.5 dark:border-white/8 dark:bg-white/4"
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
               {item.label}
             </p>
-            <p className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            <p className="mt-1 text-lg font-semibold tracking-tight text-slate-950 dark:text-white">
               {item.value}
             </p>
-            {item.detail ? (
-              <div className={`mt-3 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${toneClasses(item.tone ?? "slate")}`}>
-                {item.detail}
-              </div>
-            ) : null}
           </div>
         ))}
       </div>
@@ -808,13 +798,13 @@ export function ClientSubpageShell({
                       ))}
                     </nav>
                   )}
-                  <p className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
+                  <p className="hidden text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200 sm:block">
                     {eyebrow}
                   </p>
-                  <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                  <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:mt-4 sm:text-3xl lg:text-4xl">
                     {title}
                   </h1>
-                  <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
+                  <p className="mt-2 hidden text-sm leading-7 text-slate-600 dark:text-slate-300 sm:block sm:text-base">
                     {description}
                   </p>
                 </div>

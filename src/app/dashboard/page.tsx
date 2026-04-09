@@ -348,7 +348,7 @@ export default function DashboardPage() {
               <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-[2rem] px-4 py-5 sm:px-6">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
                 <div className="relative space-y-4">
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div className="hidden flex-wrap items-center gap-2 sm:flex">
                     <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
                       <GreetingIcon size={14} /> {todayLabel}
                     </div>
@@ -357,21 +357,11 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <h1 className="text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                  <h1 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl lg:text-4xl">
                     {greetingText}{user?.firstName ? `, ${user.firstName}` : ""}.
                   </h1>
 
                   <FocusSignalCard signal={todayFocus} />
-
-                  {signals.filter(s => s.id !== todayFocus.id).length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {signals.filter(s => s.id !== todayFocus.id).slice(0, 2).map(s => (
-                        <span key={s.id} className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ring-1 ${toneClasses(s.tone).chip}`}>
-                          {renderSignalIcon(s.tone, 13)} {s.title}
-                        </span>
-                      ))}
-                    </div>
-                  )}
 
                   <div className="flex flex-wrap gap-2">
                     <Link href="/nouveau-devis" className="tour-nouveau-devis">
@@ -384,7 +374,7 @@ export default function DashboardPage() {
                     </Link>
                   </div>
 
-                  <div className="grid gap-2 sm:grid-cols-3">
+                  <div className="hidden gap-2 sm:grid sm:grid-cols-3">
                     {heroIndicators.map(ind => <HeroIndicatorPill key={ind.id} indicator={ind} />)}
                   </div>
                 </div>
@@ -394,21 +384,20 @@ export default function DashboardPage() {
               <motion.section {...sectionMotion(0.04)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                 <div className="flex items-end justify-between gap-3">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Chiffres clés</p>
-                    <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Lecture rapide</h2>
+                    <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">Chiffres clés</h2>
                   </div>
                   <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">{totalQuotes} devis</span>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                   <CompactMetricCard label="CA validé" value={formatCurrency(acceptedRevenueHT)} detail={`${acceptedCount} acceptés`} tone="emerald" icon={TrendingUp} />
                   <CompactMetricCard label="Pipeline" value={formatCurrency(pipelineHT)} detail={`${pendingCount} en attente`} tone="amber" icon={Clock3} />
-                  <CompactMetricCard label="Relances" value={String(devisARelancer.length)} detail="À surveiller" tone="rose" icon={Bell} />
-                  <CompactMetricCard label="Ticket moyen" value={formatCurrency(averageTicket)} detail={`${conversionRate}% conv.`} tone="violet" icon={LineChart} />
+                  <div className="hidden sm:block"><CompactMetricCard label="Relances" value={String(devisARelancer.length)} detail="À surveiller" tone="rose" icon={Bell} /></div>
+                  <div className="hidden sm:block"><CompactMetricCard label="Ticket moyen" value={formatCurrency(averageTicket)} detail={`${conversionRate}% conv.`} tone="violet" icon={LineChart} /></div>
                 </div>
               </motion.section>
 
               {/* ─── Pilotage + Funnel (desktop 2-col) ──────────── */}
-              <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+              <div className="hidden sm:grid gap-4 lg:grid-cols-[1fr_auto]">
                 <div className="space-y-4">
                   {/* Objectif mensuel */}
                   <motion.section {...sectionMotion(0.06)} className="client-panel rounded-[2rem] p-4 sm:p-5">
@@ -523,7 +512,7 @@ export default function DashboardPage() {
               </div>
 
               {/* ─── Financials grid ──────────────────────────────── */}
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="hidden sm:grid gap-4 lg:grid-cols-2">
                 {/* Trésorerie */}
                 <motion.section {...sectionMotion(0.10)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
@@ -551,8 +540,8 @@ export default function DashboardPage() {
 
               {/* ─── Actions + Relances + Échéances grid ─────────── */}
               <div className="grid gap-4 lg:grid-cols-3">
-                {/* Actions */}
-                <motion.section {...sectionMotion(0.14)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                {/* Actions — desktop only */}
+                <motion.section {...sectionMotion(0.14)} className="hidden sm:block client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
                     <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Actions</p>
                     <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">{actionPlan.length}</span>
@@ -565,10 +554,7 @@ export default function DashboardPage() {
                 {/* Relances */}
                 <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Relances</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">À traiter</h2>
-                    </div>
+                    <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">À traiter</h2>
                     <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40">{devisARelancer.length}</span>
                   </div>
                   <div className="mt-3"><DashboardFollowUps items={devisARelancer} /></div>
@@ -577,10 +563,7 @@ export default function DashboardPage() {
                 {/* Échéances */}
                 <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Échéances</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Prochains paiements</h2>
-                    </div>
+                    <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">Prochains paiements</h2>
                     <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40">{echeances.length}</span>
                   </div>
                   <div className="mt-3"><DashboardEcheances items={echeances} /></div>
@@ -588,7 +571,7 @@ export default function DashboardPage() {
               </div>
 
               {/* ─── Top Clients + Quick Links ──────────────────── */}
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="hidden sm:grid gap-4 lg:grid-cols-2">
                 <motion.section {...sectionMotion(0.20)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
                     <div>

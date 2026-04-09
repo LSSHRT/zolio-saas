@@ -152,6 +152,16 @@ Breakpoints cibles : 375px, 390px, 414px (mobiles courants).
 
 ## Resume des Fichiers Modifies
 
+### Phase 3 — Simplification de la densite d'information mobile
+
+| Fichier | Type de correction |
+|---------|-------------------|
+| `src/components/client-shell.tsx` | Masquage eyebrow + description sur mobile, MobileOverview simplifie (3 KPI max, sans detail), dock reequilibre 2+2 |
+| `src/app/dashboard/page.tsx` | Masquage sections secondaires (Pilotage, Financials, Top Clients, Acces rapides), hero simplifie, labels de section allege |
+| `src/components/command-palette.tsx` | CmdKLauncher cache sur mobile |
+
+### Phase 1-2 — Audit initial
+
 | Fichier | Type de correction |
 |---------|-------------------|
 | `src/app/dashboard/page.tsx` | Dock mobile ajoute, textes agrandis, data-testid |
