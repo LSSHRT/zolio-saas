@@ -13,7 +13,7 @@ const securityHeaders = [
       "base-uri 'self'",
       "frame-ancestors 'none'",
       "form-action 'self' https://checkout.stripe.com",
-      "img-src 'self' data: blob: https://clerk.zolio.site https://img.clerk.com https://i.pravatar.cc https://www.transparenttextures.com",
+      "img-src 'self' data: blob: https://clerk.zolio.site https://img.clerk.com https://images.clerk.dev https://i.pravatar.cc https://www.transparenttextures.com https://www.pichon-peinture.com",
       "script-src 'self' 'unsafe-inline' https://clerk.zolio.site https://va.vercel-scripts.com",
       "style-src 'self' 'unsafe-inline'",
       "font-src 'self' data:",
