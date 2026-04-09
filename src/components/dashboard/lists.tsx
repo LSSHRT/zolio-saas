@@ -36,28 +36,67 @@ export function DashboardRecentQuotes({ items }: { items: QuoteListItem[] }) {
   }
 
   return (
-    <div className="space-y-3">
-      {items.slice(0, 3).map((item) => (
-        <Link href={`/devis/${item.numero}`} key={item.numero}>
-          <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  {item.numero} · {formatDateLabel(item.date)}
-                </p>
+    <>
+      {/* Mobile View (Cards) */}
+      <div className="space-y-3 lg:hidden">
+        {items.slice(0, 3).map((item) => (
+          <Link href={`/devis/${item.numero}`} key={item.numero}>
+            <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {item.numero} · {formatDateLabel(item.date)}
+                  </p>
+                </div>
+                <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
+                  {item.statut}
+                </span>
               </div>
-              <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>
-                {item.statut}
-              </span>
+              <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">
+                {formatCurrency(item.totalTTC || 0)}
+              </p>
             </div>
-            <p className="mt-3 text-sm font-semibold text-slate-950 dark:text-white">
-              {formatCurrency(item.totalTTC || 0)}
-            </p>
-          </div>
-        </Link>
-      ))}
-    </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop View (Table) */}
+      <div className="hidden lg:block overflow-hidden rounded-[1.45rem] border border-slate-200/70 bg-white/75 dark:border-white/8 dark:bg-white/4">
+        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+          <thead className="bg-slate-50/50 text-xs uppercase text-slate-500 dark:bg-white/5 dark:text-slate-400">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-semibold">Client</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Numéro</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Date</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">Montant</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">Statut</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
+            {items.slice(0, 3).map((item) => (
+              <tr key={item.numero} className="group transition hover:bg-slate-50/50 dark:hover:bg-white/5 relative">
+                <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
+                  <Link href={`/devis/${item.numero}`} className="before:absolute before:inset-0 focus:outline-none">
+                    {item.nomClient}
+                  </Link>
+                </td>
+                <td className="px-4 py-3">{item.numero}</td>
+                <td className="px-4 py-3">{formatDateLabel(item.date)}</td>
+                <td className="px-4 py-3 text-right font-semibold text-slate-950 dark:text-white">
+                  {formatCurrency(item.totalTTC || 0)}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <span className={`client-chip inline-flex ring-1 ${statusBadgeClasses(item.statut)}`}>
+                    {item.statut}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -76,21 +115,54 @@ export function DashboardFollowUps({ items }: { items: QuoteListItem[] }) {
   }
 
   return (
-    <div className="space-y-3">
-      {items.slice(0, 3).map((item) => (
-        <Link href={`/devis/${item.numero}`} key={item.numero}>
-          <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 dark:border-rose-400/12 dark:bg-rose-500/8">
-            <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
-            <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
-              {item.numero} · {formatDateLabel(item.date)}
-            </p>
-            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
-              {formatCurrency(item.totalTTC || 0)} • en attente depuis plus de 7 jours.
-            </p>
-          </div>
-        </Link>
-      ))}
-    </div>
+    <>
+      {/* Mobile View */}
+      <div className="space-y-3 lg:hidden">
+        {items.slice(0, 3).map((item) => (
+          <Link href={`/devis/${item.numero}`} key={item.numero}>
+            <div className="rounded-[1.45rem] border border-rose-200/70 bg-rose-50/80 p-4 dark:border-rose-400/12 dark:bg-rose-500/8">
+              <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
+              <p className="mt-1 text-sm text-rose-700 dark:text-rose-200">
+                {item.numero} · {formatDateLabel(item.date)}
+              </p>
+              <p className="mt-3 text-sm text-slate-600 dark:text-slate-300">
+                {formatCurrency(item.totalTTC || 0)} • en attente depuis plus de 7 jours.
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:block overflow-hidden rounded-[1.45rem] border border-rose-200/70 bg-white/75 dark:border-rose-400/12 dark:bg-white/4">
+        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+          <thead className="bg-rose-50/50 text-xs uppercase text-slate-500 dark:bg-white/5 dark:text-slate-400">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-semibold">Client</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Numéro</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Date</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">Montant</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-rose-200/70 dark:divide-white/10">
+            {items.slice(0, 3).map((item) => (
+              <tr key={item.numero} className="group transition hover:bg-rose-50/50 dark:hover:bg-white/5 relative bg-rose-50/20 dark:bg-rose-500/5">
+                <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
+                  <Link href={`/devis/${item.numero}`} className="before:absolute before:inset-0 focus:outline-none">
+                    {item.nomClient}
+                  </Link>
+                </td>
+                <td className="px-4 py-3 text-rose-700 dark:text-rose-200">{item.numero}</td>
+                <td className="px-4 py-3 text-rose-700 dark:text-rose-200">{formatDateLabel(item.date)}</td>
+                <td className="px-4 py-3 text-right font-semibold text-slate-950 dark:text-white">
+                  {formatCurrency(item.totalTTC || 0)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -107,35 +179,83 @@ export function DashboardEcheances({ items }: { items: EcheanceItem[] }) {
   }
 
   return (
-    <div className="space-y-3">
-      {items.slice(0, 5).map((ech) => (
-        <Link href={`/factures/${ech.numero}`} key={ech.numero}>
-          <div className={`rounded-[1.45rem] border p-4 transition hover:-translate-y-0.5 ${
-            ech.joursRestants <= 3
-              ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10"
-              : ech.joursRestants <= 7
-              ? "border-amber-200/70 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/10"
-              : "border-violet-200/70 bg-violet-50/50 dark:border-violet-500/20 dark:bg-violet-500/10"
-          }`}>
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{ech.nomClient}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{ech.numero}</p>
-              </div>
-              <div className="shrink-0 text-right">
-                <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ech.totalTTC)}</p>
-                <p className={`text-xs font-semibold ${
-                  ech.joursRestants <= 3 ? "text-rose-600 dark:text-rose-400" :
-                  ech.joursRestants <= 7 ? "text-amber-600 dark:text-amber-400" : "text-violet-600 dark:text-violet-400"
-                }`}>
-                  {ech.joursRestants === 0 ? "Aujourd'hui" : `J${ech.joursRestants > 0 ? '+' : ''}${ech.joursRestants}j`}
-                </p>
+    <>
+      {/* Mobile View */}
+      <div className="space-y-3 lg:hidden">
+        {items.slice(0, 5).map((ech) => (
+          <Link href={`/factures/${ech.numero}`} key={ech.numero}>
+            <div className={`rounded-[1.45rem] border p-4 transition hover:-translate-y-0.5 ${
+              ech.joursRestants <= 3
+                ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10"
+                : ech.joursRestants <= 7
+                ? "border-amber-200/70 bg-amber-50/50 dark:border-amber-500/20 dark:bg-amber-500/10"
+                : "border-violet-200/70 bg-violet-50/50 dark:border-violet-500/20 dark:bg-violet-500/10"
+            }`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{ech.nomClient}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{ech.numero}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">{formatCurrency(ech.totalTTC)}</p>
+                  <p className={`text-xs font-semibold ${
+                    ech.joursRestants <= 3 ? "text-rose-600 dark:text-rose-400" :
+                    ech.joursRestants <= 7 ? "text-amber-600 dark:text-amber-400" : "text-violet-600 dark:text-violet-400"
+                  }`}>
+                    {ech.joursRestants === 0 ? "Aujourd'hui" : `J${ech.joursRestants > 0 ? '+' : ''}${ech.joursRestants}j`}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </Link>
-      ))}
-    </div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:block overflow-hidden rounded-[1.45rem] border border-slate-200/70 bg-white/75 dark:border-white/8 dark:bg-white/4">
+        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+          <thead className="bg-slate-50/50 text-xs uppercase text-slate-500 dark:bg-white/5 dark:text-slate-400">
+            <tr>
+              <th scope="col" className="px-4 py-3 font-semibold">Client</th>
+              <th scope="col" className="px-4 py-3 font-semibold">Numéro</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-right">Montant</th>
+              <th scope="col" className="px-4 py-3 font-semibold text-center">Échéance</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
+            {items.slice(0, 5).map((ech) => {
+              const bgClass = ech.joursRestants <= 3
+                ? "bg-rose-50/40 dark:bg-rose-500/10"
+                : ech.joursRestants <= 7
+                ? "bg-amber-50/40 dark:bg-amber-500/10"
+                : "hover:bg-slate-50/50 dark:hover:bg-white/5";
+              const textClass = ech.joursRestants <= 3
+                ? "text-rose-600 dark:text-rose-400"
+                : ech.joursRestants <= 7
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-violet-600 dark:text-violet-400";
+              
+              return (
+                <tr key={ech.numero} className={`group transition relative ${bgClass}`}>
+                  <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
+                    <Link href={`/factures/${ech.numero}`} className="before:absolute before:inset-0 focus:outline-none">
+                      {ech.nomClient}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3">{ech.numero}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-slate-950 dark:text-white">
+                    {formatCurrency(ech.totalTTC)}
+                  </td>
+                  <td className={`px-4 py-3 text-center font-semibold ${textClass}`}>
+                    {ech.joursRestants === 0 ? "Aujourd'hui" : `J${ech.joursRestants > 0 ? '+' : ''}${ech.joursRestants}j`}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
