@@ -13,11 +13,16 @@ export function PullToRefresh({
 }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
+  const pullDistanceRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
 
   const threshold = 80;
   const maxPull = 120;
+
+  useEffect(() => {
+    pullDistanceRef.current = pullDistance;
+  }, [pullDistance]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -51,16 +56,22 @@ export function PullToRefresh({
       }
     };
 
-    const handleTouchEnd = async () => {
+    const handleTouchEnd = () => {
       if (!isPulling || isRefreshing) return;
       isPulling = false;
 
-      // Ensure we get the latest pullDistance from the state closure by checking DOM state if needed,
-      // but here we can just use the last setPullDistance value (which is slightly delayed).
-      // A better way is to track it in a ref, but for simplicity we assume the React state caught up 
-      // or we just check if it's over threshold roughly.
-      controls.start({ y: 0, transition: { type: "spring", stiffness: 300, damping: 20 } });
-      setPullDistance(0);
+      if (pullDistanceRef.current >= threshold) {
+        setIsRefreshing(true);
+        controls.start({ y: 50 });
+        Promise.resolve(onRefresh()).finally(() => {
+          setIsRefreshing(false);
+          controls.start({ y: 0 });
+          setPullDistance(0);
+        });
+      } else {
+        controls.start({ y: 0, transition: { type: "spring", stiffness: 300, damping: 20 } });
+        setPullDistance(0);
+      }
     };
 
     // Need passive: false to prevent default browser behavior
@@ -73,23 +84,7 @@ export function PullToRefresh({
       el.removeEventListener("touchmove", handleTouchMove);
       el.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [isRefreshing, controls]);
-
-  // We handle the refresh action separately from the touch end to access the latest state
-  useEffect(() => {
-    const unsubscribe = controls.onChange((latest) => {
-      if (latest.y === 0 && pullDistance >= threshold && !isRefreshing) {
-        setIsRefreshing(true);
-        controls.start({ y: 50 });
-        Promise.resolve(onRefresh()).finally(() => {
-          setIsRefreshing(false);
-          controls.start({ y: 0 });
-          setPullDistance(0);
-        });
-      }
-    });
-    return () => unsubscribe();
-  }, [controls, pullDistance, isRefreshing, onRefresh]);
+  }, [isRefreshing, controls, onRefresh]);
 
   return (
     <div ref={containerRef} className="relative w-full h-full min-h-screen touch-pan-y">
