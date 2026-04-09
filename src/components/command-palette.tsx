@@ -345,8 +345,8 @@ export function CmdKLauncher() {
         {open && <CommandPalette open={open} onClose={() => setOpen(false)} />}
       </AnimatePresence>
 
-      {/* Floating launcher */}
-      <div className="fixed bottom-24 left-4 z-40 sm:bottom-6">
+      {/* Floating launcher — hidden on mobile (dock has its own search) */}
+      <div className="fixed bottom-6 left-4 z-40 hidden md:block">
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.95 }}
@@ -354,8 +354,8 @@ export function CmdKLauncher() {
           className="group relative flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/95 px-4 py-2.5 text-sm font-medium text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm ring-1 ring-slate-200/60 transition-colors hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300"
         >
           <Search size={15} className="shrink-0" />
-          <span className="hidden sm:inline">Rechercher…</span>
-          <code className="hidden rounded-md border border-slate-200/80 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 sm:block dark:border-white/12 dark:bg-white/6 dark:text-slate-500">
+          <span>Rechercher…</span>
+          <code className="rounded-md border border-slate-200/80 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 dark:border-white/12 dark:bg-white/6 dark:text-slate-500">
             ⌘K
           </code>
 

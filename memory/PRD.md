@@ -22,7 +22,7 @@ Zolio est une application SaaS de gestion commerciale pour artisans et independa
 
 ## Ce qui a ete implemente
 
-### Audit UX Mobile (09/04/2025)
+### Audit UX Mobile — Phase 1 (09/04/2025)
 - Ajout du dock mobile (`ClientMobileDock`) sur la page Dashboard (manquant)
 - Correction des tailles de texte trop petites (`text-[9px]` → `text-[10px]`, `text-[10px]` → `text-[11px]`)
 - Amelioration des touch targets (boutons min 40-44px)
@@ -30,7 +30,12 @@ Zolio est une application SaaS de gestion commerciale pour artisans et independa
 - Toaster : offset ajuste pour ne pas etre cache par le dock
 - Padding bottom augmente dans ClientSubpageShell
 - 17 fichiers modifies, toutes les pages principales corrigees
-- Rapport : `/app/RAPPORT-AUDIT.md`
+
+### Audit UX Mobile — Phase 2 (09/04/2025)
+- Bouton recherche flottant (CmdKLauncher/⌘K) cache sur mobile (`hidden md:block`)
+- Bouton "+" du dock redimensionne (52→48px, -mt-6→-mt-4) pour meilleure integration
+- Dock repositionne (`bottom-5`) pour eviter rognage des labels sur petits ecrans
+- Rapport complet : `/app/RAPPORT-AUDIT.md`
 
 ## Backlog / Taches futures
 - P1 : Verification visuelle sur appareil reel avec Clerk actif

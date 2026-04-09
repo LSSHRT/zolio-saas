@@ -9,6 +9,33 @@ Breakpoints cibles : 375px, 390px, 414px (mobiles courants).
 
 ## Problemes Identifies et Corrections Appliquees
 
+### 0. CRITIQUE — Bouton recherche (loupe + ⌘K) flottant visible sur mobile
+
+**Probleme** : Le composant `CmdKLauncher` (bouton flottant de recherche desktop avec raccourci ⌘K) etait visible sur mobile, flottant au-dessus du dock. Cet element est inutile sur mobile car la recherche est accessible via le menu "Plus" du dock.
+
+**Impact** : Element parasite qui encombre l'ecran mobile et cree de la confusion avec le dock.
+
+**Correction** :
+- Ajout de `hidden md:block` pour cacher completement le launcher sur mobile
+- Suppression des classes responsive conditionnelles (`hidden sm:inline`) — le composant est entierement masque sous `md:`
+
+**Fichier** : `src/components/command-palette.tsx`
+
+---
+
+### 0b. Bouton "+" du dock trop volumineux
+
+**Probleme** : Le bouton central "+" du dock avait un `-mt-6` (24px) de depassement et une taille de `52x52px`, creant un decalage visuel excessif par rapport aux autres elements du dock.
+
+**Correction** :
+- `-mt-6` → `-mt-4` (16px) pour un depassement plus subtil
+- `52x52px` → `48x48px` pour une meilleure integration
+- Dock repositionne a `bottom-5` au lieu de `bottom-3` pour eviter le rognage des labels
+
+**Fichier** : `src/components/client-shell.tsx`
+
+---
+
 ### 1. CRITIQUE — Barre de navigation mobile absente sur le Dashboard
 
 **Probleme** : La page Dashboard (`/dashboard`) ne rendait PAS le composant `ClientMobileDock`. Toutes les autres pages utilisaient `ClientSubpageShell` qui inclut le dock, mais le Dashboard avait son propre layout sans dock mobile.

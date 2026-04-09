@@ -66,3 +66,7 @@ output/
 # temp scripts in root (move to scripts/ instead)
 /*.js
 current_landing.tsx
+-e 
+# Environment files
+*.env
+*.env.*

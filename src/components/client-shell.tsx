@@ -194,7 +194,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
   return (
     <>
-      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden" data-testid="mobile-nav-dock">
+      <nav className="client-nav-dock fixed inset-x-3 bottom-5 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden" data-testid="mobile-nav-dock">
         {/* 2 liens gauche */}
         {CLIENT_NAV_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
@@ -213,7 +213,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         {/* Bouton central Nouveau */}
         <Link
           href="/nouveau-devis"
-          className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
+          className="relative -mt-4 flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
           data-testid="mobile-new-devis-btn"
         >
           <Plus size={22} strokeWidth={2.5} />
