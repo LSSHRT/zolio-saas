@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Clock3,
   CloudSun,
-  CreditCard,
   FileCheck2,
   FileText,
   LineChart,
@@ -15,7 +14,6 @@ import {
   Package,
   Pencil,
   Plus,
-  Receipt,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -25,7 +23,8 @@ import {
   TriangleAlert,
   Users,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
@@ -42,6 +41,8 @@ import {
   ClientSupportButton,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { DesktopDrawer } from "@/components/desktop-drawer";
+import { DevisEditor } from "@/components/devis-editor";
 import ConversionFunnel from "@/components/conversion-funnel";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
@@ -51,7 +52,6 @@ import {
   readBooleanMetadata,
   formatCurrency,
   formatDateLabel,
-  toneClasses,
   sectionMotion,
   type Tone,
   type DashboardSignal,
@@ -60,18 +60,15 @@ import {
   type DashboardHeroIndicator,
 } from "@/components/dashboard/shared";
 import {
-  renderSignalIcon,
   FocusSignalCard,
   DashboardActionCard,
   CompactMetricCard,
   HeroIndicatorPill,
   QuickLinkCard,
-  MobileDisclosureSection,
 } from "@/components/dashboard/ui";
 import { DashboardTresorerie } from "@/components/dashboard/tresorerie";
 import { DashboardBenefice } from "@/components/dashboard/benefice";
 import {
-  DashboardRecentQuotes,
   DashboardFollowUps,
   DashboardEcheances,
   DashboardTopClients,
@@ -160,6 +157,7 @@ export default function DashboardPage() {
   const [runTour, setRunTour] = useState(() => typeof window !== "undefined" && !localStorage.getItem("zolio_has_seen_tour"));
   const [currentHour] = useState(() => new Date().getHours());
   const [showMoreMobile, setShowMoreMobile] = useState(false);
+  const [selectedDevisNumero, setSelectedDevisNumero] = useState<string | null>(null);
 
   useEffect(() => {
     const nextTrade = getTradeDefinition(companyTrade)?.key;
@@ -221,13 +219,10 @@ export default function DashboardPage() {
   const CA_TTC = d?.totalTTC ?? 0;
   const acceptedCount = d?.acceptedCount ?? 0;
   const pendingCount = d?.pendingCount ?? 0;
-  const refusedCount = d?.refusedCount ?? 0;
   const acceptedRevenueHT = d?.acceptedRevenueHT ?? 0;
   const pipelineHT = d?.pipelineRevenueHT ?? 0;
-  const lostRevenueHT = d?.lostRevenueHT ?? 0;
   const conversionRate = d?.conversionRate ?? 0;
   const averageTicket = d?.averageTicket ?? 0;
-  const avgResponseDays = d?.avgResponseDays ?? 0;
   const objectifProgress = objectifActif > 0 ? Math.min((CA_TTC / objectifActif) * 100, 100) : 0;
   const remainingToGoal = Math.max(objectifActif - CA_TTC, 0);
   const devisRecents = (d?.recentQuotes ?? []) as QuoteListItem[];
@@ -310,7 +305,7 @@ export default function DashboardPage() {
       {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 
       <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
-        <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[272px]">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[336px]">
         {/* ─── Header ────────────────────────────────────────────── */}
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center justify-between gap-3">
@@ -327,7 +322,14 @@ export default function DashboardPage() {
               )}
               <DashboardNotificationsMenu dashboardSignals={signals} />
               {isLoaded && user?.imageUrl ? (
-                <img src={user.imageUrl} alt="Avatar" className="h-8 w-8 lg:h-7 lg:w-7 rounded-full object-cover ring-1 ring-white/20" />
+                <Image
+                  src={user.imageUrl}
+                  alt="Avatar"
+                  width={32}
+                  height={32}
+                  unoptimized
+                  className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20 lg:h-7 lg:w-7"
+                />
               ) : (
                 <div className="h-8 w-8 lg:h-7 lg:w-7 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
               )}
@@ -481,7 +483,13 @@ export default function DashboardPage() {
                         ) : (
                           <div className="grid gap-3 sm:grid-cols-2">
                             {devisRecents.slice(0, 4).map(item => (
-                              <Link href={`/devis/${item.numero}`} key={item.numero}>
+                              <Link href={`/devis/${item.numero}`} key={item.numero} onClick={(e) => {
+                                // Only intercept on large screens
+                                if (window.innerWidth >= 1024) {
+                                  e.preventDefault();
+                                  setSelectedDevisNumero(item.numero);
+                                }
+                              }}>
                                 <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
@@ -560,7 +568,7 @@ export default function DashboardPage() {
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">À traiter</h2>
                     <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40">{devisARelancer.length}</span>
                   </div>
-                  <div className="mt-3"><DashboardFollowUps items={devisARelancer} /></div>
+                  <div className="mt-3"><DashboardFollowUps items={devisARelancer} onSelectDevis={setSelectedDevisNumero} /></div>
                 </motion.section>
 
                 {/* Échéances */}
@@ -670,6 +678,17 @@ export default function DashboardPage() {
           <button type="button" onClick={handleUpdateObjectif} className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white">Enregistrer</button>
         </div>
       </MobileDialog>
+
+      {/* ─── Desktop Drawer ─────────────────────────────────────── */}
+      <DesktopDrawer open={!!selectedDevisNumero} onClose={() => setSelectedDevisNumero(null)}>
+        {selectedDevisNumero && (
+          <DevisEditor
+            numero={selectedDevisNumero}
+            isDrawer
+            onClose={() => setSelectedDevisNumero(null)}
+          />
+        )}
+      </DesktopDrawer>
 
       {/* ─── Mobile Dock ─────────────────────────────────────── */}
       <ClientMobileDock active="dashboard" />

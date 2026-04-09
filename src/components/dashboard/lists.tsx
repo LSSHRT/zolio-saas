@@ -23,7 +23,7 @@ export interface EcheanceItem {
 
 // ─── Devis Récents ────────────────────────────────────────────────────
 
-export function DashboardRecentQuotes({ items }: { items: QuoteListItem[] }) {
+export function DashboardRecentQuotes({ items, onSelectDevis }: { items: QuoteListItem[], onSelectDevis?: (numero: string) => void }) {
   if (items.length === 0) {
     return (
       <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
@@ -77,7 +77,12 @@ export function DashboardRecentQuotes({ items }: { items: QuoteListItem[] }) {
             {items.slice(0, 3).map((item) => (
               <tr key={item.numero} className="group transition hover:bg-slate-50/50 dark:hover:bg-white/5 relative">
                 <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
-                  <Link href={`/devis/${item.numero}`} className="before:absolute before:inset-0 focus:outline-none">
+                  <Link href={`/devis/${item.numero}`} onClick={(e) => {
+                    if (onSelectDevis) {
+                      e.preventDefault();
+                      onSelectDevis(item.numero);
+                    }
+                  }} className="before:absolute before:inset-0 focus:outline-none">
                     {item.nomClient}
                   </Link>
                 </td>
@@ -102,7 +107,7 @@ export function DashboardRecentQuotes({ items }: { items: QuoteListItem[] }) {
 
 // ─── Devis à Relancer ─────────────────────────────────────────────────
 
-export function DashboardFollowUps({ items }: { items: QuoteListItem[] }) {
+export function DashboardFollowUps({ items, onSelectDevis }: { items: QuoteListItem[], onSelectDevis?: (numero: string) => void }) {
   if (items.length === 0) {
     return (
       <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
@@ -148,7 +153,12 @@ export function DashboardFollowUps({ items }: { items: QuoteListItem[] }) {
             {items.slice(0, 3).map((item) => (
               <tr key={item.numero} className="group transition hover:bg-rose-50/50 dark:hover:bg-white/5 relative bg-rose-50/20 dark:bg-rose-500/5">
                 <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
-                  <Link href={`/devis/${item.numero}`} className="before:absolute before:inset-0 focus:outline-none">
+                  <Link href={`/devis/${item.numero}`} onClick={(e) => {
+                    if (onSelectDevis) {
+                      e.preventDefault();
+                      onSelectDevis(item.numero);
+                    }
+                  }} className="before:absolute before:inset-0 focus:outline-none">
                     {item.nomClient}
                   </Link>
                 </td>
