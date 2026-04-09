@@ -1,49 +1,29 @@
 # Zolio — PRD (Product Requirements Document)
 
 ## Produit
-Zolio est une application SaaS de gestion commerciale pour artisans et independants. Elle permet de creer des devis, factures, gerer les clients, le planning, et suivre la tresorerie.
+Zolio est une application SaaS de gestion commerciale pour artisans et independants.
 
 ## Stack technique
 - **Frontend** : Next.js 16 (App Router), React, Tailwind CSS v4, Framer Motion
 - **Auth** : Clerk (@clerk/nextjs)
-- **Data Fetching** : SWR + Next.js API Routes
 - **BDD** : PostgreSQL via Prisma ORM
 - **Paiements** : Stripe
 
-## Architecture
-```
-/app/
-├── src/app/           # Pages (App Router)
-├── src/components/    # Composants partages
-├── src/proxy.ts       # Middleware Clerk
-├── prisma/            # Schema BDD
-└── package.json
-```
-
 ## Ce qui a ete implemente
 
-### Audit UX Mobile — Phase 1 (09/04/2025)
-- Ajout du dock mobile (`ClientMobileDock`) sur la page Dashboard (manquant)
-- Correction des tailles de texte trop petites (`text-[9px]` → `text-[10px]`, `text-[10px]` → `text-[11px]`)
-- Amelioration des touch targets (boutons min 40-44px)
+### Audit UX Mobile (09/04/2025)
+- Ajout du dock mobile sur la page Dashboard (manquant)
+- Correction tailles de texte trop petites (text-[9px] → text-[10px], text-[10px] → text-[11px])
+- Amelioration touch targets (boutons min 40-44px) sur toutes les pages
 - MobileDialog : pattern "bottom sheet" + safe-area iPhone
 - Toaster : offset ajuste pour ne pas etre cache par le dock
-- Padding bottom augmente dans ClientSubpageShell
-- 17 fichiers modifies, toutes les pages principales corrigees
+- Bouton recherche flottant (CmdKLauncher/⌘K) cache sur mobile
+- Dock reequilibre : 2 items | + | 2 items, bouton "Plus" sorti en FAB flottant
+- Bouton "+" redimensionne (48px, -mt-4) pour meilleure integration
+- 18+ fichiers modifies, rapport : /app/RAPPORT-AUDIT.md
 
-### Audit UX Mobile — Phase 2 (09/04/2025)
-- Bouton recherche flottant (CmdKLauncher/⌘K) cache sur mobile (`hidden md:block`)
-- Bouton "+" du dock redimensionne (52→48px, -mt-6→-mt-4) pour meilleure integration
-- Dock repositionne (`bottom-5`) pour eviter rognage des labels sur petits ecrans
-- Rapport complet : `/app/RAPPORT-AUDIT.md`
-
-## Backlog / Taches futures
-- P1 : Verification visuelle sur appareil reel avec Clerk actif
-- P1 : Tests e2e des boutons mobile sur toutes les pages
+## Backlog
+- P1 : Verification sur environnement de production avec Clerk actif
 - P2 : Animations d'entree/sortie pour le dock mobile
 - P2 : Swipe-to-dismiss sur MobileDialog
 - P3 : Mode offline / PWA
-
-## Notes
-- L'application necessite des cles Clerk valides pour fonctionner completement
-- Les tests visuels ont ete effectues avec un bypass temporaire de Clerk

@@ -233,23 +233,23 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             </Link>
           );
         })}
-
-        {/* Bouton Plus */}
-        <button
-          type="button"
-          onClick={() => setToolsOpen(true)}
-          className={`relative client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
-          aria-label="Plus d'outils"
-        >
-          <MoreHorizontal size={20} strokeWidth={active === "tools" ? 2.4 : 1.8} />
-          <span className="text-[11px] font-medium leading-tight">Plus</span>
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 right-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[7px] font-bold text-white">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
-        </button>
       </nav>
+
+      {/* Bouton Plus (flottant à droite, au-dessus du dock) */}
+      <button
+        type="button"
+        onClick={() => setToolsOpen(true)}
+        className="fixed bottom-[5.5rem] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
+        aria-label="Plus d'outils"
+        data-testid="mobile-tools-btn"
+      >
+        <MoreHorizontal size={20} />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[8px] font-bold text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </span>
+        )}
+      </button>
 
       {/* Search modal mobile */}
       {searchOpen ? (
