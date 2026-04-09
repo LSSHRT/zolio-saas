@@ -23,7 +23,8 @@ export function internalServerError(
   message = "Erreur serveur",
 ) {
   logServerError(scope, error);
-  return jsonError(message, 500);
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  return jsonError(`${message} : ${errorMessage}`, 500);
 }
 
 export function safeJsonParse<T = unknown>(value: string, fallback: T): T {
