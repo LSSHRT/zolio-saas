@@ -310,3 +310,15 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([createdAt])
 }
+
+// ─── Utilisateurs synchronisés depuis Clerk ───
+
+model User {
+  id        String   @id // L'ID Clerk
+  email     String   @unique
+  nom       String?
+  prenom    String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

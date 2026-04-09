@@ -5,14 +5,15 @@ import { internalServerError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 import { recurrenteUpdateSchema, zodErrorResponse } from "@/lib/validations";
 import { calculateNextDate } from "@/lib/recurrentes";
+import { parseNumber } from "@/lib/devis-lignes";
 
 type RecurrenteRecord = {
   id: string;
   userId: string;
   nom: string;
-  montantHT: Decimal | number;
-  tva: Decimal | number;
-  montantTTC: Decimal | number;
+  montantHT: number | Decimal;
+  tva: number | Decimal;
+  montantTTC: number | Decimal;
   frequence: string;
   jourMois: number;
   prochaineDate: Date;
@@ -29,9 +30,9 @@ function mapRecurrente(r: RecurrenteRecord) {
     nom: r.nom,
     client: r.client.nom,
     clientId: r.id,
-    montantHT: Number(r.montantHT),
-    tva: Number(r.tva),
-    montantTTC: Number(r.montantTTC),
+    montantHT: parseNumber(r.montantHT),
+    tva: parseNumber(r.tva),
+    montantTTC: parseNumber(r.montantTTC),
     frequence: r.frequence,
     jourMois: r.jourMois,
     prochaineDate: r.prochaineDate.toISOString(),
@@ -110,8 +111,8 @@ export async function PUT(
     }
 
     // Recalculer montantTTC si montantHT ou tva changent
-    const montantHT = Number(data.montantHT ?? existing.montantHT);
-    const tva = Number(data.tva ?? existing.tva);
+    const montantHT = parseNumber(data.montantHT ?? existing.montantHT);
+    const tva = parseNumber(data.tva ?? existing.tva);
     const montantTTC = Number((montantHT * (1 + tva / 100)).toFixed(2));
 
     // Recalculer prochaineDate si frequence ou jourMois changent

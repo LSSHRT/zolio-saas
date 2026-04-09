@@ -14,6 +14,7 @@ import {
   createLignesForDevis,
   normalizeLigneForOutput,
   computeTotals,
+  parseNumber,
   type LignePayload,
 } from "@/lib/devis-lignes";
 import { rateLimit } from "@/lib/rate-limit";
@@ -103,18 +104,18 @@ export async function GET(request: Request) {
         lignes = d.lignesNorm.map((ligne) => ({
           isOptional: ligne.isOptional,
           nomPrestation: ligne.nomPrestation,
-          prixUnitaire: ligne.prixUnitaire,
-          quantite: ligne.quantite,
-          totalLigne: ligne.totalLigne,
+          prixUnitaire: parseNumber(ligne.prixUnitaire),
+          quantite: parseNumber(ligne.quantite),
+          totalLigne: parseNumber(ligne.totalLigne),
           tva: ligne.tva,
           unite: ligne.unite,
         }));
       } else {
-        lignes = parseLignes(d.lignesNorm);
+        lignes = [];
       }
 
-      const remiseGlobale = Number(d.remise) || 0;
-      const tvaGlobale = Number(d.tva) || 0;
+      const remiseGlobale = parseNumber(d.remise, 0);
+      const tvaGlobale = parseNumber(d.tva, 20);
       const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
       return {

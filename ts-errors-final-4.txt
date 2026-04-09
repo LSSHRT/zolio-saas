@@ -1,0 +1,28 @@
+src/app/api/devis/options/route.ts(157,48): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/app/api/devis/options/route.ts(158,54): error TS2345: Argument of type '0 | Decimal' is not assignable to parameter of type 'number'.
+  Type 'Decimal' is not assignable to type 'number'.
+src/app/api/devis/parent/[id]/route.ts(36,58): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/app/api/devis/parent/[id]/route.ts(36,75): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/app/api/devis/parent/[id]/route.ts(38,41): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/app/api/espace-client/route.ts(46,49): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/app/api/export/factures-csv/route.ts(81,17): error TS2345: Argument of type 'Decimal' is not assignable to parameter of type 'string | number | null | undefined'.
+src/app/api/export/tva/route.ts(57,26): error TS2362: The left-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/app/api/export/tva/route.ts(57,39): error TS2363: The right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+src/app/api/export/tva/route.ts(70,55): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/app/factures/[numero]/page.tsx(429,14): error TS2873: This kind of expression is always falsy.
+src/lib/client-dashboard.ts(409,25): error TS2304: Cannot find name 'parseNumber'.
+src/lib/client-dashboard.ts(421,27): error TS2304: Cannot find name 'parseNumber'.
+src/lib/client-dashboard.ts(436,7): error TS2365: Operator '+=' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(438,7): error TS2365: Operator '+=' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(441,9): error TS2365: Operator '+=' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(443,9): error TS2365: Operator '+=' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(461,53): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(502,61): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(513,74): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(518,97): error TS2365: Operator '+' cannot be applied to types 'number' and 'Decimal'.
+src/lib/client-dashboard.ts(543,5): error TS2322: Type '{ numero: string; nomClient: string; totalTTC: Decimal; dateEcheance: string; joursRestants: number; }[]' is not assignable to type 'EcheanceItem[]'.
+  Type '{ numero: string; nomClient: string; totalTTC: Decimal; dateEcheance: string; joursRestants: number; }' is not assignable to type 'EcheanceItem'.
+    Types of property 'totalTTC' are incompatible.
+      Type 'Decimal' is not assignable to type 'number'.
+src/lib/client-dashboard.ts(550,7): error TS2322: Type 'number | Decimal' is not assignable to type 'number'.
+  Type 'Decimal' is not assignable to type 'number'.

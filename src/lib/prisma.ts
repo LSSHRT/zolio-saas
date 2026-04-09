@@ -27,7 +27,7 @@ function createExtendedClient(context?: PrismaContext) {
           ) {
             const modelMeta = (baseClient as any)._runtimeDataModel.models[model];
             if (modelMeta?.fields.some((f: any) => f.name === 'deletedAt')) {
-              args.where = { ...args.where, deletedAt: null };
+              (args as any).where = { ...((args as any).where || {}), deletedAt: null };
             }
           }
 
@@ -36,7 +36,7 @@ function createExtendedClient(context?: PrismaContext) {
             const modelMeta = (baseClient as any)._runtimeDataModel.models[model];
             if (modelMeta?.fields.some((f: any) => f.name === 'userId')) {
               // Ensure we don't bypass userId for read/update/delete operations
-              args.where = { ...args.where, userId: context.userId };
+              (args as any).where = { ...((args as any).where || {}), userId: context.userId };
               
               // For create/upsert, ensure userId is set correctly
               if (operation === 'create') {
@@ -48,6 +48,10 @@ function createExtendedClient(context?: PrismaContext) {
             }
           }
 
+          // 3. Handle Soft Delete unique constraint conflict
+          // Note: Suffix handling moved to model extension 'softDelete' for better control
+          // but we still ensure 'userId' is not bypassed.
+
           return query(args);
         },
       },
@@ -56,9 +60,24 @@ function createExtendedClient(context?: PrismaContext) {
       $allModels: {
         async softDelete(id: string) {
           const model = (this as any).name;
+          const modelMeta = (baseClient as any)._runtimeDataModel.models[model];
+          
+          const data: any = { deletedAt: new Date() };
+          
+          // Handle unique 'numero' constraint for soft deleted records
+          if (modelMeta?.fields.some((f: any) => f.name === 'numero')) {
+            const existing: any = await (baseClient as any)[model].findUnique({
+              where: { id },
+              select: { numero: true },
+            });
+            if (existing?.numero && !existing.numero.includes('_DELETED_')) {
+              data.numero = `${existing.numero}_DELETED_${Date.now()}`;
+            }
+          }
+
           return (baseClient as any)[model].update({
             where: { id },
-            data: { deletedAt: new Date() },
+            data,
           });
         },
         async restore(id: string) {

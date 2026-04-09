@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
-import { parseLignes, computeTotals } from "@/lib/devis-lignes";
+import { parseLignes, computeTotals, parseNumber } from "@/lib/devis-lignes";
 import { internalServerError } from "@/lib/http";
 
 export async function POST(
@@ -58,9 +58,14 @@ export async function POST(
       : parseLignes(devis.lignesNorm);
 
     const { totalHT, totalTTC } = computeTotals(
-      lignes,
-      Number(devis.tva) || 0,
-      Number(devis.remise) || 0,
+      lignes.map(l => ({
+        ...l,
+        prixUnitaire: parseNumber(l.prixUnitaire),
+        quantite: parseNumber(l.quantite),
+        totalLigne: parseNumber(l.totalLigne),
+      })),
+      parseNumber(devis.tva, 20),
+      parseNumber(devis.remise, 0),
     );
 
     // Create Facture and update Devis in a transaction
@@ -74,7 +79,7 @@ export async function POST(
           nomClient: devis.client.nom,
           emailClient: devis.client.email,
           totalHT,
-          tva: devis.tva || 0,
+          tva: parseNumber(devis.tva, 20),
           totalTTC,
           statut: "Émise",
         },

@@ -41,8 +41,10 @@ export function getLineTotal(line: LignePayload): number {
 }
 
 export function parseNumber(value: unknown, fallback = 0): number {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'number') return value;
   if (value instanceof Decimal) return value.toNumber();
-  const parsed = Number.parseFloat(String(value ?? fallback));
+  const parsed = Number.parseFloat(String(value));
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 

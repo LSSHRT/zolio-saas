@@ -31,7 +31,7 @@ type FactureRecord = {
   statut: string;
   totalHT: number | Decimal;
   totalTTC: number | Decimal;
-  tva: number | Decimal;
+  tva: any | Decimal;
 };
 
 function normalizeText(value: unknown) {
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
       telephone: body.client.telephone || "",
       adresse: body.client.adresse || "",
     };
-    const lignes = parseLignes((body as Record<string, unknown>).lignesNorm || body.lignes);
+    const lignes = parseLignes((body as any).lignesNorm || body.lignes);
     const devisNumero = normalizeText(body.devisNumero);
     const totalHT = body.totalHT;
     const totalTTC = body.totalTTC;

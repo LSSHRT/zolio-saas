@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
 import { currentUser } from "@clerk/nextjs/server";
-import { parseLignes, normalizeLigneForOutput, computeTotals, type LignePayload } from "@/lib/devis-lignes";
+import { parseLignes, normalizeLigneForOutput, computeTotals, parseNumber, type LignePayload } from "@/lib/devis-lignes";
 import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -40,15 +40,17 @@ export async function POST(request: Request) {
             ? d.lignesNorm.map((ligne) => ({
                 isOptional: ligne.isOptional,
                 nomPrestation: ligne.nomPrestation,
-                prixUnitaire: ligne.prixUnitaire,
-                quantite: ligne.quantite,
-                totalLigne: ligne.totalLigne,
+                prixUnitaire: parseNumber(ligne.prixUnitaire),
+                quantite: parseNumber(ligne.quantite),
+                totalLigne: parseNumber(ligne.totalLigne),
                 tva: ligne.tva,
                 unite: ligne.unite,
               }))
-            : parseLignes(d.lignesNorm);
+            : [];
 
-          const { totalHT, totalTTC } = computeTotals(lignes, Number(d.tva) || 0, Number(d.remise) || 0);
+          const tvaNum = parseNumber(d.tva, 20);
+          const remiseNum = parseNumber(d.remise, 0);
+          const { totalHT, totalTTC } = computeTotals(lignes, tvaNum, remiseNum);
 
           const _pdfBuffer = await generateDevisPDF({
             numeroDevis: d.numero,
@@ -77,10 +79,10 @@ export async function POST(request: Request) {
             },
             lignes: lignes.map(normalizeLigneForOutput),
             totalHT: totalHT.toFixed(2),
-            tva: String(d.tva || 0),
+            tva: String(tvaNum),
             totalTTC: totalTTC.toFixed(2),
-            acompte: d.acompte?.toString() || "",
-            remise: (d.remise || 0).toString(),
+            acompte: parseNumber(d.acompte).toString(),
+            remise: remiseNum.toString(),
             statut: d.statut,
             signatureBase64: d.signature || "",
             photos: [],

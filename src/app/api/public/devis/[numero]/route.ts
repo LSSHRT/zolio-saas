@@ -12,6 +12,7 @@ import {
   parseLignes,
   normalizeLigneForOutput,
   computeTotals,
+  parseNumber,
   type LignePayload,
 } from "@/lib/devis-lignes";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -56,16 +57,16 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
       ? devis.lignesNorm.map((ligne) => ({
           isOptional: ligne.isOptional,
           nomPrestation: ligne.nomPrestation,
-          prixUnitaire: ligne.prixUnitaire,
-          quantite: ligne.quantite,
-          totalLigne: ligne.totalLigne,
+          prixUnitaire: parseNumber(ligne.prixUnitaire),
+          quantite: parseNumber(ligne.quantite),
+          totalLigne: parseNumber(ligne.totalLigne),
           tva: ligne.tva,
           unite: ligne.unite,
         }))
-      : parseLignes(devis.lignesNorm);
+      : [];
 
-    const remiseGlobale = Number(devis.remise) || 0;
-    const tvaGlobale = Number(devis.tva) || 0;
+    const remiseGlobale = parseNumber(devis.remise, 0);
+    const tvaGlobale = parseNumber(devis.tva, 20);
     const { totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
@@ -166,18 +167,18 @@ export async function POST(request: Request, context: { params: Promise<{ numero
           ? devis.lignesNorm.map((ligne) => ({
               isOptional: ligne.isOptional,
               nomPrestation: ligne.nomPrestation,
-              prixUnitaire: ligne.prixUnitaire,
-              quantite: ligne.quantite,
-              totalLigne: ligne.totalLigne,
+              prixUnitaire: parseNumber(ligne.prixUnitaire),
+              quantite: parseNumber(ligne.quantite),
+              totalLigne: parseNumber(ligne.totalLigne),
               tva: ligne.tva,
               unite: ligne.unite,
             }))
-          : parseLignes(devis.lignesNorm);
+          : [];
 
         const lignesPdf = lignes.map(normalizeLigneForOutput);
-        const tvaGlobale = Number(devis.tva) || 0;
-        const remiseGlobale = Number(devis.remise) || 0;
-        const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
+        const tvaGlobaleNum = parseNumber(devis.tva, 20);
+        const remiseGlobaleNum = parseNumber(devis.remise, 0);
+        const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobaleNum, remiseGlobaleNum);
 
         const pdfBuffer = await generateDevisPDF({
           numeroDevis: devis.numero,
@@ -205,10 +206,10 @@ export async function POST(request: Request, context: { params: Promise<{ numero
           },
           lignes: lignesPdf,
           totalHT: totalHT.toFixed(2),
-          tva: tvaGlobale.toString(),
+          tva: tvaGlobaleNum.toString(),
           totalTTC: totalTTC.toFixed(2),
-          acompte: devis.acompte?.toString() || "",
-          remise: remiseGlobale.toString(),
+          acompte: parseNumber(devis.acompte).toString(),
+          remise: remiseGlobaleNum.toString(),
           statut: "Accepté",
           signatureBase64: signature,
           photos: typeof devis.photos === "string"

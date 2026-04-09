@@ -35,7 +35,7 @@ interface FactureDetail {
   nomClient: string;
   emailClient: string;
   totalHT: number;
-  tva: number;
+  tva: any;
   totalTTC: number;
   statut: string;
   date: string;

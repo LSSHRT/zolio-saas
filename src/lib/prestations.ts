@@ -1,12 +1,13 @@
-import { Decimal } from "@/lib/prisma";
+import { Decimal } from "@prisma/client/runtime/library";
+import { parseNumber } from "./devis-lignes";
 
 type PrestationRecord = {
   id: string;
   nom: string;
   description?: string | null;
   unite?: string | null;
-  prix: Decimal | number;
-  cout?: Decimal | number | null;
+  prix: number | Decimal;
+  cout?: number | Decimal | null;
   stock?: number | null;
 };
 
@@ -91,8 +92,8 @@ export function mapPrestationForClient(record: PrestationRecord) {
     nom: record.nom,
     description: decoded.description,
     unite: record.unite || "",
-    prix: Number(record.prix),
-    cout: Number(record.cout || 0),
+    prix: parseNumber(record.prix),
+    cout: parseNumber(record.cout || 0),
     stock: record.stock || 0,
   };
 }

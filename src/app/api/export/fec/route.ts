@@ -88,7 +88,7 @@ export async function GET(req: NextRequest) {
   // + TVA collectée (44571)
 
   // Regroupement par mois pour éviter trop de lignes (écriture globale mensuelle)
-  const byMonth: Record<string, { ht: number; tva: number; ttc: number; invoices: string[] }> = {};
+  const byMonth: Record<string, { ht: number; tva: any; ttc: number; invoices: string[] }> = {};
 
   for (const inv of invoices) {
     const monthKey = `${inv.date.getFullYear()}-${String(inv.date.getMonth() + 1).padStart(2, "0")}`;
@@ -175,7 +175,7 @@ export async function GET(req: NextRequest) {
 
   // Ligne de contrôle : total debit = total credit
   const totalDebit = Object.values(byMonth).reduce((s, d) => s + d.ttc, 0);
-  const totalCredit = Object.values(byMonth).reduce((s, d) => s + d.ht + d.tva, 0);
+  const totalCredit = Object.values(byMonth).reduce((s, d) => s + d.ht + Number(d.tva), 0);
 
   const header = [
     `FEC généré par Zolio`,
