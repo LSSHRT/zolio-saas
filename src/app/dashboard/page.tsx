@@ -104,7 +104,7 @@ function DashboardNotificationsMenu({ dashboardSignals }: { dashboardSignals: Da
   return (
     <Link
       href="/notifications"
-      className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+      className="relative inline-flex h-11 w-11 lg:h-9 lg:w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
       aria-label="Notifications"
     >
       <Bell size={20} />
@@ -318,19 +318,19 @@ export default function DashboardPage() {
             <ClientBrandMark showLabel={false} />
             <div className="flex items-center gap-2">
               <ThemeToggle />
-              <Link href="/parametres" className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white" aria-label="Paramètres">
-                <Settings size={20} />
+              <Link href="/parametres" className="inline-flex h-11 w-11 lg:h-9 lg:w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white" aria-label="Paramètres">
+                <Settings size={20} className="lg:w-4 lg:h-4" />
               </Link>
               {canAccessAdmin && (
-                <Link href="/admin" className="hidden md:inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100">
-                  <ShieldCheck size={17} /> Admin
+                <Link href="/admin" className="hidden md:inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 lg:px-3 lg:py-1.5 text-sm lg:text-xs font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100">
+                  <ShieldCheck size={17} className="lg:w-3.5 lg:h-3.5" /> Admin
                 </Link>
               )}
               <DashboardNotificationsMenu dashboardSignals={signals} />
               {isLoaded && user?.imageUrl ? (
-                <img src={user.imageUrl} alt="Avatar" className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20" />
+                <img src={user.imageUrl} alt="Avatar" className="h-8 w-8 lg:h-7 lg:w-7 rounded-full object-cover ring-1 ring-white/20" />
               ) : (
-                <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
+                <div className="h-8 w-8 lg:h-7 lg:w-7 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
               )}
             </div>
           </div>
@@ -342,7 +342,7 @@ export default function DashboardPage() {
           {!isLoaded ? (
             <div className="space-y-6">
               <div className="h-32 animate-pulse rounded-[2rem] bg-slate-200/80 dark:bg-slate-800/80" />
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 {[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />)}
               </div>
             </div>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
               </motion.section>
 
               {/* ─── KPI ─────────────────────────────────────────── */}
-              <motion.section {...sectionMotion(0.04)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+              <motion.section {...sectionMotion(0.04)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">Chiffres clés</h2>
@@ -404,11 +404,11 @@ export default function DashboardPage() {
               <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-[1fr_auto]`}>
                 <div className="space-y-4">
                   {/* Objectif mensuel */}
-                  <motion.section {...sectionMotion(0.06)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                  <motion.section {...sectionMotion(0.06)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                     <div className="flex items-end justify-between gap-3">
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
-                        <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Pilotage mensuel</h2>
+                        <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Pilotage mensuel</h2>
                       </div>
                       <span className="rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 text-sm font-semibold text-slate-950 dark:border-white/8 dark:bg-white/4 dark:text-white">{objectifProgress.toFixed(0)}%</span>
                     </div>
@@ -436,15 +436,15 @@ export default function DashboardPage() {
                     <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
                       <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Cap restant</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
+                        <p className="mt-2 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">{formatCurrency(remainingToGoal)}</p>
                       </div>
                       <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 dark:border-white/8 dark:bg-white/4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Total TTC</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
+                        <p className="mt-2 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
                       </div>
                       <div className="col-span-2 rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-3 py-4 sm:col-span-1 dark:border-white/8 dark:bg-white/4">
                         <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Objectif</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
+                        <p className="mt-2 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">{formatCurrency(objectifActif)}</p>
                       </div>
                     </div>
 
@@ -462,11 +462,11 @@ export default function DashboardPage() {
                   </motion.section>
 
                   {/* Derniers devis */}
-                  <motion.section {...sectionMotion(0.08)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                  <motion.section {...sectionMotion(0.08)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                     <div className="flex items-end justify-between gap-3">
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Derniers devis</p>
-                        <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Affaires récentes</h2>
+                        <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Affaires récentes</h2>
                       </div>
                       <Link href="/devis" className="inline-flex items-center gap-1 text-sm font-semibold text-violet-700 dark:text-violet-200">Voir tous <ChevronRight size={16} /></Link>
                     </div>
@@ -518,11 +518,11 @@ export default function DashboardPage() {
               {/* ─── Financials grid ──────────────────────────────── */}
               <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-2`}>
                 {/* Trésorerie */}
-                <motion.section {...sectionMotion(0.10)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section {...sectionMotion(0.10)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Trésorerie</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">État des factures</h2>
+                      <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">État des factures</h2>
                     </div>
                     {tresorerie && <span className={`client-chip ring-1 ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-500/12 text-amber-700 ring-amber-300/40" : "bg-rose-500/12 text-rose-700 ring-rose-300/40"}`}>{tresorerie.tauxRecouvrement}% rec.</span>}
                   </div>
@@ -530,11 +530,11 @@ export default function DashboardPage() {
                 </motion.section>
 
                 {/* Bénéfice */}
-                <motion.section {...sectionMotion(0.12)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section {...sectionMotion(0.12)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Bénéfice net</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Votre résultat</h2>
+                      <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Votre résultat</h2>
                     </div>
                     {benefice && <span className={`rounded-full px-3 py-1.5 text-sm font-bold ${benefice.margePct >= 70 ? "bg-emerald-500/12 text-emerald-700" : benefice.margePct >= 40 ? "bg-amber-500/12 text-amber-700" : "bg-rose-500/12 text-rose-700"}`}>{benefice.margePct}% marge</span>}
                   </div>
@@ -543,9 +543,9 @@ export default function DashboardPage() {
               </div>
 
               {/* ─── Actions + Relances + Échéances grid ─────────── */}
-              <div className="grid gap-4 lg:grid-cols-3">
+              <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-4">
                 {/* Actions — desktop only or expanded mobile */}
-                <motion.section {...sectionMotion(0.14)} className={`${showMoreMobile ? "block" : "hidden sm:block"} client-panel rounded-[2rem] p-4 sm:p-5`}>
+                <motion.section {...sectionMotion(0.14)} className={`${showMoreMobile ? "block" : "hidden sm:block"} client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4`}>
                   <div className="flex items-end justify-between gap-3">
                     <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Actions</p>
                     <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">{actionPlan.length}</span>
@@ -556,7 +556,7 @@ export default function DashboardPage() {
                 </motion.section>
 
                 {/* Relances */}
-                <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">À traiter</h2>
                     <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40">{devisARelancer.length}</span>
@@ -565,7 +565,7 @@ export default function DashboardPage() {
                 </motion.section>
 
                 {/* Échéances */}
-                <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">Prochains paiements</h2>
                     <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40">{echeances.length}</span>
@@ -587,21 +587,21 @@ export default function DashboardPage() {
 
               {/* ─── Top Clients + Quick Links ──────────────────── */}
               <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-2`}>
-                <motion.section {...sectionMotion(0.20)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section {...sectionMotion(0.20)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Top Clients</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Meilleurs clients</h2>
+                      <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Meilleurs clients</h2>
                     </div>
                   </div>
                   <div className="mt-3"><DashboardTopClients items={topClients} /></div>
                 </motion.section>
 
-                <motion.section {...sectionMotion(0.22)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section {...sectionMotion(0.22)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Modules</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Accès rapides</h2>
+                      <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Accès rapides</h2>
                     </div>
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3">
@@ -616,11 +616,11 @@ export default function DashboardPage() {
 
               {/* ─── Starter métier (setup only) ─────────────────── */}
               {setupRequired && selectedTradeDef && (
-                <motion.section id="dashboard-setup-panel" {...sectionMotion(0.24)} className="client-panel rounded-[2rem] p-4 sm:p-5">
+                <motion.section id="dashboard-setup-panel" {...sectionMotion(0.24)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Starter métier</p>
-                      <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Préparez votre activité</h2>
+                      <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Préparez votre activité</h2>
                     </div>
                     <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40">{starterCatalogCount} en base</span>
                   </div>
@@ -646,7 +646,7 @@ export default function DashboardPage() {
 
               {/* ─── Funnel mobile ──────────────────────────────── */}
               {funnel && funnel.length > 0 && (
-                <motion.section {...sectionMotion(0.26)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:hidden">
+                <motion.section {...sectionMotion(0.26)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4 lg:hidden">
                   <div className="mb-2 flex items-center gap-2">
                     <Target size={18} className="text-violet-500" />
                     <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
