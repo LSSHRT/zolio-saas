@@ -10,7 +10,7 @@ Zolio est une application SaaS de gestion commerciale pour artisans et independa
 
 ## Ce qui a ete implemente
 
-### Audit UX Mobile — Simplification (09/04/2025)
+### Audit UX Mobile (09/04/2025)
 
 **Phase 1 — Corrections techniques :**
 - Ajout dock mobile sur Dashboard (manquant)
@@ -25,13 +25,16 @@ Zolio est une application SaaS de gestion commerciale pour artisans et independa
 - Bouton "+" redimensionne (48px, -mt-4)
 
 **Phase 3 — Simplification densite d'information :**
-- Dashboard : sections Pilotage, Financials, Top Clients, Quick Links masquees sur mobile
-- Dashboard : hero simplifie (badges date/metier masques, titre reduit, signaux secondaires retires)
-- Dashboard : KPI "Chiffres cles" reduit a 2 metriques sur mobile (au lieu de 4)
-- Dashboard : labels sections simplifies (titre direct sans eyebrow sur mobile)
+- Dashboard : sections secondaires masquees sur mobile
+- Dashboard : hero simplifie, KPIs reduits a 2 sur mobile
 - ClientSubpageShell : eyebrow + description masques sur mobile
-- ClientMobileOverview : limite a 3 KPIs compacts sans texte descriptif
-- Rapport complet : /app/RAPPORT-AUDIT.md
+- ClientMobileOverview : 3 KPIs compacts max
+
+**Phase 4 — Bouton "Voir plus" :**
+- Bouton "Voir plus de details" / "Voir moins" en bas du dashboard mobile
+- Revele les sections masquees (Pilotage, Financials, Actions, Top Clients, Quick Links)
+- Chevron anime (rotation 180°)
+- Visible uniquement sur mobile (sm:hidden)
 
 ## Backlog
 - P1 : Verification sur environnement de production avec Clerk actif

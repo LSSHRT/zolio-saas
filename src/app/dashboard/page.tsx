@@ -3,6 +3,7 @@
 import {
   Bell,
   BriefcaseBusiness,
+  ChevronDown,
   ChevronRight,
   Clock3,
   CloudSun,
@@ -158,6 +159,7 @@ export default function DashboardPage() {
   const [objectifDraft, setObjectifDraft] = useState("5000");
   const [runTour, setRunTour] = useState(() => typeof window !== "undefined" && !localStorage.getItem("zolio_has_seen_tour"));
   const [currentHour] = useState(() => new Date().getHours());
+  const [showMoreMobile, setShowMoreMobile] = useState(false);
 
   useEffect(() => {
     const nextTrade = getTradeDefinition(companyTrade)?.key;
@@ -397,7 +399,7 @@ export default function DashboardPage() {
               </motion.section>
 
               {/* ─── Pilotage + Funnel (desktop 2-col) ──────────── */}
-              <div className="hidden sm:grid gap-4 lg:grid-cols-[1fr_auto]">
+              <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-[1fr_auto]`}>
                 <div className="space-y-4">
                   {/* Objectif mensuel */}
                   <motion.section {...sectionMotion(0.06)} className="client-panel rounded-[2rem] p-4 sm:p-5">
@@ -512,7 +514,7 @@ export default function DashboardPage() {
               </div>
 
               {/* ─── Financials grid ──────────────────────────────── */}
-              <div className="hidden sm:grid gap-4 lg:grid-cols-2">
+              <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-2`}>
                 {/* Trésorerie */}
                 <motion.section {...sectionMotion(0.10)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
@@ -540,8 +542,8 @@ export default function DashboardPage() {
 
               {/* ─── Actions + Relances + Échéances grid ─────────── */}
               <div className="grid gap-4 lg:grid-cols-3">
-                {/* Actions — desktop only */}
-                <motion.section {...sectionMotion(0.14)} className="hidden sm:block client-panel rounded-[2rem] p-4 sm:p-5">
+                {/* Actions — desktop only or expanded mobile */}
+                <motion.section {...sectionMotion(0.14)} className={`${showMoreMobile ? "block" : "hidden sm:block"} client-panel rounded-[2rem] p-4 sm:p-5`}>
                   <div className="flex items-end justify-between gap-3">
                     <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Actions</p>
                     <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">{actionPlan.length}</span>
@@ -570,8 +572,19 @@ export default function DashboardPage() {
                 </motion.section>
               </div>
 
+              {/* ─── Bouton Voir plus (mobile only) ───────────────── */}
+              <button
+                type="button"
+                onClick={() => setShowMoreMobile(!showMoreMobile)}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200/70 bg-white/80 py-3.5 text-sm font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:hidden"
+                data-testid="mobile-show-more-btn"
+              >
+                {showMoreMobile ? "Voir moins" : "Voir plus de détails"}
+                <ChevronDown size={16} className={`transition-transform duration-300 ${showMoreMobile ? "rotate-180" : ""}`} />
+              </button>
+
               {/* ─── Top Clients + Quick Links ──────────────────── */}
-              <div className="hidden sm:grid gap-4 lg:grid-cols-2">
+              <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-2`}>
                 <motion.section {...sectionMotion(0.20)} className="client-panel rounded-[2rem] p-4 sm:p-5">
                   <div className="flex items-end justify-between gap-3">
                     <div>
