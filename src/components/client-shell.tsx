@@ -418,6 +418,16 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         <span className="text-[13px] font-bold tracking-widest text-slate-900 dark:text-white">ZOLIO</span>
       </div>
 
+      <div className="mb-6 px-2">
+        <Link
+          href="/nouveau-devis"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:opacity-90"
+        >
+          <Plus size={18} strokeWidth={2.5} />
+          Nouveau devis
+        </Link>
+      </div>
+
       {/* Navigation principale */}
       <nav className="flex flex-col gap-0.5">
         {mainItems.map((item) => {

@@ -155,7 +155,6 @@ export default function DashboardPage() {
 
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isBootstrapping, setIsBootstrapping] = useState(false);
-  const [fabOpen, setFabOpen] = useState(false);
   const [objectifDialogOpen, setObjectifDialogOpen] = useState(false);
   const [objectifDraft, setObjectifDraft] = useState("5000");
   const [runTour, setRunTour] = useState(() => typeof window !== "undefined" && !localStorage.getItem("zolio_has_seen_tour"));
@@ -675,34 +674,6 @@ export default function DashboardPage() {
       {/* ─── Mobile Dock ─────────────────────────────────────── */}
       <ClientMobileDock active="dashboard" />
 
-      {/* ─── FAB (desktop only) ──────────────────────────────── */}
-      <div className="hidden lg:block fixed bottom-8 right-8">
-        <AnimatePresence>
-          {fabOpen && (
-            <motion.div initial={{ opacity: 0, scale: 0.8, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8, y: 16 }} className="mb-3 flex flex-col items-end gap-2">
-              {[
-                { href: "/nouveau-devis", icon: FileText, label: "Nouveau devis", color: "bg-violet-600" },
-                { href: "/nouvelle-facture", icon: Receipt, label: "Nouvelle facture", color: "bg-emerald-600" },
-                { href: "/clients?new=1", icon: Users, label: "Nouveau client", color: "bg-blue-600" },
-                { href: "/depenses?new=1", icon: CreditCard, label: "Nouvelle dépense", color: "bg-amber-600" },
-              ].map(action => {
-                const Icon = action.icon;
-                return (
-                  <Link key={action.href} href={action.href} onClick={() => setFabOpen(false)}>
-                    <motion.button whileTap={{ scale: 0.92 }} className="flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg dark:bg-slate-800">
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">{action.label}</span>
-                      <div className={`flex h-8 w-8 items-center justify-center rounded-full ${action.color}`}><Icon size={16} className="text-white" /></div>
-                    </motion.button>
-                  </Link>
-                );
-              })}
-            </motion.div>
-          )}
-        </AnimatePresence>
-        <motion.button whileTap={{ scale: 0.9 }} onClick={() => setFabOpen(!fabOpen)} className={`flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-xl shadow-violet-500/30 transition ${fabOpen ? "rotate-45" : ""}`}>
-          <Plus size={24} />
-        </motion.button>
-      </div>
     </div>
   );
 }
