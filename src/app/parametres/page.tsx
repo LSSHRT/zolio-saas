@@ -447,13 +447,13 @@ export default function ParametresEntreprise() {
       <div className="mt-5 space-y-3">
         <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
           <div
-            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
+            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
               documentReady
                 ? "bg-emerald-500/12 text-emerald-600 dark:bg-emerald-500/12 dark:text-emerald-300"
                 : "bg-amber-400/12 text-amber-600 dark:bg-amber-400/12 dark:text-amber-300"
             }`}
           >
-            {documentReady ? <CheckCircle2 size={16} /> : <Sparkles size={16} />}
+            {documentReady ? <CheckCircle2 size={17} /> : <Sparkles size={17} />}
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Base entreprise</p>
@@ -467,13 +467,13 @@ export default function ParametresEntreprise() {
 
         <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
           <div
-            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
+            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
               payoutReady
                 ? "bg-emerald-500/12 text-emerald-600 dark:bg-emerald-500/12 dark:text-emerald-300"
                 : "bg-slate-900/6 text-slate-600 dark:bg-white/8 dark:text-slate-300"
             }`}
           >
-            <Landmark size={16} />
+            <Landmark size={17} />
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Coordonnées bancaires</p>
@@ -487,13 +487,13 @@ export default function ParametresEntreprise() {
 
         <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
           <div
-            className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl ${
+            className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${
               reviewReady
                 ? "bg-violet-500/12 text-violet-600 dark:bg-violet-500/12 dark:text-violet-300"
                 : "bg-slate-900/6 text-slate-600 dark:bg-white/8 dark:text-slate-300"
             }`}
           >
-            <Star size={16} />
+            <Star size={17} />
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Relance avis Google</p>
@@ -507,8 +507,8 @@ export default function ParametresEntreprise() {
 
         {/* Relances automatiques factures */}
         <div className="flex items-start gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-amber-500/12 text-amber-600 dark:bg-amber-500/12 dark:text-amber-300">
-            <Clock size={16} />
+          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-amber-500/12 text-amber-600 dark:bg-amber-500/12 dark:text-amber-300">
+            <Clock size={17} />
           </div>
           <div className="flex-1">
             <p className="text-sm font-semibold text-slate-950 dark:text-white">Relances automatiques</p>

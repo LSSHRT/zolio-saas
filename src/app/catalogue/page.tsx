@@ -837,19 +837,19 @@ export default function CataloguePage() {
 
                     <div className="grid gap-3 sm:grid-cols-3">
                       <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                           Unité
                         </p>
                         <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{prestation.unite}</p>
                       </div>
                       <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                           Coût matière
                         </p>
                         <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{formatPrice(prestation.cout || 0)}</p>
                       </div>
                       <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                           Stock
                         </p>
                         <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">

@@ -33,8 +33,8 @@ export function AdminMobileNav({
               }`}
               aria-pressed={isActive}
             >
-              <Icon className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
-              <span className="text-[10px] font-medium leading-tight">{section.label}</span>
+              <Icon className={`h-[18px] w-[18px] ${isActive ? "text-white" : "text-slate-400"}`} />
+              <span className="text-[11px] font-medium leading-tight">{section.label}</span>
               {section.badge && (
                 <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-fuchsia-300" />
               )}

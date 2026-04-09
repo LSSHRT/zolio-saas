@@ -101,6 +101,7 @@ export default function RootLayout({
               {children}
               <Toaster
                 position="bottom-center"
+                offset={80}
                 toastOptions={{
                   classNames: {
                     toast: "font-sans",

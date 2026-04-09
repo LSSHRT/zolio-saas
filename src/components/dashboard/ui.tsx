@@ -107,7 +107,7 @@ export function CompactMetricCard({
         <div className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ring-1 ${toneClasses(tone).icon}`}>
           <Icon size={15} />
         </div>
-        <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{label}</span>
+        <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{label}</span>
       </div>
       <p className="mt-2 text-xl font-bold text-slate-950 dark:text-white">{value}</p>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{detail}</p>
@@ -120,7 +120,7 @@ export function CompactMetricCard({
 export function HeroIndicatorPill({ indicator }: { indicator: DashboardHeroIndicator }) {
   return (
     <div className={`rounded-full px-3 py-2 ring-1 ${toneClasses(indicator.tone).chip}`}>
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-inherit/70">{indicator.label}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-inherit/70">{indicator.label}</p>
       <p className="text-sm font-bold text-inherit">{indicator.value}</p>
     </div>
   );

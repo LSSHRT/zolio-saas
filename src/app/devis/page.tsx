@@ -685,7 +685,7 @@ export default function DevisPage() {
                             </div>
                             <p className="text-xs text-slate-400">{d.numero}</p>
                             {d.optionLabel && (
-                              <span className={`inline-block mt-1 rounded px-1.5 py-0.5 text-[9px] font-bold capitalize ${optionColors[d.optionLabel] || "bg-violet-100 text-violet-700"}`}>
+                              <span className={`inline-block mt-1 rounded px-1.5 py-0.5 text-[10px] font-bold capitalize ${optionColors[d.optionLabel] || "bg-violet-100 text-violet-700"}`}>
                                 {d.optionLabel}
                               </span>
                             )}
@@ -695,19 +695,19 @@ export default function DevisPage() {
                         
                         {pending && (
                           <div className="flex gap-2">
-                            <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"><Check size={14} className="inline mr-1"/>Valider</button>
-                            <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 py-1.5 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
+                            <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 min-h-[40px] py-2 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"><Check size={14} className="inline mr-1"/>Valider</button>
+                            <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 min-h-[40px] py-2 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
                             <button onClick={(e) => {
                               e.preventDefault();
                               window.location.href = buildFollowUpMailTo(d);
-                            }} className="py-1.5 px-2 bg-violet-50 dark:bg-violet-500/10 text-brand-violet text-xs font-semibold rounded-lg hover:bg-violet-100 dark:bg-violet-900/30 transition" title="Relancer par email">
+                            }} className="min-h-[40px] py-2 px-2.5 bg-violet-50 dark:bg-violet-500/10 text-brand-violet text-xs font-semibold rounded-lg hover:bg-violet-100 dark:bg-violet-900/30 transition" title="Relancer par email">
                               <Mail size={14}/>
                             </button>
                           </div>
                         )}
                         <div className="flex items-center gap-2">
                           <Link href={`/devis/${d.numero}`} className="flex-1">
-                            <button className="w-full py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+                            <button className="w-full min-h-[40px] py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition">
                               Ouvrir
                             </button>
                           </Link>
@@ -810,7 +810,7 @@ export default function DevisPage() {
                       </div>
 
                       <div className="mt-4 rounded-[1.2rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/30">
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Total TTC</p>
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Total TTC</p>
                         <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{d.totalTTC}€</p>
                       </div>
 
@@ -820,11 +820,11 @@ export default function DevisPage() {
                         </summary>
                         <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                           <div>
-                            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">Total HT</p>
+                            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Total HT</p>
                             <p className="mt-1 font-semibold text-slate-700 dark:text-slate-200">{d.totalHT}€</p>
                           </div>
                           <div>
-                            <p className="text-[10px] uppercase tracking-[0.18em] text-slate-400">TVA</p>
+                            <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">TVA</p>
                             <p className="mt-1 font-semibold text-slate-700 dark:text-slate-200">{d.tva}</p>
                           </div>
                         </div>
@@ -833,7 +833,7 @@ export default function DevisPage() {
                       <Link href={`/devis/${d.numero}`} className="mt-3 block">
                         <motion.button
                           whileTap={{ scale: 0.96 }}
-                          className="w-full py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-violet-50 hover:border-violet-300 hover:text-brand-violet transition"
+                          className="w-full min-h-[44px] py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-violet-50 hover:border-violet-300 hover:text-brand-violet transition"
                         >
                           <Pencil size={14} /> Ouvrir
                         </motion.button>
@@ -984,11 +984,11 @@ export default function DevisPage() {
                                 <div className="flex flex-wrap items-center gap-1.5">
                                   <span className="text-[10px] text-slate-400">{child.numero}</span>
                                   {child.optionLabel && (
-                                    <span className={`inline-flex items-center gap-0.5 rounded px-1 py-px text-[9px] font-bold capitalize ${optionColors[child.optionLabel] || "bg-violet-100 text-violet-700"}`}>
+                                    <span className={`inline-flex items-center gap-0.5 rounded px-1 py-px text-[10px] font-bold capitalize ${optionColors[child.optionLabel] || "bg-violet-100 text-violet-700"}`}>
                                       {child.optionLabel}
                                     </span>
                                   )}
-                                  <span className={`${childConfig.bg} ${childConfig.color} inline-flex items-center gap-0.5 rounded px-1 py-px text-[9px] font-bold`}>
+                                  <span className={`${childConfig.bg} ${childConfig.color} inline-flex items-center gap-0.5 rounded px-1 py-px text-[10px] font-bold`}>
                                     <ChildIcon size={10} /> {child.statut}
                                   </span>
                                 </div>

@@ -308,7 +308,7 @@ export default function RapportsPage() {
                   </div>
                   <span className="text-[10px] text-slate-500 dark:text-slate-400">{m.name}</span>
                   {m.CA > 0 && (
-                    <span className="text-[9px] text-slate-400 dark:text-slate-500">
+                    <span className="text-[10px] text-slate-400 dark:text-slate-500">
                       {Math.round(m.CA)}€
                     </span>
                   )}

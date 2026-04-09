@@ -761,7 +761,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
                         <div className="mt-4 grid gap-3 sm:grid-cols-2">
                           <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                               Réf devis
                             </p>
                             <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -769,7 +769,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                             </p>
                           </div>
                           <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
-                            <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                               Total TTC
                             </p>
                             <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
@@ -779,7 +779,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                           <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20 sm:col-span-2">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                               <div>
-                                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                                <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                                   Total HT
                                 </p>
                                 <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
@@ -1001,7 +1001,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                                 <button
                                   onClick={() => handleMarkAsPaid(facture.numero)}
                                   disabled={markingPaid === facture.numero}
-                                  className="w-full py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-100 transition disabled:opacity-50 dark:bg-slate-700 dark:text-blue-300"
+                                  className="w-full min-h-[40px] py-2 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg hover:bg-blue-100 transition disabled:opacity-50 dark:bg-slate-700 dark:text-blue-300"
                                 >
                                   <BadgeCheck size={14} className="inline mr-1" />
                                   {markingPaid === facture.numero ? "..." : "Marquer payée"}
@@ -1011,7 +1011,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => handleDownloadPDF(facture)}
-                                  className="flex-1 py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+                                  className="flex-1 min-h-[40px] py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition"
                                 >
                                   <Download size={14} className="inline mr-1" /> PDF
                                 </button>
@@ -1019,7 +1019,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                                   <>
                                     <button
                                       onClick={() => handleRelance(facture)}
-                                      className="py-1.5 px-2 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
+                                      className="min-h-[40px] py-2 px-2.5 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-xs font-semibold rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 transition"
                                       title="Relancer"
                                     >
                                       <Clock size={14} />
@@ -1027,7 +1027,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                                     <button
                                       onClick={() => handlePayLink(facture)}
                                       disabled={creatingPayLink === facture.numero}
-                                      className="py-1.5 px-2 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition disabled:opacity-50"
+                                      className="min-h-[40px] py-2 px-2.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-semibold rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition disabled:opacity-50"
                                       title="Lien de paiement"
                                     >
                                       <BadgeCheck size={14} />

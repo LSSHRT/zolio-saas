@@ -346,7 +346,7 @@ export default function ModelesPage() {
               <div className="mb-3 flex items-center gap-2">
                 <Wrench size={18} className="text-violet-500" />
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">{trade.label}</h3>
-                <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+                <span className="ml-auto rounded-full bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
                   {trade.bundles.length} packs
                 </span>
               </div>
@@ -467,7 +467,7 @@ export default function ModelesPage() {
 
                 {(tpl.lignes || []).length > 0 && (
                   <div className="mt-4 rounded-2xl border border-slate-200/70 bg-white/70 dark:border-white/8 dark:bg-slate-950/20">
-                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                    <div className="grid grid-cols-[1fr_auto_auto_auto] gap-2 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                       <span>Description</span>
                       <span className="text-right">Qté</span>
                       <span className="text-right">P.U.</span>
@@ -625,7 +625,7 @@ export default function ModelesPage() {
                   </div>
                   <div className="mt-2 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-slate-400">Qté</label>
+                      <label className="mb-1 block text-[11px] uppercase tracking-[0.2em] text-slate-400">Qté</label>
                       <input
                         type="number"
                         min={0}
@@ -635,7 +635,7 @@ export default function ModelesPage() {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                      <label className="mb-1 block text-[11px] uppercase tracking-[0.2em] text-slate-400">
                         Prix unitaire €
                       </label>
                       <input

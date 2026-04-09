@@ -396,20 +396,20 @@ export default function NouvelleFacturePage() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-[10px] text-slate-400">Qté</label>
+                  <label className="text-[11px] text-slate-400">Qté</label>
                   <input type="number" value={l.quantite} min="0.1" step="any"
                     onChange={(e) => updateLine(l.id, { quantite: parseFloat(e.target.value) || 1 })}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
                 </div>
                 <div>
-                  <label className="text-[10px] text-slate-400">Prix</label>
+                  <label className="text-[11px] text-slate-400">Prix</label>
                   <input type="number" value={l.prixUnitaire} min="0" step="any"
                     onChange={(e) => updateLine(l.id, { prixUnitaire: parseFloat(e.target.value) || 0 })}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
+                    className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
                 </div>
               </div>
-              <div className="mt-1 flex items-center justify-between rounded-lg bg-violet-50 px-3 py-1.5 dark:bg-violet-500/10">
-                <span className="text-[10px] text-violet-400">Total ligne</span>
+              <div className="mt-1 flex items-center justify-between rounded-lg bg-violet-50 px-3 py-2 dark:bg-violet-500/10">
+                <span className="text-[11px] text-violet-400">Total ligne</span>
                 <p className="text-sm font-bold text-slate-800 dark:text-white">{l.totalLigne.toFixed(2)}€</p>
               </div>
             </ClientSectionCard>

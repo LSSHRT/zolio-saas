@@ -358,7 +358,7 @@ export default function RecurrentesPage() {
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
                         <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Montant TTC
                           </p>
                           <p className="mt-2 text-lg font-semibold text-slate-950 dark:text-white">
@@ -366,7 +366,7 @@ export default function RecurrentesPage() {
                           </p>
                         </div>
                         <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Prochaine facture
                           </p>
                           <p className="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">

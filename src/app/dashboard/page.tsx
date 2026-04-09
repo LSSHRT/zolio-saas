@@ -37,6 +37,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ClientBrandMark,
   ClientDesktopNav,
+  ClientMobileDock,
   ClientSupportButton,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
@@ -300,7 +301,7 @@ export default function DashboardPage() {
   // ─── Render ──────────────────────────────────────────────────────
 
   return (
-    <div className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
+    <div className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white" data-testid="dashboard-page">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
@@ -424,17 +425,17 @@ export default function DashboardPage() {
                         <div className="rounded-xl bg-violet-50 px-3 py-2.5 text-center dark:bg-violet-500/10">
                           <p className="text-[10px] uppercase tracking-wider text-violet-500">Devis</p>
                           <p className="mt-1 text-lg font-black text-violet-700 dark:text-violet-300">{semaine.nouveauxDevis}</p>
-                          <p className="text-[9px] text-violet-400">{semaine.devisAcceptes} accepté{semaine.devisAcceptes !== 1 ? 's' : ''}</p>
+                          <p className="text-[10px] text-violet-400">{semaine.devisAcceptes} accepté{semaine.devisAcceptes !== 1 ? 's' : ''}</p>
                         </div>
                         <div className="rounded-xl bg-emerald-50 px-3 py-2.5 text-center dark:bg-emerald-500/10">
                           <p className="text-[10px] uppercase tracking-wider text-emerald-500">Factures</p>
                           <p className="mt-1 text-lg font-black text-emerald-700 dark:text-emerald-300">{semaine.facturesEmises}</p>
-                          <p className="text-[9px] text-emerald-400">{semaine.facturesPayees} payée{semaine.facturesPayees !== 1 ? 's' : ''}</p>
+                          <p className="text-[10px] text-emerald-400">{semaine.facturesPayees} payée{semaine.facturesPayees !== 1 ? 's' : ''}</p>
                         </div>
                         <div className="rounded-xl bg-amber-50 px-3 py-2.5 text-center dark:bg-amber-500/10">
                           <p className="text-[10px] uppercase tracking-wider text-amber-500">Encaissé</p>
                           <p className="mt-1 text-lg font-black text-amber-700 dark:text-amber-300">{formatCurrency(semaine.caEncaisse)}</p>
-                          <p className="text-[9px] text-amber-400">{formatCurrency(semaine.depensesSemaine)} dép.</p>
+                          <p className="text-[10px] text-amber-400">{formatCurrency(semaine.depensesSemaine)} dép.</p>
                         </div>
                       </div>
                     )}
@@ -671,6 +672,9 @@ export default function DashboardPage() {
           <button type="button" onClick={handleUpdateObjectif} className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white">Enregistrer</button>
         </div>
       </MobileDialog>
+
+      {/* ─── Mobile Dock ─────────────────────────────────────── */}
+      <ClientMobileDock active="dashboard" />
 
       {/* ─── FAB (desktop only) ──────────────────────────────── */}
       <div className="hidden lg:block fixed bottom-8 right-8">

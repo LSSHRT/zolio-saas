@@ -194,7 +194,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 
   return (
     <>
-      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-1 rounded-[1.75rem] px-3 py-2.5 lg:hidden">
+      <nav className="client-nav-dock fixed inset-x-3 bottom-3 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden" data-testid="mobile-nav-dock">
         {/* 2 liens gauche */}
         {CLIENT_NAV_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
@@ -204,8 +204,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               href={item.href}
               className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
             >
-              <Icon size={19} strokeWidth={active === item.key ? 2.4 : 1.8} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
+              <span className="text-[11px] font-medium leading-tight">{item.label}</span>
             </Link>
           );
         })}
@@ -214,6 +214,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         <Link
           href="/nouveau-devis"
           className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
+          data-testid="mobile-new-devis-btn"
         >
           <Plus size={22} strokeWidth={2.5} />
         </Link>
@@ -227,8 +228,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               href={item.href}
               className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
             >
-              <Icon size={19} strokeWidth={active === item.key ? 2.4 : 1.8} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
+              <span className="text-[11px] font-medium leading-tight">{item.label}</span>
             </Link>
           );
         })}
@@ -240,8 +241,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
           className={`relative client-nav-link ${active === "tools" ? "client-nav-link-active" : ""}`}
           aria-label="Plus d'outils"
         >
-          <MoreHorizontal size={19} strokeWidth={active === "tools" ? 2.4 : 1.8} />
-          <span className="text-[10px] font-medium">Plus</span>
+          <MoreHorizontal size={20} strokeWidth={active === "tools" ? 2.4 : 1.8} />
+          <span className="text-[11px] font-medium leading-tight">Plus</span>
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 right-0 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-rose-500 px-0.5 text-[7px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
@@ -735,21 +736,22 @@ export function ClientSubpageShell({
   title: string;
 }) {
   return (
-    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-24 text-slate-950 dark:text-white sm:pb-28">
+    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white sm:pb-32">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-24 pt-3 sm:px-6 sm:pb-28 sm:pt-4 lg:px-8 lg:pl-[272px]">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1480px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[272px]">
         <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href={backHref}
-                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
+                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
                 aria-label="Retour"
+                data-testid="mobile-back-button"
               >
                 <ArrowLeft size={18} />
               </Link>
@@ -758,7 +760,7 @@ export function ClientSubpageShell({
 
             {mobilePrimaryAction || mobileSecondaryActions.length > 0 ? (
               <div className="flex min-w-0 shrink-0 items-center gap-2">
-                {mobilePrimaryAction ? <div className="max-w-[calc(100vw-12rem)] shrink overflow-hidden">{mobilePrimaryAction}</div> : null}
+                {mobilePrimaryAction ? <div className="max-w-[calc(100vw-11rem)] shrink overflow-hidden">{mobilePrimaryAction}</div> : null}
                 <ClientMobileActionsMenu items={mobileSecondaryActions} />
               </div>
             ) : actions ? (

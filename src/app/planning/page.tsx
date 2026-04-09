@@ -187,13 +187,13 @@ export default function PlanningPage() {
       {/* Calendrier */}
       <ClientSectionCard>
         <div className="mb-3 flex items-center justify-between sm:mb-4">
-          <button onClick={prevMonth} className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button onClick={prevMonth} className="rounded-xl p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
             <ChevronLeft size={18} className="sm:w-5 sm:h-5" />
           </button>
           <h2 className="text-base font-bold text-slate-800 dark:text-white sm:text-lg">
             {MOIS_LABELS[viewMonth - 1]} {viewYear}
           </h2>
-          <button onClick={nextMonth} className="rounded-xl p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button onClick={nextMonth} className="rounded-xl p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
             <ChevronRight size={18} className="sm:w-5 sm:h-5" />
           </button>
         </div>
@@ -201,7 +201,7 @@ export default function PlanningPage() {
         {/* Grille */}
         <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
           {JOURS.map((j) => (
-            <div key={j} className="py-2 text-center text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+            <div key={j} className="py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
               {j}
             </div>
           ))}
