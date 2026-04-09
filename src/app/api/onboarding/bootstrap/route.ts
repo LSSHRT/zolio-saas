@@ -22,12 +22,12 @@ export async function POST(request: Request) {
     });
 
     const existingKeys = new Set(
-      existingPrestations.map((item) => `${item.nom.toLowerCase()}::${(item.unite || "").toLowerCase()}`),
+      existingPrestations.map((item) => `${(item.nom || "").toLowerCase()}::${(item.unite || "").toLowerCase()}`),
     );
 
     const starterCatalog = getStarterCatalogForTrade(trade.key);
     const data = starterCatalog
-      .filter((item) => !existingKeys.has(`${item.nom.toLowerCase()}::${item.unite.toLowerCase()}`))
+      .filter((item) => !existingKeys.has(`${(item.nom || "").toLowerCase()}::${(item.unite || "").toLowerCase()}`))
       .map((item) => buildPrestationCreateData(userId, item));
 
     if (data.length > 0) {
