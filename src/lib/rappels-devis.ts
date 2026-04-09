@@ -15,13 +15,14 @@ import { sendPushNotification } from "@/lib/push-notifications";
 const DEVIS_EXPIRY_DAYS = 7;
 const REMINDER_DAYS = [4, 6]; // Jours 4 et 6 après création (3j et 1j avant expiration)
 
-export async function checkExpiringDevis() {
+export async function checkExpiringDevis(userId: string) {
   const now = new Date();
   const results: { numero: string; action: string }[] = [];
 
   // Récupérer les devis en attente non signés
   const devis = await prisma.devis.findMany({
     where: {
+      userId,
       statut: "En attente",
       signature: null,
     },

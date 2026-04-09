@@ -10,7 +10,7 @@ export async function POST() {
     const { userId } = await auth();
     if (!userId) return jsonError("Non autorisé", 401);
 
-    const results = await checkExpiringDevis();
+    const results = await checkExpiringDevis(userId);
 
     return NextResponse.json({
       success: true,

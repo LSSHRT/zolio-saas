@@ -59,10 +59,25 @@ export async function POST(req: Request) {
             },
           });
           if (facture) {
-            await prisma.facture.update({
-              where: { id: facture.id },
-              data: { statut: "Payée" },
+            const paymentUpdate = await prisma.facture.updateMany({
+              where: {
+                id: facture.id,
+                statut: { not: "Payée" },
+              },
+              data: {
+                statut: "Payée",
+                stripeSessionId: session.id,
+              },
             });
+
+            if (paymentUpdate.count === 0) {
+              logInfo(
+                "stripe-webhook",
+                `Facture ${factureNumero} déjà traitée pour la session ${session.id}.`,
+              );
+              break;
+            }
+
             logInfo("stripe-webhook", `Facture ${factureNumero} marquée comme payée via Stripe.`);
 
             // Email de confirmation au client avec reçu PDF

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/sendEmail";
 import { logError, logInfo } from "@/lib/logger";
-import { clerkClient } from "@clerk/nextjs/server";
+import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { createClientPortalToken } from "@/lib/client-portal";
+import { isAdminUser } from "@/lib/admin";
 
 const PUBLIC_URL = process.env.NEXT_PUBLIC_APP_URL || "https://zolio.site";
 
@@ -122,8 +123,19 @@ const REMINDER_LEVELS = [
 ];
 
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET;
+  const authorization = req.headers.get("authorization");
+  const isCronTrigger = Boolean(
+    cronSecret && authorization === `Bearer ${cronSecret}`,
+  );
+
+  let isAdminTrigger = false;
+  if (!isCronTrigger) {
+    const user = await currentUser();
+    isAdminTrigger = isAdminUser(user);
+  }
+
+  if (!isCronTrigger && !isAdminTrigger) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -170,7 +182,7 @@ export async function GET(req: NextRequest) {
 
         // Déterminer le niveau de relance approprié
         const applicableLevel = REMINDER_LEVELS.reduce((best, level) => {
-          if (overdueDays >= level.delayDays && level.level > ((invoice as any).derniereRelanceNiveau ?? 0)) {
+          if (overdueDays >= level.delayDays && level.level > (invoice.derniereRelanceNiveau ?? 0)) {
             return level;
           }
           return best;
@@ -182,8 +194,8 @@ export async function GET(req: NextRequest) {
         }
 
         // Vérifier qu'on n'a pas déjà envoyé ce niveau (sécurité supplémentaire)
-        const daysSinceLastReminder = (invoice as any).derniereRelanceDate
-          ? Math.floor((now.getTime() - (invoice as any).derniereRelanceDate.getTime()) / 86400000)
+        const daysSinceLastReminder = invoice.derniereRelanceDate
+          ? Math.floor((now.getTime() - invoice.derniereRelanceDate.getTime()) / 86400000)
           : 999;
 
         // Éviter les doublons : attendre au moins 1 jour depuis la dernière relance
@@ -226,7 +238,7 @@ export async function GET(req: NextRequest) {
           data: {
             derniereRelanceNiveau: applicableLevel.level,
             derniereRelanceDate: now,
-          } as any,
+          },
         });
 
         sent++;

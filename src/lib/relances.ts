@@ -35,7 +35,7 @@ async function getRelanceDelays() {
   }
 }
 
-export async function checkOverdueFactures() {
+export async function checkOverdueFactures(userId: string) {
   const now = new Date();
   const results: { numero: string; action: string }[] = [];
 
@@ -43,6 +43,7 @@ export async function checkOverdueFactures() {
   const RELANCE_DELAYS = await getRelanceDelays();
   const factures = await prisma.facture.findMany({
     where: {
+      userId,
       statut: { in: ["Émise"] },
     },
     orderBy: { createdAt: "asc" },
@@ -86,22 +87,6 @@ export async function checkOverdueFactures() {
     // Envoyer la relance par email si on a l'email du client
     if (facture.emailClient) {
       try {
-        const _relanceSubject = `${applicableRelance.label} — Facture ${facture.numero} (${facture.totalTTC.toFixed(2)}€)`;
-        const _relanceBody = [
-          `Bonjour ${facture.nomClient},`,
-          "",
-          `Nous nous permettons de vous relancer concernant la facture ${facture.numero} d'un montant de ${facture.totalTTC.toFixed(2)}€ TTC, émise le ${facture.date.toLocaleDateString("fr-FR")}.`,
-          "",
-          daysSinceEmission >= 30
-            ? "Cette facture est maintenant en retard de paiement. Nous vous prions de bien vouloir régulariser votre situation dans les plus brefs délais."
-            : `Cette facture est en attente de paiement depuis ${daysSinceEmission} jours.`,
-          "",
-          "Si vous avez déjà réglé cette facture, merci de ne pas tenir compte de ce message.",
-          "",
-          "Cordialement,",
-          "L'équipe Zolio",
-        ].join("\n");
-
         // Log de la relance dans la DB
         await prisma.prospectMail.create({
           data: {

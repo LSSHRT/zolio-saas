@@ -14,6 +14,8 @@ export type RecurrenteResult = {
   error: string | null;
 };
 
+const MAX_SERIALIZABLE_RETRIES = 2;
+
 /**
  * Calcule la prochaine date de facturation en fonction de la fréquence.
  */
@@ -62,82 +64,119 @@ export async function processRecurrentInvoices(): Promise<{
       prochaineDate: { lte: now },
       OR: [{ dateFin: null }, { dateFin: { gt: now } }],
     },
-    include: {
-      client: {
-        select: { nom: true, email: true },
-      },
+    select: {
+      id: true,
+      nom: true,
     },
   });
 
   const results: RecurrenteResult[] = [];
 
   for (const rec of recurrentes) {
-    try {
-      // Générer un numéro de facture unique
-      const numero = await generateSequentialDocumentNumber({
-        prefix: "FAC",
-        userId: rec.userId,
-        findLatest: (basePrefix) =>
-          prisma.facture.findFirst({
-            where: { userId: rec.userId, numero: { startsWith: basePrefix } },
-            orderBy: { numero: "desc" },
-            select: { numero: true },
-          }),
-      });
+    for (let attempt = 0; attempt <= MAX_SERIALIZABLE_RETRIES; attempt += 1) {
+      try {
+        const processed = await prisma.$transaction(
+          async (tx) => {
+            const current = await tx.factureRecurrente.findFirst({
+              where: {
+                id: rec.id,
+                actif: true,
+                prochaineDate: { lte: now },
+                OR: [{ dateFin: null }, { dateFin: { gt: now } }],
+              },
+              include: {
+                client: {
+                  select: { nom: true, email: true },
+                },
+              },
+            });
 
-      // Créer la facture
-      const facture = await prisma.facture.create({
-        data: {
-          userId: rec.userId,
-          numero,
+            if (!current) {
+              return null;
+            }
+
+            const numero = await generateSequentialDocumentNumber({
+              prefix: "FAC",
+              userId: current.userId,
+              findLatest: (basePrefix) =>
+                tx.facture.findFirst({
+                  where: { userId: current.userId, numero: { startsWith: basePrefix } },
+                  orderBy: { numero: "desc" },
+                  select: { numero: true },
+                }),
+            });
+
+            const facture = await tx.facture.create({
+              data: {
+                userId: current.userId,
+                numero,
+                recurrenteId: current.id,
+                nomClient: current.client.nom,
+                emailClient: current.client.email || null,
+                totalHT: current.montantHT,
+                tva: current.tva,
+                totalTTC: current.montantTTC,
+                statut: "Émise",
+                date: now,
+              },
+            });
+
+            const prochaineDate = calculateNextDate(
+              current.prochaineDate,
+              current.frequence,
+              current.jourMois,
+            );
+
+            await tx.factureRecurrente.update({
+              where: { id: current.id },
+              data: { prochaineDate },
+            });
+
+            return facture.numero;
+          },
+          { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+        );
+
+        if (processed) {
+          results.push({
+            recurrenteId: rec.id,
+            nom: rec.nom,
+            factureNumero: processed,
+            error: null,
+          });
+        }
+
+        break;
+      } catch (error) {
+        const isRetryableSerialization =
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2034";
+
+        if (isRetryableSerialization && attempt < MAX_SERIALIZABLE_RETRIES) {
+          continue;
+        }
+
+        const isUniqueConflict =
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === "P2002";
+
+        logError(
+          "recurrentes-process",
+          error,
+          `Erreur pour la récurrente ${rec.id}`,
+        );
+
+        results.push({
           recurrenteId: rec.id,
-          nomClient: rec.client.nom,
-          emailClient: rec.client.email || null,
-          totalHT: rec.montantHT,
-          tva: rec.tva,
-          totalTTC: rec.montantTTC,
-          statut: "Émise",
-          date: now,
-        },
-      });
+          nom: rec.nom,
+          factureNumero: null,
+          error: isUniqueConflict
+            ? "Conflit de numéro de facture"
+            : "Erreur lors de la création",
+        });
 
-      // Calculer la prochaine date
-      const prochaineDate = calculateNextDate(
-        rec.prochaineDate,
-        rec.frequence,
-        rec.jourMois,
-      );
-
-      await prisma.factureRecurrente.update({
-        where: { id: rec.id },
-        data: { prochaineDate },
-      });
-
-      results.push({
-        recurrenteId: rec.id,
-        nom: rec.nom,
-        factureNumero: facture.numero,
-        error: null,
-      });
-    } catch (error) {
-      const isUniqueConflict =
-        error instanceof Prisma.PrismaClientKnownRequestError &&
-        error.code === "P2002";
-
-      logError(
-        "recurrentes-process",
-        error,
-        `Erreur pour la récurrente ${rec.id}`,
-      );
-
-      results.push({
-        recurrenteId: rec.id,
-        nom: rec.nom,
-        factureNumero: null,
-        error: isUniqueConflict
-          ? "Conflit de numéro de facture"
-          : "Erreur lors de la création",
-      });
+        break;
+      }
     }
   }
 

@@ -20,6 +20,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/api/system/status(.*)',
   '/api/cron/prospect(.*)',
+  '/api/prospect-domains/track(.*)',
   '/api/public/devis(.*)',
   '/api/stripe/checkout(.*)',
   '/api/webhooks/stripe(.*)',
@@ -31,6 +32,7 @@ const isMaintenanceBypassRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/cron/prospect(.*)',
+  '/api/prospect-domains/track(.*)',
   '/api/system/status(.*)',
   '/api/webhooks/stripe(.*)',
 ]);
