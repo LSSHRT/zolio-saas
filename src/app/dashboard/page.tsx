@@ -89,6 +89,10 @@ const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ss
 
 const fetcher = async (url: string) => {
   const response = await fetch(url);
+  if (!response.ok) {
+    const error = new Error(`API ${response.status}`);
+    throw error;
+  }
   return response.json();
 };
 
@@ -305,11 +309,11 @@ export default function DashboardPage() {
       {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 
       <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
-        <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[336px]">
+        <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[292px]">
         {/* ─── Header ────────────────────────────────────────────── */}
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center justify-between gap-3">
-            <ClientBrandMark showLabel={false} />
+            <ClientBrandMark showLabel={false} className="lg:hidden" />
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Link href="/parametres" className="inline-flex h-11 w-11 lg:h-9 lg:w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white" aria-label="Paramètres">
@@ -457,7 +461,7 @@ export default function DashboardPage() {
                       <Pencil size={14} /> Ajuster l&apos;objectif
                     </button>
 
-                    <div className="mt-4 h-56 overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white/75 px-2 py-4 sm:h-64 dark:border-white/8 dark:bg-white/4">
+                    <div className="mt-4 h-56 overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white/75 px-2 py-4 sm:h-64 lg:h-80 dark:border-white/8 dark:bg-white/4">
                       {loading ? <ChartSkeleton /> : <DashboardChart monthlyData={monthlyData} />}
                     </div>
                   </motion.section>

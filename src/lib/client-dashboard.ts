@@ -226,7 +226,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         statut: true,
         remise: true,
         tva: true,
-        
+        lignesNorm: true,
         createdAt: true,
         client: { select: { nom: true, email: true } },
       },
@@ -247,7 +247,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         statut: true,
         remise: true,
         tva: true,
-        
+        lignesNorm: true,
         client: { select: { nom: true, email: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -266,7 +266,8 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         createdAt: true,
         remise: true,
         tva: true,
-        
+        lignesNorm: true,
+        client: { select: { nom: true } },
       },
     }),
 
@@ -282,7 +283,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
         createdAt: true,
         remise: true,
         tva: true,
-        
+        lignesNorm: true,
       },
     }),
 
@@ -381,7 +382,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   }
 
   const conversionRate = totalCount > 0 ? Math.round((acceptedCount / totalCount) * 100) : 0;
-  const averageTicket = totalCount > 0 ? totalTTC / totalCount : 0;
+  const averageTicket = acceptedCount > 0 ? acceptedRevenueHT / acceptedCount : 0;
 
   // Construction du graphique mensuel
   const months = Array.from({ length: 6 }).map((_, index) => {

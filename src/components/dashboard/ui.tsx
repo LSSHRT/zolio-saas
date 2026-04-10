@@ -118,10 +118,18 @@ export function CompactMetricCard({
 // ─── Hero Indicator Pill ──────────────────────────────────────────────
 
 export function HeroIndicatorPill({ indicator }: { indicator: DashboardHeroIndicator }) {
+  const toneText: Record<Tone, { label: string; value: string }> = {
+    violet: { label: "text-violet-500 dark:text-violet-400", value: "text-violet-700 dark:text-violet-200" },
+    emerald: { label: "text-emerald-500 dark:text-emerald-400", value: "text-emerald-700 dark:text-emerald-200" },
+    amber: { label: "text-amber-500 dark:text-amber-400", value: "text-amber-700 dark:text-amber-200" },
+    rose: { label: "text-rose-500 dark:text-rose-400", value: "text-rose-700 dark:text-rose-200" },
+    slate: { label: "text-slate-400 dark:text-slate-500", value: "text-slate-700 dark:text-slate-200" },
+  };
+  const t = toneText[indicator.tone];
   return (
     <div className={`rounded-full px-3 py-2 ring-1 ${toneClasses(indicator.tone).chip}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-inherit/70">{indicator.label}</p>
-      <p className="text-sm font-bold text-inherit">{indicator.value}</p>
+      <p className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${t.label}`}>{indicator.label}</p>
+      <p className={`text-sm font-bold ${t.value}`}>{indicator.value}</p>
     </div>
   );
 }

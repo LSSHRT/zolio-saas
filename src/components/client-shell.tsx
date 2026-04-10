@@ -159,9 +159,9 @@ function bottomSheetBaseClasses() {
   return "absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(78vh,32rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96";
 }
 
-export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
+export function ClientBrandMark({ showLabel = true, className = "" }: { showLabel?: boolean; className?: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className={`flex min-w-0 items-center gap-3 ${className}`}>
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/80 ring-1 ring-white/50 dark:bg-white/8 dark:ring-white/10">
         <Image
           src="/logo.png"
@@ -411,7 +411,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[304px] flex-col rounded-[2rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
+    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[260px] flex-col rounded-[2rem] border border-slate-200/80 bg-white/92 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
           <ClientBrandMark />
@@ -497,7 +497,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         ))}
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-3 shrink-0">
         <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -810,7 +810,7 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[336px] xl:px-10">
+      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[292px] xl:px-10">
         <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
