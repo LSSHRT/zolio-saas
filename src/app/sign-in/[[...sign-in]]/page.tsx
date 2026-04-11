@@ -20,7 +20,32 @@ export default function Page() {
         </div>
       </div>
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-50 dark:bg-gray-900 dark:bg-slate-900 p-8">
-        <SignIn />
+        <SignIn
+          appearance={{
+            variables: {
+              colorPrimary: "#7c3aed",
+              colorText: "#0f172a",
+              colorTextSecondary: "#64748b",
+              colorBackground: "#ffffff",
+              colorInputText: "#0f172a",
+              colorInputBackground: "#f8fafc",
+              borderRadius: "1rem",
+              fontFamily: "inherit",
+            },
+            elements: {
+              rootBox: "w-full max-w-[400px]",
+              card: "shadow-xl shadow-violet-500/8 border border-slate-200/60 rounded-2xl",
+              headerTitle: "text-slate-950 dark:text-white",
+              headerSubtitle: "text-slate-500 dark:text-slate-400",
+              socialButtonsBlockButton: "rounded-xl border-slate-200 hover:border-violet-300 transition",
+              formButtonPrimary: "rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-md shadow-violet-500/20",
+              formFieldInput: "rounded-xl border-slate-200 focus:border-violet-400 focus:ring-violet-400/20",
+              footerActionLink: "text-violet-600 hover:text-violet-700",
+              dividerLine: "bg-slate-200",
+              dividerText: "text-slate-400 text-xs",
+            },
+          }}
+        />
       </div>
     </div>
   );

@@ -295,8 +295,8 @@ export default function DashboardPage() {
   // ─── Tour steps ──────────────────────────────────────────────────
 
   const tourSteps: Step[] = [
-    { target: ".tour-dashboard", title: "Bienvenue", content: "Votre cockpit d'activité.", disableBeacon: true, placement: "bottom" as const },
-    { target: ".tour-nouveau-devis", title: "Nouveau devis", content: "Créez un devis en quelques secondes.", placement: "bottom" as const },
+    { target: ".tour-nouveau-devis", title: "Bienvenue sur Zolio 👋", content: "Votre cockpit d'activité. Créez un devis en un clic ici.", disableBeacon: true, placement: "bottom-start" as const },
+    { target: ".tour-dashboard", title: "Votre tableau de bord", content: "Suivez votre chiffre d'affaires, vos relances et votre pipeline en un coup d'œil.", placement: "bottom" as const },
   ];
 
   // ─── Render ──────────────────────────────────────────────────────
@@ -309,7 +309,7 @@ export default function DashboardPage() {
       {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 
       <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
-        <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[292px]">
+        <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 lg:pb-10">
         {/* ─── Header ────────────────────────────────────────────── */}
         <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center justify-between gap-3">

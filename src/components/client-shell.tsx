@@ -199,7 +199,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="client-nav-dock fixed inset-x-3 bottom-5 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden"
+        className="client-nav-dock fixed inset-x-3 bottom-5 z-30 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden"
         data-testid="mobile-nav-dock"
       >
         {/* 2 liens gauche */}
@@ -254,7 +254,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
         onClick={() => setToolsOpen(true)}
-        className="fixed bottom-[5.5rem] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
+        className="fixed bottom-[5.5rem] right-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
         aria-label="Plus d'outils"
         data-testid="mobile-tools-btn"
       >
@@ -411,7 +411,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[260px] flex-col rounded-[2rem] border border-slate-200/80 bg-white/92 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
+    <aside className="fixed inset-y-4 left-4 z-30 hidden w-[260px] flex-col overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/92 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
           <ClientBrandMark />
@@ -476,7 +476,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative flex min-h-10 items-center gap-3 rounded-[1.15rem] px-3 py-2.5 text-[13px] transition ${
+                    className={`relative flex min-h-11 items-center gap-3 rounded-[1.15rem] px-3 py-2.5 text-[13px] transition ${
                       itemActive
                         ? "bg-slate-100 font-medium text-slate-950 ring-1 ring-slate-200/80 dark:bg-white/10 dark:text-white dark:ring-white/12"
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
@@ -810,7 +810,7 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[292px] xl:px-10">
+      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 xl:px-6">
         <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
