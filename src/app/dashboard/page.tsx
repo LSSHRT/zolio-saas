@@ -152,7 +152,8 @@ export default function DashboardPage() {
   const catalogImported = readBooleanMetadata(user?.unsafeMetadata?.starterCatalogImported || user?.publicMetadata?.starterCatalogImported);
   const onboardingDone = readBooleanMetadata(user?.unsafeMetadata?.onboardingCompleted || user?.publicMetadata?.onboardingCompleted);
   const starterCatalogCount = dashboardData?.starterCatalogCount ?? 0;
-  const starterTrade = getTradeDefinition(companyTrade) ?? getTradeDefinition(DEFAULT_TRADE);
+    const currentTrade = companyTrade || fallbackTrade || DEFAULT_TRADE;
+  const starterTrade = getTradeDefinition(currentTrade);
 
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isBootstrapping, setIsBootstrapping] = useState(false);
