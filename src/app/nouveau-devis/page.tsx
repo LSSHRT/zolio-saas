@@ -970,8 +970,8 @@ export default function NouveauDevisPage() {
                 isCreating={isAddingClient}
                 isLoading={isBooting}
                 newClient={newClient}
-                onClearSelection={() =
-                errors={errors}> setSelectedClientId("")}
+                onClearSelection={() => setSelectedClientId("")}
+                errors={errors}
                 onCreateClient={handleCreateClient}
                 onNewClientChange={(field, value) =>
                   setNewClient((current) => ({ ...current, [field]: value }))
