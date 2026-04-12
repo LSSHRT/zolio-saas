@@ -553,7 +553,7 @@ export default function ClientsPage() {
               {[1, 2, 3].map((item) => (
                 <div
                   key={item}
-                  className="animate-shimmer rounded-[1.75rem] border border-slate-200/70 bg-white/70 p-5 dark:border-white/8 dark:bg-white/4"
+                  className="animate-shimmer rounded-2xl border border-slate-200/70 bg-white/70 p-5 dark:border-white/8 dark:bg-white/4"
                 >
                   <div className="flex items-center gap-3">
                     <div className="h-12 w-12 rounded-2xl bg-slate-200/60 dark:bg-white/10" />
@@ -599,7 +599,7 @@ export default function ClientsPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: Math.min(index * 0.03, 0.15) }}
-                        className="rounded-[1.75rem] border border-slate-100 bg-slate-50 dark:border-white/8 dark:bg-white/4"
+                        className="rounded-2xl border border-slate-100 bg-slate-50 dark:border-white/8 dark:bg-white/4"
                       >
                         <div className="p-4 md:hidden">
                           <div className="flex items-start gap-3">
@@ -663,7 +663,7 @@ export default function ClientsPage() {
                                 </button>
                               </div>
 
-                              <details className="mt-3 rounded-[1.2rem] border border-slate-200/70 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+                              <details className="mt-3 rounded-xl border border-slate-200/70 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
                                 <summary className="cursor-pointer list-none text-sm font-semibold text-slate-700 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
                                   Voir la fiche
                                 </summary>
@@ -996,7 +996,7 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
         initial={{ opacity: 0, scale: 0.96, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: 12 }}
-        className="relative w-full max-w-xl overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl dark:bg-slate-900"
+        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl dark:bg-slate-900"
       >
         <div className="border-b border-slate-100 px-5 py-4 dark:border-white/8 sm:px-6 sm:py-5">
           <div className="flex items-start justify-between gap-3">
@@ -1018,7 +1018,7 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
 
         <div className="max-h-[78vh] overflow-y-auto px-5 py-5 sm:px-6 sm:py-6">
           {history.length === 0 ? (
-            <div className="rounded-[1.5rem] border border-dashed border-slate-200 px-5 py-10 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+            <div className="rounded-2xl border border-dashed border-slate-200 px-5 py-10 text-center text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
               Aucune activité enregistrée pour ce client.
             </div>
           ) : (
@@ -1037,7 +1037,7 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
                     )}
                   </div>
 
-                  <div className="rounded-[1.5rem] border border-slate-100 bg-slate-50 p-4 dark:border-white/8 dark:bg-white/4">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-white/8 dark:bg-white/4">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <p className="font-semibold text-slate-950 dark:text-white">

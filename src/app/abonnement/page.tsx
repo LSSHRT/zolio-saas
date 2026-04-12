@@ -153,7 +153,7 @@ export default function AbonnementPage() {
     >
       <ClientSectionCard>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <section className="rounded-[1.9rem] border border-violet-200/70 bg-gradient-to-br from-slate-950 via-violet-950 to-slate-900 p-5 text-white shadow-[0_28px_90px_-45px_rgba(76,29,149,0.75)] sm:p-6">
+          <section className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-slate-950 via-violet-950 to-slate-900 p-5 text-white shadow-[0_28px_90px_-45px_rgba(76,29,149,0.75)] sm:p-6">
             <div className="flex flex-col gap-4">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full border border-violet-300/30 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-100">
@@ -175,12 +175,12 @@ export default function AbonnementPage() {
                 </p>
               </div>
 
-              <div className="rounded-[1.4rem] border border-white/10 bg-white/8 p-2">
+              <div className="rounded-2xl border border-white/10 bg-white/8 p-2">
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setIsAnnual(false)}
-                    className={`rounded-[1rem] px-3 py-3 text-sm font-semibold transition ${
+                    className={`rounded-lg px-3 py-3 text-sm font-semibold transition ${
                       !isAnnual
                         ? "bg-white text-slate-950 shadow-sm"
                         : "text-slate-300 hover:bg-white/8 hover:text-white"
@@ -191,7 +191,7 @@ export default function AbonnementPage() {
                   <button
                     type="button"
                     onClick={() => setIsAnnual(true)}
-                    className={`rounded-[1rem] px-3 py-3 text-sm font-semibold transition ${
+                    className={`rounded-lg px-3 py-3 text-sm font-semibold transition ${
                       isAnnual
                         ? "bg-white text-slate-950 shadow-sm"
                         : "text-slate-300 hover:bg-white/8 hover:text-white"
@@ -207,7 +207,7 @@ export default function AbonnementPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 rounded-[1.5rem] border border-white/10 bg-white/8 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
+              <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-white/8 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-100/80">
                     Offre active
@@ -232,7 +232,7 @@ export default function AbonnementPage() {
                   type="button"
                   onClick={() => void handleSubscribe()}
                   disabled={loading}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
                 >
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
@@ -251,7 +251,7 @@ export default function AbonnementPage() {
                   href={supportHref}
                   target={supportIsExternal ? "_blank" : undefined}
                   rel={supportIsExternal ? "noreferrer" : undefined}
-                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[1rem] border border-white/15 bg-white/8 px-4 py-3 text-sm font-semibold text-white transition hover:border-violet-300/40 hover:bg-white/12 sm:w-auto"
+                  className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg border border-white/15 bg-white/8 px-4 py-3 text-sm font-semibold text-white transition hover:border-violet-300/40 hover:bg-white/12 sm:w-auto"
                 >
                   Être accompagné
                   <ArrowRight size={16} />
@@ -282,7 +282,7 @@ export default function AbonnementPage() {
                 Réassurance
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
+                <div className="rounded-xl border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
                     <Shield size={16} className="text-violet-500 dark:text-violet-200" />
                     Stripe sécurisé
@@ -291,7 +291,7 @@ export default function AbonnementPage() {
                     Paiement protégé et redirection immédiate vers le checkout sécurisé.
                   </p>
                 </div>
-                <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
+                <div className="rounded-xl border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
                     <Clock3 size={16} className="text-violet-500 dark:text-violet-200" />
                     Activation rapide
@@ -300,7 +300,7 @@ export default function AbonnementPage() {
                     Passez de l&apos;offre à votre premier devis pro sans tunnel complexe.
                   </p>
                 </div>
-                <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
+                <div className="rounded-xl border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
                   <div className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white">
                     <BadgeCheck size={16} className="text-violet-500 dark:text-violet-200" />
                     Accompagnement inclus
@@ -335,7 +335,7 @@ export default function AbonnementPage() {
             {PLAN_FEATURES.map((feature) => (
               <div
                 key={feature}
-                className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4"
+                className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4"
               >
                 <div className="flex items-start gap-3">
                   <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-700 dark:bg-violet-500/12 dark:text-violet-200">

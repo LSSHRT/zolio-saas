@@ -107,19 +107,19 @@ export function AdminUserDrawer({
               </div>
 
               <div className="mt-6 grid grid-cols-2 gap-3">
-                <div className="admin-panel rounded-[24px] p-4">
+                <div className="admin-panel rounded-2xl p-4">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Inscription</p>
                   <p className="mt-3 text-sm font-medium text-white">{formatDateTime(user.createdAt)}</p>
                 </div>
-                <div className="admin-panel rounded-[24px] p-4">
+                <div className="admin-panel rounded-2xl p-4">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Dernière connexion</p>
                   <p className="mt-3 text-sm font-medium text-white">{formatDateTime(user.lastSignInAt)}</p>
                 </div>
-                <div className="admin-panel rounded-[24px] p-4">
+                <div className="admin-panel rounded-2xl p-4">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Devis IA</p>
                   <p className="mt-3 text-2xl font-semibold text-white">{user.aiGenerations}</p>
                 </div>
-                <div className="admin-panel rounded-[24px] p-4">
+                <div className="admin-panel rounded-2xl p-4">
                   <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Code parrain</p>
                   <p className="mt-3 text-sm font-medium text-white">
                     {user.publicMetadata.parrainCode || "Aucun"}
@@ -128,7 +128,7 @@ export function AdminUserDrawer({
               </div>
 
               <div className="mt-6 space-y-4 overflow-y-auto pr-1">
-                <section className="admin-panel rounded-[28px] p-5">
+                <section className="admin-panel rounded-2xl p-5">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-fuchsia-300" />
                     <h4 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-300">
@@ -153,7 +153,7 @@ export function AdminUserDrawer({
                   </dl>
                 </section>
 
-                <section className="admin-panel rounded-[28px] p-5">
+                <section className="admin-panel rounded-2xl p-5">
                   <div className="flex items-center gap-2">
                     <Shield className="h-4 w-4 text-violet-300" />
                     <h4 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-300">
@@ -190,7 +190,7 @@ export function AdminUserDrawer({
                   </div>
                 </section>
 
-                <section className="admin-panel rounded-[28px] p-5">
+                <section className="admin-panel rounded-2xl p-5">
                   <div className="flex items-center gap-2">
                     <Ban className="h-4 w-4 text-amber-200" />
                     <h4 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-300">

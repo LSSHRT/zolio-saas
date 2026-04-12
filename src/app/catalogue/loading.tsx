@@ -12,13 +12,13 @@ export default function Loading() {
 
       {/* Starter trade + info */}
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
-        <div className="h-56 rounded-[1.8rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
-        <div className="h-56 rounded-[1.8rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-56 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-56 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
       </div>
 
       {/* Search */}
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-        <div className="h-12 rounded-[1.25rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+        <div className="h-12 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
         <div className="flex gap-2">
           <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
           <div className="h-10 w-24 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
@@ -37,17 +37,17 @@ export default function Loading() {
                 </div>
                 <div className="h-5 w-48 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               </div>
-              <div className="h-16 w-36 rounded-[1.2rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-16 w-36 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-3">
-              <div className="h-16 rounded-[1.2rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
-              <div className="h-16 rounded-[1.2rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
-              <div className="h-16 rounded-[1.2rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-16 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-16 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-16 rounded-xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
             </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
-              <div className="h-11 rounded-[1rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
-              <div className="h-11 rounded-[1rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
-              <div className="h-11 rounded-[1rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-11 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-11 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
+              <div className="h-11 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse" />
             </div>
           </div>
         ))}

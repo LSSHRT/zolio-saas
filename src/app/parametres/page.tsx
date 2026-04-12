@@ -80,7 +80,7 @@ const LEGAL_LINKS = [
 ] as const;
 
 const inputClassName =
-  "w-full rounded-[1rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-violet-400/40 dark:focus:ring-violet-500/10";
+  "w-full rounded-lg border border-slate-200/80 bg-white/80 px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-slate-500 dark:focus:border-violet-400/40 dark:focus:ring-violet-500/10";
 
 const textAreaClassName = `${inputClassName} min-h-[120px] resize-y`;
 
@@ -187,7 +187,7 @@ export default function ParametresEntreprise() {
       <div className="client-workspace relative min-h-screen overflow-hidden">
         <div className="client-grid-overlay pointer-events-none absolute inset-0" />
         <div className="flex min-h-screen items-center justify-center px-4">
-          <div className="client-panel rounded-[2rem] px-6 py-5">
+          <div className="client-panel rounded-2xl px-6 py-5">
             <div className="flex items-center gap-3">
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-violet-500/30 border-t-violet-600" />
               <p className="text-sm font-medium text-slate-700 dark:text-slate-200">
@@ -351,7 +351,7 @@ export default function ParametresEntreprise() {
   const messageCard = message.text ? (
     <ClientSectionCard>
       <div
-        className={`rounded-[1.4rem] border px-4 py-4 text-sm font-medium ${
+        className={`rounded-2xl border px-4 py-4 text-sm font-medium ${
           message.type === "success"
             ? "border-emerald-300/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:text-emerald-300"
             : "border-rose-300/30 bg-rose-500/10 text-rose-700 dark:border-rose-400/20 dark:text-rose-300"
@@ -565,7 +565,7 @@ export default function ParametresEntreprise() {
   );
 
   const referralCard = (
-    <div className="overflow-hidden rounded-[2rem] bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-400 p-[1px] shadow-brand-lg">
+    <div className="overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-400 p-[1px] shadow-brand-lg">
       <div className="h-full rounded-[calc(2rem-1px)] bg-[linear-gradient(160deg,rgba(11,13,25,0.88),rgba(20,12,38,0.82))] p-5 text-white sm:p-7">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/12">
@@ -582,18 +582,18 @@ export default function ParametresEntreprise() {
           <span className="font-semibold text-white"> -50% sur votre prochain mois</span>.
         </p>
 
-        <div className="mt-6 rounded-[1.6rem] border border-white/10 bg-white/8 p-4">
+        <div className="mt-6 rounded-2xl border border-white/10 bg-white/8 p-4">
           <p className="text-xs font-medium uppercase tracking-[0.26em] text-violet-100/70">
             Votre code de parrainage unique
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <code className="flex-1 rounded-[1rem] bg-white/12 px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.24em] text-white">
+            <code className="flex-1 rounded-lg bg-white/12 px-4 py-3 text-center font-mono text-xl font-bold tracking-[0.24em] text-white">
               {referralCode}
             </code>
             <button
               type="button"
               onClick={copyReferralMessage}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-50"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-50"
             >
               <Copy size={16} />
               Copier le message
@@ -602,7 +602,7 @@ export default function ParametresEntreprise() {
         </div>
 
         {!referralApplied ? (
-          <div className="mt-5 rounded-[1.6rem] border border-white/10 bg-black/18 p-4">
+          <div className="mt-5 rounded-2xl border border-white/10 bg-black/18 p-4">
             <p className="text-sm font-semibold text-white">Vous avez été parrainé ?</p>
             <p className="mt-1 text-sm leading-6 text-violet-50/70">
               Entrez le code reçu pour profiter de l&apos;offre avant votre passage en PRO.
@@ -614,20 +614,20 @@ export default function ParametresEntreprise() {
                 value={formData.referredBy}
                 onChange={handleChange}
                 placeholder="Entrez le code de votre parrain"
-                className="w-full rounded-[1rem] border border-white/15 bg-white/10 px-4 py-3 text-base text-white outline-none transition placeholder:text-violet-100/60 focus:border-white/30 focus:ring-4 focus:ring-white/10"
+                className="w-full rounded-lg border border-white/15 bg-white/10 px-4 py-3 text-base text-white outline-none transition placeholder:text-violet-100/60 focus:border-white/30 focus:ring-4 focus:ring-white/10"
               />
               <button
                 type="button"
                 onClick={saveSettings}
                 disabled={isSaving || !formData.referredBy}
-                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] bg-white px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-violet-700 transition hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Valider
               </button>
             </div>
           </div>
         ) : (
-          <div className="mt-5 flex items-start gap-3 rounded-[1.6rem] border border-emerald-300/20 bg-emerald-500/10 p-4">
+          <div className="mt-5 flex items-start gap-3 rounded-2xl border border-emerald-300/20 bg-emerald-500/10 p-4">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/18 text-emerald-200">
               <CheckCircle2 size={16} />
             </div>
@@ -945,7 +945,7 @@ export default function ParametresEntreprise() {
                 </div>
               </div>
 
-              <div className="rounded-[1.6rem] border border-slate-200/80 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
                 <p className="text-xs uppercase tracking-[0.26em] text-slate-500 dark:text-slate-400">Couleur principale</p>
                 <div className="mt-4 flex items-center gap-4">
                   <input
@@ -963,7 +963,7 @@ export default function ParametresEntreprise() {
                   </div>
                 </div>
                 <div
-                  className="mt-5 h-12 rounded-[1rem] ring-1 ring-black/5 dark:ring-white/10"
+                  className="mt-5 h-12 rounded-lg ring-1 ring-black/5 dark:ring-white/10"
                   style={{ background: `linear-gradient(135deg, ${brandColor}, rgba(255,255,255,0.14))` }}
                 />
                 {formData.companyGoogleReview ? (
@@ -1076,7 +1076,7 @@ export default function ParametresEntreprise() {
               </div>
 
               {/* Langue */}
-              <div className="space-y-3 rounded-[1.25rem] border border-slate-200/80 bg-white/80 p-5 dark:border-white/10 dark:bg-white/6">
+              <div className="space-y-3 rounded-xl border border-slate-200/80 bg-white/80 p-5 dark:border-white/10 dark:bg-white/6">
                 <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Langue</h3>
                 <LanguageSelector />
               </div>
@@ -1084,14 +1084,14 @@ export default function ParametresEntreprise() {
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Link
                   href="/dashboard"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
                 >
                   Retour au cockpit
                 </Link>
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] bg-gradient-zolio px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-gradient-zolio px-5 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isSaving ? (
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/35 border-t-white" />

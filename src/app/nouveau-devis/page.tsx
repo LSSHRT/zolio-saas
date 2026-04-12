@@ -925,7 +925,7 @@ export default function NouveauDevisPage() {
       <div className="space-y-6">
         {!isBooting && trialLocked ? (
           <CreationWizardPanel>
-            <div className="flex items-start gap-3 rounded-[1.5rem] border border-rose-300/40 bg-rose-500/10 px-4 py-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
+            <div className="flex items-start gap-3 rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
               <Rocket size={18} className="mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold">Votre essai a atteint sa limite</p>

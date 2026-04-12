@@ -13,7 +13,7 @@ export default function Loading() {
 
       <div className="mx-auto max-w-2xl space-y-4 px-4 py-6">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-24 rounded-[1.5rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div key={i} className="h-24 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
         ))}
       </div>
     </div>

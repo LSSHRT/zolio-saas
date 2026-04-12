@@ -220,7 +220,7 @@ export default function TvaPage() {
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-[1.75rem] border border-emerald-200/70 bg-emerald-50/60 p-5 dark:border-emerald-400/15 dark:bg-emerald-500/6"
+              className="rounded-2xl border border-emerald-200/70 bg-emerald-50/60 p-5 dark:border-emerald-400/15 dark:bg-emerald-500/6"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ export default function TvaPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.05 }}
-              className="rounded-[1.75rem] border border-amber-200/70 bg-amber-50/60 p-5 dark:border-amber-400/15 dark:bg-amber-500/6"
+              className="rounded-2xl border border-amber-200/70 bg-amber-50/60 p-5 dark:border-amber-400/15 dark:bg-amber-500/6"
             >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -264,7 +264,7 @@ export default function TvaPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className={`rounded-[1.75rem] border p-5 ${
+              className={`rounded-2xl border p-5 ${
                 data.solde >= 0
                   ? "border-rose-200/70 bg-rose-50/60 dark:border-rose-400/15 dark:bg-rose-500/6"
                   : "border-emerald-200/70 bg-emerald-50/60 dark:border-emerald-400/15 dark:bg-emerald-500/6"

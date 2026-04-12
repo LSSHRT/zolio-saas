@@ -123,7 +123,7 @@ function TradeOptionCard({ active, onSelect, option }: { active: boolean; onSele
     <button
       type="button"
       onClick={() => onSelect(option.key)}
-      className={`rounded-[1.45rem] border px-4 py-4 text-left transition ${
+      className={`rounded-2xl border px-4 py-4 text-left transition ${
         active
           ? "border-violet-400/50 bg-violet-500/12 shadow-[0_18px_45px_-32px_rgba(124,58,237,0.8)]"
           : "border-slate-200/70 bg-white/75 hover:border-violet-300/50 hover:bg-violet-500/6 dark:border-white/8 dark:bg-white/4"
@@ -311,7 +311,7 @@ export default function DashboardPage() {
       <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
         <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 lg:pb-10">
         {/* ─── Header ────────────────────────────────────────────── */}
-        <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
+        <header className="client-panel sticky top-3 z-40 rounded-2xl px-4 py-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center justify-between gap-3">
             <ClientBrandMark showLabel={false} className="lg:hidden" />
             <div className="flex items-center gap-2">
@@ -346,7 +346,7 @@ export default function DashboardPage() {
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
           {!isLoaded ? (
             <div className="space-y-6">
-              <div className="h-32 animate-pulse rounded-[2rem] bg-slate-200/80 dark:bg-slate-800/80" />
+              <div className="h-32 animate-pulse rounded-2xl bg-slate-200/80 dark:bg-slate-800/80" />
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
                 {[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />)}
               </div>
@@ -354,7 +354,7 @@ export default function DashboardPage() {
           ) : (
             <>
               {/* ─── Hero ────────────────────────────────────────── */}
-              <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-[2rem] px-4 py-5 sm:px-6">
+              <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
                 <div className="relative space-y-4">
                   <div className="hidden flex-wrap items-center gap-2 sm:flex">
@@ -390,7 +390,7 @@ export default function DashboardPage() {
               </motion.section>
 
               {/* ─── KPI ─────────────────────────────────────────── */}
-              <motion.section {...sectionMotion(0.04)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+              <motion.section {...sectionMotion(0.04)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                 <div className="flex items-end justify-between gap-3">
                   <div>
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">Chiffres clés</h2>
@@ -409,7 +409,7 @@ export default function DashboardPage() {
               <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-[1fr_auto]`}>
                 <div className="space-y-4">
                   {/* Objectif mensuel */}
-                  <motion.section {...sectionMotion(0.06)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                  <motion.section {...sectionMotion(0.06)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                     <div className="flex items-end justify-between gap-3">
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif</p>
@@ -461,13 +461,13 @@ export default function DashboardPage() {
                       <Pencil size={14} /> Ajuster l&apos;objectif
                     </button>
 
-                    <div className="mt-4 h-56 overflow-hidden rounded-[1.5rem] border border-slate-200/70 bg-white/75 px-2 py-4 sm:h-64 lg:h-80 dark:border-white/8 dark:bg-white/4">
+                    <div className="mt-4 h-56 overflow-hidden rounded-2xl border border-slate-200/70 bg-white/75 px-2 py-4 sm:h-64 lg:h-80 dark:border-white/8 dark:bg-white/4">
                       {loading ? <ChartSkeleton /> : <DashboardChart monthlyData={monthlyData} />}
                     </div>
                   </motion.section>
 
                   {/* Derniers devis */}
-                  <motion.section {...sectionMotion(0.08)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                  <motion.section {...sectionMotion(0.08)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                     <div className="flex items-end justify-between gap-3">
                       <div>
                         <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Derniers devis</p>
@@ -478,7 +478,7 @@ export default function DashboardPage() {
                     <div className="mt-3">
                       {loading ? <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />)}</div> : (
                         devisRecents.length === 0 ? (
-                          <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-8 text-center dark:border-white/10 dark:bg-white/4">
+                          <div className="rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-8 text-center dark:border-white/10 dark:bg-white/4">
                             <p className="text-sm font-semibold text-slate-950 dark:text-white">Le cockpit attend votre premier devis</p>
                             <Link href="/nouveau-devis" className="mt-4 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white">
                               <Plus size={16} /> Créer mon premier devis
@@ -494,7 +494,7 @@ export default function DashboardPage() {
                                   setSelectedDevisNumero(item.numero);
                                 }
                               }}>
-                                <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
+                                <div className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
                                       <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
@@ -515,7 +515,7 @@ export default function DashboardPage() {
                 {/* Funnel (desktop sidebar) */}
                 {funnel && funnel.length > 0 && (
                   <div className="hidden lg:block">
-                    <div className="client-panel rounded-[2rem] p-5 sticky top-24">
+                    <div className="client-panel rounded-2xl p-5 sticky top-24">
                       <div className="mb-2 flex items-center gap-2">
                         <Target size={18} className="text-violet-500" />
                         <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
@@ -529,7 +529,7 @@ export default function DashboardPage() {
               {/* ─── Financials grid ──────────────────────────────── */}
               <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-2`}>
                 {/* Trésorerie */}
-                <motion.section {...sectionMotion(0.10)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section {...sectionMotion(0.10)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Trésorerie</p>
@@ -541,7 +541,7 @@ export default function DashboardPage() {
                 </motion.section>
 
                 {/* Bénéfice */}
-                <motion.section {...sectionMotion(0.12)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section {...sectionMotion(0.12)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Bénéfice net</p>
@@ -556,7 +556,7 @@ export default function DashboardPage() {
               {/* ─── Actions + Relances + Échéances grid ─────────── */}
               <div className="grid gap-4 lg:grid-cols-3 xl:grid-cols-4">
                 {/* Actions — desktop only or expanded mobile */}
-                <motion.section {...sectionMotion(0.14)} className={`${showMoreMobile ? "block" : "hidden sm:block"} client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4`}>
+                <motion.section {...sectionMotion(0.14)} className={`${showMoreMobile ? "block" : "hidden sm:block"} client-panel rounded-2xl p-4 sm:p-5 xl:p-4`}>
                   <div className="flex items-end justify-between gap-3">
                     <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Actions</p>
                     <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">{actionPlan.length}</span>
@@ -567,7 +567,7 @@ export default function DashboardPage() {
                 </motion.section>
 
                 {/* Relances */}
-                <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section {...sectionMotion(0.16)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">À traiter</h2>
                     <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40">{devisARelancer.length}</span>
@@ -576,7 +576,7 @@ export default function DashboardPage() {
                 </motion.section>
 
                 {/* Échéances */}
-                <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section {...sectionMotion(0.18)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <h2 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">Prochains paiements</h2>
                     <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40">{echeances.length}</span>
@@ -598,7 +598,7 @@ export default function DashboardPage() {
 
               {/* ─── Top Clients + Quick Links ──────────────────── */}
               <div className={`${showMoreMobile ? "grid" : "hidden sm:grid"} gap-4 lg:grid-cols-2`}>
-                <motion.section {...sectionMotion(0.20)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section {...sectionMotion(0.20)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Top Clients</p>
@@ -608,7 +608,7 @@ export default function DashboardPage() {
                   <div className="mt-3"><DashboardTopClients items={topClients} /></div>
                 </motion.section>
 
-                <motion.section {...sectionMotion(0.22)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section {...sectionMotion(0.22)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Modules</p>
@@ -620,14 +620,14 @@ export default function DashboardPage() {
                   </div>
                   <div className="mt-4 space-y-2">
                     <ClientSupportButton />
-                    {canAccessAdmin && <Link href="/admin" className="flex items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-100"><ShieldCheck size={16} /> Admin</Link>}
+                    {canAccessAdmin && <Link href="/admin" className="flex items-center justify-center gap-2 rounded-xl border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-100"><ShieldCheck size={16} /> Admin</Link>}
                   </div>
                 </motion.section>
               </div>
 
               {/* ─── Starter métier (setup only) ─────────────────── */}
               {setupRequired && selectedTradeDef && (
-                <motion.section id="dashboard-setup-panel" {...sectionMotion(0.24)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4">
+                <motion.section id="dashboard-setup-panel" {...sectionMotion(0.24)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Starter métier</p>
@@ -644,10 +644,10 @@ export default function DashboardPage() {
                       <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">{selectedTradeDef.pitch} {selectedStarterCount} prestations seront injectées.</p>
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <button type="button" onClick={handleBootstrap} disabled={isBootstrapping} className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60">
+                      <button type="button" onClick={handleBootstrap} disabled={isBootstrapping} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60">
                         {isBootstrapping ? "Préparation..." : "Activer mon starter"}
                       </button>
-                      <Link href="/parametres" className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100">
+                      <Link href="/parametres" className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100">
                         Finaliser mes paramètres
                       </Link>
                     </div>
@@ -657,7 +657,7 @@ export default function DashboardPage() {
 
               {/* ─── Funnel mobile ──────────────────────────────── */}
               {funnel && funnel.length > 0 && (
-                <motion.section {...sectionMotion(0.26)} className="client-panel rounded-[2rem] p-4 sm:p-5 xl:p-4 lg:hidden">
+                <motion.section {...sectionMotion(0.26)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4 lg:hidden">
                   <div className="mb-2 flex items-center gap-2">
                     <Target size={18} className="text-violet-500" />
                     <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
@@ -677,9 +677,9 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-600 dark:text-slate-300">Définissez votre cap de CA mensuel pour suivre votre progression.</p>
           <label className="block">
             <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">Montant (€)</span>
-            <input type="number" inputMode="decimal" min="1" step="100" value={objectifDraft} onChange={e => setObjectifDraft(e.target.value)} className="mt-2 w-full rounded-[1.25rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-950 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white" placeholder="5000" />
+            <input type="number" inputMode="decimal" min="1" step="100" value={objectifDraft} onChange={e => setObjectifDraft(e.target.value)} className="mt-2 w-full rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-950 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white" placeholder="5000" />
           </label>
-          <button type="button" onClick={handleUpdateObjectif} className="inline-flex w-full items-center justify-center gap-2 rounded-[1.25rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white">Enregistrer</button>
+          <button type="button" onClick={handleUpdateObjectif} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white">Enregistrer</button>
         </div>
       </MobileDialog>
 

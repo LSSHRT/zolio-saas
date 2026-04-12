@@ -43,7 +43,7 @@ export function AdminConfirmDialog({
           onClick={onClose}
         >
           <motion.div
-            className="admin-panel-strong w-full max-w-lg rounded-[28px] p-6"
+            className="admin-panel-strong w-full max-w-lg rounded-2xl p-6"
             initial={{ opacity: 0, scale: 0.96, y: 14 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}

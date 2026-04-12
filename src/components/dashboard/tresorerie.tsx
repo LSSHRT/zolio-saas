@@ -11,7 +11,7 @@ import type { TresorerieSummary } from "./shared";
 export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
   if (!data || data.nombreFactures === 0) {
     return (
-      <div className="rounded-[1.45rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+      <div className="rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
         <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucune facture</p>
         <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
           Transformez vos devis acceptés en factures pour suivre votre trésorerie.
@@ -23,7 +23,7 @@ export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
   return (
     <div className="space-y-3">
       {/* Encaissé */}
-      <div className="rounded-[1.45rem] border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+      <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15">
             <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
@@ -38,7 +38,7 @@ export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
       </div>
 
       {/* À encaisser */}
-      <div className="rounded-[1.45rem] border border-violet-200/70 bg-violet-50/50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
+      <div className="rounded-2xl border border-violet-200/70 bg-violet-50/50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/15">
             <Clock3 size={16} className="text-violet-600 dark:text-violet-400" />
@@ -53,7 +53,7 @@ export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
       </div>
 
       {/* En retard */}
-      <div className={`rounded-[1.45rem] border p-4 ${data.enRetard > 0 ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10" : "border-slate-200/70 bg-slate-50/50 dark:border-white/8 dark:bg-white/4"}`}>
+      <div className={`rounded-2xl border p-4 ${data.enRetard > 0 ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10" : "border-slate-200/70 bg-slate-50/50 dark:border-white/8 dark:bg-white/4"}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className={`flex h-8 w-8 items-center justify-center rounded-full ${data.enRetard > 0 ? "bg-rose-500/15" : "bg-slate-500/15"}`}>

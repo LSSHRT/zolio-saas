@@ -5,7 +5,7 @@ export default function Loading() {
     <div className="client-workspace relative min-h-screen overflow-hidden">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="client-panel w-full max-w-2xl rounded-[2rem] p-6">
+        <div className="client-panel w-full max-w-2xl rounded-2xl p-6">
           <div className="space-y-6">
             {/* Logo + title */}
             <div className="flex items-center gap-3">

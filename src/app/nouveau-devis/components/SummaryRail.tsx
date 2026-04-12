@@ -90,7 +90,7 @@ export function SummaryRail({
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
               Client lié
             </p>
@@ -113,7 +113,7 @@ export function SummaryRail({
             )}
           </div>
 
-          <div className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
+          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -151,7 +151,7 @@ export function SummaryRail({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1 2xl:grid-cols-3">
-            <label className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
+            <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 text-sm font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
               TVA globale
               <select
                 value={tva}
@@ -166,7 +166,7 @@ export function SummaryRail({
               </select>
             </label>
 
-            <label className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-base font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
+            <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 text-base font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
               Remise (%)
               <input
                 type="number"
@@ -177,7 +177,7 @@ export function SummaryRail({
               />
             </label>
 
-            <label className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
+            <label className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 text-sm font-medium text-slate-700 dark:border-white/8 dark:bg-white/4 dark:text-slate-200">
               Acompte (%)
               <input
                 type="number"
@@ -189,7 +189,7 @@ export function SummaryRail({
             </label>
           </div>
 
-          <div className="rounded-[1.75rem] bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(15,23,42,0.92))] p-5 text-white">
+          <div className="rounded-2xl bg-[linear-gradient(135deg,rgba(124,58,237,0.18),rgba(15,23,42,0.92))] p-5 text-white">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
@@ -238,7 +238,7 @@ export function SummaryRail({
             </div>
           </div>
 
-          <details className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
+          <details className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-4 [&::-webkit-details-marker]:hidden">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
@@ -291,14 +291,14 @@ export function SummaryRail({
                   ))}
                 </div>
               ) : (
-                <div className="mt-4 rounded-[1.2rem] border border-dashed border-slate-300/70 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300">
+                <div className="mt-4 rounded-xl border border-dashed border-slate-300/70 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300">
                   Aucune photo jointe pour l’instant.
                 </div>
               )}
             </div>
           </details>
 
-          <div className="hidden rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:block">
+          <div className="hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:block">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
@@ -341,14 +341,14 @@ export function SummaryRail({
                 ))}
               </div>
             ) : (
-              <div className="mt-4 rounded-[1.2rem] border border-dashed border-slate-300/70 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300">
+              <div className="mt-4 rounded-xl border border-dashed border-slate-300/70 bg-white/60 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300">
                 Aucune photo jointe pour l’instant.
               </div>
             )}
           </div>
 
           {trialLocked ? (
-            <div className="rounded-[1.5rem] border border-rose-300/40 bg-rose-500/10 p-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
+            <div className="rounded-2xl border border-rose-300/40 bg-rose-500/10 p-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
               <p className="font-semibold">Essai terminé pour la création de devis</p>
               <p className="mt-2 leading-6 opacity-80">
                 Votre essai est arrivé à sa limite. Passez en Pro pour créer des devis illimités sans quitter ce cockpit.
@@ -365,7 +365,7 @@ export function SummaryRail({
 
           {!trialLocked && emailHint ? (
             <>
-              <details className="rounded-[1.4rem] border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100 md:hidden">
+              <details className="rounded-2xl border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100 md:hidden">
                 <summary className="cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">
                   Envoi email sous contrôle
                 </summary>
@@ -374,7 +374,7 @@ export function SummaryRail({
                   <p className="leading-6 opacity-80">{emailHint}</p>
                 </div>
               </details>
-              <div className="hidden rounded-[1.4rem] border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100 md:block">
+              <div className="hidden rounded-2xl border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-950 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100 md:block">
                 <div className="flex items-start gap-3">
                   <Mail size={18} className="mt-0.5 shrink-0" />
                   <div>
@@ -408,7 +408,7 @@ export function SummaryRail({
                 {sendBusy ? "Création + envoi..." : "Créer et envoyer"}
               </button>
 
-              <div className="rounded-[1.2rem] border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-xs leading-6 text-slate-500 dark:border-white/8 dark:bg-white/4 dark:text-slate-400">
+              <div className="rounded-xl border border-slate-200/70 bg-slate-50/80 px-4 py-3 text-xs leading-6 text-slate-500 dark:border-white/8 dark:bg-white/4 dark:text-slate-400">
                 <div className="flex items-start gap-2">
                   <ShieldCheck size={15} className="mt-0.5 shrink-0 text-violet-600 dark:text-violet-200" />
                   <p>
@@ -419,7 +419,7 @@ export function SummaryRail({
             </div>
           ) : null}
 
-          <details className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300 md:hidden">
+          <details className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300 md:hidden">
             <summary className="cursor-pointer list-none font-semibold text-slate-900 dark:text-white [&::-webkit-details-marker]:hidden">
               État du compte
             </summary>
@@ -432,7 +432,7 @@ export function SummaryRail({
             </p>
           </details>
 
-          <div className="hidden rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300 md:block">
+          <div className="hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 text-sm text-slate-600 dark:border-white/8 dark:bg-white/4 dark:text-slate-300 md:block">
             <p className="font-semibold text-slate-900 dark:text-white">État du compte</p>
             <p className="mt-2 leading-6">
               {isPro

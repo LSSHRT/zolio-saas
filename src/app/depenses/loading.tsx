@@ -16,7 +16,7 @@ export default function Loading() {
       {/* Expense cards */}
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+          <div key={i} className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1 space-y-3">
                 <div className="flex gap-2">

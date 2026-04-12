@@ -19,7 +19,7 @@ export default function Loading() {
       {/* Client cards */}
       <div className="space-y-3">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4">
+          <div key={i} className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4">
             <div className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
               <div className="flex-1 space-y-2">

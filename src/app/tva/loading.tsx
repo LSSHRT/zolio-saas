@@ -11,7 +11,7 @@ export default function Loading() {
       <div className="h-24 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
       <div className="space-y-4">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="h-24 rounded-[1.75rem] bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div key={i} className="h-24 rounded-2xl bg-gray-200 dark:bg-gray-700 animate-pulse" />
         ))}
       </div>
     </div>

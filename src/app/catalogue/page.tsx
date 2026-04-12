@@ -530,7 +530,7 @@ export default function CataloguePage() {
       >
         <ClientSectionCard>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
-            <section className="rounded-[1.8rem] border border-violet-200/70 bg-violet-50/80 p-5 dark:border-violet-500/20 dark:bg-violet-500/10">
+            <section className="rounded-2xl border border-violet-200/70 bg-violet-50/80 p-5 dark:border-violet-500/20 dark:bg-violet-500/10">
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-700 dark:text-violet-200">
                 Starter métier
               </p>
@@ -547,7 +547,7 @@ export default function CataloguePage() {
                     key={option.key}
                     type="button"
                     onClick={() => setSelectedTrade(option.key)}
-                    className={`rounded-[1rem] px-3 py-3 text-sm font-semibold transition ${
+                    className={`rounded-lg px-3 py-3 text-sm font-semibold transition ${
                       activeTrade === option.key
                         ? "bg-violet-600 text-white shadow-brand"
                         : "bg-white/90 text-slate-700 ring-1 ring-slate-200 hover:ring-violet-300 dark:bg-white/8 dark:text-slate-100 dark:ring-white/10 dark:hover:ring-violet-400/20"
@@ -559,7 +559,7 @@ export default function CataloguePage() {
               </div>
             </section>
 
-            <section className="rounded-[1.8rem] border border-slate-200/70 bg-slate-50/80 p-5 dark:border-white/8 dark:bg-white/4">
+            <section className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-5 dark:border-white/8 dark:bg-white/4">
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
                 <div className="rounded-[1.35rem] border border-slate-200/80 bg-white/90 p-4 dark:border-white/10 dark:bg-slate-950/20">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
@@ -588,7 +588,7 @@ export default function CataloguePage() {
                   type="button"
                   onClick={() => void handleImportStarterCatalog()}
                   disabled={isImportingStarter}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
                 >
                   {isImportingStarter ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                   {isImportingStarter ? "Import en cours..." : `Importer ${starterCount} lignes starter`}
@@ -596,7 +596,7 @@ export default function CataloguePage() {
                 <button
                   type="button"
                   onClick={openFilePicker}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white sm:flex-1"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white sm:flex-1"
                 >
                   <Upload size={16} />
                   Importer un CSV
@@ -615,7 +615,7 @@ export default function CataloguePage() {
                 placeholder="Rechercher une prestation ou une catégorie..."
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                className="w-full rounded-[1.25rem] border border-slate-200/80 bg-white/90 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                className="w-full rounded-xl border border-slate-200/80 bg-white/90 py-3 pl-12 pr-4 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
               />
             </div>
 
@@ -661,7 +661,7 @@ export default function CataloguePage() {
                   <select
                     value={form.categorie}
                     onChange={(event) => setForm((current) => ({ ...current, categorie: event.target.value }))}
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   >
                     {STARTER_CATEGORIES.map((category) => (
                       <option key={category} value={category}>
@@ -678,7 +678,7 @@ export default function CataloguePage() {
                     value={form.nom}
                     onChange={(event) => setForm((current) => ({ ...current, nom: event.target.value }))}
                     placeholder="Ex: Peinture mate blanche"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
 
@@ -687,7 +687,7 @@ export default function CataloguePage() {
                   <select
                     value={form.unite}
                     onChange={(event) => setForm((current) => ({ ...current, unite: event.target.value }))}
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   >
                     <option value="m²">m²</option>
                     <option value="ml">ml</option>
@@ -707,7 +707,7 @@ export default function CataloguePage() {
                     value={form.prix}
                     onChange={(event) => setForm((current) => ({ ...current, prix: event.target.value }))}
                     placeholder="0,00"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
 
@@ -720,7 +720,7 @@ export default function CataloguePage() {
                     value={form.cout}
                     onChange={(event) => setForm((current) => ({ ...current, cout: event.target.value }))}
                     placeholder="Optionnel"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
 
@@ -733,7 +733,7 @@ export default function CataloguePage() {
                     value={form.stock}
                     onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
                     placeholder="Optionnel"
-                    className="rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
+                    className="rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-base text-slate-900 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-white/6 dark:text-white"
                   />
                 </label>
               </div>
@@ -742,14 +742,14 @@ export default function CataloguePage() {
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {saving ? <Loader2 size={16} className="animate-spin" /> : null}
                   {saving
@@ -769,8 +769,8 @@ export default function CataloguePage() {
               <Loader2 size={28} className="animate-spin text-violet-500" />
             </div>
           ) : filteredPrestations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-[1.85rem] border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
-              <div className="flex h-14 w-14 items-center justify-center rounded-[1.5rem] bg-slate-100 text-slate-400 dark:bg-white/6 dark:text-slate-500">
+            <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-white/6 dark:text-slate-500">
                 <Package size={26} />
               </div>
               <div>
@@ -788,7 +788,7 @@ export default function CataloguePage() {
                   type="button"
                   onClick={() => void handleImportStarterCatalog()}
                   disabled={isImportingStarter}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white sm:flex-1"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white sm:flex-1"
                 >
                   {isImportingStarter ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                   Starter {activeTradeDefinition?.shortLabel || "métier"}
@@ -796,7 +796,7 @@ export default function CataloguePage() {
                 <button
                   type="button"
                   onClick={openCreateForm}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[1rem] bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand sm:flex-1"
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand sm:flex-1"
                 >
                   <Plus size={16} />
                   Ajouter une ligne
@@ -829,26 +829,26 @@ export default function CataloguePage() {
                         <h3 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">{prestation.nom}</h3>
                       </div>
 
-                      <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-slate-950/20 sm:min-w-[140px] sm:text-right">
+                      <div className="rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-left shadow-sm dark:border-white/10 dark:bg-slate-950/20 sm:min-w-[140px] sm:text-right">
                         <p className="text-lg font-semibold text-slate-950 dark:text-white">{formatPrice(prestation.prix)}</p>
                         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">HT / {prestation.unite}</p>
                       </div>
                     </div>
 
                     <div className="grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
+                      <div className="rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                           Unité
                         </p>
                         <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{prestation.unite}</p>
                       </div>
-                      <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
+                      <div className="rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                           Coût matière
                         </p>
                         <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{formatPrice(prestation.cout || 0)}</p>
                       </div>
-                      <div className="rounded-[1.2rem] border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
+                      <div className="rounded-xl border border-slate-200/80 bg-white/80 px-4 py-3 dark:border-white/10 dark:bg-white/6">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
                           Stock
                         </p>
@@ -862,7 +862,7 @@ export default function CataloguePage() {
                       <button
                         type="button"
                         onClick={() => handleEdit(prestation)}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-emerald-400/20 dark:hover:text-white"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-300 hover:text-emerald-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-emerald-400/20 dark:hover:text-white"
                       >
                         <Pencil size={16} />
                         Modifier
@@ -870,7 +870,7 @@ export default function CataloguePage() {
                       <button
                         type="button"
                         onClick={() => handleDuplicate(prestation)}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
                       >
                         <Copy size={16} />
                         Dupliquer
@@ -878,7 +878,7 @@ export default function CataloguePage() {
                       <button
                         type="button"
                         onClick={() => setPendingDelete(prestation)}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1rem] border border-rose-200/80 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-rose-200/80 bg-rose-50/80 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:border-rose-300 hover:bg-rose-100 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200"
                       >
                         <Trash2 size={16} />
                         Supprimer
@@ -903,14 +903,14 @@ export default function CataloguePage() {
             <button
               type="button"
               onClick={() => setPendingDelete(null)}
-              className="inline-flex min-h-11 items-center justify-center rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
             >
               Annuler
             </button>
             <button
               type="button"
               onClick={() => void confirmDelete()}
-              className="inline-flex min-h-11 items-center justify-center rounded-[1rem] bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700"
             >
               Supprimer
             </button>
@@ -934,7 +934,7 @@ export default function CataloguePage() {
               type="button"
               onClick={() => setPendingImport(null)}
               disabled={isImportingCsv}
-              className="inline-flex min-h-11 items-center justify-center rounded-[1rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white"
             >
               Annuler
             </button>
@@ -942,7 +942,7 @@ export default function CataloguePage() {
               type="button"
               onClick={() => void confirmCsvImport()}
               disabled={isImportingCsv}
-              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[1rem] bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isImportingCsv ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
               {isImportingCsv ? "Import en cours..." : "Confirmer l'import"}
@@ -950,7 +950,7 @@ export default function CataloguePage() {
           </>
         }
       >
-        <div className="rounded-[1.25rem] border border-violet-200/70 bg-violet-50/80 p-4 text-sm leading-6 text-violet-900 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-100">
+        <div className="rounded-xl border border-violet-200/70 bg-violet-50/80 p-4 text-sm leading-6 text-violet-900 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-100">
           Les lignes seront ajoutées à votre catalogue existant. Vérifiez le séparateur et les colonnes avant de confirmer.
         </div>
       </MobileDialog>

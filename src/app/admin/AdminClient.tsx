@@ -184,7 +184,7 @@ function Panel({
   title?: string;
 }) {
   return (
-    <section className={`admin-panel rounded-[30px] ${className}`}>
+    <section className={`admin-panel rounded-2xl ${className}`}>
       {(title || description || action) && (
         <div className="flex flex-col gap-4 border-b border-white/8 px-5 py-5 sm:px-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -1028,7 +1028,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
     const quickAction = renderQuickAction();
 
     return (
-      <section className="admin-panel-strong relative overflow-hidden rounded-[30px] p-5 lg:hidden">
+      <section className="admin-panel-strong relative overflow-hidden rounded-2xl p-5 lg:hidden">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.18),transparent_38%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent)]" />
         <div className="relative">
           <div className="flex items-start justify-between gap-4">
@@ -1068,7 +1068,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
   function renderPilotage() {
     return (
       <div className="space-y-6">
-        <section className="admin-panel-strong relative hidden overflow-hidden rounded-[34px] p-6 sm:p-8 lg:block">
+        <section className="admin-panel-strong relative hidden overflow-hidden rounded-2xl p-6 sm:p-8 lg:block">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,0.22),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(244,114,182,0.16),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent)]" />
           <div className="relative grid gap-8 xl:grid-cols-[1.35fr_0.95fr]">
             <div>
@@ -1102,12 +1102,12 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+              <div className="rounded-2xl bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Alertes ouvertes</p>
                 <p className="mt-4 text-3xl font-semibold text-white">{attentionCount}</p>
                 <p className="mt-2 text-sm text-slate-300">Signalements qui demandent une décision.</p>
               </div>
-              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+              <div className="rounded-2xl bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Base de données</p>
                 <p className="mt-4 text-3xl font-semibold text-white">
                   {data.environment.dbLatencyMs === null
@@ -1118,12 +1118,12 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   Sonde Prisma légère, séparée du chargement du cockpit.
                 </p>
               </div>
-              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+              <div className="rounded-2xl bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Robot acquisition</p>
                 <p className="mt-4 text-3xl font-semibold text-white">{isCronEnabled ? "ON" : "OFF"}</p>
                 <p className="mt-2 text-sm text-slate-300">Moteur automatisé de prospection.</p>
               </div>
-              <div className="rounded-[26px] bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
+              <div className="rounded-2xl bg-white/6 p-4 ring-1 ring-white/10 backdrop-blur">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-slate-400">Délivrabilité</p>
                 <p className="mt-4 text-3xl font-semibold text-white">{deliveryRate}%</p>
                 <p className="mt-2 text-sm text-slate-300">Ratio d&apos;emails envoyés avec succès.</p>
@@ -1145,7 +1145,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   key={alert.id}
                   type="button"
                   onClick={() => setActiveSection(alert.section)}
-                  className={`rounded-[26px] border p-4 text-left transition hover:translate-y-[-1px] hover:border-white/16 ${alertClasses(alert.severity)}`}
+                  className={`rounded-2xl border p-4 text-left transition hover:translate-y-[-1px] hover:border-white/16 ${alertClasses(alert.severity)}`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -1172,7 +1172,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             >
               <div className="space-y-3">
                 {activityFeed.length === 0 ? (
-                  <div className="rounded-[24px] border border-dashed border-white/12 bg-white/4 px-4 py-6 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-dashed border-white/12 bg-white/4 px-4 py-6 text-sm text-slate-400">
                     Aucun événement récent à afficher pour le moment.
                   </div>
                 ) : (
@@ -1181,7 +1181,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                       key={item.id}
                       type="button"
                       onClick={() => setActiveSection(item.section)}
-                      className="flex w-full items-start justify-between gap-4 rounded-[24px] border border-white/8 bg-white/4 px-4 py-4 text-left transition hover:border-white/14 hover:bg-white/6"
+                      className="flex w-full items-start justify-between gap-4 rounded-2xl border border-white/8 bg-white/4 px-4 py-4 text-left transition hover:border-white/14 hover:bg-white/6"
                     >
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-white">{item.title}</p>
@@ -1207,7 +1207,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                     key={status.id}
                     type="button"
                     onClick={() => setActiveSection("systeme")}
-                    className="rounded-[24px] border border-white/8 bg-white/4 p-4 text-left transition hover:border-white/14 hover:bg-white/6"
+                    className="rounded-2xl border border-white/8 bg-white/4 p-4 text-left transition hover:border-white/14 hover:bg-white/6"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <p className="text-sm font-medium text-white">{status.label}</p>
@@ -1269,7 +1269,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             {filteredUsers.map((user) => (
               <article
                 key={user.id}
-                className="rounded-[26px] border border-white/8 bg-white/4 p-4 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.72)]"
+                className="rounded-2xl border border-white/8 bg-white/4 p-4 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.72)]"
               >
                 <button
                   type="button"
@@ -1335,13 +1335,13 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
               </article>
             ))}
             {filteredUsers.length === 0 && (
-              <div className="rounded-[26px] border border-dashed border-white/12 bg-white/4 px-4 py-10 text-center text-sm text-slate-400">
+              <div className="rounded-2xl border border-dashed border-white/12 bg-white/4 px-4 py-10 text-center text-sm text-slate-400">
                 Aucun utilisateur ne correspond à ce filtre.
               </div>
             )}
           </div>
 
-          <div className="mt-6 hidden overflow-hidden rounded-[26px] border border-white/8 md:block">
+          <div className="mt-6 hidden overflow-hidden rounded-2xl border border-white/8 md:block">
             <div className="overflow-x-auto">
               <table className="min-w-full text-left">
                 <thead className="bg-white/4 text-xs uppercase tracking-[0.24em] text-slate-500">
@@ -1505,7 +1505,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
               {businessSignals.map((signal) => (
                 <article
                   key={signal.title}
-                  className="rounded-[26px] border border-white/8 bg-white/4 p-5"
+                  className="rounded-2xl border border-white/8 bg-white/4 p-5"
                 >
                   <p className="text-sm text-slate-400">{signal.title}</p>
                   <p className="mt-4 text-2xl font-semibold text-white">{signal.value}</p>
@@ -1523,14 +1523,14 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
               {monetizationSignals.map((signal) => (
                 <article
                   key={signal.title}
-                  className="rounded-[26px] border border-white/8 bg-white/4 p-5"
+                  className="rounded-2xl border border-white/8 bg-white/4 p-5"
                 >
                   <p className="text-sm text-slate-400">{signal.title}</p>
                   <p className="mt-4 text-2xl font-semibold text-white">{signal.value}</p>
                   <p className="mt-3 text-sm leading-6 text-slate-400">{signal.detail}</p>
                 </article>
               ))}
-              <article className="rounded-[26px] border border-white/8 bg-white/4 p-5 md:col-span-2">
+              <article className="rounded-2xl border border-white/8 bg-white/4 p-5 md:col-span-2">
                 <div className="flex items-center gap-3">
                   <MessageSquareDashed className="h-5 w-5 text-slate-400" />
                   <h4 className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300">
@@ -1614,7 +1614,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
               </div>
             }
           >
-            <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+            <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
               <div className="flex flex-wrap items-center gap-3">
                 <span className={`admin-chip ${isCronEnabled ? "bg-emerald-500/12 text-emerald-100 ring-emerald-300/20" : "bg-amber-400/12 text-amber-100 ring-amber-300/20"}`}>
                   {isCronEnabled ? "Robot activé" : "Robot désactivé"}
@@ -1649,7 +1649,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                   value={prospectEmail}
                   onChange={(event) => setProspectEmail(event.target.value)}
                   disabled={!data.environment.canManualProspectSend}
-                  className="w-full rounded-[24px] border border-white/10 bg-slate-950/45 px-4 py-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
+                  className="w-full rounded-2xl border border-white/10 bg-slate-950/45 px-4 py-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-violet-300/25"
                 />
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-slate-400">
@@ -1685,7 +1685,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             description="Journal réel des envois de prospection. Les échecs peuvent être marqués proprement depuis ici."
           >
             {mails.length === 0 ? (
-              <div className="rounded-[26px] border border-dashed border-white/12 bg-white/4 px-5 py-10 text-center text-sm text-slate-400">
+              <div className="rounded-2xl border border-dashed border-white/12 bg-white/4 px-5 py-10 text-center text-sm text-slate-400">
                 Aucun envoi enregistré pour le moment.
               </div>
             ) : (
@@ -1693,7 +1693,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                 {mails.slice(0, 12).map((mail) => (
                   <article
                     key={mail.id}
-                    className="rounded-[24px] border border-white/8 bg-white/4 p-4"
+                    className="rounded-2xl border border-white/8 bg-white/4 p-4"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0">
@@ -1745,7 +1745,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             {systemStatuses.map((status) => (
               <article
                 key={status.id}
-                className="rounded-[26px] border border-white/8 bg-white/4 p-5"
+                className="rounded-2xl border border-white/8 bg-white/4 p-5"
               >
                 <div className="flex items-center justify-between gap-3">
                   <p className="text-sm font-medium text-white">{status.label}</p>
@@ -1764,7 +1764,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             description="Réglages utiles immédiatement. Les feedbacks passent en inline et en toast, sans alertes natives."
           >
             <div className="space-y-6">
-              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+              <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
                 <label className="block text-sm font-medium text-white">
                   Bannière d’information globale
                 </label>
@@ -1790,7 +1790,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                 </div>
               </div>
 
-              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+              <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
                 <label className="block text-sm font-medium text-white">
                   Clé Gemini admin
                 </label>
@@ -1823,7 +1823,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
             description="Un vrai levier d’exploitation pour couper proprement l’accès public et garder une trace de ce qui s’est passé."
           >
             <div className="space-y-5">
-              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+              <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex items-center gap-3">
@@ -1871,7 +1871,7 @@ export default function AdminClient({ data }: { data: AdminDashboardData }) {
                 </div>
               </div>
 
-              <div className="rounded-[26px] border border-white/8 bg-white/4 p-5">
+              <div className="rounded-2xl border border-white/8 bg-white/4 p-5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <Activity className="h-4 w-4 text-sky-200" />

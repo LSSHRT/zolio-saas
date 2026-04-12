@@ -15,7 +15,7 @@ export default async function AdminDashboard() {
       <div className="admin-cockpit min-h-screen px-4 py-10 font-sans">
         <div className="pointer-events-none absolute inset-0 admin-grid-overlay" />
         <div className="relative mx-auto flex min-h-[80vh] max-w-2xl items-center justify-center">
-          <div className="admin-panel-strong w-full rounded-[34px] p-8 text-center">
+          <div className="admin-panel-strong w-full rounded-2xl p-8 text-center">
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-3xl bg-rose-500/12 text-rose-300 ring-1 ring-rose-400/20">
               <ShieldAlert size={32} />
             </div>
@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
               serveur.
             </p>
             {!adminEmail && (
-              <div className="mt-6 rounded-[24px] border border-amber-300/18 bg-amber-400/8 p-4 text-left text-sm text-amber-100">
+              <div className="mt-6 rounded-2xl border border-amber-300/18 bg-amber-400/8 p-4 text-left text-sm text-amber-100">
                 <strong>Configuration manquante :</strong> ajoute <code>ADMIN_EMAIL=votre@email.com</code>
                 dans Vercel pour aligner l’identité admin canonique.
               </div>

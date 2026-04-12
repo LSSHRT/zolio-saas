@@ -1054,7 +1054,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
         }
       >
         <div className="space-y-4">
-          <div className="relative overflow-hidden rounded-[1.4rem] border-2 border-dashed border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60">
+          <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60">
             <SignaturePad
               ref={sigCanvas}
               penColor="black"
@@ -1106,7 +1106,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
           value={aiPrompt}
           onChange={(e) => setAiPrompt(e.target.value)}
           placeholder="Exemple : rénovation complète d’une salle de bain de 10 m² avec dépose, plomberie, carrelage et peinture."
-          className="h-40 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          className="h-40 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         />
       </MobileDialog>
 
@@ -1122,7 +1122,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
               key={forfait.nom}
               type="button"
               onClick={() => applyForfait(forfait)}
-              className="w-full rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
+              className="w-full rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>

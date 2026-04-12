@@ -47,7 +47,7 @@ export function NotificationPrompt() {
         onClick={handleDeny}
       />
 
-      <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[1.5rem] border border-slate-200/80 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-slate-900">
+      <div className="relative z-10 max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-slate-200/80 bg-white p-6 shadow-2xl dark:border-white/10 dark:bg-slate-900">
         <button
           type="button"
           onClick={handleDeny}

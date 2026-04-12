@@ -111,7 +111,7 @@ export function LineEditor({
           </div>
 
           {!hasClient ? (
-            <div className="flex items-start gap-3 rounded-[1.5rem] border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-900 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100">
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/10 px-4 py-4 text-sm text-amber-900 dark:border-amber-400/20 dark:bg-amber-400/10 dark:text-amber-100">
               <Lock size={18} className="mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold">Choisissez un client pour activer le chiffrage</p>
@@ -122,7 +122,7 @@ export function LineEditor({
             </div>
           ) : null}
 
-          <details className="rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
+          <details className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:hidden">
             <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
               <div className="flex items-start justify-between gap-4">
                 <div>
@@ -197,7 +197,7 @@ export function LineEditor({
             </div>
           </details>
 
-          <div className="hidden rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:block">
+          <div className="hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 md:block">
             <div className="flex flex-col gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -251,7 +251,7 @@ export function LineEditor({
 
           <div className="grid gap-3 md:hidden">
             {expressPrestations.length > 0 ? (
-              <div className="rounded-[1.6rem] border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-400/20 dark:bg-violet-500/10">
+              <div className="rounded-2xl border border-violet-200/70 bg-violet-50/80 p-4 dark:border-violet-400/20 dark:bg-violet-500/10">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-700 dark:text-violet-200">
@@ -273,7 +273,7 @@ export function LineEditor({
                       type="button"
                       onClick={() => onAddPrestation(prestation)}
                       disabled={!canEdit}
-                      className="rounded-[1.2rem] border border-white/70 bg-white/90 px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
+                      className="rounded-xl border border-white/70 bg-white/90 px-3 py-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/8"
                     >
                       <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{prestation.nom}</p>
                       <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
@@ -365,7 +365,7 @@ export function LineEditor({
                   type="button"
                   onClick={() => onAddPrestation(prestation)}
                   disabled={!canEdit}
-                  className="rounded-[1.4rem] border border-slate-200/70 bg-white/80 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
+                  className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -383,7 +383,7 @@ export function LineEditor({
                 </button>
               ))
             ) : (
-              <div className="lg:col-span-2 rounded-[1.4rem] border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/4 dark:text-slate-300">
+              <div className="lg:col-span-2 rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/4 dark:text-slate-300">
                 {prestations.length === 0
                   ? "Votre catalogue est vide. Importez le starter métier ou ajoutez une ligne libre."
                   : "Aucune prestation ne correspond à votre recherche. Ajoutez une ligne libre pour continuer."}
@@ -397,7 +397,7 @@ export function LineEditor({
             ))}
           </datalist>
 
-          <div className="rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h3 className="text-base font-semibold text-slate-950 dark:text-white sm:text-lg">
@@ -411,7 +411,7 @@ export function LineEditor({
 
             {lignes.length > 0 ? (
               <>
-                <div className="mt-5 hidden overflow-hidden rounded-[1.4rem] border border-slate-200/70 dark:border-white/8 lg:block">
+                <div className="mt-5 hidden overflow-hidden rounded-2xl border border-slate-200/70 dark:border-white/8 lg:block">
                   <div className="grid grid-cols-[minmax(0,2.2fr)_0.65fr_0.8fr_0.95fr_0.75fr_0.8fr_0.42fr] gap-3 bg-slate-100/80 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:bg-white/6 dark:text-slate-400">
                     <span>Prestation</span>
                     <span>Qté</span>
@@ -499,7 +499,7 @@ export function LineEditor({
                   {lignes.map((ligne, index) => (
                     <details
                       key={`${ligne.nomPrestation || "ligne"}-${index}`}
-                      className="rounded-[1.4rem] border border-slate-200/70 bg-white/80 p-4 dark:border-white/8 dark:bg-white/4"
+                      className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 dark:border-white/8 dark:bg-white/4"
                     >
                       <summary className="flex cursor-pointer list-none items-start justify-between gap-3 [&::-webkit-details-marker]:hidden">
                         <div className="min-w-0">
@@ -630,7 +630,7 @@ export function LineEditor({
                 </div>
               </>
             ) : (
-              <div className="mt-5 rounded-[1.4rem] border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-8 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/4 dark:text-slate-300">
+              <div className="mt-5 rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-8 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/4 dark:text-slate-300">
                 Aucune ligne pour le moment. Ajoutez une prestation du catalogue, appliquez un pack métier ou démarrez avec une ligne libre.
               </div>
             )}
@@ -640,7 +640,7 @@ export function LineEditor({
 
       {showBundles ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/65 p-3 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#0d1328] sm:max-h-[80vh] sm:rounded-[2rem] sm:p-6">
+          <div className="flex max-h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#0d1328] sm:max-h-[80vh] sm:rounded-2xl sm:p-6">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -672,7 +672,7 @@ export function LineEditor({
                     onApplyBundle(bundle);
                     setShowBundles(false);
                   }}
-                  className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
+                  className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
