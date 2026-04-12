@@ -228,6 +228,7 @@ export default function NouveauDevisPage() {
   const [isAddingClient, setIsAddingClient] = useState(false);
   const [showNewClient, setShowNewClient] = useState(false);
   const [newClient, setNewClient] = useState<QuickClientForm>(EMPTY_CLIENT_FORM);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -647,11 +648,27 @@ export default function NouveauDevisPage() {
   };
 
   const handleCreateClient = async () => {
+    const currentErrors: Record<string, string> = {};
+
     if (!newClient.nom.trim()) {
-      toast.error("Le nom du client est obligatoire.");
+      currentErrors.nom = "Le nom du client est obligatoire.";
+    }
+
+    if (newClient.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newClient.email)) {
+      currentErrors.email = "L'adresse email n'est pas valide.";
+    }
+
+    if (newClient.telephone && newClient.telephone.length < 8) {
+      currentErrors.telephone = "Le numéro de téléphone est trop court.";
+    }
+
+    if (Object.keys(currentErrors).length > 0) {
+      setErrors(currentErrors);
+      toast.error("Veuillez corriger les erreurs dans le formulaire.");
       return;
     }
 
+    setErrors({});
     setIsAddingClient(true);
     try {
       const response = await fetch("/api/clients", {
@@ -677,7 +694,7 @@ export default function NouveauDevisPage() {
     } finally {
       setIsAddingClient(false);
     }
-  };
+  };;
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -953,7 +970,8 @@ export default function NouveauDevisPage() {
                 isCreating={isAddingClient}
                 isLoading={isBooting}
                 newClient={newClient}
-                onClearSelection={() => setSelectedClientId("")}
+                onClearSelection={() =
+                errors={errors}> setSelectedClientId("")}
                 onCreateClient={handleCreateClient}
                 onNewClientChange={(field, value) =>
                   setNewClient((current) => ({ ...current, [field]: value }))

@@ -676,7 +676,7 @@ export default function DevisPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3"
-                      >
+                       whileHover={{ scale: 1.01, y: -2 }} transition={{ type: "spring", stiffness: 400, damping: 17 }} >
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="flex items-center gap-2">
@@ -974,7 +974,7 @@ export default function DevisPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: Math.min((i * 0.03 + ci * 0.02), 0.2) }}
                             className="bg-white/70 dark:bg-white/5 rounded-xl border border-slate-200/60 dark:border-white/8 p-3 flex items-center justify-between gap-3"
-                          >
+                           whileHover={{ scale: 1.01, y: -2 }} transition={{ type: "spring", stiffness: 400, damping: 17 }} >
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${optionColors[child.optionLabel || ""] || "bg-violet-100 text-violet-600"}`}>
                                 <Layers size={13} />

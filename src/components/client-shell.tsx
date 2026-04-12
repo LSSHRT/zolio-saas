@@ -329,7 +329,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
                       key="search-tool"
                       type="button"
                       onClick={() => { setToolsOpen(false); setSearchOpen(true); }}
-                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses("default")}`}
+                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses("default")}`}
                     >
                       <Icon size={18} />
                       <span className="leading-5">{item.label}</span>
@@ -341,7 +341,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setToolsOpen(false)}
-                    className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
+                    className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses(
                       pathname === item.href ? "accent" : "default",
                     )}`}
                   >
@@ -448,7 +448,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
                 <Link
                   key={item.key}
                   href={item.href}
-                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition ${
+                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
                     itemActive
                       ? "bg-[linear-gradient(135deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08))] text-slate-950 shadow-[0_16px_30px_-22px_rgba(124,58,237,0.55)] ring-1 ring-violet-300/50 dark:text-white dark:ring-violet-400/20"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
@@ -476,7 +476,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition ${
+                    className={`relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
                       itemActive
                         ? "bg-slate-100 font-medium text-slate-950 ring-1 ring-slate-200/80 dark:bg-white/10 dark:text-white dark:ring-white/12"
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"

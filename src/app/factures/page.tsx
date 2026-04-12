@@ -733,7 +733,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: Math.min(index * 0.03, 0.15) }}
                       className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
-                    >
+                     whileHover={{ scale: 1.01, y: -2 }} transition={{ type: "spring", stiffness: 400, damping: 17 }} >
                       <div className="md:hidden">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex min-w-0 items-start gap-3">
@@ -988,7 +988,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3"
-                            >
+                             whileHover={{ scale: 1.01, y: -2 }} transition={{ type: "spring", stiffness: 400, damping: 17 }} >
                               <div className="flex justify-between items-start">
                                 <Link href={`/factures/${facture.numero}`} className="min-w-0 flex-1">
                                   <p className="font-semibold text-slate-900 dark:text-white text-sm truncate hover:text-violet-600 dark:hover:text-violet-400 transition-colors">{facture.nomClient}</p>
