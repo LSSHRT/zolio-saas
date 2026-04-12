@@ -521,7 +521,7 @@ export default function DashboardPage() {
                         <Target size={18} className="text-violet-500" />
                         <h3 className="text-sm font-bold text-slate-800 dark:text-white">Funnel</h3>
                       </div>
-                      <ConversionFunnel funnel={funnel} />
+                      <ConversionFunnel funnel={funnel} isLoading={loading} />
                     </div>
                   </div>
                 )}

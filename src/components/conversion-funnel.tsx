@@ -11,7 +11,31 @@ const COLOR_MAP: Record<string, { bg: string; text: string; bar: string; lightBg
   amber: { bg: "bg-amber-500", text: "text-amber-700 dark:text-amber-300", bar: "from-amber-500 to-amber-400", lightBg: "bg-amber-50 dark:bg-amber-500/10" },
 };
 
-export default function ConversionFunnel({ funnel }: { funnel: FunnelEtape[] }) {
+export default function ConversionFunnel({ funnel, isLoading }: { funnel: FunnelEtape[]; isLoading?: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="flex items-center gap-3 rounded-xl bg-slate-100/50 dark:bg-white/5 px-4 py-3">
+            <div className="h-3 w-3 shrink-0 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="h-4 w-24 rounded bg-slate-200 dark:bg-white/10 animate-pulse />
+                <div className="h-3 w-12 rounded bg-slate-200 dark:bg-white/10 animate-pulse />
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-white/10 animate-pulse />
+              <div className="flex items-center justify-between">
+                <div className="h-3 w-16 rounded bg-slate-200 dark:bg-white/10 animate-pulse />
+                <div className="h-3 w-12 rounded bg-slate-200 dark:bg-white/10 animate-pulse />
+              </div>
+            </div>
+            <div className="h-4 w-4 rounded-full bg-slate-200 dark:bg-white/10 animate-pulse />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (!funnel.length) return null;
   const maxCount = Math.max(...funnel.map((e) => e.count), 1);
 
