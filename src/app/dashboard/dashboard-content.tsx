@@ -29,7 +29,8 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { CallBackProps, STATUS, Step } from "react-joyride";
+import type { EventData, Step } from "react-joyride";
+import { STATUS } from "react-joyride";
 import useSWR from "swr";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -106,7 +107,7 @@ interface DashboardContentProps {
   initialSummary: ClientDashboardSummary;
 }
 
-const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
+const Joyride = dynamic(() => import("react-joyride").then(mod => mod.Joyride), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
 
 const fetcher = async (url: string) => {
@@ -239,7 +240,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     } catch { toast.error("Erreur de sauvegarde."); }
   };
 
-  const handleTourCallback = (data: CallBackProps) => {
+  const handleTourCallback = (data: EventData) => {
     if (data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED) {
       localStorage.setItem("zolio_has_seen_tour", "true");
       setRunTour(false);
@@ -325,7 +326,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   // ─── Tour steps ──────────────────────────────────────────────────
 
   const tourSteps: Step[] = [
-    { target: ".tour-nouveau-devis", title: "Bienvenue sur Zolio 👋", content: "Votre cockpit d'activité. Créez un devis en un clic ici.", disableBeacon: true, placement: "bottom-start" as const },
+    { target: ".tour-nouveau-devis", title: "Bienvenue sur Zolio 👋", content: "Votre cockpit d'activité. Créez un devis en un clic ici.", skipBeacon: true, placement: "bottom-start" as const },
     { target: ".tour-dashboard", title: "Votre tableau de bord", content: "Suivez votre chiffre d'affaires, vos relances et votre pipeline en un coup d'œil.", placement: "bottom" as const },
   ];
 
@@ -336,7 +337,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
+      {runTour && <Joyride steps={tourSteps} run={runTour} continuous onEvent={handleTourCallback} options={{ primaryColor: "#7c3aed", zIndex: 1000, buttons: ["back", "close", "primary", "skip"], showProgress: true }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 
       <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
         <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 lg:pb-10">

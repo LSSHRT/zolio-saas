@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { logError } from "@/lib/logger";
 
-
 export default function Error({
   error,
   reset,

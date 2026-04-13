@@ -1,7 +1,7 @@
 /**
  * Logger centralisé — remplace tous les console.* éparpillés.
  *
- * - Serveur : console + audit admin log
+ * - Serveur : console + audit admin log (via fetch API route)
  * - Client : console seulement (Sentry capture les erreurs automatiquement)
  */
 
@@ -18,16 +18,23 @@ async function tryAuditLog(level: LogLevel, scope: string, message: string, meta
   if (!isServer || (level !== "error" && level !== "warn")) return;
 
   try {
-    // Import dynamique uniquement côté serveur
-    const { appendAdminAuditLog } = await import("@/lib/admin-settings");
-    await appendAdminAuditLog({
-      level: level === "warn" ? "warning" : "error",
-      scope: "system",
-      action: scope,
-      actor: "Serveur",
-      message,
-      meta,
-    });
+    // Appel API route au lieu d'import direct (évite le bundling Prisma côté client)
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+    const secret = process.env.CRON_SECRET || "";
+    await fetch(`${baseUrl}/api/admin/audit-log`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${secret}` },
+      body: JSON.stringify({
+        level: level === "warn" ? "warning" : "error",
+        scope: "system",
+        action: scope,
+        actor: "Serveur",
+        message,
+        meta,
+      }),
+    }).catch(() => {});
   } catch {
     // On ne boucle pas si l'audit log échoue
   }
@@ -78,7 +85,5 @@ export function logDebug(scope: string, message: string) {
   }
 }
 
-/**
- * Compat : remplace l'ancien logServerError de http.ts
- */
+/** Compat : remplace l'ancien logServerError de http.ts */
 export { logError as logServerError };

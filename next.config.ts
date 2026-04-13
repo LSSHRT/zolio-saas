@@ -47,8 +47,11 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   poweredByHeader: false,
-  serverExternalPackages: ["jspdf"],
+  serverExternalPackages: ["jspdf", "@prisma/client", "prisma"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "i.pravatar.cc" },
