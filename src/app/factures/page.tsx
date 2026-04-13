@@ -462,7 +462,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
       eyebrow="Suivi de trésorerie"
       mobileSecondaryActions={[
         {
-          href: "/nouvelle-facture" as any,
+          href: "/nouvelle-facture",
           icon: Plus,
           label: "Nouvelle facture",
           tone: "accent",

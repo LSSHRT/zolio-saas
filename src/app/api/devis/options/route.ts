@@ -155,7 +155,7 @@ export async function POST(request: Request) {
         remise: d.remise,
         tva: d.tva,
         totalHT: d.lignesNorm.reduce((s, l) => s + Number(l.totalLigne), 0),
-        totalTTC: computeTotals(d.lignesNorm as any, Number(d.remise) ?? 0, Number(d.tva) ?? 20).totalTTC,
+        totalTTC: computeTotals(d.lignesNorm.map((l) => ({ nomPrestation: l.nomPrestation || '', quantite: Number(l.quantite), prixUnitaire: Number(l.prixUnitaire), tva: l.tva || '', totalLigne: Number(l.totalLigne), unite: l.unite || 'U', isOptional: l.isOptional || false })), Number(d.remise) ?? 0, Number(d.tva) ?? 20).totalTTC,
         createdAt: d.createdAt.toISOString(),
         lignes: d.lignesNorm.map((l) => normalizeLigneForOutput(l)),
       })),

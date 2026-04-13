@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { internalServerError, jsonError } from "@/lib/http";
 
 export async function GET(request: Request) {
@@ -25,8 +26,8 @@ export async function GET(request: Request) {
         where: {
           ...where,
           OR: [
-            { client: { nom: { contains: q, mode: "insensitive" as any } } },
-            { numero: { contains: q, mode: "insensitive" as any } },
+            { client: { nom: { contains: q, mode: Prisma.QueryMode.insensitive } } },
+            { numero: { contains: q, mode: Prisma.QueryMode.insensitive } },
           ],
         },
         select: { id: true, numero: true, clientId: true, statut: true, date: true, client: { select: { nom: true } } },
@@ -36,8 +37,8 @@ export async function GET(request: Request) {
         where: {
           ...where,
           OR: [
-            { nomClient: { contains: q, mode: "insensitive" as any } },
-            { numero: { contains: q, mode: "insensitive" as any } },
+            { nomClient: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { numero: { contains: q, mode: Prisma.QueryMode.insensitive } },
           ],
         },
         select: { id: true, numero: true, nomClient: true, statut: true, totalTTC: true, date: true },
@@ -47,8 +48,8 @@ export async function GET(request: Request) {
         where: {
           ...where,
           OR: [
-            { nom: { contains: q, mode: "insensitive" as any } },
-            { email: { contains: q, mode: "insensitive" as any } },
+            { nom: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { email: { contains: q, mode: Prisma.QueryMode.insensitive } },
           ],
         },
         select: { id: true, nom: true, email: true },
@@ -58,8 +59,8 @@ export async function GET(request: Request) {
         where: {
           ...where,
           OR: [
-            { description: { contains: q, mode: "insensitive" as any } },
-            { categorie: { contains: q, mode: "insensitive" as any } },
+            { description: { contains: q, mode: Prisma.QueryMode.insensitive } },
+            { categorie: { contains: q, mode: Prisma.QueryMode.insensitive } },
           ],
         },
         select: { id: true, description: true, categorie: true, montant: true, date: true },

@@ -53,7 +53,7 @@ export async function POST(
       : 0;
 
     // Déterminer le niveau
-    const lastLevel = (facture as any).derniereRelanceNiveau ?? 0;
+    const lastLevel = facture.derniereRelanceNiveau ?? 0;
     const nextLevel = Math.min(lastLevel + 1, 3);
 
     // Générer le lien espace client
@@ -105,7 +105,7 @@ export async function POST(
       data: {
         derniereRelanceNiveau: nextLevel,
         derniereRelanceDate: now,
-      } as any,
+      },
     });
 
     logInfo("[relance] manuel", `${numero} → ${facture.emailClient} (niveau ${nextLevel})`);

@@ -202,7 +202,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   const selectedStarterCount = getStarterCatalogForTrade(selectedTrade).length;
   const setupRequired = !companyTrade || !catalogImported || !onboardingDone || starterCatalogCount === 0;
 
-  const objectifMensuel = Number((clerkUser?.unsafeMetadata as any)?.objectifMensuel || 0);
+  const objectifMensuel = Number((clerkUser?.unsafeMetadata as Record<string, unknown>)?.objectifMensuel || 0);
   const objectifInitial = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : 5000;
   const [objectif, setObjectif] = useState(objectifInitial);
   const objectifActif = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;

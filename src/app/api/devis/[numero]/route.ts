@@ -143,7 +143,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     const parsed = devisUpdateSchema.safeParse(rawBody);
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const body = parsed.data as any;
+    const body = parsed.data as Record<string, unknown>;
     const lignes = parseLignes(body.lignesNorm || body.lignes);
     const photos = parsePhotos(body.photos);
     const tvaNum = parseNumber(body.tva);

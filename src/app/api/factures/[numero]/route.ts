@@ -39,8 +39,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ nume
       stripePaymentLink: facture.stripePaymentLink || null,
       stripeSessionId: facture.stripeSessionId || null,
       notes: facture.notes || "",
-      derniereRelanceNiveau: (facture as any).derniereRelanceNiveau,
-      derniereRelanceDate: (facture as any).derniereRelanceDate?.toISOString() || null,
+      derniereRelanceNiveau: facture.derniereRelanceNiveau,
+      derniereRelanceDate: facture.derniereRelanceDate?.toISOString() || null,
       createdAt: facture.createdAt.toISOString(),
     });
   } catch (error) {

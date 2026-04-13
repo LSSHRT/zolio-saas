@@ -93,7 +93,7 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
     {
       label: "Retour",
       icon: ArrowLeft,
-      href: "/clients" as any,
+      href: "/clients",
     },
     client?.email
       ? {
