@@ -52,6 +52,10 @@ model Devis {
   acompte       Decimal?     @default(0) @db.Decimal(10, 2)
   tva           Decimal?     @default(0) @db.Decimal(10, 2)
   signature     String?      // URL de la signature image (migré depuis base64)
+  signedBy      String?      // Nom du signataire
+  signatureIp   String?      // IP du signataire
+  signatureUserAgent String? // User-agent du signataire
+  signatureDate DateTime?    // Date de signature
   totalHT        Decimal       @default(0) @db.Decimal(10, 2)
   totalTTC       Decimal       @default(0) @db.Decimal(10, 2)
   lignesNorm     LigneDevis[] // Lignes normalisées

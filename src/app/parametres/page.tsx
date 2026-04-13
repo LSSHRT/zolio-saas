@@ -31,6 +31,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { ThemeSelector } from "@/components/ThemeSelector";
 import { logError } from "@/lib/logger";
 
 type SettingsFormData = {
@@ -1061,12 +1062,30 @@ export default function ParametresEntreprise() {
                 </p>
               </div>
             </div>
-          </ClientSectionCard>
+        </ClientSectionCard>
 
-          <ClientSectionCard>
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Validation</p>
+        {/* ─── Apparence / Thème ─── */}
+        <ClientSectionCard>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Apparence</p>
+              <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+                Personnalisez votre thème
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                Choisissez entre le mode clair, sombre ou laissez votre système décider.
+              </p>
+            </div>
+            <div className="w-full lg:w-[340px]">
+              <ThemeSelector />
+            </div>
+          </div>
+        </ClientSectionCard>
+
+        <ClientSectionCard>
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">Validation</p>
                 <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
                   Enregistrez une base propre pour tous vos documents
                 </h2>

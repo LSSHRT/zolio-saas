@@ -33,6 +33,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { CsvUploader } from "@/components/CsvUploader";
 
 interface Client {
   id: string;
@@ -84,6 +85,7 @@ export default function ClientsPage() {
   const [pendingDeleteClient, setPendingDeleteClient] = useState<Client | null>(null);
   const [confirmBulkDeleteOpen, setConfirmBulkDeleteOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -399,21 +401,14 @@ export default function ClientsPage() {
             disabled: isImporting,
             icon: Upload,
             label: isImporting ? "Import en cours..." : "Importer un CSV",
-            onClick: () => fileInputRef.current?.click(),
+            onClick: () => setImportDialogOpen(true),
           },
         ]}
         actions={
           <>
-            <input
-              type="file"
-              accept=".csv"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              className="hidden"
-            />
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => setImportDialogOpen(true)}
               disabled={isImporting}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-violet-400/40 dark:hover:text-white"
             >
