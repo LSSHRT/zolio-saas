@@ -9,6 +9,7 @@ import { internalServerError, rateLimitResponse } from "@/lib/http";
 import { createNotification } from "@/lib/notifications";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
 import { generateSequentialDocumentNumber } from "@/lib/document-number";
+import { syncDevisTotals } from "@/lib/devis-totals";
 import {
   parseLignes,
   createLignesForDevis,
@@ -252,6 +253,7 @@ export async function POST(request: Request) {
 
         // Créer les lignes normalisées
         await createLignesForDevis(devis.id, parsedLignes);
+        await syncDevisTotals(devis.id);
         break;
       } catch (error) {
         const isUniqueConflict =
