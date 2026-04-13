@@ -189,7 +189,11 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     acceptedQuotesForChart,
     refusedQuotesForLost,
     starterCatalogCount,
-    factures,
+    encaisseRes,
+    enRetardStatutRes,
+    enRetardDateRes,
+    aEncaisserRes,
+    totalFacturesCount,
     echeances,
     totalDepensesResult,
     nouveauxDevis,
@@ -222,10 +226,11 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       select: { date: true, createdAt: true, remise: true, tva: true, lignesNorm: true },
     }),
     prisma.prestation.count({ where: { userId } }),
-    prisma.facture.findMany({
-      where: { userId },
-      select: { totalTTC: true, statut: true, dateEcheance: true },
-    }),
+    prisma.facture.aggregate({ where: { userId, statut: "Payée" }, _sum: { totalTTC: true } }),
+    prisma.facture.aggregate({ where: { userId, statut: "En retard" }, _sum: { totalTTC: true } }),
+    prisma.facture.aggregate({ where: { userId, statut: { notIn: ["Payée", "Annulée", "En retard"] }, dateEcheance: { lt: today } }, _sum: { totalTTC: true } }),
+    prisma.facture.aggregate({ where: { userId, statut: { notIn: ["Payée", "Annulée", "En retard"] }, OR: [{ dateEcheance: { gte: today } }, { dateEcheance: null }] }, _sum: { totalTTC: true } }),
+    prisma.facture.count({ where: { userId } }),
     prisma.facture.findMany({
       where: { userId, dateEcheance: { gte: today, lte: inFourteenDays }, statut: { notIn: ["Payée", "Annulée"] } },
       select: { numero: true, nomClient: true, totalTTC: true, dateEcheance: true },
@@ -312,20 +317,13 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   let encaisse = 0;
   let aEncaisser = 0;
   let enRetard = 0;
-  for (const f of factures) {
-    if (f.statut === "Payée") {
-      encaisse += Number(f.totalTTC);
-    } else if (f.statut === "En retard") {
-      enRetard += Number(f.totalTTC);
-    } else if (f.statut !== "Annulée") {
-      if (f.dateEcheance && f.dateEcheance < today) enRetard += Number(f.totalTTC);
-      else aEncaisser += Number(f.totalTTC);
-    }
-  }
+  encaisse = Number(encaisseRes._sum.totalTTC || 0);
+  enRetard = Number(enRetardStatutRes._sum.totalTTC || 0) + Number(enRetardDateRes._sum.totalTTC || 0);
+  aEncaisser = Number(aEncaisserRes._sum.totalTTC || 0);
 
   const totalRecouvrable = encaisse + enRetard;
   const tauxRecouvrement = totalRecouvrable > 0 ? Math.round((encaisse / totalRecouvrable) * 100) : 100;
-  const tresorerie: TresorerieSummary = { encaisse, aEncaisser, enRetard, nombreFactures: factures.length, tauxRecouvrement };
+  const tresorerie: TresorerieSummary = { encaisse, aEncaisser, enRetard, nombreFactures: totalFacturesCount, tauxRecouvrement };
 
   const caFacture = encaisse;
   const beneficeNet = caFacture - totalDepenses;
