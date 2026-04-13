@@ -1,6 +1,10 @@
-import React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata = {
+  title: "Politique de Confidentialité",
+  description: "Politique de confidentialité et protection des données de Zolio.",
+};
 
 export default function PolitiqueConfidentialite() {
   return (

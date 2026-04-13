@@ -1,3 +1,8 @@
+export const metadata = {
+  title: "Conditions Générales d'Utilisation",
+  description: "Conditions générales d'utilisation de Zolio, le logiciel de devis et factures pour artisans.",
+};
+
 export default function CGU() {
   return (
     <div className="p-8 max-w-4xl mx-auto">

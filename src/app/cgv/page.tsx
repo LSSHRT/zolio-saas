@@ -1,6 +1,10 @@
-import React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata = {
+  title: "Conditions Générales de Vente",
+  description: "Conditions générales de vente de Zolio, le logiciel de devis et factures pour artisans.",
+};
 
 export default function CGV() {
   return (

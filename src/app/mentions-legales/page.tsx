@@ -1,6 +1,10 @@
-import React from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata = {
+  title: "Mentions Légales",
+  description: "Mentions légales de Zolio, le logiciel de devis et factures pour artisans.",
+};
 
 export default function MentionsLegales() {
   return (

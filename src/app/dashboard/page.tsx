@@ -1,5 +1,11 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+
+export const metadata = {
+  title: "Tableau de bord",
+  description: "Vue d'ensemble de votre activité : chiffre d'affaires, devis, factures et statistiques de votre entreprise.",
+};
+
 import { getClientDashboardSummary } from "@/lib/client-dashboard";
 import DashboardContent from "./dashboard-content";
 

@@ -1,27 +1,14 @@
-"use client";
+import type { Metadata } from "next";
+import LandingRouter from "@/components/LandingRouter";
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import LandingPage from "@/components/LandingPage";
+export const metadata: Metadata = {
+  title: "Zolio — Logiciel de Devis et Factures pour Artisans (Gratuit)",
+  description: "Créez des devis professionnels en 3 minutes depuis votre téléphone. Signature digitale, facturation en 1 clic. Conçu pour les artisans du bâtiment. 1 devis offert, sans carte bancaire.",
+  alternates: {
+    canonical: "https://www.zolio.site",
+  },
+};
 
 export default function Page() {
-  const { user, isLoaded } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (isLoaded && user) {
-      router.push("/dashboard");
-    }
-  }, [user, isLoaded, router]);
-
-  if (!isLoaded || user) {
-    return (
-      <div className="min-h-screen bg-[#faf5ff] dark:bg-[#0c0a1d] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-violet"></div>
-      </div>
-    );
-  }
-
-  return <LandingPage />;
+  return <LandingRouter />;
 }
