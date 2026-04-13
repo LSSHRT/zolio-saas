@@ -180,6 +180,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 7);
 
+  const PENDING_STATUSES = ["En attente", "En attente (Modifié)"];
   const [
     totalCount,
     acceptedCount,
@@ -203,7 +204,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   ] = await Promise.all([
     prisma.devis.count({ where: { userId } }),
     prisma.devis.count({ where: { userId, statut: "Accepté" } }),
-    prisma.devis.count({ where: { userId, statut: { in: ["En attente", "En attente (Modifié)"] } }),
+    prisma.devis.count({ where: { userId, statut: { in: PENDING_STATUSES } } }),
     prisma.devis.count({ where: { userId, statut: "Refusé" } }),
     prisma.devis.findMany({
       where: { userId },
@@ -212,7 +213,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       take: 4,
     }),
     prisma.devis.findMany({
-      where: { userId, createdAt: { lt: sevenDaysAgo }, statut: { in: ["En attente", "En attente (Modifié)"] } },
+      where: { userId, createdAt: { lt: sevenDaysAgo }, statut: { in: PENDING_STATUSES } },
       select: { numero: true, date: true, statut: true, remise: true, tva: true, lignesNorm: true, client: { select: { nom: true, email: true } } },
       orderBy: { createdAt: "desc" },
       take: 4,
