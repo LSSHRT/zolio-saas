@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "prisma generate",
     "dev": "next dev",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' prisma generate && NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build": "rm -rf .next && NODE_OPTIONS='--max-old-space-size=4096' prisma generate && NODE_OPTIONS='--max-old-space-size=4096' next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@clerk/localizations": "^4.2.1",
-    "@clerk/nextjs": "^7.1.0",
+    "@clerk/nextjs": "^7.0.7",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.3",
     "@sentry/nextjs": "^10.46.0",
