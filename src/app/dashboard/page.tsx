@@ -345,17 +345,8 @@ export default function DashboardPage() {
         <ClientDesktopNav active="dashboard" />
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
-          {!isLoaded ? (
-            <div className="space-y-6">
-              <div className="h-32 animate-pulse rounded-2xl bg-slate-200/80 dark:bg-slate-800/80" />
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
-                {[...Array(4)].map((_, i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-200/60 dark:bg-slate-800/60" />)}
-              </div>
-            </div>
-          ) : (
-            <>
-              {/* ─── Hero ────────────────────────────────────────── */}
-              <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
+          {/* ─── Hero ────────────────────────────────────────── */}
+          <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
                 <div className="relative space-y-4">
                   <div className="hidden flex-wrap items-center gap-2 sm:flex">
@@ -666,8 +657,6 @@ export default function DashboardPage() {
                   <ConversionFunnel funnel={funnel} />
                 </motion.section>
               )}
-            </>
-          )}
         </main>
       </div>
       </PullToRefresh>
