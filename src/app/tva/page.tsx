@@ -46,6 +46,15 @@ export default function TvaPage() {
     revalidateOnFocus: false,
   });
 
+  const handleExportPennylane = useCallback(() => {
+    if (!data) return;
+    const year = annee;
+    const a = document.createElement("a");
+    a.href = `/api/export/pennylane?annee=${year}`;
+    a.click();
+    toast.success("Export Pennylane en cours...");
+  }, [data, annee]);
+
   const handleExportPdf = useCallback(async () => {
     if (!data) return;
 
@@ -97,6 +106,16 @@ export default function TvaPage() {
           <Download size={16} />
           Exporter PDF
         </button>
+      }
+      mobileSecondaryActions={
+        data ? [
+          {
+            label: "Pennylane",
+            icon: Download,
+            onClick: handleExportPennylane,
+            tone: "default" as const,
+          },
+        ] : []
       }
       actions={
         <button
