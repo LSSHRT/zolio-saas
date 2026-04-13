@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-const MONTH_NAMES = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+const MONTH_NAMES = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"];
 
 type RawDashboardQuote = {
   numero: string;
@@ -33,18 +33,18 @@ export type ClientDashboardMonthlyDatum = {
 };
 
 export type TresorerieSummary = {
-  encaisse: number;     // factures "Payée"
-  aEncaisser: number;   // factures "Émise" / "En attente" non échues
-  enRetard: number;     // factures "En retard" ou échues non payées
+  encaisse: number;
+  aEncaisser: number;
+  enRetard: number;
   nombreFactures: number;
-  tauxRecouvrement: number; // encaissé / (encaissé + enRetard) * 100
+  tauxRecouvrement: number;
 };
 
 export type BeneficeSummary = {
-  caFacture: number;    // totalTTC factures payées
-  depenses: number;     // total dépenses
-  beneficeNet: number;  // caFacture - depenses
-  margePct: number;     // beneficeNet / caFacture * 100
+  caFacture: number;
+  depenses: number;
+  beneficeNet: number;
+  margePct: number;
 };
 
 export type EcheanceItem = {
@@ -59,7 +59,7 @@ export type FunnelEtape = {
   label: string;
   count: number;
   amount: number;
-  pct: number; // par rapport au total devis
+  pct: number;
   color: string;
 };
 
@@ -163,14 +163,6 @@ function mapQuote(quote: RawDashboardQuote): ClientDashboardQuoteSummary {
   };
 }
 
-/**
- * Version optimisée du dashboard.
- * 
- * Optimisations :
- * 1. Parallélisation massive de toutes les requêtes (Dashboard + Semaine + Funnel)
- * 2. Réduction des allers-retours DB
- * 3. Calculs optimisés
- */
 export async function getClientDashboardSummary(userId: string): Promise<ClientDashboardSummary> {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
