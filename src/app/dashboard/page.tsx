@@ -171,7 +171,7 @@ export default function DashboardPage() {
 
   const selectedTradeDef = getTradeDefinition(selectedTrade) ?? getTradeDefinition(DEFAULT_TRADE);
   const selectedStarterCount = getStarterCatalogForTrade(selectedTrade).length;
-  const setupRequired = isLoaded && (!companyTrade || !catalogImported || !onboardingDone || starterCatalogCount === 0);
+  const setupRequired = isLoaded && !loading && (!companyTrade || !catalogImported || !onboardingDone || starterCatalogCount === 0);
 
   const objectifMensuel = Number(user?.unsafeMetadata?.objectifMensuel);
   const objectifInitial = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : 5000;
