@@ -181,11 +181,9 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   endOfWeek.setDate(startOfWeek.getDate() + 7);
 
   const PENDING_STATUSES = ["En attente", "En attente (Modifié)"];
+  
   const [
-    totalCount,
-    acceptedCount,
-    pendingCount,
-    refusedCount,
+    statusCounts,
     recentQuotes,
     followUpQuotesRaw,
     acceptedQuotesForChart,
@@ -193,7 +191,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     starterCatalogCount,
     factures,
     echeances,
-    depenses,
+    totalDepensesResult,
     nouveauxDevis,
     devisAcceptesSemaine,
     facturesEmises,
@@ -202,10 +200,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     facturesPayeesSemaine,
     facturesFromDevis,
   ] = await Promise.all([
-    prisma.devis.count({ where: { userId } }),
-    prisma.devis.count({ where: { userId, statut: "Accepté" } }),
-    prisma.devis.count({ where: { userId, statut: { in: PENDING_STATUSES } } }),
-    prisma.devis.count({ where: { userId, statut: "Refusé" } }),
+    prisma.devis.groupBy({ by: ["statut"], where: { userId }, _count: true }),
     prisma.devis.findMany({
       where: { userId },
       select: { numero: true, date: true, statut: true, remise: true, tva: true, lignesNorm: true, createdAt: true, client: { select: { nom: true, email: true } } },
@@ -236,7 +231,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
       select: { numero: true, nomClient: true, totalTTC: true, dateEcheance: true },
       orderBy: { dateEcheance: "asc" },
     }),
-    prisma.depense.findMany({ where: { userId }, select: { montant: true } }),
+    prisma.depense.aggregate({ where: { userId }, _sum: { montant: true } }),
     prisma.devis.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
     prisma.devis.count({ where: { userId, statut: "Accepté", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
     prisma.facture.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
@@ -245,6 +240,13 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     prisma.facture.findMany({ where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } }, select: { totalTTC: true } }),
     prisma.facture.findMany({ where: { userId, devisId: { not: null } }, select: { totalTTC: true, statut: true, devisId: true } }),
   ]);
+
+  const countsMap = Object.fromEntries(statusCounts.map(s => [s.statut, s._count]));
+  const totalCount = statusCounts.reduce((sum, s) => sum + s._count, 0);
+  const acceptedCount = countsMap["Accepté"] || 0;
+  const pendingCount = PENDING_STATUSES.reduce((sum, s) => sum + (countsMap[s] || 0), 0);
+  const refusedCount = countsMap["Refusé"] || 0;
+  const totalDepenses = Number(totalDepensesResult._sum.montant || 0);
 
   let totalHT = 0;
   let totalTTC = 0;
@@ -326,7 +328,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   const tresorerie: TresorerieSummary = { encaisse, aEncaisser, enRetard, nombreFactures: factures.length, tauxRecouvrement };
 
   const caFacture = encaisse;
-  const totalDepenses = depenses.reduce((sum, d) => sum + Number(d.montant), 0);
   const beneficeNet = caFacture - totalDepenses;
   const margePct = caFacture > 0 ? Math.round((beneficeNet / caFacture) * 100) : 0;
   const benefice: BeneficeSummary = { caFacture, depenses: totalDepenses, beneficeNet, margePct };
