@@ -20,8 +20,12 @@ const isPublicRoute = createRouteMatcher([
   // API publiques
   "/api/webhook(.*)",
   "/api/cron(.*)",
+  "/api/public(.*)",
   "/api/(.*)/signer(.*)",
   "/api/stripe(.*)",
+  "/api/contact(.*)",
+  "/api/referral(.*)",
+  "/api/prospect-domains(.*)",
 
   // Pages publiques
   "/espace-client/(.*)",
