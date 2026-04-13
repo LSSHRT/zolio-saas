@@ -222,7 +222,7 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
     prisma.devis.findMany({
       where: { userId, createdAt: { lt: sevenDaysAgo }, statut: { in: ["En attente", "En attente (Modifié)"] } },
       select: { numero: true, date: true, statut: true, remise: true, tva: true, lignesNorm: true, client: { select: { nom: true, email: true } } },
-      orderBy: { createdAt: "desc\"},
+      orderBy: { createdAt: "desc" },
       take: 4,
     }),
     prisma.devis.findMany({
