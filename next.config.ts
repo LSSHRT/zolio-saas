@@ -53,6 +53,9 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "i.pravatar.cc" },
       { protocol: "https", hostname: "img.clerk.com" },
+      { protocol: "https", hostname: "images.clerk.dev" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "www.transparenttextures.com" },
     ],
   },
   async headers() {
