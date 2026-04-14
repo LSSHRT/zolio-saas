@@ -99,7 +99,7 @@ export function DashboardMobileSkeleton() {
   return (
     <div className="space-y-4 md:hidden">
       {/* Hero section */}
-      <div className="rounded-[2rem] border border-slate-200/70 bg-white/75 px-4 py-5 dark:border-white/8 dark:bg-white/4">
+      <div className="rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-5 dark:border-white/8 dark:bg-white/4">
         <Skeleton className="h-6 w-40 mb-4" />
         <Skeleton className="h-10 w-64 mb-2" />
         <Skeleton className="h-4 w-48 mb-4" />
@@ -111,7 +111,7 @@ export function DashboardMobileSkeleton() {
       </div>
 
       {/* KPIs */}
-      <div className="rounded-[1.9rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
+      <div className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
         <Skeleton className="h-4 w-24 mb-2" />
         <Skeleton className="h-6 w-40 mb-4" />
         <div className="grid grid-cols-2 gap-3">
@@ -123,7 +123,7 @@ export function DashboardMobileSkeleton() {
       </div>
 
       {/* Devis récents */}
-      <div className="rounded-[1.9rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
+      <div className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
         <Skeleton className="h-4 w-32 mb-4" />
         <div className="space-y-3">
           <DevisCardSkeleton />

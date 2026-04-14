@@ -7,7 +7,7 @@ const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: f
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import NextImage from "next/image";
-import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles, Eye, FileText } from "lucide-react";
+import { ArrowLeft, Trash2, Plus, Send, Check, Search, Save, PenTool, X, Loader2, Camera, Sparkles, Eye, FileText, LayoutTemplate } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -81,6 +81,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
   const [editNotes, setEditNotes] = useState(false);
   const [notesDraft, setNotesDraft] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
   const sigCanvas = useRef<ReactSignatureCanvas | null>(null);
   const creationToastHandled = useRef(false);
 
@@ -400,6 +401,37 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
       setSavingNotes(false);
     }
   };
+  const handleSaveAsTemplate = async () => {
+    if (savingTemplate || !lignes.length) return;
+    setSavingTemplate(true);
+    try {
+      const templateLignes = lignes.map((l) => ({
+        nomPrestation: l.nomPrestation,
+        quantite: l.quantite,
+        unite: l.unite || "U",
+        prixUnitaire: l.prixUnitaire,
+      }));
+      
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nom: devisInfo?.nomClient ? `Devis ${devisInfo.nomClient}` : `Modèle du ${new Date().toLocaleDateString("fr-FR")}`,
+          lignes: templateLignes,
+          tva,
+          remise: remise || "0",
+        }),
+      });
+      
+      if (!res.ok) throw new Error("Erreur serveur");
+      toast.success("Modèle sauvegardé !");
+    } catch {
+      toast.error("Impossible de sauvegarder le modèle");
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
+
 
   const handleCreateInvoice = async () => {
     if (isCreatingInvoice || saving) {
@@ -954,6 +986,19 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
           )}
         </div>
 
+        {/* Sauvegarder comme modèle */}
+        {lignes.length > 0 && (
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={handleSaveAsTemplate}
+            disabled={savingTemplate}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 py-3 text-sm font-bold text-amber-700 shadow-sm disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+          >
+            {savingTemplate ? <Loader2 size={16} className="animate-spin" /> : <LayoutTemplate size={16} />}
+            {savingTemplate ? "Sauvegarde..." : "Sauvegarder comme modèle"}
+          </motion.button>
+        )}
+
         {/* Facture d'acompte (si accepté/signé) */}
         {(devisInfo?.statut === "Accepté" || devisInfo?.statut === "Signé") && (
           <motion.button
@@ -1054,7 +1099,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
         }
       >
         <div className="space-y-4">
-          <div className="relative overflow-hidden rounded-[1.4rem] border-2 border-dashed border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60">
+          <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-950/60">
             <SignaturePad
               ref={sigCanvas}
               penColor="black"
@@ -1106,7 +1151,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
           value={aiPrompt}
           onChange={(e) => setAiPrompt(e.target.value)}
           placeholder="Exemple : rénovation complète d’une salle de bain de 10 m² avec dépose, plomberie, carrelage et peinture."
-          className="h-40 w-full resize-none rounded-[1.4rem] border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          className="h-40 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-700 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         />
       </MobileDialog>
 
@@ -1122,7 +1167,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
               key={forfait.nom}
               type="button"
               onClick={() => applyForfait(forfait)}
-              className="w-full rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
+              className="w-full rounded-2xl border border-slate-200/70 bg-slate-50/80 px-4 py-4 text-left transition hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>

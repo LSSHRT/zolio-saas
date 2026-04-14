@@ -57,7 +57,7 @@ export function AdminSidebar({
   return (
     <aside className="hidden lg:flex lg:w-[296px] lg:flex-col lg:sticky lg:top-0 lg:h-screen lg:border-r lg:border-white/8 lg:bg-slate-950/55 lg:backdrop-blur-xl">
       <div className="flex-1 p-6">
-        <div className="admin-panel-strong rounded-[28px] p-5">
+        <div className="admin-panel-strong rounded-2xl p-5">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[11px] uppercase tracking-[0.34em] text-slate-400">Zolio</p>

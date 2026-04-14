@@ -40,7 +40,7 @@ export default function TradeLandingClient({ tradeKey }: Props) {
       {/* Nav */}
       <nav className="fixed inset-x-0 top-3 z-50 sm:top-4">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-[4.5rem] items-center justify-between rounded-[28px] bg-white/[0.04] px-4 sm:px-6 backdrop-blur-xl border border-white/10">
+          <div className="flex h-[4.5rem] items-center justify-between rounded-2xl bg-white/[0.04] px-4 sm:px-6 backdrop-blur-xl border border-white/10">
             <Link href="/" className="flex items-center gap-3">
               <span className="text-2xl font-bold bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">Zolio</span>
               <span className="hidden text-[10px] uppercase tracking-[0.28em] text-white/40 sm:block">{trade.shortLabel} OS</span>

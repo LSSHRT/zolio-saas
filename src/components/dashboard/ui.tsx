@@ -28,7 +28,7 @@ export function renderSignalIcon(tone: Tone, size = 16) {
 
 export function FocusSignalCard({ signal }: { signal: DashboardSignal }) {
   return (
-    <div className={`rounded-[1.45rem] border p-4 ${signal.href ? "cursor-pointer transition hover:-translate-y-0.5" : ""}`}>
+    <div className={`rounded-2xl border p-4 ${signal.href ? "cursor-pointer transition hover:-translate-y-0.5" : ""}`}>
       <div className="flex items-start gap-3">
         {renderSignalIcon(signal.tone)}
         <div className="min-w-0 flex-1">
@@ -46,7 +46,7 @@ export function DashboardActionCard({ item, compact = false }: { item: Dashboard
   const Icon = item.icon;
   const content = (
     <div
-      className={`rounded-[1.45rem] border p-4 transition hover:-translate-y-0.5 ${
+      className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${
         item.tone === "rose"
           ? "border-rose-200/70 bg-rose-50/80 dark:border-rose-400/12 dark:bg-rose-500/8"
           : item.tone === "amber"
@@ -118,10 +118,18 @@ export function CompactMetricCard({
 // ─── Hero Indicator Pill ──────────────────────────────────────────────
 
 export function HeroIndicatorPill({ indicator }: { indicator: DashboardHeroIndicator }) {
+  const toneText: Record<Tone, { label: string; value: string }> = {
+    violet: { label: "text-violet-500 dark:text-violet-400", value: "text-violet-700 dark:text-violet-200" },
+    emerald: { label: "text-emerald-500 dark:text-emerald-400", value: "text-emerald-700 dark:text-emerald-200" },
+    amber: { label: "text-amber-500 dark:text-amber-400", value: "text-amber-700 dark:text-amber-200" },
+    rose: { label: "text-rose-500 dark:text-rose-400", value: "text-rose-700 dark:text-rose-200" },
+    slate: { label: "text-slate-400 dark:text-slate-500", value: "text-slate-700 dark:text-slate-200" },
+  };
+  const t = toneText[indicator.tone];
   return (
     <div className={`rounded-full px-3 py-2 ring-1 ${toneClasses(indicator.tone).chip}`}>
-      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-inherit/70">{indicator.label}</p>
-      <p className="text-sm font-bold text-inherit">{indicator.value}</p>
+      <p className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${t.label}`}>{indicator.label}</p>
+      <p className={`text-sm font-bold ${t.value}`}>{indicator.value}</p>
     </div>
   );
 }
@@ -164,7 +172,7 @@ export function MobileDisclosureSection({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="client-panel rounded-[1.9rem] p-4"
+      className="client-panel rounded-2xl p-4"
     >
       <details open={defaultOpen} className="group">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">

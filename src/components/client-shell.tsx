@@ -156,12 +156,12 @@ function useOverlayCloseSignal(onClose: () => void) {
 }
 
 function bottomSheetBaseClasses() {
-  return "absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(78vh,32rem)] overflow-y-auto rounded-[1.6rem] border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96";
+  return "absolute inset-x-4 bottom-[calc(env(safe-area-inset-bottom)+1rem)] max-h-[min(78vh,32rem)] overflow-y-auto rounded-2xl border border-slate-200/80 bg-white/96 p-3 shadow-[0_28px_70px_-36px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/96";
 }
 
-export function ClientBrandMark({ showLabel = true }: { showLabel?: boolean }) {
+export function ClientBrandMark({ showLabel = true, className = "" }: { showLabel?: boolean; className?: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-3">
+    <div className={`flex min-w-0 items-center gap-3 ${className}`}>
       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/80 ring-1 ring-white/50 dark:bg-white/8 dark:ring-white/10">
         <Image
           src="/logo.png"
@@ -199,7 +199,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="client-nav-dock fixed inset-x-3 bottom-5 z-40 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-[1.75rem] px-2 py-2 lg:hidden"
+        className="client-nav-dock fixed inset-x-3 bottom-5 z-30 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-2xl px-2 py-2 lg:hidden"
         data-testid="mobile-nav-dock"
       >
         {/* 2 liens gauche */}
@@ -254,7 +254,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
         onClick={() => setToolsOpen(true)}
-        className="fixed bottom-[5.5rem] right-4 z-40 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
+        className="fixed bottom-[5.5rem] right-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
         aria-label="Plus d'outils"
         data-testid="mobile-tools-btn"
       >
@@ -329,7 +329,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
                       key="search-tool"
                       type="button"
                       onClick={() => { setToolsOpen(false); setSearchOpen(true); }}
-                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses("default")}`}
+                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses("default")}`}
                     >
                       <Icon size={18} />
                       <span className="leading-5">{item.label}</span>
@@ -341,7 +341,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setToolsOpen(false)}
-                    className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-[1.15rem] border px-3 py-3 text-left text-sm font-semibold transition ${mobileActionToneClasses(
+                    className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses(
                       pathname === item.href ? "accent" : "default",
                     )}`}
                   >
@@ -411,9 +411,9 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-4 left-4 z-40 hidden w-[304px] flex-col rounded-[2rem] border border-slate-200/80 bg-white/92 p-5 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
+    <aside className="fixed inset-y-4 left-4 z-30 hidden w-[260px] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white/92 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
+        <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
           <ClientBrandMark />
           <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
             Un cockpit bureau pour piloter devis, encaissements et fiches clients sans friction.
@@ -421,14 +421,14 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link
               href="/nouveau-devis"
-              className="inline-flex items-center justify-center gap-2 rounded-[1.15rem] bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:translate-y-[-1px]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:translate-y-[-1px]"
             >
               <Plus size={16} />
               Nouveau devis
             </Link>
             <Link
               href="/nouvelle-facture"
-              className="inline-flex items-center justify-center gap-2 rounded-[1.15rem] border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
             >
               <Receipt size={16} />
               Facture
@@ -436,7 +436,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </div>
         </div>
 
-        <div className="mt-4 rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
+        <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
           <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
             Pilotage
           </p>
@@ -448,7 +448,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
                 <Link
                   key={item.key}
                   href={item.href}
-                  className={`flex min-h-11 items-center gap-3 rounded-[1.15rem] px-3 py-2.5 text-[13px] font-medium transition ${
+                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
                     itemActive
                       ? "bg-[linear-gradient(135deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08))] text-slate-950 shadow-[0_16px_30px_-22px_rgba(124,58,237,0.55)] ring-1 ring-violet-300/50 dark:text-white dark:ring-violet-400/20"
                       : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
@@ -463,7 +463,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         </div>
 
         {toolGroups.map((group) => (
-          <div key={group.label} className="mt-4 rounded-[1.75rem] border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
+          <div key={group.label} className="mt-4 rounded-2xl border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
             <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
               {group.label}
             </p>
@@ -476,7 +476,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`relative flex min-h-10 items-center gap-3 rounded-[1.15rem] px-3 py-2.5 text-[13px] transition ${
+                    className={`relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
                       itemActive
                         ? "bg-slate-100 font-medium text-slate-950 ring-1 ring-slate-200/80 dark:bg-white/10 dark:text-white dark:ring-white/12"
                         : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
@@ -497,8 +497,8 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         ))}
       </div>
 
-      <div className="mt-4 space-y-3">
-        <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+      <div className="mt-4 space-y-3 shrink-0">
+        <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
@@ -537,7 +537,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </p>
         </div>
 
-        <div className="flex items-center justify-between rounded-[1.5rem] border border-slate-200/80 bg-white/84 p-3 dark:border-white/10 dark:bg-white/4">
+        <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/84 p-3 dark:border-white/10 dark:bg-white/4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
               Compte
@@ -647,7 +647,7 @@ export function ClientMobileActionsMenu({
             <div className="flex flex-col gap-2">
               {items.map((item) => {
                 const Icon = item.icon;
-                const commonClasses = `inline-flex min-h-12 w-full items-center gap-3 rounded-[1rem] border px-3 py-3 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${mobileActionToneClasses(item.tone)}`;
+                const commonClasses = `inline-flex min-h-12 w-full items-center gap-3 rounded-lg border px-3 py-3 text-left text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${mobileActionToneClasses(item.tone)}`;
 
                 if (item.href) {
                   return (
@@ -734,7 +734,7 @@ export function ClientMobileOverview({
   // Show max 3 items on mobile for clarity
   const visibleItems = items.slice(0, 3);
   return (
-    <section className="client-panel rounded-[1.85rem] p-4 md:hidden">
+    <section className="client-panel rounded-2xl p-4 md:hidden">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-slate-950 dark:text-white">{title}</h2>
         {badge ? (
@@ -770,7 +770,7 @@ export function ClientSectionCard({
   children: ReactNode;
   className?: string;
 }) {
-  return <section className={`client-panel rounded-[2rem] p-4 sm:p-5 md:p-6 ${className}`}>{children}</section>;
+  return <section className={`client-panel rounded-2xl p-4 sm:p-5 md:p-6 ${className}`}>{children}</section>;
 }
 
 export function ClientSubpageShell({
@@ -810,8 +810,8 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="mx-auto flex min-h-screen w-full max-w-[1440px] flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 lg:pl-[336px] xl:px-10">
-        <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
+      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 xl:px-6">
+        <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
               <Link
@@ -860,7 +860,7 @@ export function ClientSubpageShell({
         </header>
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
-          <section className="client-panel-strong overflow-hidden rounded-[2.25rem] px-5 py-6 sm:px-6 lg:px-7">
+          <section className="client-panel-strong overflow-hidden rounded-2xl px-5 py-6 sm:px-6 lg:px-7">
             <div className="flex flex-col gap-6">
               <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
                 <div className="max-w-3xl">
@@ -892,7 +892,7 @@ export function ClientSubpageShell({
                 </div>
 
                 <div className="hidden xl:grid gap-3">
-                  <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+                  <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
                       Recherche globale
                     </p>
@@ -902,7 +902,7 @@ export function ClientSubpageShell({
                     <GlobalSearch className="mt-0 max-w-none" />
                   </div>
 
-                  <div className="rounded-[1.6rem] border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+                  <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">

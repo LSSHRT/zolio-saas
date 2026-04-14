@@ -175,7 +175,7 @@ const HorizontalScrollCarousel = () => {
           <div className="relative z-10 p-8 sm:p-10 flex flex-col h-full">
             <div className="flex-1 w-full flex items-center justify-center mb-10 h-[300px]">
               {/* Mockup Devis Mobile */}
-              <div className="w-[200px] h-[320px] bg-white/[0.02] rounded-[2rem] border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col">
+              <div className="w-[200px] h-[320px] bg-white/[0.02] rounded-2xl border-[6px] border-neutral-800 shadow-2xl overflow-hidden relative flex flex-col">
                 <div className="absolute top-0 w-full h-5 bg-neutral-900 flex justify-center z-10"><div className="w-16 h-4 bg-white/[0.02] rounded-b-xl"></div></div>
                 <div className="bg-neutral-900 pt-8 pb-3 px-4 flex justify-between items-center border-b border-neutral-800">
                    <span className="text-xs font-bold text-white">Nouveau Devis</span>
@@ -401,7 +401,7 @@ export default function LandingPage() {
         {/* Navigation */}
         <nav className="fixed inset-x-0 top-3 z-50 transition-all duration-300 sm:top-4">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="landing-panel flex h-[4.5rem] items-center justify-between rounded-[28px] px-4 sm:px-6">
+            <div className="landing-panel flex h-[4.5rem] items-center justify-between rounded-2xl px-4 sm:px-6">
               <div className="flex items-center">
                 <Image src="/logo.png" alt="Zolio Logo" width={40} height={40} className="mr-3" />
                 <div className="flex flex-col">
@@ -443,7 +443,7 @@ export default function LandingPage() {
                 exit={{ opacity: 0, height: 0 }}
                 className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-8 md:hidden"
               >
-                <div className="landing-panel rounded-[28px] px-4 pb-6 pt-4">
+                <div className="landing-panel rounded-2xl px-4 pb-6 pt-4">
                   <div className="space-y-4 flex flex-col">
                   <a href="#features" className="block text-base font-medium text-neutral-300 hover:text-white">Fonctionnalités</a>
                   <a href="#pricing" className="block text-base font-medium text-neutral-300 hover:text-white">Tarifs</a>
@@ -544,7 +544,7 @@ export default function LandingPage() {
                     return (
                       <div
                         key={pillar.title}
-                        className="landing-panel rounded-[28px] p-4 text-left"
+                        className="landing-panel rounded-2xl p-4 text-left"
                       >
                         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/8 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">
                           <Icon className="h-5 w-5" />
@@ -578,7 +578,7 @@ export default function LandingPage() {
                   </div>
 
                   <div className="relative mt-5 grid gap-4 lg:grid-cols-[1.12fr_0.88fr]">
-                    <div className="landing-panel rounded-[30px] p-5">
+                    <div className="landing-panel rounded-2xl p-5">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">Flux terrain</p>
@@ -596,7 +596,7 @@ export default function LandingPage() {
                           { title: "Signature client immédiate", detail: "Validation sur écran sans impression papier", tone: "fuchsia" },
                           { title: "Facture prête à partir", detail: "Relance et suivi centralisés dans le même flux", tone: "orange" },
                         ].map((step) => (
-                          <div key={step.title} className="rounded-[24px] border border-white/8 bg-white/[0.03] p-4">
+                          <div key={step.title} className="rounded-2xl border border-white/8 bg-white/[0.03] p-4">
                             <div className="flex items-start gap-3">
                               <div className={`mt-0.5 flex h-9 w-9 items-center justify-center rounded-2xl ${step.tone === "violet" ? "bg-violet-500/14 text-violet-200" : step.tone === "fuchsia" ? "bg-fuchsia-500/14 text-fuchsia-200" : "bg-orange-500/14 text-orange-200"}`}>
                                 <CheckCircle2 className="h-4 w-4" />
@@ -615,7 +615,7 @@ export default function LandingPage() {
                       {heroSignals.map((signal) => (
                         <div
                           key={signal.label}
-                          className="landing-panel rounded-[28px] p-5"
+                          className="landing-panel rounded-2xl p-5"
                         >
                           <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">{signal.label}</p>
                           <p className="mt-3 text-2xl font-semibold text-white">{signal.value}</p>
@@ -1532,7 +1532,7 @@ export default function LandingPage() {
 
                 <div className="space-y-4">
                   {closingHighlights.map((item) => (
-                    <div key={item} className="landing-panel rounded-[26px] px-5 py-4">
+                    <div key={item} className="landing-panel rounded-2xl px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
                           <CheckCircle className="h-5 w-5 text-violet-300" />

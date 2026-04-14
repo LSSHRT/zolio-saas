@@ -226,7 +226,7 @@ export default function CalepinPage() {
     >
       <ClientSectionCard className="space-y-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(19rem,0.7fr)]">
-          <div className="rounded-[1.75rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 sm:p-5">
+          <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 sm:p-5">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-500 dark:text-violet-300">
@@ -250,7 +250,7 @@ export default function CalepinPage() {
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-slate-200/70 bg-white/90 p-4 dark:border-white/8 dark:bg-white/4 sm:p-5">
+          <div className="rounded-2xl border border-slate-200/70 bg-white/90 p-4 dark:border-white/8 dark:bg-white/4 sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
@@ -276,7 +276,7 @@ export default function CalepinPage() {
         </div>
 
         {error ? (
-          <div className="rounded-[1.5rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/8 dark:text-rose-200">
             Erreur lors du chargement des notes.
           </div>
         ) : isLoading ? (
@@ -284,19 +284,19 @@ export default function CalepinPage() {
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="relative h-56 overflow-hidden rounded-[1.75rem] border border-slate-200/60 bg-slate-100/80 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent dark:border-white/8 dark:bg-white/4 dark:before:via-white/5"
+                className="relative h-56 overflow-hidden rounded-2xl border border-slate-200/60 bg-slate-100/80 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent dark:border-white/8 dark:bg-white/4 dark:before:via-white/5"
               />
             ))}
           </div>
         ) : noteList.length === 0 ? (
-          <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/70 bg-slate-50/80 px-6 py-16 text-center dark:border-white/8 dark:bg-white/4">
+          <div className="relative overflow-hidden rounded-2xl border border-slate-200/70 bg-slate-50/80 px-6 py-16 text-center dark:border-white/8 dark:bg-white/4">
             <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-violet-500/10 blur-3xl" />
             <motion.div
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               className="relative z-10 flex flex-col items-center"
             >
-              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[1.75rem] bg-white shadow-xl dark:bg-slate-900">
+              <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-xl dark:bg-slate-900">
                 <StickyNote className="h-10 w-10 text-brand-fuchsia" />
               </div>
               <h3 className="text-xl font-semibold text-slate-950 dark:text-white">Calepin vide</h3>
@@ -315,7 +315,7 @@ export default function CalepinPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex flex-col gap-3 rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
                   Liste active
@@ -337,7 +337,7 @@ export default function CalepinPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   key={note.id}
                   onClick={() => openNote(note)}
-                  className="group relative cursor-pointer overflow-hidden rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/8 dark:bg-white/4"
+                  className="group relative cursor-pointer overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-white/8 dark:bg-white/4"
                 >
                   <div className="absolute inset-y-0 left-0 w-1 bg-gradient-zolio opacity-0 transition group-hover:opacity-100" />
 
@@ -491,7 +491,7 @@ export default function CalepinPage() {
               aria-label="Notes de chantier" placeholder="Écrivez vos notes de chantier, dimensions, idées..."
               value={currentNote.contenu || ""}
               onChange={(e) => setCurrentNote({ ...currentNote, contenu: e.target.value })}
-              className="min-h-[18rem] w-full resize-none rounded-[1.5rem] border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-base leading-7 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/15 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:placeholder:text-slate-600"
+              className="min-h-[18rem] w-full resize-none rounded-2xl border border-slate-200/80 bg-slate-50/80 px-4 py-4 text-base leading-7 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/15 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:placeholder:text-slate-600"
               autoFocus
             />
           </label>

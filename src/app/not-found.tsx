@@ -5,7 +5,7 @@ export default function NotFound() {
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-50 px-4 dark:bg-slate-950">
       <div className="mx-auto max-w-md text-center">
-        <div className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-[1.5rem] bg-violet-100 dark:bg-violet-500/15">
+        <div className="mx-auto mb-6 inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-violet-100 dark:bg-violet-500/15">
           <Search size={36} className="text-violet-600 dark:text-violet-400" />
         </div>
 

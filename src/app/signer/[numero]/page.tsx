@@ -137,7 +137,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(124,58,237,0.10),_transparent_35%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)] px-6">
-        <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-[2rem] border border-white/70 bg-white/90 px-6 py-8 text-center shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-slate-900/85 dark:shadow-black/20">
+        <div className="flex w-full max-w-sm flex-col items-center gap-4 rounded-2xl border border-white/70 bg-white/90 px-6 py-8 text-center shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-slate-900/85 dark:shadow-black/20">
           <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
           <div className="space-y-1">
             <p className="text-sm font-semibold text-slate-900 dark:text-white">Chargement du devis</p>
@@ -151,7 +151,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   if (error || !devis) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(248,113,113,0.08),_transparent_35%),linear-gradient(180deg,#fff7ed_0%,#fff_100%)] px-6 py-10">
-        <div className="w-full max-w-md rounded-[2rem] border border-red-100 bg-white p-7 text-center shadow-xl shadow-red-100/40">
+        <div className="w-full max-w-md rounded-2xl border border-red-100 bg-white p-7 text-center shadow-xl shadow-red-100/40">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10">
             <AlertCircle className="h-8 w-8 text-red-500" />
           </div>
@@ -165,7 +165,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   if (success || devis.statut === "Accepté" || devis.signature) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.08),_transparent_35%),linear-gradient(180deg,#f0fdf4_0%,#fff_100%)] px-6 py-10">
-        <div className="w-full max-w-md rounded-[2rem] border border-emerald-100 bg-white p-7 text-center shadow-xl shadow-emerald-100/40">
+        <div className="w-full max-w-md rounded-2xl border border-emerald-100 bg-white p-7 text-center shadow-xl shadow-emerald-100/40">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -188,7 +188,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="overflow-hidden rounded-[2rem] border border-white/90 bg-white shadow-[0_28px_70px_-35px_rgba(76,29,149,0.28)]"
+          className="overflow-hidden rounded-2xl border border-white/90 bg-white shadow-[0_28px_70px_-35px_rgba(76,29,149,0.28)]"
         >
           <div className="relative overflow-hidden border-b border-slate-100 px-5 pb-6 pt-5 sm:px-8 sm:pb-8 sm:pt-7">
             <div
@@ -234,11 +234,11 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
             </div>
 
             <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
-              <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Client</p>
                 <p className="mt-2 text-sm font-semibold text-slate-900">{clientName}</p>
               </div>
-              <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50">
                 <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <CircleDollarSign className="h-3.5 w-3.5" />
                   Montant
@@ -247,7 +247,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
                   {formatCurrency(devis.totalTTC)}
                 </p>
               </div>
-              <div className="rounded-[1.4rem] border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50">
+              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/50">
                 <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                   <FileSignature className="h-3.5 w-3.5" />
                   Étape
@@ -258,7 +258,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
           </div>
 
           <div className="px-5 py-5 sm:px-8 sm:py-7">
-            <div className="rounded-[1.75rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-4 shadow-inner shadow-slate-100/80 sm:p-5">
+            <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-4 shadow-inner shadow-slate-100/80 sm:p-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h2 className="text-base font-semibold text-slate-900">Votre signature</h2>
@@ -276,7 +276,7 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
                 </button>
               </div>
 
-              <div className="mt-4 overflow-hidden rounded-[1.5rem] border-2 border-dashed border-slate-300 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <div className="mt-4 overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
                 <SignaturePad
                   ref={sigCanvas}
                   penColor="#0f172a"
@@ -285,20 +285,20 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
                 />
               </div>
 
-              <div className="mt-4 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-600 shadow-sm shadow-slate-100">
+              <div className="mt-4 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-600 shadow-sm shadow-slate-100">
                 En signant ce document, vous confirmez votre accord sur le devis et ses conditions générales de vente.
               </div>
             </div>
           </div>
         </motion.div>
 
-        <div className="sticky bottom-0 z-20 -mx-4 mt-auto border-t border-slate-200 bg-white/98 px-4 py-4 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-[1.75rem] sm:border sm:px-5 sm:py-5 sm:shadow-lg sm:shadow-slate-200/40">
+        <div className="sticky bottom-0 z-20 -mx-4 mt-auto border-t border-slate-200 bg-white/98 px-4 py-4 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-2xl sm:border sm:px-5 sm:py-5 sm:shadow-lg sm:shadow-slate-200/40">
           <div className="space-y-3">
             <button
               type="button"
               onClick={save}
               disabled={signing}
-              className="flex w-full items-center justify-center gap-2 rounded-[1.25rem] px-4 py-4 text-sm font-bold text-white shadow-lg shadow-violet-200/60 transition-all disabled:opacity-50 hover:opacity-95"
+              className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-4 text-sm font-bold text-white shadow-lg shadow-violet-200/60 transition-all disabled:opacity-50 hover:opacity-95"
               style={{ backgroundColor: accentColor }}
             >
               {signing ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}

@@ -228,6 +228,7 @@ export default function NouveauDevisPage() {
   const [isAddingClient, setIsAddingClient] = useState(false);
   const [showNewClient, setShowNewClient] = useState(false);
   const [newClient, setNewClient] = useState<QuickClientForm>(EMPTY_CLIENT_FORM);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
@@ -647,11 +648,27 @@ export default function NouveauDevisPage() {
   };
 
   const handleCreateClient = async () => {
+    const currentErrors: Record<string, string> = {};
+
     if (!newClient.nom.trim()) {
-      toast.error("Le nom du client est obligatoire.");
+      currentErrors.nom = "Le nom du client est obligatoire.";
+    }
+
+    if (newClient.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newClient.email)) {
+      currentErrors.email = "L'adresse email n'est pas valide.";
+    }
+
+    if (newClient.telephone && newClient.telephone.length < 8) {
+      currentErrors.telephone = "Le numéro de téléphone est trop court.";
+    }
+
+    if (Object.keys(currentErrors).length > 0) {
+      setErrors(currentErrors);
+      toast.error("Veuillez corriger les erreurs dans le formulaire.");
       return;
     }
 
+    setErrors({});
     setIsAddingClient(true);
     try {
       const response = await fetch("/api/clients", {
@@ -677,7 +694,7 @@ export default function NouveauDevisPage() {
     } finally {
       setIsAddingClient(false);
     }
-  };
+  };;
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? []);
@@ -925,7 +942,7 @@ export default function NouveauDevisPage() {
       <div className="space-y-6">
         {!isBooting && trialLocked ? (
           <CreationWizardPanel>
-            <div className="flex items-start gap-3 rounded-[1.5rem] border border-rose-300/40 bg-rose-500/10 px-4 py-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
+            <div className="flex items-start gap-3 rounded-2xl border border-rose-300/40 bg-rose-500/10 px-4 py-4 text-sm text-rose-950 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-100">
               <Rocket size={18} className="mt-0.5 shrink-0" />
               <div>
                 <p className="font-semibold">Votre essai a atteint sa limite</p>
@@ -954,6 +971,7 @@ export default function NouveauDevisPage() {
                 isLoading={isBooting}
                 newClient={newClient}
                 onClearSelection={() => setSelectedClientId("")}
+                errors={errors}
                 onCreateClient={handleCreateClient}
                 onNewClientChange={(field, value) =>
                   setNewClient((current) => ({ ...current, [field]: value }))

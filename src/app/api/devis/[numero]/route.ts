@@ -8,6 +8,7 @@ import { sendDevisEmail } from "@/lib/sendEmail";
 import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError } from "@/lib/http";
 import { createPublicDevisToken } from "@/lib/public-devis-token";
+import { syncDevisTotals } from "@/lib/devis-totals";
 import { devisUpdateSchema, zodErrorResponse } from "@/lib/validations";
 import {
   parseLignes,
@@ -142,7 +143,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
     const parsed = devisUpdateSchema.safeParse(rawBody);
     if (!parsed.success) return zodErrorResponse(parsed.error);
 
-    const body = parsed.data as any;
+    const body = parsed.data as Record<string, unknown>;
     const lignes = parseLignes(body.lignesNorm || body.lignes);
     const photos = parsePhotos(body.photos);
     const tvaNum = parseNumber(body.tva);
@@ -202,6 +203,7 @@ export async function PUT(request: Request, context: { params: Promise<{ numero:
 
     // Remplacer les lignes normalisées
     await replaceLignesForDevis(existingDevis.id, lignes);
+    await syncDevisTotals(existingDevis.id);
 
     const updatedDevis = await prisma.devis.findFirst({
       where: { numero, userId },

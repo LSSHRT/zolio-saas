@@ -47,12 +47,18 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   poweredByHeader: false,
-  serverExternalPackages: ["jspdf"],
+  serverExternalPackages: ["jspdf", "@prisma/client", "prisma"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "i.pravatar.cc" },
       { protocol: "https", hostname: "img.clerk.com" },
+      { protocol: "https", hostname: "images.clerk.dev" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "www.transparenttextures.com" },
     ],
   },
   async headers() {

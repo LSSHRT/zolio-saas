@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 
-const MONTH_NAMES = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+const MONTH_NAMES = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", "Sep", "Oct", "Nov", "Dec"];
 
 type RawDashboardQuote = {
   numero: string;
@@ -33,18 +33,18 @@ export type ClientDashboardMonthlyDatum = {
 };
 
 export type TresorerieSummary = {
-  encaisse: number;     // factures "Payée"
-  aEncaisser: number;   // factures "Émise" / "En attente" non échues
-  enRetard: number;     // factures "En retard" ou échues non payées
+  encaisse: number;
+  aEncaisser: number;
+  enRetard: number;
   nombreFactures: number;
-  tauxRecouvrement: number; // encaissé / (encaissé + enRetard) * 100
+  tauxRecouvrement: number;
 };
 
 export type BeneficeSummary = {
-  caFacture: number;    // totalTTC factures payées
-  depenses: number;     // total dépenses
-  beneficeNet: number;  // caFacture - depenses
-  margePct: number;     // beneficeNet / caFacture * 100
+  caFacture: number;
+  depenses: number;
+  beneficeNet: number;
+  margePct: number;
 };
 
 export type EcheanceItem = {
@@ -59,7 +59,7 @@ export type FunnelEtape = {
   label: string;
   count: number;
   amount: number;
-  pct: number; // par rapport au total devis
+  pct: number;
   color: string;
 };
 
@@ -163,17 +163,6 @@ function mapQuote(quote: RawDashboardQuote): ClientDashboardQuoteSummary {
   };
 }
 
-
-
-/**
- * Version optimisée du dashboard.
- *
- * Au lieu de charger TOUS les devis, on fait des requêtes ciblées :
- * 1. Comptage rapide par statut (COUNT)
- * 2. Les 4 devis les plus récents uniquement
- * 3. Les devis à relancer (> 7 jours, en attente)
- * 4. Les devis acceptés des 6 derniers mois (pour le graphique)
- */
 export async function getClientDashboardSummary(userId: string): Promise<ClientDashboardSummary> {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
@@ -185,145 +174,84 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   const inFourteenDays = new Date();
   inFourteenDays.setDate(today.getDate() + 14);
 
-  // Requêtes parallèles ciblées (beaucoup plus rapide que tout charger)
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+  startOfWeek.setHours(0, 0, 0, 0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+
+  const PENDING_STATUSES = ["En attente", "En attente (Modifié)"];
+  
   const [
-    totalCount,
-    acceptedCount,
-    pendingCount,
-    refusedCount,
+    statusCounts,
     recentQuotes,
     followUpQuotesRaw,
     acceptedQuotesForChart,
     refusedQuotesForLost,
     starterCatalogCount,
-    factures,
+    encaisseRes,
+    enRetardStatutRes,
+    enRetardDateRes,
+    aEncaisserRes,
+    totalFacturesCount,
     echeances,
-    depenses,
+    totalDepensesResult,
+    nouveauxDevis,
+    devisAcceptesSemaine,
+    facturesEmises,
+    facturesPayees,
+    depensesAgg,
+    facturesPayeesSemaine,
+    facturesFromDevis,
   ] = await Promise.all([
-    // 1. Nombre total de devis (COUNT rapide)
-    prisma.devis.count({ where: { userId } }),
-
-    // 2. Nombre de devis acceptés
-    prisma.devis.count({ where: { userId, statut: "Accepté" } }),
-
-    // 3. Nombre de devis en attente
-    prisma.devis.count({
-      where: {
-        userId,
-        statut: { in: ["En attente", "En attente (Modifié)"] },
-      },
-    }),
-
-    // 3b. Nombre de devis refusés
-    prisma.devis.count({ where: { userId, statut: "Refusé" } }),
-
-    // 4. Les 4 devis les plus récents
+    prisma.devis.groupBy({ by: ["statut"], where: { userId }, _count: true }),
     prisma.devis.findMany({
       where: { userId },
-      select: {
-        numero: true,
-        date: true,
-        statut: true,
-        remise: true,
-        tva: true,
-        
-        createdAt: true,
-        client: { select: { nom: true, email: true } },
-      },
+      select: { numero: true, date: true, statut: true, remise: true, tva: true, lignesNorm: true, createdAt: true, client: { select: { nom: true, email: true } } },
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
-
-    // 5. Devis à relancer (> 7 jours, pas encore acceptés/refusés)
     prisma.devis.findMany({
-      where: {
-        userId,
-        createdAt: { lt: sevenDaysAgo },
-        statut: { in: ["En attente", "En attente (Modifié)"] },
-      },
-      select: {
-        numero: true,
-        date: true,
-        statut: true,
-        remise: true,
-        tva: true,
-        
-        client: { select: { nom: true, email: true } },
-      },
+      where: { userId, createdAt: { lt: sevenDaysAgo }, statut: { in: PENDING_STATUSES } },
+      select: { numero: true, date: true, statut: true, remise: true, tva: true, lignesNorm: true, client: { select: { nom: true, email: true } } },
       orderBy: { createdAt: "desc" },
       take: 4,
     }),
-
-    // 6. Devis acceptés des 6 derniers mois (pour le graphique)
     prisma.devis.findMany({
-      where: {
-        userId,
-        statut: "Accepté",
-        date: { gte: sixMonthsAgo },
-      },
-      select: {
-        date: true,
-        createdAt: true,
-        remise: true,
-        tva: true,
-        
-      },
+      where: { userId, statut: "Accepté", date: { gte: sixMonthsAgo } },
+      select: { date: true, createdAt: true, remise: true, tva: true, lignesNorm: true, client: { select: { nom: true } } },
     }),
-
-    // 6b. Devis refusés des 6 derniers mois (revenu perdu)
     prisma.devis.findMany({
-      where: {
-        userId,
-        statut: "Refusé",
-        date: { gte: sixMonthsAgo },
-      },
-      select: {
-        date: true,
-        createdAt: true,
-        remise: true,
-        tva: true,
-        
-      },
+      where: { userId, statut: "Refusé", date: { gte: sixMonthsAgo } },
+      select: { date: true, createdAt: true, remise: true, tva: true, lignesNorm: true },
     }),
-
-    // 7. Nombre de prestations dans le catalogue
     prisma.prestation.count({ where: { userId } }),
-
-    // 8. Factures pour trésorerie
+    prisma.facture.aggregate({ where: { userId, statut: "Payée" }, _sum: { totalTTC: true } }),
+    prisma.facture.aggregate({ where: { userId, statut: "En retard" }, _sum: { totalTTC: true } }),
+    prisma.facture.aggregate({ where: { userId, statut: { notIn: ["Payée", "Annulée", "En retard"] }, dateEcheance: { lt: today } }, _sum: { totalTTC: true } }),
+    prisma.facture.aggregate({ where: { userId, statut: { notIn: ["Payée", "Annulée", "En retard"] }, OR: [{ dateEcheance: { gte: today } }, { dateEcheance: null }] }, _sum: { totalTTC: true } }),
+    prisma.facture.count({ where: { userId } }),
     prisma.facture.findMany({
-      where: { userId },
-      select: {
-        totalTTC: true,
-        statut: true,
-        dateEcheance: true,
-      },
-    }),
-
-    // 9. Échéances à venir (7-14 jours)
-    prisma.facture.findMany({
-      where: {
-        userId,
-        dateEcheance: { gte: today, lte: inFourteenDays },
-        statut: { notIn: ["Payée", "Annulée"] },
-      },
-      select: {
-        numero: true,
-        nomClient: true,
-        totalTTC: true,
-        dateEcheance: true
-      },
+      where: { userId, dateEcheance: { gte: today, lte: inFourteenDays }, statut: { notIn: ["Payée", "Annulée"] } },
+      select: { numero: true, nomClient: true, totalTTC: true, dateEcheance: true },
       orderBy: { dateEcheance: "asc" },
     }),
-
-    // 10. Dépenses pour bénéfice net
-    prisma.depense.findMany({
-      where: { userId },
-      select: { montant: true },
-    }),
+    prisma.depense.aggregate({ where: { userId }, _sum: { montant: true } }),
+    prisma.devis.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.devis.count({ where: { userId, statut: "Accepté", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.facture.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.facture.count({ where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
+    prisma.depense.aggregate({ where: { userId, date: { gte: startOfWeek, lt: endOfWeek } }, _sum: { montant: true } }),
+    prisma.facture.findMany({ where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } }, select: { totalTTC: true } }),
+    prisma.facture.findMany({ where: { userId, devisId: { not: null } }, select: { totalTTC: true, statut: true, devisId: true } }),
   ]);
 
-  // Calcul des totaux uniquement sur les devis acceptés récents (pas tous les devis)
-  // allRelevantQuotes removed (unused)
+  const countsMap = Object.fromEntries(statusCounts.map(s => [s.statut, s._count]));
+  const totalCount = statusCounts.reduce((sum, s) => sum + s._count, 0);
+  const acceptedCount = countsMap["Accepté"] || 0;
+  const pendingCount = PENDING_STATUSES.reduce((sum, s) => sum + (countsMap[s] || 0), 0);
+  const refusedCount = countsMap["Refusé"] || 0;
+  const totalDepenses = Number(totalDepensesResult._sum.montant || 0);
 
   let totalHT = 0;
   let totalTTC = 0;
@@ -331,181 +259,85 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   let pipelineRevenueHT = 0;
   let lostRevenueHT = 0;
 
-  // On calcule les totaux globaux en chargeant les devis par batch si nécessaire
-  // Pour l'instant, on utilise les devis chargés pour une estimation rapide
-  // Les vrais totaux seront recalculés quand l'utilisateur navigue vers la page devis
-
-  // Calcul des totaux pour les devis acceptés (revenus validés)
   for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
-    const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignesNorm),
-      Number(quote.tva) || 0,
-      Number(quote.remise) || 0,
-    );
+    const totals = computeQuoteTotals(normalizeLineItems(quote.lignesNorm), Number(quote.tva) || 0, Number(quote.remise) || 0);
     acceptedRevenueHT += totals.totalHT;
     totalHT += totals.totalHT;
     totalTTC += totals.totalTTC;
   }
 
-  // Calcul du revenu perdu (devis refusés des 6 derniers mois)
   for (const quote of refusedQuotesForLost as RawDashboardQuote[]) {
-    const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignesNorm),
-      Number(quote.tva) || 0,
-      Number(quote.remise) || 0,
-    );
+    const totals = computeQuoteTotals(normalizeLineItems(quote.lignesNorm), Number(quote.tva) || 0, Number(quote.remise) || 0);
     lostRevenueHT += totals.totalHT;
   }
 
-  // Délai moyen de réponse (depuis la création jusqu'à acceptation/refus)
-  const respondedQuotes = [
-    ...(acceptedQuotesForChart as (RawDashboardQuote & { createdAt: Date })[]),
-    ...(refusedQuotesForLost as (RawDashboardQuote & { createdAt: Date })[]),
-  ].filter((q) => q.createdAt);
-  const totalResponseDays = respondedQuotes.reduce((sum, q) => {
-    const days = (q.date.getTime() - q.createdAt.getTime()) / (1000 * 60 * 60 * 24);
-    return sum + Math.max(0, days);
-  }, 0);
-  const avgResponseDays = respondedQuotes.length > 0
-    ? Math.round((totalResponseDays / respondedQuotes.length) * 10) / 10
-    : 0;
-
-  // Calcul des totaux pour les devis en attente (pipeline)
   for (const quote of followUpQuotesRaw as RawDashboardQuote[]) {
-    const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignesNorm),
-      Number(quote.tva) || 0,
-      Number(quote.remise) || 0,
-    );
+    const totals = computeQuoteTotals(normalizeLineItems(quote.lignesNorm), Number(quote.tva) || 0, Number(quote.remise) || 0);
     pipelineRevenueHT += totals.totalHT;
   }
 
   const conversionRate = totalCount > 0 ? Math.round((acceptedCount / totalCount) * 100) : 0;
-  const averageTicket = totalCount > 0 ? totalTTC / totalCount : 0;
+  const averageTicket = acceptedCount > 0 ? acceptedRevenueHT / acceptedCount : 0;
 
-  // Construction du graphique mensuel
+  const respondedQuotes = [
+    ...(acceptedQuotesForChart as (RawDashboardQuote & { createdAt: Date })[]),
+    ...(refusedQuotesForLost as (RawDashboardQuote & { createdAt: Date })[]),
+  ].filter((q) => q.createdAt);
+  
+  const totalResponseDays = respondedQuotes.reduce((sum, q) => {
+    const days = (q.date.getTime() - q.createdAt.getTime()) / (1000 * 60 * 60 * 24);
+    return sum + Math.max(0, days);
+  }, 0);
+  const avgResponseDays = respondedQuotes.length > 0 ? Math.round((totalResponseDays / respondedQuotes.length) * 10) / 10 : 0;
+
   const months = Array.from({ length: 6 }).map((_, index) => {
     const date = new Date();
     date.setMonth(date.getMonth() - (5 - index));
-    return {
-      name: MONTH_NAMES[date.getMonth()],
-      month: date.getMonth(),
-      year: date.getFullYear(),
-      CA: 0,
-    };
+    return { name: MONTH_NAMES[date.getMonth()], month: date.getMonth(), year: date.getFullYear(), CA: 0 };
   });
 
   for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
     const quoteDate = parseQuoteDate(quote.date);
-    const totals = computeQuoteTotals(
-      normalizeLineItems(quote.lignesNorm),
-      Number(quote.tva) || 0,
-      Number(quote.remise) || 0,
-    );
-    const targetMonth = months.find(
-      (m) => m.month === quoteDate.getMonth() && m.year === quoteDate.getFullYear(),
-    );
-    if (targetMonth) {
-      targetMonth.CA += totals.totalHT;
-    }
+    const totals = computeQuoteTotals(normalizeLineItems(quote.lignesNorm), Number(quote.tva) || 0, Number(quote.remise) || 0);
+    const targetMonth = months.find((m) => m.month === quoteDate.getMonth() && m.year === quoteDate.getFullYear());
+    if (targetMonth) targetMonth.CA += totals.totalHT;
   }
 
-  // Top clients par revenu
   const clientRevenue = new Map<string, { nom: string; devisCount: number; revenueHT: number }>();
   for (const quote of acceptedQuotesForChart as RawDashboardQuote[]) {
     const nom = quote.client?.nom || "Inconnu";
     const existing = clientRevenue.get(nom) || { nom, devisCount: 0, revenueHT: 0 };
-    const lines = Array.isArray(quote.lignesNorm) ? (quote.lignesNorm as DashboardLineItem[]) : [];
-    const totals = computeQuoteTotals(lines, quote.tva || 0, quote.remise || 0);
+    const totals = computeQuoteTotals(normalizeLineItems(quote.lignesNorm), quote.tva || 0, quote.remise || 0);
     existing.devisCount++;
     existing.revenueHT += totals.totalHT;
     clientRevenue.set(nom, existing);
   }
-  const topClients = Array.from(clientRevenue.values())
-    .sort((a, b) => b.revenueHT - a.revenueHT)
-    .slice(0, 5);
+  const topClients = Array.from(clientRevenue.values()).sort((a, b) => b.revenueHT - a.revenueHT).slice(0, 5);
 
-  // Trésorerie depuis les factures
   let encaisse = 0;
   let aEncaisser = 0;
   let enRetard = 0;
-  let nombreFactures = factures.length;
-
-  for (const f of factures) {
-    if (f.statut === "Payée") {
-      encaisse += Number(f.totalTTC);
-    } else if (f.statut === "En retard") {
-      enRetard += Number(f.totalTTC);
-    } else if (f.statut !== "Annulée") {
-      if (f.dateEcheance && f.dateEcheance < today) {
-        enRetard += Number(f.totalTTC);
-      } else {
-        aEncaisser += Number(f.totalTTC);
-      }
-    }
-  }
+  encaisse = Number(encaisseRes._sum.totalTTC || 0);
+  enRetard = Number(enRetardStatutRes._sum.totalTTC || 0) + Number(enRetardDateRes._sum.totalTTC || 0);
+  aEncaisser = Number(aEncaisserRes._sum.totalTTC || 0);
 
   const totalRecouvrable = encaisse + enRetard;
   const tauxRecouvrement = totalRecouvrable > 0 ? Math.round((encaisse / totalRecouvrable) * 100) : 100;
+  const tresorerie: TresorerieSummary = { encaisse, aEncaisser, enRetard, nombreFactures: totalFacturesCount, tauxRecouvrement };
 
-  const tresorerie: TresorerieSummary = {
-    encaisse,
-    aEncaisser,
-    enRetard,
-    nombreFactures,
-    tauxRecouvrement,
-  };
-
-  // Bénéfice net
-  const caFacture = encaisse; // factures payées = CA réel
-  const totalDepenses = depenses.reduce((sum, d) => sum + Number(d.montant), 0);
+  const caFacture = encaisse;
   const beneficeNet = caFacture - totalDepenses;
   const margePct = caFacture > 0 ? Math.round((beneficeNet / caFacture) * 100) : 0;
+  const benefice: BeneficeSummary = { caFacture, depenses: totalDepenses, beneficeNet, margePct };
 
-  const benefice: BeneficeSummary = {
-    caFacture,
-    depenses: totalDepenses,
-    beneficeNet,
-    margePct,
-  };
+  const echeancesProchaines = echeances.filter((e) => e.dateEcheance).map((e) => ({
+    numero: e.numero, nomClient: e.nomClient, totalTTC: Number(e.totalTTC),
+    dateEcheance: e.dateEcheance!.toISOString(),
+    joursRestants: Math.ceil((e.dateEcheance!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
+  }));
 
-  // Prochaines échéances
-  const echeancesProchaines = echeances
-    .filter((e) => e.dateEcheance)
-    .map((e) => ({
-      numero: e.numero,
-      nomClient: e.nomClient,
-      totalTTC: Number(e.totalTTC),
-      dateEcheance: e.dateEcheance!.toISOString(),
-      joursRestants: Math.ceil((e.dateEcheance!.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)),
-    }));
+  const caEncaisseSemaine = facturesPayeesSemaine.reduce((s, f) => s + Number(f.totalTTC), 0);
 
-  // Résumé de la semaine
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay() + 1);
-  startOfWeek.setHours(0, 0, 0, 0);
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 7);
-
-  const [nouveauxDevis, devisAcceptesSemaine, facturesEmises, facturesPayees, depensesAgg] = await Promise.all([
-    prisma.devis.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
-    prisma.devis.count({ where: { userId, statut: "Accepté", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
-    prisma.facture.count({ where: { userId, createdAt: { gte: startOfWeek, lt: endOfWeek } } }),
-    prisma.facture.count({ where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } } }),
-    prisma.depense.aggregate({ where: { userId, date: { gte: startOfWeek, lt: endOfWeek } }, _sum: { montant: true } }),
-  ]);
-
-  const facturesPayeesSemaine = await prisma.facture.findMany({
-    where: { userId, statut: "Payée", updatedAt: { gte: startOfWeek, lt: endOfWeek } },
-    select: { totalTTC: true },
-  });
-  const caEncaisse = facturesPayeesSemaine.reduce((s, f) => s + Number(f.totalTTC), 0);
-
-  // Funnel de conversion : Devis créés → Acceptés → Facturés → Payés
-  const facturesFromDevis = await prisma.facture.findMany({
-    where: { userId, devisId: { not: null } },
-    select: { totalTTC: true, statut: true, devisId: true },
-  });
   const devisFacturesIds = new Set(facturesFromDevis.map((f) => f.devisId));
   const nbFacturesFromDevis = facturesFromDevis.length;
   const facturesPayeesFromDevis = facturesFromDevis.filter((f) => f.statut === "Payée");
@@ -520,35 +352,14 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
   ];
 
   return {
-    starterCatalogCount,
-    totalQuotes: totalCount,
-    totalHT,
-    totalTTC,
-    acceptedCount,
-    pendingCount,
-    refusedCount,
-    acceptedRevenueHT,
-    pipelineRevenueHT,
-    lostRevenueHT,
-    followUpCount: followUpQuotesRaw.length,
-    conversionRate,
-    averageTicket,
-    avgResponseDays,
+    starterCatalogCount, totalQuotes: totalCount, totalHT, totalTTC, acceptedCount, pendingCount, refusedCount,
+    acceptedRevenueHT, pipelineRevenueHT, lostRevenueHT, followUpCount: followUpQuotesRaw.length,
+    conversionRate, averageTicket, avgResponseDays,
     recentQuotes: (recentQuotes as RawDashboardQuote[]).map(mapQuote),
     followUpQuotes: (followUpQuotesRaw as RawDashboardQuote[]).map(mapQuote),
     monthlyData: months.map(({ name, CA }) => ({ name, CA })),
-    topClients,
-    tresorerie,
-    benefice,
-    echeances: echeancesProchaines,
-    semaine: {
-      nouveauxDevis,
-      devisAcceptes: devisAcceptesSemaine,
-      facturesEmises,
-      facturesPayees,
-      caEncaisse,
-      depensesSemaine: Number(depensesAgg._sum.montant ?? 0),
-    },
+    topClients, tresorerie, benefice, echeances: echeancesProchaines,
+    semaine: { nouveauxDevis, devisAcceptes: devisAcceptesSemaine, facturesEmises, facturesPayees, caEncaisse: caEncaisseSemaine, depensesSemaine: Number(depensesAgg._sum.montant ?? 0) },
     funnel,
   };
 }

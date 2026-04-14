@@ -29,7 +29,7 @@ export function AIAssistant({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/65 p-3 backdrop-blur-sm sm:items-center sm:p-4">
-      <div className="flex max-h-[88vh] w-full max-w-xl flex-col overflow-hidden rounded-[1.75rem] border border-slate-200/70 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#0d1328] sm:max-h-[80vh] sm:rounded-[2rem] sm:p-6">
+      <div className="flex max-h-[88vh] w-full max-w-xl flex-col overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-4 shadow-2xl dark:border-white/10 dark:bg-[#0d1328] sm:max-h-[80vh] sm:rounded-2xl sm:p-6">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -70,7 +70,7 @@ export function AIAssistant({
             value={prompt}
             onChange={(event) => onPromptChange(event.target.value)}
             placeholder="Ex: Refaire une salle de bain de 10m² avec dépose, plomberie, faïence murale, meuble vasque et peinture plafond."
-            className="h-40 w-full rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4 text-base leading-6 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/4 sm:h-44"
+            className="h-40 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-base leading-6 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/4 sm:h-44"
           />
 
           <p className="text-sm text-slate-500 dark:text-slate-400">

@@ -132,12 +132,19 @@ export async function POST(request: Request, context: { params: Promise<{ numero
       return jsonError("Ce devis a déjà été signé", 409);
     }
 
+    // Capture signature metadata for legal traceability
+    const sigMeta = {
+      statut: "Accepté",
+      signature,
+      signedBy: body.signedBy || devis.client?.nom || "Inconnu",
+      signatureIp: ip || request.headers.get("x-forwarded-for") || "unknown",
+      signatureUserAgent: request.headers.get("user-agent") || "unknown",
+      signatureDate: new Date(),
+    };
+
     await prisma.devis.updateMany({
       where: { numero, userId },
-      data: {
-        statut: "Accepté",
-        signature,
-      },
+      data: sigMeta,
     });
 
     // Envoyer une notification push à l'artisan

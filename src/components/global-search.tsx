@@ -42,7 +42,7 @@ interface SearchResult {
   date: string | null;
 }
 
-export function GlobalSearch({ className }: { className?: string }) {
+export function GlobalSearch({ className = "" }: { className?: string }) {
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const debouncedQuery = useDebounce(query, 300);
@@ -89,7 +89,7 @@ export function GlobalSearch({ className }: { className?: string }) {
   }, []);
 
   return (
-    <div ref={containerRef} className={`relative mx-auto mt-4 max-w-xl ${className || ""}`}>
+    <div ref={containerRef} className={`relative mx-auto mt-4 max-w-xl ${className}`}>
       <div
         className={`flex items-center gap-2 rounded-2xl border bg-white px-4 py-3 transition dark:bg-slate-800/80 ${
           focused

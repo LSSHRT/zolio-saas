@@ -15,8 +15,8 @@ export default async function MaintenancePage() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_26%),linear-gradient(180deg,#050816_0%,#020617_100%)] px-4 py-12 text-white">
       <div className="mx-auto flex min-h-[80vh] max-w-3xl items-center justify-center">
-        <section className="w-full overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-8 text-center shadow-[0_30px_120px_-40px_rgba(0,0,0,0.75)] sm:p-10">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[28px] bg-amber-400/12 text-amber-200 ring-1 ring-amber-300/20">
+        <section className="w-full overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(15,23,42,0.96),rgba(2,6,23,0.98))] p-8 text-center shadow-[0_30px_120px_-40px_rgba(0,0,0,0.75)] sm:p-10">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-400/12 text-amber-200 ring-1 ring-amber-300/20">
             <Wrench className="h-10 w-10" />
           </div>
           <p className="mt-6 text-[11px] uppercase tracking-[0.34em] text-slate-500">Zolio maintenance</p>

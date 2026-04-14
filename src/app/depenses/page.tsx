@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
@@ -39,6 +39,14 @@ interface DepensesResponse {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DepensesPage() {
+ return (
+ <Suspense fallback={null}>
+ <DepensesContent />
+ </Suspense>
+ );
+}
+
+function DepensesContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -286,11 +294,11 @@ export default function DepensesPage() {
         {!data ? (
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="h-24 rounded-[1.5rem] bg-slate-100 dark:bg-white/6" />
+              <div key={item} className="h-24 rounded-2xl bg-slate-100 dark:bg-white/6" />
             ))}
           </div>
         ) : filteredDepenses.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-[1.85rem] border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
             <Receipt className="text-slate-300 dark:text-slate-600" size={46} />
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Aucune dépense trouvée</h2>
             <p className="max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
@@ -311,7 +319,7 @@ export default function DepensesPage() {
                 key={depense.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4"
+                className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1">

@@ -5,6 +5,7 @@ import { sendEmail } from "@/lib/sendEmail";
 import { internalServerError, jsonError } from "@/lib/http";
 import { createClientPortalToken } from "@/lib/client-portal";
 import { logError, logInfo } from "@/lib/logger";
+import { sendPushNotification } from "@/lib/push-notifications";
 
 const PUBLIC_URL = process.env.NEXT_PUBLIC_APP_URL || "https://zolio.site";
 
@@ -53,7 +54,7 @@ export async function POST(
       : 0;
 
     // Déterminer le niveau
-    const lastLevel = (facture as any).derniereRelanceNiveau ?? 0;
+    const lastLevel = facture.derniereRelanceNiveau ?? 0;
     const nextLevel = Math.min(lastLevel + 1, 3);
 
     // Générer le lien espace client
@@ -105,8 +106,16 @@ export async function POST(
       data: {
         derniereRelanceNiveau: nextLevel,
         derniereRelanceDate: now,
-      } as any,
+      },
     });
+
+    // Envoyer notification push à l'artisan que la relance a été envoyée
+    sendPushNotification(userId, {
+      title: "📧 Relance envoyée",
+      body: `Relance niveau ${nextLevel}/3 envoyée à ${facture.emailClient} pour la facture ${numero}`,
+      url: `/factures/${numero}`,
+      tag: `facture-relance-${numero}`,
+    }).catch(() => {});
 
     logInfo("[relance] manuel", `${numero} → ${facture.emailClient} (niveau ${nextLevel})`);
 

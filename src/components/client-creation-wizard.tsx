@@ -41,7 +41,7 @@ export function CreationWizardShell({
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
       <div className="mx-auto flex min-h-screen w-full max-w-[1320px] flex-col px-4 pb-8 pt-3 sm:px-6 sm:pb-10 sm:pt-4 lg:px-8">
-        <header className="client-panel sticky top-2 z-40 rounded-[1.8rem] px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-[2rem] sm:px-6 sm:py-4">
+        <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:hidden">
             <div className="flex min-w-0 items-center gap-3">
               <Link
@@ -78,7 +78,7 @@ export function CreationWizardShell({
         </header>
 
         <main className="mt-3 flex-1 space-y-4 sm:mt-4 lg:mt-6 lg:space-y-6">
-          <section className="client-panel-strong overflow-hidden rounded-[1.9rem] px-4 py-4 sm:rounded-[2.25rem] sm:px-6 sm:py-6 lg:px-7 md:hidden">
+          <section className="client-panel-strong overflow-hidden rounded-2xl px-4 py-4 sm:rounded-2xl sm:px-6 sm:py-6 lg:px-7 md:hidden">
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -86,7 +86,7 @@ export function CreationWizardShell({
                     {title}
                   </h1>
                 </div>
-                <div className="rounded-[1.2rem] border border-violet-300/40 bg-violet-500/10 px-3 py-2 text-right dark:border-violet-400/20 dark:bg-violet-500/12">
+                <div className="rounded-xl border border-violet-300/40 bg-violet-500/10 px-3 py-2 text-right dark:border-violet-400/20 dark:bg-violet-500/12">
                   <p className="text-sm font-semibold text-slate-950 dark:text-white">
                     {steps[currentStep]?.title}
                   </p>
@@ -101,7 +101,7 @@ export function CreationWizardShell({
                   return (
                     <div
                       key={step.title}
-                      className={`min-w-[10.5rem] snap-start rounded-[1.2rem] border px-3 py-3 text-left ${
+                      className={`min-w-[10.5rem] snap-start rounded-xl border px-3 py-3 text-left ${
                         isActive
                           ? "border-violet-300/50 bg-violet-500/10 dark:border-violet-400/20 dark:bg-violet-500/12"
                           : "border-slate-200/70 bg-white/70 dark:border-white/8 dark:bg-white/4"
@@ -130,7 +130,7 @@ export function CreationWizardShell({
             </div>
           </section>
 
-          <section className="client-panel-strong hidden overflow-hidden rounded-[2.25rem] px-5 py-6 md:block sm:px-6 lg:px-7">
+          <section className="client-panel-strong hidden overflow-hidden rounded-2xl px-5 py-6 md:block sm:px-6 lg:px-7">
             <div className="flex flex-col gap-6">
               <div className="max-w-3xl">
                 <p className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
@@ -152,7 +152,7 @@ export function CreationWizardShell({
                   return (
                     <div
                       key={step.title}
-                      className={`rounded-[1.6rem] border p-4 transition ${
+                      className={`rounded-2xl border p-4 transition ${
                         isActive
                           ? "border-violet-300/50 bg-violet-500/10 shadow-[0_22px_60px_-36px_rgba(124,58,237,0.55)] dark:border-violet-400/20 dark:bg-violet-500/12"
                           : "border-slate-200/70 bg-white/70 dark:border-white/8 dark:bg-white/4"
@@ -203,7 +203,7 @@ export function CreationWizardPanel({
   children: ReactNode;
   className?: string;
 }) {
-  return <section className={`client-panel rounded-[2rem] p-5 sm:p-6 ${className}`}>{children}</section>;
+  return <section className={`client-panel rounded-2xl p-5 sm:p-6 ${className}`}>{children}</section>;
 }
 
 export function CreationWizardFooter({
@@ -219,7 +219,7 @@ export function CreationWizardFooter({
 }) {
   return (
     <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-30 sm:sticky sm:bottom-4 sm:inset-x-auto">
-      <div className="client-panel rounded-[1.5rem] px-4 py-4 shadow-[0_32px_90px_-52px_rgba(15,23,42,0.42)] sm:rounded-[1.8rem]">
+      <div className="client-panel rounded-2xl px-4 py-4 shadow-[0_32px_90px_-52px_rgba(15,23,42,0.42)] sm:rounded-2xl">
         {mobilePrimaryAction || mobileSecondaryActions.length > 0 ? (
           <>
             <div className="grid gap-3 sm:hidden">

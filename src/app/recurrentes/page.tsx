@@ -282,7 +282,7 @@ export default function RecurrentesPage() {
             {[1, 2, 3].map((item) => (
               <div
                 key={item}
-                className="animate-shimmer rounded-[1.75rem] border border-slate-200/70 bg-white/70 p-5 dark:border-white/8 dark:bg-white/4"
+                className="animate-shimmer rounded-2xl border border-slate-200/70 bg-white/70 p-5 dark:border-white/8 dark:bg-white/4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ export default function RecurrentesPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="flex flex-col gap-2 rounded-[1.5rem] border border-slate-200/70 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-2 rounded-2xl border border-slate-200/70 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400 dark:text-slate-500">
                       Contrats actifs
@@ -334,7 +334,7 @@ export default function RecurrentesPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: Math.min(index * 0.03, 0.15) }}
-                    className="rounded-[1.75rem] border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
+                    className="rounded-2xl border border-slate-100 bg-slate-50 p-5 dark:border-white/8 dark:bg-white/4"
                   >
                     <div className="md:hidden">
                       <div className="flex items-start justify-between gap-3">
@@ -357,7 +357,7 @@ export default function RecurrentesPage() {
                       </div>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
+                        <div className="rounded-xl border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
                           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Montant TTC
                           </p>
@@ -365,7 +365,7 @@ export default function RecurrentesPage() {
                             {item.montantTTC.toFixed(2)}€
                           </p>
                         </div>
-                        <div className="rounded-[1.25rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
+                        <div className="rounded-xl border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/20">
                           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
                             Prochaine facture
                           </p>

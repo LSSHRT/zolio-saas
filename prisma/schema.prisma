@@ -52,7 +52,13 @@ model Devis {
   acompte       Decimal?     @default(0) @db.Decimal(10, 2)
   tva           Decimal?     @default(0) @db.Decimal(10, 2)
   signature     String?      // URL de la signature image (migré depuis base64)
-  lignesNorm    LigneDevis[] // Lignes normalisées
+  signedBy      String?      // Nom du signataire
+  signatureIp   String?      // IP du signataire
+  signatureUserAgent String? // User-agent du signataire
+  signatureDate DateTime?    // Date de signature
+  totalHT        Decimal       @default(0) @db.Decimal(10, 2)
+  totalTTC       Decimal       @default(0) @db.Decimal(10, 2)
+  lignesNorm     LigneDevis[] // Lignes normalisées
   photos        Json?        // Array of photo URLs
   tags          Json?        // Array de tags (ex: ["urgent", "récurrent"])
   notes         String?      // Notes internes sur le devis
@@ -91,17 +97,18 @@ model LigneDevis {
 }
 
 model Depense {
-  id          String    @id @default(cuid())
-  userId      String
-  description String
-  montant     Decimal   @db.Decimal(10, 2)
-  date        DateTime  @default(now())
-  categorie   String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+ id String @id @default(cuid())
+ userId String
+ description String
+ montant Decimal @db.Decimal(10, 2)
+ date DateTime @default(now())
+ categorie String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ deletedAt DateTime?
 
-  @@index([userId])
+ @@index([userId])
+ @@index([userId, date])
 }
 
 model Facture {
@@ -129,12 +136,13 @@ model Facture {
   updatedAt             DateTime           @updatedAt
   deletedAt             DateTime?
 
-  @@unique([userId, numero])
-  @@index([devisId])
-  @@index([userId, statut])
-  @@index([userId, createdAt])
-  @@index([userId, dateEcheance])
-  @@index([recurrenteId])
+@@unique([userId, numero])
+ @@index([devisId])
+ @@index([userId, statut])
+ @@index([userId, createdAt])
+ @@index([userId, date])
+ @@index([userId, dateEcheance])
+ @@index([recurrenteId])
 }
 
 model Note {

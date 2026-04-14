@@ -676,7 +676,7 @@ export default function DevisPage() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3"
-                      >
+                           whileHover={{ scale: 1.01, y: -2, transition: { type: "spring", stiffness: 400, damping: 17 } }} >
                         <div className="flex justify-between items-start">
                           <div>
                             <div className="flex items-center gap-2">
@@ -809,12 +809,12 @@ export default function DevisPage() {
                         </div>
                       </div>
 
-                      <div className="mt-4 rounded-[1.2rem] border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/30">
+                      <div className="mt-4 rounded-xl border border-slate-200/70 bg-white/80 px-4 py-3 dark:border-white/8 dark:bg-slate-950/30">
                         <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Total TTC</p>
                         <p className="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{d.totalTTC}€</p>
                       </div>
 
-                      <details className="mt-3 rounded-[1.2rem] border border-slate-200/70 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+                      <details className="mt-3 rounded-xl border border-slate-200/70 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
                         <summary className="cursor-pointer list-none text-sm font-semibold text-slate-700 dark:text-slate-200 [&::-webkit-details-marker]:hidden">
                           Voir plus de détails
                         </summary>
@@ -974,7 +974,7 @@ export default function DevisPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: Math.min((i * 0.03 + ci * 0.02), 0.2) }}
                             className="bg-white/70 dark:bg-white/5 rounded-xl border border-slate-200/60 dark:border-white/8 p-3 flex items-center justify-between gap-3"
-                          >
+                           whileHover={{ scale: 1.01, y: -2, transition: { type: "spring", stiffness: 400, damping: 17 } }} >
                             <div className="flex items-center gap-2.5 min-w-0 flex-1">
                               <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold ${optionColors[child.optionLabel || ""] || "bg-violet-100 text-violet-600"}`}>
                                 <Layers size={13} />
@@ -1059,7 +1059,7 @@ export default function DevisPage() {
               : "Le devis supprimé ne sera plus accessible depuis le pipeline ni depuis son lien de signature."}
           </p>
           {deleteDialog && deleteDialog.numeros.length > 0 ? (
-            <div className="rounded-[1.2rem] border border-rose-200/70 bg-rose-50/80 px-4 py-3 dark:border-rose-400/20 dark:bg-rose-500/10">
+            <div className="rounded-xl border border-rose-200/70 bg-rose-50/80 px-4 py-3 dark:border-rose-400/20 dark:bg-rose-500/10">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-rose-700 dark:text-rose-200">
                 Devis concernés
               </p>

@@ -390,11 +390,11 @@ export default function ModelesPage() {
         {loading ? (
           <div className="animate-pulse space-y-4">
             {[1, 2, 3].map((item) => (
-              <div key={item} className="h-32 rounded-[1.5rem] bg-slate-100 dark:bg-white/6" />
+              <div key={item} className="h-32 rounded-2xl bg-slate-100 dark:bg-white/6" />
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-[1.85rem] border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
             <LayoutTemplate className="text-slate-300 dark:text-slate-600" size={46} />
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Aucun modèle</h2>
             <p className="max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
@@ -417,7 +417,7 @@ export default function ModelesPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(index * 0.03, 0.15) }}
-                className="rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-5 dark:border-white/8 dark:bg-white/4"
+                className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-5 dark:border-white/8 dark:bg-white/4"
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div className="min-w-0 flex-1">

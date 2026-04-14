@@ -178,10 +178,52 @@ export async function POST(req: Request) {
         }
         break;
       }
+      case "customer.subscription.updated": {
+        // Quand un abonnement change de statut (past_due, incomplete, etc.)
+        const subscription = event.data.object as Stripe.Subscription;
+        const userId = subscription.metadata?.userId;
+
+        if (userId) {
+          const status = subscription.status;
+
+          if (status === "past_due") {
+            await createNotification({
+              userId,
+              type: "payment_failed",
+              title: "⚠️ Paiement échoué",
+              description: "Le paiement de votre abonnement n'a pas pu être traité. Veuillez vérifier votre carte.",
+              href: "/abonnement",
+              tone: "amber",
+            });
+            logInfo("stripe-webhook", `Abonnement past_due pour ${userId}`);
+          } else if (status === "incomplete_expired") {
+            const client = await clerkClient();
+            await client.users.updateUserMetadata(userId, {
+              publicMetadata: { isPro: false },
+            });
+            await createNotification({
+              userId,
+              type: "subscription_cancelled",
+              title: "Abonnement expiré",
+              description: "Votre abonnement Pro a expiré pour non-paiement. Revenez sur le plan Starter.",
+              href: "/abonnement",
+              tone: "rose",
+            });
+            logInfo("stripe-webhook", `Utilisateur ${userId} downgradé (incomplete_expired)`);
+          } else if (status === "active") {
+            // Réactivation après past_due
+            const client = await clerkClient();
+            await client.users.updateUserMetadata(userId, {
+              publicMetadata: { isPro: true },
+            });
+            logInfo("stripe-webhook", `Abonnement réactivé pour ${userId}`);
+          }
+        }
+        break;
+      }
       case "customer.subscription.deleted": {
         // En cas d'annulation ou fin d'abonnement
         const subscription = event.data.object as Stripe.Subscription;
-        // On récupère l'userId depuis les metadata de la subscription
         const userId = subscription.metadata?.userId;
 
         if (userId) {
@@ -203,6 +245,22 @@ export async function POST(req: Request) {
           });
         } else {
           logWarn("stripe-webhook", "customer.subscription.deleted: userId introuvable");
+        }
+        break;
+      }
+      case "charge.refunded": {
+        // Quand un paiement est remboursé
+        const charge = event.data.object as Stripe.Charge;
+        const factureNumero = charge.metadata?.factureNumero;
+
+        if (factureNumero && charge.refunded) {
+          const result = await prisma.facture.updateMany({
+            where: { stripeSessionId: charge.payment_intent as string },
+            data: { statut: "Annulée" },
+          });
+          if (result.count > 0) {
+            logInfo("stripe-webhook", `Facture ${factureNumero} remboursée → Annulée`);
+          }
         }
         break;
       }

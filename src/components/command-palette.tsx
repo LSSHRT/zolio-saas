@@ -346,7 +346,7 @@ export function CmdKLauncher() {
       </AnimatePresence>
 
       {/* Floating launcher — hidden on mobile (dock has its own search) */}
-      <div className="fixed bottom-6 left-4 z-40 hidden md:block">
+      <div className="fixed bottom-6 left-4 z-20 hidden md:block">
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.95 }}

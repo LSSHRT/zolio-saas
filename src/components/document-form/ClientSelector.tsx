@@ -17,6 +17,7 @@ type ClientSelectorProps = {
   selectedClient: Client | null;
   showNewClient: boolean;
   onToggleNewClient: () => void;
+  errors?: Record<string, string>;
 };
 
 export function ClientSelector({
@@ -34,6 +35,7 @@ export function ClientSelector({
   selectedClient,
   showNewClient,
   onToggleNewClient,
+  errors,
 }: ClientSelectorProps) {
   const selectedPrimaryContact = selectedClient?.email || selectedClient?.telephone || selectedClient?.adresse;
 
@@ -64,7 +66,7 @@ export function ClientSelector({
         </div>
 
         {selectedClient ? (
-          <div className="rounded-[1.75rem] border border-emerald-300/40 bg-emerald-500/10 p-5 dark:border-emerald-400/20 dark:bg-emerald-500/10">
+          <div className="rounded-2xl border border-emerald-300/40 bg-emerald-500/10 p-5 dark:border-emerald-400/20 dark:bg-emerald-500/10">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="flex min-w-0 items-start gap-4">
                 <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/70 text-emerald-700 ring-1 ring-emerald-300/40 dark:bg-white/8 dark:text-emerald-200 dark:ring-emerald-400/20">
@@ -85,7 +87,7 @@ export function ClientSelector({
                   ) : null}
 
                   {(selectedClient.email && selectedClient.telephone) || selectedClient.adresse ? (
-                    <details className="mt-3 rounded-[1.2rem] border border-emerald-300/40 bg-white/70 px-4 py-3 text-sm text-slate-600 dark:border-emerald-400/20 dark:bg-white/6 dark:text-slate-300 md:hidden">
+                    <details className="mt-3 rounded-xl border border-emerald-300/40 bg-white/70 px-4 py-3 text-sm text-slate-600 dark:border-emerald-400/20 dark:bg-white/6 dark:text-slate-300 md:hidden">
                       <summary className="cursor-pointer list-none font-semibold text-emerald-700 dark:text-emerald-200 [&::-webkit-details-marker]:hidden">
                         Voir plus
                       </summary>
@@ -143,7 +145,7 @@ export function ClientSelector({
         {!selectedClient ? (
           <>
             {!showNewClient && recentClients.length > 0 ? (
-              <div className="grid gap-3 rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
+              <div className="grid gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
@@ -164,7 +166,7 @@ export function ClientSelector({
                       key={`recent-${client.id}`}
                       type="button"
                       onClick={() => onSelectClient(client)}
-                      className="rounded-[1.2rem] border border-slate-200/80 bg-white/90 px-4 py-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 dark:border-white/10 dark:bg-white/6 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
+                      className="rounded-xl border border-slate-200/80 bg-white/90 px-4 py-3 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 dark:border-white/10 dark:bg-white/6 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
                     >
                       <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{client.nom}</p>
                       <p className="mt-1 truncate text-xs text-slate-500 dark:text-slate-400">
@@ -191,7 +193,7 @@ export function ClientSelector({
             </div>
 
             {showNewClient ? (
-              <div className="grid gap-3 rounded-[1.6rem] border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 lg:grid-cols-2">
+              <div className="grid gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 lg:grid-cols-2">
                 <input
                   type="text"
                   value={newClient.nom}
@@ -241,7 +243,7 @@ export function ClientSelector({
                 Array.from({ length: 4 }).map((_, index) => (
                   <div
                     key={index}
-                    className="rounded-[1.4rem] border border-slate-200/70 bg-slate-50/80 p-4 animate-pulse dark:border-white/8 dark:bg-white/4"
+                    className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 animate-pulse dark:border-white/8 dark:bg-white/4"
                   >
                     <div className="h-4 w-32 rounded bg-slate-200 dark:bg-white/10" />
                     <div className="mt-3 h-3 w-40 rounded bg-slate-100 dark:bg-white/6" />
@@ -253,7 +255,7 @@ export function ClientSelector({
                     key={client.id}
                     type="button"
                     onClick={() => onSelectClient(client)}
-                    className="rounded-[1.4rem] border border-slate-200/70 bg-white/80 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
+                    className="rounded-2xl border border-slate-200/70 bg-white/80 p-4 text-left transition hover:-translate-y-0.5 hover:border-violet-300 hover:bg-violet-50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 dark:hover:bg-violet-500/8"
                   >
                     <div className="flex items-start gap-3">
                       <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-white/8 dark:text-slate-200">
@@ -277,7 +279,7 @@ export function ClientSelector({
                   </button>
                 ))
               ) : (
-                <div className="lg:col-span-2 rounded-[1.4rem] border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/4 dark:text-slate-300">
+                <div className="lg:col-span-2 rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/80 px-4 py-6 text-center text-sm text-slate-500 dark:border-white/10 dark:bg-white/4 dark:text-slate-300">
                   {searchValue
                     ? `Aucun client ne correspond à “${searchValue}”.`
                     : "Aucun client enregistré pour l’instant. Créez-en un ici pour démarrer votre devis."}

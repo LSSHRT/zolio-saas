@@ -500,7 +500,7 @@ export default function NouvelleFacturePage() {
 
       {/* Footer */}
       <div className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-30 sm:sticky sm:bottom-4 sm:inset-x-auto">
-        <div className="client-panel rounded-[1.5rem] px-4 py-4 shadow-[0_32px_90px_-52px_rgba(15,23,42,0.42)] sm:rounded-[1.8rem]">
+        <div className="client-panel rounded-2xl px-4 py-4 shadow-[0_32px_90px_-52px_rgba(15,23,42,0.42)] sm:rounded-2xl">
           <div className="flex items-center gap-3">
             {step > 1 && step < 4 && (
               <button onClick={() => setStep(step - 1)}
