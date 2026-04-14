@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -64,6 +64,14 @@ interface HistoryFacture {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function ClientsPage() {
+ return (
+ <Suspense fallback={null}>
+ <ClientsContent />
+ </Suspense>
+ );
+}
+
+function ClientsContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();

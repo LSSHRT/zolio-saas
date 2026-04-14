@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
@@ -125,6 +125,14 @@ function parseCsvRows(text: string) {
 }
 
 export default function CataloguePage() {
+ return (
+ <Suspense fallback={null}>
+ <CatalogueContent />
+ </Suspense>
+ );
+}
+
+function CatalogueContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();

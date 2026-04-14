@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
@@ -39,6 +39,14 @@ interface DepensesResponse {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function DepensesPage() {
+ return (
+ <Suspense fallback={null}>
+ <DepensesContent />
+ </Suspense>
+ );
+}
+
+function DepensesContent() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
