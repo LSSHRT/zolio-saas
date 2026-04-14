@@ -12,10 +12,24 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 function createExtendedClient(context?: PrismaContext) {
-  const baseClient = new PrismaClient({
-    log: ['error'],
-    datasourceUrl: process.env.DATABASE_URL,
-  });
+ // Build connection URL with expanded pool for concurrent API usage
+ const databaseUrl = process.env.DATABASE_URL ?? '';
+ let datasourceUrl = databaseUrl;
+
+ try {
+   const url = new URL(databaseUrl);
+   // Expand pool to handle concurrent connections across API routes
+   url.searchParams.set('connection_limit', '10');
+   url.searchParams.set('pool_timeout', '30');
+   datasourceUrl = url.toString();
+ } catch {
+   // Fallback: use as-is if URL parsing fails
+ }
+
+ const baseClient = new PrismaClient({
+  log: ['error'],
+  datasourceUrl,
+ });
 
   return baseClient.$extends({
     query: {

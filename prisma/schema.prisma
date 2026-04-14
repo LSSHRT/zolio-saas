@@ -97,17 +97,18 @@ model LigneDevis {
 }
 
 model Depense {
-  id          String    @id @default(cuid())
-  userId      String
-  description String
-  montant     Decimal   @db.Decimal(10, 2)
-  date        DateTime  @default(now())
-  categorie   String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+ id String @id @default(cuid())
+ userId String
+ description String
+ montant Decimal @db.Decimal(10, 2)
+ date DateTime @default(now())
+ categorie String?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ deletedAt DateTime?
 
-  @@index([userId])
+ @@index([userId])
+ @@index([userId, date])
 }
 
 model Facture {
@@ -135,12 +136,13 @@ model Facture {
   updatedAt             DateTime           @updatedAt
   deletedAt             DateTime?
 
-  @@unique([userId, numero])
-  @@index([devisId])
-  @@index([userId, statut])
-  @@index([userId, createdAt])
-  @@index([userId, dateEcheance])
-  @@index([recurrenteId])
+@@unique([userId, numero])
+ @@index([devisId])
+ @@index([userId, statut])
+ @@index([userId, createdAt])
+ @@index([userId, date])
+ @@index([userId, dateEcheance])
+ @@index([recurrenteId])
 }
 
 model Note {
