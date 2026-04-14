@@ -4612,7 +4612,16 @@ class AIAgent:
                             entry["id"] = tc_delta.id
                         if tc_delta.function:
                             if tc_delta.function.name:
-                                entry["function"]["name"] += tc_delta.function.name
+                                current_name = entry["function"]["name"]
+                                delta_name = tc_delta.function.name
+                                # Some models (e.g. MiniMax via NVIDIA NIM) resend the full name in
+                                # every chunk instead of incrementally. Detect and skip duplicates.
+                                if not current_name:
+                                    entry["function"]["name"] = delta_name
+                                elif current_name == delta_name:
+                                    pass
+                                else:
+                                    entry["function"]["name"] += delta_name
                             if tc_delta.function.arguments:
                                 entry["function"]["arguments"] += tc_delta.function.arguments
                         extra = getattr(tc_delta, "extra_content", None)
