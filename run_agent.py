@@ -2988,7 +2988,8 @@ class AIAgent:
 
         1. Try lowercase
         2. Try normalized (lowercase + hyphens/spaces -> underscores)
-        3. Try fuzzy match (difflib, cutoff=0.7)
+        3. Try doubled-name detection (e.g. "terminalterminal" -> "terminal")
+        4. Try fuzzy match (difflib, cutoff=0.7)
 
         Returns the repaired name if found in valid_tool_names, else None.
         """
@@ -3004,8 +3005,20 @@ class AIAgent:
         if normalized in self.valid_tool_names:
             return normalized
 
-        # 3. Fuzzy match
-        matches = get_close_matches(lowered, self.valid_tool_names, n=1, cutoff=0.7)
+        # 3. Doubled-name detection — some models duplicate tool names
+        #    (e.g. "terminalterminal", "read_fileread_file")
+        half = len(normalized) // 2
+        if len(normalized) % 2 == 0:
+            first_half = normalized[:half]
+            if first_half in self.valid_tool_names:
+                return first_half
+        # Also try odd-length (e.g. "terminalterminalx" → "terminal")
+        for name in self.valid_tool_names:
+            if len(name) > 0 and normalized == name + name:
+                return name
+
+        # 4. Fuzzy match
+        matches = get_close_matches(normalized, self.valid_tool_names, n=1, cutoff=0.7)
         if matches:
             return matches[0]
 
