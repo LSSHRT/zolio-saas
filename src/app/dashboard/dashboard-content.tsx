@@ -738,3 +738,55 @@ export default function DashboardPage() {
           )}
 
         </main>
+
+        <DesktopDrawer open={!!selectedDevisNumero} onClose={() => setSelectedDevisNumero(null)}>
+          {selectedDevisNumero && <DevisEditor numero={selectedDevisNumero} />}
+        </DesktopDrawer>
+
+        <MobileDialog open={objectifDialogOpen} onClose={() => setObjectifDialogOpen(false)} title="Ajuster l'objectif">
+          <div className="p-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Définissez votre objectif de chiffre d'affaires mensuel (TTC) pour suivre votre progression.
+            </p>
+            <div className="mt-4">
+              <label htmlFor="objectif" className="block text-sm font-medium text-slate-700 dark:text-slate-300">Objectif mensuel</label>
+              <div className="relative mt-1 mt-2">
+                <input
+                  type="text"
+                  name="objectif"
+                  id="objectif"
+                  value={objectifDraft}
+                  onChange={(e) => setObjectifDraft(e.target.value)}
+                  className="block w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-950 focus:border-violet-500 focus:ring-violet-500 dark:border-white/10 dark:bg-white/5 dark:text-white sm:text-sm"
+                  placeholder="5000"
+                />
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                  <span className="text-slate-500 sm:text-sm">€ TTC</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setObjectifDialogOpen(false)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
+              >
+                Annuler
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdateObjectif}
+                className="flex-1 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </MobileDialog>
+
+        <ClientMobileDock active="dashboard" />
+      </div>
+    </PullToRefresh>
+  </div>
+  );
+}
