@@ -25,17 +25,6 @@ export default async function DashboardPage() {
   const imageUrl = user?.imageUrl || null;
 
   return (
-    <DashboardContent
-      initialUser={{ firstName, imageUrl }}
-      initialData={{
-        companyTrade: companyTrade || null,
-        catalogImported,
-        onboardingDone,
-        starterCatalogCount: summary.starterCatalogCount,
-        canAccessAdmin,
-        isPro,
-      }}
-      initialSummary={summary}
-    />
+    <DashboardContent />
   );
 }
