@@ -247,13 +247,21 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     },
   );
 
+  const safeData = initialData ?? {
+    companyTrade: null,
+    catalogImported: false,
+    onboardingDone: false,
+    starterCatalogCount: 0,
+    canAccessAdmin: false,
+    isPro: false,
+  };
 
-  const canAccessAdmin = initialData.canAccessAdmin;
-  const isPro = initialData.isPro;
-  const companyTrade = readStringMetadata(initialData.companyTrade || clerkUser?.publicMetadata?.companyTrade as string | undefined);
-  const catalogImported = initialData.catalogImported || readBooleanMetadata(clerkUser?.publicMetadata?.starterCatalogImported as boolean | undefined);
-  const onboardingDone = initialData.onboardingDone || readBooleanMetadata(clerkUser?.publicMetadata?.onboardingCompleted as boolean | undefined);
-  const starterCatalogCount = dashboardData?.starterCatalogCount ?? initialData.starterCatalogCount;
+  const canAccessAdmin = safeData.canAccessAdmin;
+  const isPro = safeData.isPro;
+  const companyTrade = readStringMetadata(safeData.companyTrade || clerkUser?.publicMetadata?.companyTrade as string | undefined);
+  const catalogImported = safeData.catalogImported || readBooleanMetadata(clerkUser?.publicMetadata?.starterCatalogImported as boolean | undefined);
+  const onboardingDone = safeData.onboardingDone || readBooleanMetadata(clerkUser?.publicMetadata?.onboardingCompleted as boolean | undefined);
+  const starterCatalogCount = dashboardData?.starterCatalogCount ?? safeData.starterCatalogCount;
   const currentTrade = companyTrade || DEFAULT_TRADE;
   const starterTrade = getTradeDefinition(currentTrade);
 
