@@ -27,11 +27,15 @@ function EmptyListState({
   description: string;
 }) {
   return (
-    <div className="rounded-[1.6rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-7 text-center dark:border-white/10 dark:bg-white/4">
+    <div className="rounded-[1.5rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-7 text-center dark:border-white/10 dark:bg-white/4">
       <p className="text-sm font-semibold text-slate-950 dark:text-white">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
     </div>
   );
+}
+
+function shouldInterceptDesktopOpen() {
+  return typeof window !== "undefined" && window.innerWidth >= 1024;
 }
 
 export function DashboardRecentQuotes({
@@ -45,79 +49,47 @@ export function DashboardRecentQuotes({
     return (
       <EmptyListState
         title="Aucun devis récent"
-        description="Créez votre premier devis pour alimenter le cockpit."
+        description="Créez votre premier devis pour faire vivre le cockpit."
       />
     );
   }
 
   return (
-    <>
-      <div className="space-y-3 lg:hidden">
-        {items.slice(0, 4).map((item) => (
-          <Link href={`/devis/${item.numero}`} key={item.numero}>
-            <div className="rounded-[1.5rem] border border-slate-200/70 bg-white/80 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.24)] transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
+    <div className="space-y-3">
+      {items.slice(0, 4).map((item) => (
+        <Link
+          href={`/devis/${item.numero}`}
+          key={item.numero}
+          onClick={(event) => {
+            if (onSelectDevis && shouldInterceptDesktopOpen()) {
+              event.preventDefault();
+              onSelectDevis(item.numero);
+            }
+          }}
+        >
+          <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/84 p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
                   <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
-                    {item.numero}
-                  </p>
+                  <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>{item.statut}</span>
                 </div>
-                <span className={`client-chip ring-1 ${statusBadgeClasses(item.statut)}`}>{item.statut}</span>
+                <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+                  {item.numero}
+                </p>
               </div>
-              <div className="mt-4 flex items-end justify-between gap-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400">{formatDateLabel(item.date)}</p>
-                <p className="text-base font-semibold text-slate-950 dark:text-white">{formatCurrency(item.totalTTC || 0)}</p>
-              </div>
+              <p className="shrink-0 text-base font-semibold text-slate-950 dark:text-white">
+                {formatCurrency(item.totalTTC || 0)}
+              </p>
             </div>
-          </Link>
-        ))}
-      </div>
-
-      <div className="hidden overflow-hidden rounded-[1.65rem] border border-slate-200/70 bg-white/80 shadow-[0_20px_48px_-36px_rgba(15,23,42,0.22)] lg:block dark:border-white/8 dark:bg-white/4">
-        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-          <thead className="bg-slate-50/70 text-xs uppercase tracking-[0.16em] text-slate-500 dark:bg-white/5 dark:text-slate-400">
-            <tr>
-              <th scope="col" className="px-4 py-3 font-semibold">Client</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Numéro</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Date</th>
-              <th scope="col" className="px-4 py-3 font-semibold text-right">Montant</th>
-              <th scope="col" className="px-4 py-3 font-semibold text-center">Statut</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200/70 dark:divide-white/10">
-            {items.slice(0, 4).map((item) => (
-              <tr key={item.numero} className="group relative transition hover:bg-slate-50/70 dark:hover:bg-white/5">
-                <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
-                  <Link
-                    href={`/devis/${item.numero}`}
-                    onClick={(event) => {
-                      if (onSelectDevis) {
-                        event.preventDefault();
-                        onSelectDevis(item.numero);
-                      }
-                    }}
-                    className="before:absolute before:inset-0 focus:outline-none"
-                  >
-                    {item.nomClient}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">{item.numero}</td>
-                <td className="px-4 py-3">{formatDateLabel(item.date)}</td>
-                <td className="px-4 py-3 text-right font-semibold text-slate-950 dark:text-white">
-                  {formatCurrency(item.totalTTC || 0)}
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span className={`client-chip inline-flex ring-1 ${statusBadgeClasses(item.statut)}`}>
-                    {item.statut}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
+            <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-3 text-sm text-slate-500 dark:border-white/10 dark:text-slate-400">
+              <span>Créé le {formatDateLabel(item.date)}</span>
+              <span className="font-medium text-slate-700 dark:text-slate-200">Ouvrir</span>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }
 
@@ -131,76 +103,48 @@ export function DashboardFollowUps({
   if (items.length === 0) {
     return (
       <EmptyListState
-        title="Pipeline propre"
-        description="Aucun devis âgé de plus de 7 jours n'attend une relance."
+        title="Aucune relance en attente"
+        description="Le pipeline ne contient pas de devis dépassant 7 jours d'attente."
       />
     );
   }
 
   return (
-    <>
-      <div className="space-y-3 lg:hidden">
-        {items.slice(0, 4).map((item) => (
-          <Link href={`/devis/${item.numero}`} key={item.numero}>
-            <div className="rounded-[1.5rem] border border-rose-200/70 bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(255,255,255,0.95))] p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] dark:border-rose-400/12 dark:bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(15,23,42,0.86))]">
+    <div className="space-y-3">
+      {items.slice(0, 4).map((item) => (
+        <Link
+          href={`/devis/${item.numero}`}
+          key={item.numero}
+          onClick={(event) => {
+            if (onSelectDevis && shouldInterceptDesktopOpen()) {
+              event.preventDefault();
+              onSelectDevis(item.numero);
+            }
+          }}
+        >
+          <div className="relative overflow-hidden rounded-[1.45rem] border border-rose-200/70 bg-white/84 p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 dark:border-rose-400/12 dark:bg-white/4">
+            <div className="absolute inset-y-4 left-0 w-1 rounded-r-full bg-gradient-to-b from-rose-500 to-orange-300" />
+            <div className="pl-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-rose-500 dark:text-rose-300">
+                  <p className="mt-2 text-xs uppercase tracking-[0.18em] text-rose-500 dark:text-rose-300">
                     {item.numero}
                   </p>
                 </div>
-                <span className="client-chip bg-rose-500/12 text-rose-700 ring-1 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
-                  +7j
-                </span>
+                <p className="shrink-0 text-base font-semibold text-slate-950 dark:text-white">
+                  {formatCurrency(item.totalTTC || 0)}
+                </p>
               </div>
-              <div className="mt-4 flex items-end justify-between gap-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400">{formatDateLabel(item.date)}</p>
-                <p className="text-base font-semibold text-slate-950 dark:text-white">{formatCurrency(item.totalTTC || 0)}</p>
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-rose-200/70 pt-3 text-sm dark:border-rose-400/12">
+                <span className="text-slate-500 dark:text-slate-400">En attente depuis le {formatDateLabel(item.date)}</span>
+                <span className="font-semibold text-rose-700 dark:text-rose-200">Relancer</span>
               </div>
             </div>
-          </Link>
-        ))}
-      </div>
-
-      <div className="hidden overflow-hidden rounded-[1.65rem] border border-rose-200/70 bg-white/80 shadow-[0_20px_48px_-36px_rgba(15,23,42,0.22)] lg:block dark:border-rose-400/12 dark:bg-white/4">
-        <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
-          <thead className="bg-rose-50/70 text-xs uppercase tracking-[0.16em] text-slate-500 dark:bg-white/5 dark:text-slate-400">
-            <tr>
-              <th scope="col" className="px-4 py-3 font-semibold">Client</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Numéro</th>
-              <th scope="col" className="px-4 py-3 font-semibold">Date</th>
-              <th scope="col" className="px-4 py-3 font-semibold text-right">Montant</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-rose-200/60 dark:divide-white/10">
-            {items.slice(0, 4).map((item) => (
-              <tr key={item.numero} className="group relative bg-rose-50/30 transition hover:bg-rose-50/60 dark:bg-rose-500/5 dark:hover:bg-rose-500/10">
-                <td className="px-4 py-3 font-semibold text-slate-950 dark:text-white">
-                  <Link
-                    href={`/devis/${item.numero}`}
-                    onClick={(event) => {
-                      if (onSelectDevis) {
-                        event.preventDefault();
-                        onSelectDevis(item.numero);
-                      }
-                    }}
-                    className="before:absolute before:inset-0 focus:outline-none"
-                  >
-                    {item.nomClient}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-rose-700 dark:text-rose-200">{item.numero}</td>
-                <td className="px-4 py-3 text-rose-700 dark:text-rose-200">{formatDateLabel(item.date)}</td>
-                <td className="px-4 py-3 text-right font-semibold text-slate-950 dark:text-white">
-                  {formatCurrency(item.totalTTC || 0)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }
 
@@ -208,8 +152,8 @@ export function DashboardEcheances({ items }: { items: EcheanceItem[] }) {
   if (items.length === 0) {
     return (
       <EmptyListState
-        title="Aucune échéance dans les 14 jours"
-        description="Tout est sous contrôle côté encaissement."
+        title="Aucune échéance proche"
+        description="Aucun paiement n'est attendu dans les 14 prochains jours."
       />
     );
   }
@@ -219,34 +163,31 @@ export function DashboardEcheances({ items }: { items: EcheanceItem[] }) {
       {items.slice(0, 5).map((item) => {
         const urgent = item.joursRestants <= 3;
         const soon = item.joursRestants > 3 && item.joursRestants <= 7;
-        const toneClasses = urgent
-          ? "border-rose-200/70 bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(255,255,255,0.95))] dark:border-rose-400/12 dark:bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(15,23,42,0.86))]"
+        const badgeClasses = urgent
+          ? "bg-rose-500/12 text-rose-700 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20"
           : soon
-            ? "border-amber-200/70 bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(255,255,255,0.95))] dark:border-amber-400/12 dark:bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(15,23,42,0.86))]"
-            : "border-violet-200/70 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(255,255,255,0.95))] dark:border-violet-400/12 dark:bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(15,23,42,0.86))]";
-        const textClass = urgent
-          ? "text-rose-700 dark:text-rose-200"
-          : soon
-            ? "text-amber-700 dark:text-amber-200"
-            : "text-violet-700 dark:text-violet-200";
+            ? "bg-amber-500/12 text-amber-700 ring-amber-300/40 dark:bg-amber-500/12 dark:text-amber-200 dark:ring-amber-400/20"
+            : "bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:bg-violet-500/12 dark:text-violet-200 dark:ring-violet-400/20";
 
         return (
           <Link href={`/factures/${item.numero}`} key={item.numero}>
-            <div className={`rounded-[1.5rem] border p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 ${toneClasses}`}>
+            <div className="rounded-[1.45rem] border border-slate-200/70 bg-white/84 p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{item.nomClient}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-400 dark:text-slate-500">
+                  <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
                     {item.numero} · {formatDateLabel(item.dateEcheance)}
                   </p>
                 </div>
-                <span className={`client-chip ring-1 ${textClass} ${urgent ? "bg-rose-500/12 ring-rose-300/40 dark:bg-rose-500/12 dark:ring-rose-400/20" : soon ? "bg-amber-500/12 ring-amber-300/40 dark:bg-amber-500/12 dark:ring-amber-400/20" : "bg-violet-500/12 ring-violet-300/40 dark:bg-violet-500/12 dark:ring-violet-400/20"}`}>
+                <span className={`client-chip ring-1 ${badgeClasses}`}>
                   {item.joursRestants === 0 ? "Aujourd'hui" : `J${item.joursRestants > 0 ? "+" : ""}${item.joursRestants}`}
                 </span>
               </div>
-              <div className="mt-4 flex items-end justify-between gap-3">
-                <p className="text-sm text-slate-500 dark:text-slate-400">Paiement attendu</p>
-                <p className="text-base font-semibold text-slate-950 dark:text-white">{formatCurrency(item.totalTTC)}</p>
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-200/70 pt-3 dark:border-white/10">
+                <span className="text-sm text-slate-500 dark:text-slate-400">Montant attendu</span>
+                <span className="text-base font-semibold text-slate-950 dark:text-white">
+                  {formatCurrency(item.totalTTC)}
+                </span>
               </div>
             </div>
           </Link>
@@ -264,8 +205,8 @@ export function DashboardTopClients({
   if (items.length === 0) {
     return (
       <EmptyListState
-        title="Pas encore de données"
-        description="Acceptez vos premiers devis pour faire émerger vos meilleurs clients."
+        title="Aucun top client pour l'instant"
+        description="Vos prochains devis acceptés feront émerger les comptes les plus rentables."
       />
     );
   }
@@ -276,10 +217,11 @@ export function DashboardTopClients({
     <div className="space-y-3">
       {items.map((client, index) => {
         const width = Math.max((client.revenueHT / maxRevenue) * 100, 8);
+
         return (
           <div
             key={client.nom}
-            className="rounded-[1.5rem] border border-slate-200/70 bg-white/80 p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] dark:border-white/8 dark:bg-white/4"
+            className="rounded-[1.45rem] border border-slate-200/70 bg-white/84 p-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-white/4"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">

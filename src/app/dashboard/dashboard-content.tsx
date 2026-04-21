@@ -3,7 +3,6 @@
 import {
   Bell,
   BriefcaseBusiness,
-  ChevronDown,
   ChevronRight,
   Clock3,
   CloudSun,
@@ -20,7 +19,6 @@ import {
   SunMedium,
   Target,
   TrendingUp,
-  TriangleAlert,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -52,8 +50,6 @@ import {
   readBooleanMetadata,
   formatCurrency,
   sectionMotion,
-  toneClasses,
-  type Tone,
   type DashboardSignal,
   type DashboardActionPlanItem,
   type QuickLinkItem,
@@ -130,9 +126,9 @@ function TradeOptionCard({
     <button
       type="button"
       onClick={() => onSelect(option.key)}
-      className={`rounded-[1.5rem] border px-4 py-4 text-left transition ${
+      className={`rounded-[1.45rem] border px-4 py-4 text-left transition ${
         active
-          ? "border-violet-300/70 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(255,255,255,0.96))] shadow-[0_20px_46px_-36px_rgba(124,58,237,0.4)] dark:border-violet-400/20 dark:bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(15,23,42,0.86))]"
+          ? "border-violet-300/70 bg-white/90 shadow-[0_20px_46px_-36px_rgba(124,58,237,0.3)] dark:border-violet-400/20 dark:bg-white/6"
           : "border-slate-200/70 bg-white/80 hover:border-violet-300 hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4"
       }`}
     >
@@ -163,13 +159,9 @@ function DashboardSectionHeader({
         <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
           {eyebrow}
         </p>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
-          {title}
-        </h2>
+        <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{title}</h2>
         {description ? (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">
-            {description}
-          </p>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
         ) : null}
       </div>
       <div className="flex items-center gap-3">
@@ -192,55 +184,99 @@ function DashboardSectionHeader({
   );
 }
 
-function DashboardPulseTile({
+function GoalSummaryCard({
+  objectifProgress,
+  goalContextLabel,
+  caTTC,
+  objectifActif,
+  onEdit,
+}: {
+  objectifProgress: number;
+  goalContextLabel: string;
+  caTTC: number;
+  objectifActif: number;
+  onEdit: () => void;
+}) {
+  return (
+    <div className="rounded-[1.8rem] border border-white/70 bg-white/84 p-5 shadow-[0_24px_56px_-40px_rgba(15,23,42,0.22)] backdrop-blur-xl dark:border-white/10 dark:bg-white/6">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+            Objectif mensuel
+          </p>
+          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            {objectifProgress.toFixed(0)}%
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{goalContextLabel}</p>
+        </div>
+        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/12 text-violet-700 ring-1 ring-violet-300/40 dark:text-violet-200 dark:ring-violet-400/20">
+          <Target size={18} />
+        </div>
+      </div>
+
+      <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
+          style={{ width: `${objectifProgress}%` }}
+        />
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            CA TTC
+          </p>
+          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            {formatCurrency(caTTC)}
+          </p>
+        </div>
+        <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+            Cible
+          </p>
+          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            {formatCurrency(objectifActif)}
+          </p>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={onEdit}
+        className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+      >
+        <Pencil size={14} />
+        Ajuster
+      </button>
+    </div>
+  );
+}
+
+function WeeklyMiniStat({
   icon: Icon,
   label,
   value,
   detail,
-  tone,
 }: {
   icon: LucideIcon;
   label: string;
   value: string;
   detail: string;
-  tone: Tone;
 }) {
   return (
-    <div className="rounded-[1.5rem] border border-white/70 bg-white/70 p-4 shadow-[0_20px_44px_-34px_rgba(15,23,42,0.22)] backdrop-blur-xl dark:border-white/10 dark:bg-white/6">
+    <div className="rounded-[1.35rem] border border-slate-200/70 bg-white/84 p-4 dark:border-white/8 dark:bg-white/4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
             {label}
           </p>
-          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-            {value}
-          </p>
+          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
+          <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{detail}</p>
         </div>
-        <div className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ring-1 ${toneClasses(tone).icon}`}>
-          <Icon size={17} />
+        <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
+          <Icon size={15} />
         </div>
       </div>
-      <p className="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-400">{detail}</p>
-    </div>
-  );
-}
-
-function DashboardInsightStat({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-}) {
-  return (
-    <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-        {label}
-      </p>
-      <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
-      <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{detail}</p>
     </div>
   );
 }
@@ -276,7 +312,6 @@ export default function DashboardPage() {
     () => typeof window !== "undefined" && !localStorage.getItem("zolio_has_seen_tour"),
   );
   const [currentHour] = useState(() => new Date().getHours());
-  const [showMoreMobile, setShowMoreMobile] = useState(false);
   const [selectedDevisNumero, setSelectedDevisNumero] = useState<string | null>(null);
 
   useEffect(() => {
@@ -362,7 +397,7 @@ export default function DashboardPage() {
 
   const d = dashboardData;
   const totalQuotes = d?.totalQuotes ?? 0;
-  const CA_TTC = d?.totalTTC ?? 0;
+  const caTTC = d?.totalTTC ?? 0;
   const acceptedCount = d?.acceptedCount ?? 0;
   const pendingCount = d?.pendingCount ?? 0;
   const acceptedRevenueHT = d?.acceptedRevenueHT ?? 0;
@@ -370,8 +405,8 @@ export default function DashboardPage() {
   const conversionRate = d?.conversionRate ?? 0;
   const averageTicket = d?.averageTicket ?? 0;
   const avgResponseDays = d?.avgResponseDays ?? 0;
-  const objectifProgress = objectifActif > 0 ? Math.min((CA_TTC / objectifActif) * 100, 100) : 0;
-  const remainingToGoal = Math.max(objectifActif - CA_TTC, 0);
+  const objectifProgress = objectifActif > 0 ? Math.min((caTTC / objectifActif) * 100, 100) : 0;
+  const remainingToGoal = Math.max(objectifActif - caTTC, 0);
   const devisRecents = (d?.recentQuotes ?? []) as QuoteListItem[];
   const devisARelancer = (d?.followUpQuotes ?? []) as QuoteListItem[];
   const monthlyData: ClientDashboardMonthlyDatum[] = d?.monthlyData ?? [];
@@ -405,24 +440,15 @@ export default function DashboardPage() {
       nextSignals.push({
         id: "setup",
         title: "Starter métier à activer",
-        description: "Choisissez votre métier et importez le catalogue de départ.",
-        tone: "violet",
-      });
-    }
-    if (totalQuotes === 0) {
-      nextSignals.push({
-        id: "empty",
-        title: "Premier devis à lancer",
-        description: "Créez votre premier devis pour enclencher votre pipeline.",
-        href: "/nouveau-devis",
+        description: "Choisissez votre métier et importez votre base de prestations.",
         tone: "violet",
       });
     }
     if (devisARelancer.length > 0) {
       nextSignals.push({
         id: "followups",
-        title: `${devisARelancer.length} devis à relancer`,
-        description: "Des clients attendent un rappel de votre part.",
+        title: `${devisARelancer.length} relance(s)`,
+        description: "Des devis ont besoin d'une action commerciale rapide.",
         href: "/devis",
         tone: "rose",
       });
@@ -430,8 +456,8 @@ export default function DashboardPage() {
     if (pendingCount > 0) {
       nextSignals.push({
         id: "pipeline",
-        title: `${pendingCount} devis dans le pipe`,
-        description: `${formatCurrency(pipelineHT)} HT sont encore à convertir.`,
+        title: `${pendingCount} devis en attente`,
+        description: `${formatCurrency(pipelineHT)} HT restent à convertir.`,
         href: "/devis",
         tone: "amber",
       });
@@ -440,9 +466,18 @@ export default function DashboardPage() {
       nextSignals.push({
         id: "overdue",
         title: `${formatCurrency(tresorerie.enRetard)} en retard`,
-        description: `${tresorerie.tauxRecouvrement}% de recouvrement sur les montants exposés.`,
+        description: "Une partie de la trésorerie doit être sécurisée.",
         href: "/factures",
         tone: "rose",
+      });
+    }
+    if (totalQuotes === 0) {
+      nextSignals.push({
+        id: "first",
+        title: "Premier devis à lancer",
+        description: "Le cockpit prendra tout son sens dès la première affaire créée.",
+        href: "/nouveau-devis",
+        tone: "violet",
       });
     }
 
@@ -453,25 +488,16 @@ export default function DashboardPage() {
     if (setupRequired) {
       return {
         id: "focus-setup",
-        title: "Activer le starter métier",
-        description: "Configurez votre activité pour partir avec un catalogue prêt à l'emploi.",
-        tone: "violet",
-      };
-    }
-    if (totalQuotes === 0) {
-      return {
-        id: "focus-first",
-        title: "Créer le premier devis",
-        description: "Lancez votre première affaire et posez une base chiffrée.",
-        href: "/nouveau-devis",
+        title: "Finaliser la configuration métier",
+        description: "Commencez par activer le starter pour avoir un cockpit immédiatement utile.",
         tone: "violet",
       };
     }
     if (devisARelancer.length > 0) {
       return {
         id: "focus-followups",
-        title: `${devisARelancer.length} relance(s) à faire`,
-        description: "Traitez-les avant qu'elles refroidissent.",
+        title: `${devisARelancer.length} devis doivent être relancés`,
+        description: "La priorité du moment est commerciale, pas décorative.",
         href: "/devis",
         tone: "rose",
       };
@@ -479,45 +505,50 @@ export default function DashboardPage() {
     if (pendingCount > 0) {
       return {
         id: "focus-pipeline",
-        title: "Pipeline chaud",
-        description: `${formatCurrency(pipelineHT)} HT attendent encore une décision.`,
+        title: "Le pipeline reste ouvert",
+        description: `${formatCurrency(pipelineHT)} HT peuvent encore être convertis.`,
         href: "/devis",
         tone: "amber",
       };
     }
+    if (totalQuotes === 0) {
+      return {
+        id: "focus-first",
+        title: "Créer le premier devis",
+        description: "Le dashboard est prêt, mais il lui manque encore un signal réel.",
+        href: "/nouveau-devis",
+        tone: "violet",
+      };
+    }
     return {
       id: "focus-steady",
-      title: "Cockpit sous contrôle",
-      description: "Le bon levier du moment: maintenir le rythme et améliorer la conversion.",
+      title: "Le cockpit est stable",
+      description: "Travaillez maintenant la conversion, la réactivité et l'encaissement.",
       tone: "emerald",
     };
   }, [devisARelancer.length, pendingCount, pipelineHT, setupRequired, totalQuotes]);
 
   const heroIndicators = useMemo<DashboardHeroIndicator[]>(() => {
-    const indicators: DashboardHeroIndicator[] = [];
-
-    if (devisARelancer.length > 0) {
-      indicators.push({
-        id: "hero-followups",
+    return [
+      {
+        id: "indicator-pipeline",
+        label: "Pipeline",
+        value: formatCurrency(pipelineHT),
+        tone: pendingCount > 0 ? "amber" : "slate",
+      },
+      {
+        id: "indicator-relances",
         label: "Relances",
-        value: `${devisARelancer.length} à faire`,
-        tone: "rose",
-      });
-    }
-    indicators.push({
-      id: "hero-pipeline",
-      label: "Pipeline",
-      value: formatCurrency(pipelineHT),
-      tone: pendingCount > 0 ? "amber" : "slate",
-    });
-    indicators.push({
-      id: "hero-goal",
-      label: remainingToGoal > 0 ? "Cap restant" : "Objectif",
-      value: remainingToGoal > 0 ? formatCurrency(remainingToGoal) : "Atteint",
-      tone: remainingToGoal > 0 ? "violet" : "emerald",
-    });
-
-    return indicators.slice(0, 3);
+        value: `${devisARelancer.length} à traiter`,
+        tone: devisARelancer.length > 0 ? "rose" : "slate",
+      },
+      {
+        id: "indicator-cap",
+        label: "Cap restant",
+        value: remainingToGoal > 0 ? formatCurrency(remainingToGoal) : "Atteint",
+        tone: remainingToGoal > 0 ? "violet" : "emerald",
+      },
+    ];
   }, [devisARelancer.length, pendingCount, pipelineHT, remainingToGoal]);
 
   const actionPlan = useMemo<DashboardActionPlanItem[]>(() => {
@@ -525,8 +556,8 @@ export default function DashboardPage() {
       {
         id: "create",
         eyebrow: "Action",
-        title: totalQuotes === 0 ? "Créer le premier devis" : "Nouveau devis",
-        description: "Ouvrez une nouvelle affaire et nourrissez votre pipeline.",
+        title: totalQuotes === 0 ? "Créer le premier devis" : "Ouvrir un nouveau devis",
+        description: "Le flux principal du cockpit commence ici.",
         href: "/nouveau-devis",
         icon: Plus,
         tone: "violet",
@@ -538,8 +569,8 @@ export default function DashboardPage() {
       items.push({
         id: "followups",
         eyebrow: "Urgent",
-        title: `${devisARelancer.length} relance(s)`,
-        description: "Des devis attendent un rappel immédiat.",
+        title: "Traiter les relances",
+        description: `${devisARelancer.length} devis attendent un rappel.`,
         href: "/devis",
         icon: Bell,
         tone: "rose",
@@ -549,9 +580,9 @@ export default function DashboardPage() {
     } else if (pendingCount > 0) {
       items.push({
         id: "pipeline",
-        eyebrow: "À suivre",
-        title: "Pipe chaud",
-        description: `${pendingCount} devis restent en attente de décision.`,
+        eyebrow: "Commercial",
+        title: "Suivre le pipeline",
+        description: `${pendingCount} devis restent en attente.`,
         href: "/devis",
         icon: Clock3,
         tone: "amber",
@@ -560,26 +591,12 @@ export default function DashboardPage() {
       });
     }
 
-    if (tresorerie && tresorerie.enRetard > 0) {
-      items.push({
-        id: "overdue",
-        eyebrow: "Priorité",
-        title: `${formatCurrency(tresorerie.enRetard)} en retard`,
-        description: "Relancez les impayés avant qu'ils dérivent.",
-        href: "/factures",
-        icon: TriangleAlert,
-        tone: "rose",
-        value: formatCurrency(tresorerie.enRetard),
-        ctaLabel: "Voir",
-      });
-    }
-
     if (!isPro) {
       items.push({
         id: "pro",
         eyebrow: "Croissance",
         title: "Passer en PRO",
-        description: "Levez les limites et débloquez plus de marge de manœuvre.",
+        description: "Débloquez plus de latitude pour piloter votre activité.",
         href: "/abonnement",
         icon: Sparkles,
         tone: "violet",
@@ -587,52 +604,49 @@ export default function DashboardPage() {
       });
     }
 
-    return items;
-  }, [devisARelancer.length, isPro, pendingCount, pipelineHT, totalQuotes, tresorerie]);
+    return items.slice(0, 3);
+  }, [devisARelancer.length, isPro, pendingCount, pipelineHT, totalQuotes]);
 
   const quickLinks: QuickLinkItem[] = [
-    { href: "/clients", label: "Clients", description: "Carnet, historique et coordonnées.", icon: Users, tone: "violet" },
-    { href: "/factures", label: "Factures", description: "Paiements, relances et suivi.", icon: FileCheck2, tone: "slate" },
-    { href: "/catalogue", label: "Catalogue", description: "Prestations prêtes à l'emploi.", icon: Package, tone: "amber" },
-    { href: "/parametres", label: "Paramètres", description: "Identité, entreprise et réglages.", icon: Settings, tone: "slate" },
+    { href: "/clients", label: "Clients", description: "Carnet et historique", icon: Users, tone: "violet" },
+    { href: "/factures", label: "Factures", description: "Paiements et relances", icon: FileCheck2, tone: "slate" },
+    { href: "/catalogue", label: "Catalogue", description: "Prestations réutilisables", icon: Package, tone: "amber" },
+    { href: "/parametres", label: "Paramètres", description: "Entreprise et réglages", icon: Settings, tone: "slate" },
   ];
 
   const briefingText = useMemo(() => {
     if (setupRequired) {
-      return "Finalisez votre base métier pour démarrer avec un dashboard utile dès la première semaine.";
-    }
-    if (devisARelancer.length > 0 && echeances.length > 0) {
-      return `${devisARelancer.length} devis demandent une relance et ${echeances.length} paiement(s) approchent. Le cockpit met les points de tension au premier plan.`;
+      return "Le dashboard a été vidé de tout bruit inutile. La première étape est maintenant d'activer le starter métier pour lui donner une base réelle.";
     }
     if (devisARelancer.length > 0) {
-      return `${devisARelancer.length} devis attendent une relance. C'est le meilleur levier immédiat pour sécuriser votre pipeline.`;
+      return `${devisARelancer.length} devis demandent une relance. C'est l'information la plus importante du moment, devant le reste.`;
     }
     if (pendingCount > 0) {
-      return `${pendingCount} devis restent en attente. ${formatCurrency(pipelineHT)} HT peuvent encore tomber si vous gardez la pression commerciale.`;
+      return `${pendingCount} devis restent ouverts. Le cockpit se concentre donc sur le pipeline, l'encaissement et la vitesse de conversion.`;
     }
     if (totalQuotes === 0) {
-      return "Le cockpit est prêt. Il ne manque plus que votre premier devis pour créer du signal utile.";
+      return "Le dashboard est prêt mais il n'a pas encore de matière. Créez un premier devis pour faire apparaître les vrais signaux.";
     }
-    return "Le cockpit est stable. Utilisez-le pour surveiller votre rythme, votre conversion et votre encaissement sans perdre le fil.";
-  }, [devisARelancer.length, echeances.length, pendingCount, pipelineHT, setupRequired, totalQuotes]);
+    return "Le cockpit se concentre désormais sur ce qui compte vraiment: conversion, rythme, trésorerie et clients forts.";
+  }, [devisARelancer.length, pendingCount, setupRequired, totalQuotes]);
 
   const goalContextLabel =
     remainingToGoal > 0
-      ? `${formatCurrency(remainingToGoal)} pour atteindre l'objectif`
+      ? `${formatCurrency(remainingToGoal)} restent à sécuriser pour atteindre la cible`
       : "Objectif mensuel atteint";
 
   const tourSteps: Step[] = [
     {
       target: ".tour-dashboard",
-      title: "Bienvenue",
-      content: "Votre cockpit central pour piloter activité, relances et encaissement.",
+      title: "Cockpit",
+      content: "Le dashboard a été recentré sur la hiérarchie des actions et des chiffres clés.",
       disableBeacon: true,
       placement: "bottom" as const,
     },
     {
       target: ".tour-nouveau-devis",
       title: "Nouveau devis",
-      content: "La création d'un devis reste le point d'entrée principal du dashboard.",
+      content: "Le point d'entrée principal reste ici.",
       placement: "bottom" as const,
     },
   ];
@@ -713,12 +727,12 @@ export default function DashboardPage() {
           <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
             {!isLoaded ? (
               <div className="space-y-6">
-                <div className="h-36 animate-pulse rounded-[2rem] bg-slate-200/80 dark:bg-slate-800/80" />
+                <div className="h-40 animate-pulse rounded-[2rem] bg-slate-200/80 dark:bg-slate-800/80" />
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {[...Array(4)].map((_, index) => (
                     <div
                       key={index}
-                      className="h-36 animate-pulse rounded-[1.6rem] bg-slate-200/60 dark:bg-slate-800/60"
+                      className="h-32 animate-pulse rounded-[1.6rem] bg-slate-200/60 dark:bg-slate-800/60"
                     />
                   ))}
                 </div>
@@ -727,13 +741,12 @@ export default function DashboardPage() {
               <>
                 <motion.section
                   {...sectionMotion(0)}
-                  className="client-panel-strong relative overflow-hidden rounded-[2.25rem] px-5 py-5 sm:px-6 sm:py-6 lg:px-7"
+                  className="client-panel-strong relative overflow-hidden rounded-[2.2rem] px-5 py-5 sm:px-6 sm:py-6 lg:px-7"
                 >
-                  <div className="pointer-events-none absolute -left-12 top-8 h-40 w-40 rounded-full bg-violet-500/12 blur-3xl" />
-                  <div className="pointer-events-none absolute -right-10 top-0 h-56 w-56 rounded-full bg-orange-400/10 blur-3xl" />
-                  <div className="pointer-events-none absolute bottom-0 left-1/3 h-36 w-36 rounded-full bg-fuchsia-500/10 blur-3xl" />
+                  <div className="pointer-events-none absolute -left-14 top-12 h-40 w-40 rounded-full bg-violet-500/12 blur-3xl" />
+                  <div className="pointer-events-none absolute -right-10 top-0 h-52 w-52 rounded-full bg-orange-400/10 blur-3xl" />
 
-                  <div className="relative grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.95fr)]">
+                  <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_380px]">
                     <div className="space-y-5">
                       <div className="flex flex-wrap items-center gap-2">
                         <div className="inline-flex items-center gap-2 rounded-full bg-white/72 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
@@ -759,6 +772,8 @@ export default function DashboardPage() {
                         </p>
                       </div>
 
+                      <FocusSignalCard signal={todayFocus} />
+
                       <div className="flex flex-wrap gap-3">
                         <Link href="/nouveau-devis" className="tour-nouveau-devis">
                           <motion.div
@@ -777,368 +792,298 @@ export default function DashboardPage() {
                           Mes devis
                         </Link>
                       </div>
-
-                      <div className="grid gap-3 sm:grid-cols-3">
-                        {heroIndicators.map((indicator) => (
-                          <HeroIndicatorPill key={indicator.id} indicator={indicator} />
-                        ))}
-                      </div>
-
-                      {semaine ? (
-                        <div className="grid gap-3 sm:grid-cols-3">
-                          <DashboardPulseTile
-                            icon={FileText}
-                            label="Devis semaine"
-                            value={String(semaine.nouveauxDevis)}
-                            detail={`${semaine.devisAcceptes} accepté${semaine.devisAcceptes > 1 ? "s" : ""}`}
-                            tone="violet"
-                          />
-                          <DashboardPulseTile
-                            icon={FileCheck2}
-                            label="Factures payées"
-                            value={String(semaine.facturesPayees)}
-                            detail={`${semaine.facturesEmises} émises cette semaine`}
-                            tone="emerald"
-                          />
-                          <DashboardPulseTile
-                            icon={TrendingUp}
-                            label="Encaissé semaine"
-                            value={formatCurrency(semaine.caEncaisse)}
-                            detail={`${formatCurrency(semaine.depensesSemaine)} de dépenses sur la période`}
-                            tone="amber"
-                          />
-                        </div>
-                      ) : null}
                     </div>
 
-                    <div className="grid gap-3">
-                      <div className="rounded-[1.85rem] border border-white/70 bg-white/80 p-5 shadow-[0_24px_56px_-40px_rgba(15,23,42,0.26)] backdrop-blur-xl dark:border-white/10 dark:bg-white/6">
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-                              Objectif mensuel
-                            </p>
-                            <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
-                              {objectifProgress.toFixed(0)}%
-                            </p>
-                            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                              {goalContextLabel}
-                            </p>
-                          </div>
-                          <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/12 text-violet-700 ring-1 ring-violet-300/40 dark:text-violet-200 dark:ring-violet-400/20">
-                            <Target size={18} />
-                          </div>
-                        </div>
+                    <div className="space-y-4">
+                      <GoalSummaryCard
+                        objectifProgress={objectifProgress}
+                        goalContextLabel={goalContextLabel}
+                        caTTC={caTTC}
+                        objectifActif={objectifActif}
+                        onEdit={() => {
+                          setObjectifDraft(objectifActif.toString());
+                          setObjectifDialogOpen(true);
+                        }}
+                      />
 
-                        <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
-                          <div
-                            className="h-full rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
-                            style={{ width: `${objectifProgress}%` }}
-                          />
-                        </div>
-
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                          <DashboardInsightStat
-                            label="CA TTC"
-                            value={formatCurrency(CA_TTC)}
-                            detail="Total cumulé issu du cockpit"
-                          />
-                          <DashboardInsightStat
-                            label="Objectif"
-                            value={formatCurrency(objectifActif)}
-                            detail="Cible mensuelle courante"
-                          />
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setObjectifDraft(objectifActif.toString());
-                            setObjectifDialogOpen(true);
-                          }}
-                          className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                        >
-                          <Pencil size={14} />
-                          Ajuster l'objectif
-                        </button>
-                      </div>
-
-                      <FocusSignalCard signal={todayFocus} />
-
-                      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
-                        {actionPlan.slice(0, 3).map((item) => (
-                          <DashboardActionCard key={item.id} item={item} compact />
+                      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
+                        {heroIndicators.map((indicator) => (
+                          <HeroIndicatorPill key={indicator.id} indicator={indicator} />
                         ))}
                       </div>
                     </div>
                   </div>
                 </motion.section>
 
-                <motion.section {...sectionMotion(0.04)} className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <CompactMetricCard
-                    label="CA validé"
-                    value={formatCurrency(acceptedRevenueHT)}
-                    detail={`${acceptedCount} devis acceptés`}
-                    tone="emerald"
-                    icon={TrendingUp}
-                  />
-                  <CompactMetricCard
-                    label="Pipeline"
-                    value={formatCurrency(pipelineHT)}
-                    detail={`${pendingCount} en attente`}
-                    tone="amber"
-                    icon={Clock3}
-                  />
-                  <CompactMetricCard
-                    label="Relances"
-                    value={String(devisARelancer.length)}
-                    detail="Devis de plus de 7 jours"
-                    tone="rose"
-                    icon={Bell}
-                  />
-                  <CompactMetricCard
-                    label="Ticket moyen"
-                    value={formatCurrency(averageTicket)}
-                    detail={`${conversionRate}% de conversion`}
-                    tone="violet"
-                    icon={LineChart}
-                  />
+                {setupRequired && selectedTradeDef ? (
+                  <motion.section
+                    id="dashboard-setup-panel"
+                    {...sectionMotion(0.04)}
+                    className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6"
+                  >
+                    <DashboardSectionHeader
+                      eyebrow="Starter métier"
+                      title="Initialiser votre base de travail"
+                      description="Le dashboard est maintenant plus strict. Pour qu'il soit pertinent, il faut lui donner une base métier propre."
+                      badge={`${starterCatalogCount} en base`}
+                    />
+
+                    <div className="mt-5 space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                        {TRADE_OPTIONS.map((option) => (
+                          <TradeOptionCard
+                            key={option.key}
+                            option={option}
+                            active={selectedTrade === option.key}
+                            onSelect={setSelectedTrade}
+                          />
+                        ))}
+                      </div>
+
+                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
+                        <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDef.label}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                          {selectedTradeDef.pitch} {selectedStarterCount} prestations seront injectées.
+                        </p>
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          onClick={handleBootstrap}
+                          disabled={isBootstrapping}
+                          className="inline-flex items-center justify-center gap-2 rounded-[1.3rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
+                        >
+                          {isBootstrapping ? "Préparation..." : "Activer mon starter"}
+                        </button>
+                        <Link
+                          href="/parametres"
+                          className="inline-flex items-center justify-center gap-2 rounded-[1.3rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                        >
+                          Finaliser mes paramètres
+                        </Link>
+                      </div>
+                    </div>
+                  </motion.section>
+                ) : null}
+
+                <motion.section
+                  {...sectionMotion(0.08)}
+                  className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start"
+                >
+                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <CompactMetricCard
+                      label="CA validé"
+                      value={formatCurrency(acceptedRevenueHT)}
+                      detail={`${acceptedCount} devis gagnés`}
+                      tone="emerald"
+                      icon={TrendingUp}
+                    />
+                    <CompactMetricCard
+                      label="Pipeline"
+                      value={formatCurrency(pipelineHT)}
+                      detail={`${pendingCount} devis ouverts`}
+                      tone="amber"
+                      icon={Clock3}
+                    />
+                    <CompactMetricCard
+                      label="Ticket moyen"
+                      value={formatCurrency(averageTicket)}
+                      detail={`${conversionRate}% de conversion`}
+                      tone="violet"
+                      icon={LineChart}
+                    />
+                    <CompactMetricCard
+                      label="Réponse"
+                      value={`${avgResponseDays.toFixed(1)} j`}
+                      detail="Délai moyen avant issue"
+                      tone="slate"
+                      icon={FileText}
+                    />
+                  </div>
+
+                  <div className="client-panel rounded-[2rem] p-4 sm:p-5">
+                    <DashboardSectionHeader
+                      eyebrow="À faire maintenant"
+                      title="Plan d'action"
+                      description="Trois actions maximum, sans bruit."
+                    />
+                    <div className="mt-5 grid gap-3">
+                      {actionPlan.map((item) => (
+                        <DashboardActionCard key={item.id} item={item} compact />
+                      ))}
+                    </div>
+                  </div>
                 </motion.section>
 
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(330px,0.95fr)] xl:gap-6">
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.9fr)] xl:gap-6">
                   <div className="space-y-4 xl:space-y-6">
-                    <motion.section {...sectionMotion(0.06)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                    <motion.section {...sectionMotion(0.1)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
                       <DashboardSectionHeader
-                        eyebrow="Pilotage"
-                        title="Rythme mensuel"
-                        description="Lisez votre trajectoire sur les derniers mois et gardez les ratios utiles sous les yeux."
-                        badge={`${objectifProgress.toFixed(0)}% atteint`}
+                        eyebrow="Performance"
+                        title="Rythme et tendance"
+                        description="La courbe mensuelle reste au centre, avec les signaux hebdomadaires à portée directe."
                       />
 
-                      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                        <DashboardInsightStat
-                          label="Réponse moyenne"
-                          value={`${avgResponseDays.toFixed(1)} j`}
-                          detail="Délai moyen avant issue d'un devis"
-                        />
-                        <DashboardInsightStat
-                          label="Total devis"
-                          value={String(totalQuotes)}
-                          detail={`${acceptedCount} gagnés, ${pendingCount} ouverts`}
-                        />
-                        <DashboardInsightStat
-                          label="Cap restant"
-                          value={formatCurrency(remainingToGoal)}
-                          detail={remainingToGoal > 0 ? "Montant encore à sécuriser" : "Objectif déjà franchi"}
-                        />
-                      </div>
+                      {semaine ? (
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                          <WeeklyMiniStat
+                            icon={FileText}
+                            label="Nouveaux devis"
+                            value={String(semaine.nouveauxDevis)}
+                            detail={`${semaine.devisAcceptes} accepté${semaine.devisAcceptes > 1 ? "s" : ""}`}
+                          />
+                          <WeeklyMiniStat
+                            icon={FileCheck2}
+                            label="Factures"
+                            value={String(semaine.facturesEmises)}
+                            detail={`${semaine.facturesPayees} payée${semaine.facturesPayees > 1 ? "s" : ""}`}
+                          />
+                          <WeeklyMiniStat
+                            icon={TrendingUp}
+                            label="Encaissé"
+                            value={formatCurrency(semaine.caEncaisse)}
+                            detail="Semaine en cours"
+                          />
+                          <WeeklyMiniStat
+                            icon={Package}
+                            label="Dépenses"
+                            value={formatCurrency(semaine.depensesSemaine)}
+                            detail="Semaine en cours"
+                          />
+                        </div>
+                      ) : null}
 
                       <div className="mt-5 h-[18rem] overflow-hidden rounded-[1.7rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4 sm:h-72">
                         {loading ? <ChartSkeleton /> : <DashboardChart monthlyData={monthlyData} />}
                       </div>
                     </motion.section>
 
-                    <motion.section {...sectionMotion(0.08)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                    <motion.section {...sectionMotion(0.12)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
                       <DashboardSectionHeader
                         eyebrow="Pipeline"
                         title="Affaires en cours"
-                        description="Vos derniers devis d'un côté, les relances à ne pas laisser refroidir de l'autre."
+                        description="Les devis récents et les relances sont séparés pour éviter les ambiguïtés."
                         linkHref="/devis"
                         linkLabel="Voir tous"
                       />
 
-                      <div className="mt-6 space-y-6">
-                        <div>
-                          <div className="mb-3 flex items-center justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-950 dark:text-white">Derniers devis</p>
-                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Les affaires les plus récentes créées dans le cockpit.
-                              </p>
-                            </div>
-                            <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                              {devisRecents.length}
-                            </span>
+                      <div className="mt-5 grid gap-4 xl:grid-cols-2">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Derniers devis</p>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">{devisRecents.length} item(s)</span>
                           </div>
                           <DashboardRecentQuotes items={devisRecents} onSelectDevis={setSelectedDevisNumero} />
                         </div>
 
-                        <div>
-                          <div className="mb-3 flex items-center justify-between gap-3">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-950 dark:text-white">Relances à traiter</p>
-                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                Les devis qui perdent de la température commerciale.
-                              </p>
-                            </div>
-                            <span className="client-chip bg-rose-500/12 text-rose-700 ring-1 ring-rose-300/40 dark:bg-rose-500/12 dark:text-rose-200 dark:ring-rose-400/20">
-                              {devisARelancer.length}
-                            </span>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Relances à traiter</p>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">{devisARelancer.length} item(s)</span>
                           </div>
                           <DashboardFollowUps items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
                         </div>
                       </div>
                     </motion.section>
 
-                    <motion.section {...sectionMotion(0.1)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                      <DashboardSectionHeader
-                        eyebrow="Finance"
-                        title="Santé financière"
-                        description="Encaissement, exposition et résultat net dans une seule zone de lecture."
-                      />
-
-                      <div className="mt-6 grid gap-4 xl:grid-cols-2">
-                        <div>
-                          {tresorerie ? (
-                            <DashboardTresorerie data={tresorerie} />
-                          ) : (
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement…</p>
-                          )}
-                        </div>
-                        <div>
-                          {benefice ? (
-                            <DashboardBenefice data={benefice} />
-                          ) : (
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Chargement…</p>
-                          )}
-                        </div>
-                      </div>
-                    </motion.section>
-                  </div>
-
-                  <div className="space-y-4 xl:space-y-6">
-                    {setupRequired && selectedTradeDef ? (
-                      <motion.section
-                        id="dashboard-setup-panel"
-                        {...sectionMotion(0.12)}
-                        className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6"
-                      >
+                    {funnel && funnel.length > 0 ? (
+                      <motion.section {...sectionMotion(0.14)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
                         <DashboardSectionHeader
-                          eyebrow="Starter métier"
-                          title="Préparez votre activité"
-                          description="Choisissez votre métier puis injectez les prestations de départ pour que le dashboard devienne utile tout de suite."
-                          badge={`${starterCatalogCount} en base`}
+                          eyebrow="Conversion"
+                          title="Funnel commercial"
+                          description="Lecture rapide du passage du devis jusqu'au paiement."
                         />
-
-                        <div className="mt-5 space-y-4">
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            {TRADE_OPTIONS.map((option) => (
-                              <TradeOptionCard
-                                key={option.key}
-                                option={option}
-                                active={selectedTrade === option.key}
-                                onSelect={setSelectedTrade}
-                              />
-                            ))}
-                          </div>
-
-                          <div className="rounded-[1.5rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                            <p className="text-sm font-semibold text-slate-950 dark:text-white">
-                              {selectedTradeDef.label}
-                            </p>
-                            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                              {selectedTradeDef.pitch} {selectedStarterCount} prestations seront injectées.
-                            </p>
-                          </div>
-
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            <button
-                              type="button"
-                              onClick={handleBootstrap}
-                              disabled={isBootstrapping}
-                              className="inline-flex items-center justify-center gap-2 rounded-[1.3rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
-                            >
-                              {isBootstrapping ? "Préparation..." : "Activer mon starter"}
-                            </button>
-                            <Link
-                              href="/parametres"
-                              className="inline-flex items-center justify-center gap-2 rounded-[1.3rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                            >
-                              Finaliser mes paramètres
-                            </Link>
-                          </div>
+                        <div className="mt-5">
+                          <ConversionFunnel funnel={funnel} />
                         </div>
                       </motion.section>
                     ) : null}
+                  </div>
 
-                    <motion.section {...sectionMotion(0.14)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                  <div className="space-y-4 xl:space-y-6">
+                    <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
                       <DashboardSectionHeader
-                        eyebrow="Encaissement"
-                        title="Prochains paiements"
-                        description="Les échéances qui arrivent dans les 14 prochains jours."
+                        eyebrow="Finance"
+                        title="Trésorerie"
+                        description="Montants encaissés, ouverts et en retard."
+                      />
+                      <div className="mt-5">
+                        {tresorerie ? (
+                          <DashboardTresorerie data={tresorerie} />
+                        ) : (
+                          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement…</p>
+                        )}
+                      </div>
+                    </motion.section>
+
+                    <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                      <DashboardSectionHeader
+                        eyebrow="Résultat"
+                        title="Rentabilité"
+                        description="Lecture sobre du net encaissé face aux dépenses."
+                      />
+                      <div className="mt-5">
+                        {benefice ? (
+                          <DashboardBenefice data={benefice} />
+                        ) : (
+                          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement…</p>
+                        )}
+                      </div>
+                    </motion.section>
+
+                    <motion.section {...sectionMotion(0.2)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                      <DashboardSectionHeader
+                        eyebrow="Paiements"
+                        title="Prochaines échéances"
+                        description="Ce qui doit tomber dans les 14 prochains jours."
                         badge={`${echeances.length}`}
                       />
                       <div className="mt-5">
                         <DashboardEcheances items={echeances} />
                       </div>
                     </motion.section>
-
-                    <div className={`${showMoreMobile ? "space-y-4" : "hidden space-y-4 sm:block xl:space-y-6"}`}>
-                      {funnel && funnel.length > 0 ? (
-                        <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                          <DashboardSectionHeader
-                            eyebrow="Conversion"
-                            title="Funnel commercial"
-                            description="Suivez le passage de vos devis jusqu'au paiement."
-                          />
-                          <div className="mt-5">
-                            <ConversionFunnel funnel={funnel} />
-                          </div>
-                        </motion.section>
-                      ) : null}
-
-                      <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                        <DashboardSectionHeader
-                          eyebrow="Relation client"
-                          title="Meilleurs clients"
-                          description="Ceux qui concentrent le plus de chiffre gagné."
-                        />
-                        <div className="mt-5">
-                          <DashboardTopClients items={topClients} />
-                        </div>
-                      </motion.section>
-
-                      <motion.section {...sectionMotion(0.2)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                        <DashboardSectionHeader
-                          eyebrow="Modules"
-                          title="Accès rapides"
-                          description="Les outils satellites du cockpit restent à portée directe."
-                        />
-                        <div className="mt-5 grid grid-cols-2 gap-3">
-                          {quickLinks.map((item) => (
-                            <QuickLinkCard key={item.href} item={item} />
-                          ))}
-                        </div>
-
-                        <div className="mt-5 space-y-2">
-                          <ClientSupportButton />
-                          {canAccessAdmin ? (
-                            <Link
-                              href="/admin"
-                              className="flex items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-100"
-                            >
-                              <ShieldCheck size={16} />
-                              Admin
-                            </Link>
-                          ) : null}
-                        </div>
-                      </motion.section>
-                    </div>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowMoreMobile(!showMoreMobile)}
-                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200/70 bg-white/80 py-3.5 text-sm font-semibold text-slate-600 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:hidden"
-                  data-testid="mobile-show-more-btn"
-                >
-                  {showMoreMobile ? "Voir moins" : "Voir plus de détails"}
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-300 ${showMoreMobile ? "rotate-180" : ""}`}
-                  />
-                </button>
+                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-6">
+                  <motion.section {...sectionMotion(0.22)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                    <DashboardSectionHeader
+                      eyebrow="Clients"
+                      title="Comptes les plus forts"
+                      description="Ceux qui concentrent le plus de chiffre gagné."
+                    />
+                    <div className="mt-5">
+                      <DashboardTopClients items={topClients} />
+                    </div>
+                  </motion.section>
+
+                  <motion.section {...sectionMotion(0.24)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
+                    <DashboardSectionHeader
+                      eyebrow="Modules"
+                      title="Accès rapides"
+                      description="Les outils secondaires restent disponibles, sans polluer le haut du cockpit."
+                    />
+                    <div className="mt-5 grid grid-cols-2 gap-3">
+                      {quickLinks.map((item) => (
+                        <QuickLinkCard key={item.href} item={item} />
+                      ))}
+                    </div>
+
+                    <div className="mt-5 space-y-2">
+                      <ClientSupportButton />
+                      {canAccessAdmin ? (
+                        <Link
+                          href="/admin"
+                          className="flex items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-100"
+                        >
+                          <ShieldCheck size={16} />
+                          Admin
+                        </Link>
+                      ) : null}
+                    </div>
+                  </motion.section>
+                </div>
               </>
             )}
           </main>
@@ -1154,7 +1099,7 @@ export default function DashboardPage() {
           >
             <div className="p-6">
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Définissez votre objectif de chiffre d'affaires mensuel TTC pour suivre votre progression.
+                Définissez votre objectif de chiffre d'affaires mensuel TTC pour piloter votre progression.
               </p>
               <div className="mt-4">
                 <label
