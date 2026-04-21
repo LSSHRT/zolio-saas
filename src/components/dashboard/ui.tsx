@@ -1,11 +1,32 @@
 "use client";
 
-import { TrendingUp, Clock3, Bell, TriangleAlert, type LucideIcon } from "lucide-react";
+import { ArrowRight, Bell, Clock3, TriangleAlert, TrendingUp, type LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { toneClasses, type Tone, type DashboardSignal, type DashboardActionPlanItem, type DashboardHeroIndicator, type QuickLinkItem } from "./shared";
+import {
+  toneClasses,
+  type Tone,
+  type DashboardSignal,
+  type DashboardActionPlanItem,
+  type DashboardHeroIndicator,
+  type QuickLinkItem,
+} from "./shared";
 
-// ─── Signal Icon ──────────────────────────────────────────────────────
+function tonePanelClasses(tone: Tone) {
+  switch (tone) {
+    case "emerald":
+      return "border-emerald-200/70 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.96))] dark:border-emerald-400/15 dark:bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(15,23,42,0.86))]";
+    case "amber":
+      return "border-amber-200/70 bg-[linear-gradient(135deg,rgba(245,158,11,0.14),rgba(255,255,255,0.96))] dark:border-amber-400/15 dark:bg-[linear-gradient(135deg,rgba(245,158,11,0.12),rgba(15,23,42,0.86))]";
+    case "rose":
+      return "border-rose-200/70 bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(255,255,255,0.96))] dark:border-rose-400/15 dark:bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(15,23,42,0.86))]";
+    case "slate":
+      return "border-slate-200/70 bg-[linear-gradient(135deg,rgba(148,163,184,0.12),rgba(255,255,255,0.96))] dark:border-white/10 dark:bg-[linear-gradient(135deg,rgba(148,163,184,0.08),rgba(15,23,42,0.86))]";
+    case "violet":
+    default:
+      return "border-violet-200/70 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(255,255,255,0.96))] dark:border-violet-400/15 dark:bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(15,23,42,0.86))]";
+  }
+}
 
 export function renderSignalIcon(tone: Tone, size = 16) {
   const cls = toneClasses(tone).icon;
@@ -18,75 +39,84 @@ export function renderSignalIcon(tone: Tone, size = 16) {
   };
   const Icon = IconMap[tone];
   return (
-    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-full ring-1 ${cls}`}>
+    <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ring-1 ${cls}`}>
       <Icon size={size} />
     </span>
   );
 }
 
-// ─── Focus Signal Card ────────────────────────────────────────────────
-
 export function FocusSignalCard({ signal }: { signal: DashboardSignal }) {
-  return (
-    <div className={`rounded-2xl border p-4 ${signal.href ? "cursor-pointer transition hover:-translate-y-0.5" : ""}`}>
-      <div className="flex items-start gap-3">
-        {renderSignalIcon(signal.tone)}
+  const content = (
+    <div
+      className={`group relative overflow-hidden rounded-[1.75rem] border p-5 shadow-[0_26px_60px_-42px_rgba(15,23,42,0.32)] transition duration-200 hover:-translate-y-0.5 ${tonePanelClasses(signal.tone)}`}
+    >
+      <div className="absolute inset-y-4 left-0 w-1 rounded-full bg-gradient-to-b from-violet-500 via-fuchsia-500 to-orange-400" />
+      <div className="flex items-start gap-4 pl-2">
+        {renderSignalIcon(signal.tone, 18)}
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-slate-950 dark:text-white">{signal.title}</p>
-          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{signal.description}</p>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-500 dark:text-slate-400">
+            Priorité du jour
+          </p>
+          <p className="mt-2 text-base font-semibold tracking-tight text-slate-950 dark:text-white">
+            {signal.title}
+          </p>
+          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+            {signal.description}
+          </p>
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-100">
+            {signal.href ? "Ouvrir le module" : "Point de contrôle actif"}
+            <ArrowRight size={15} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+          </div>
         </div>
       </div>
     </div>
   );
-}
 
-// ─── Dashboard Action Card ────────────────────────────────────────────
+  return signal.href ? <Link href={signal.href}>{content}</Link> : content;
+}
 
 export function DashboardActionCard({ item, compact = false }: { item: DashboardActionPlanItem; compact?: boolean }) {
   const Icon = item.icon;
   const content = (
     <div
-      className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${
-        item.tone === "rose"
-          ? "border-rose-200/70 bg-rose-50/80 dark:border-rose-400/12 dark:bg-rose-500/8"
-          : item.tone === "amber"
-          ? "border-amber-200/70 bg-amber-50/80 dark:border-amber-400/12 dark:bg-amber-500/8"
-          : item.tone === "emerald"
-          ? "border-emerald-200/70 bg-emerald-50/80 dark:border-emerald-400/12 dark:bg-emerald-500/8"
-          : "border-violet-200/70 bg-violet-50/80 dark:border-violet-400/12 dark:bg-violet-500/8"
-      }`}
+      className={`group relative overflow-hidden rounded-[1.5rem] border p-4 shadow-[0_20px_46px_-36px_rgba(15,23,42,0.26)] transition duration-200 hover:-translate-y-0.5 ${tonePanelClasses(item.tone)}`}
     >
       <div className="flex items-start gap-3">
-        <div className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ring-1 ${toneClasses(item.tone).icon}`}>
+        <div className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${toneClasses(item.tone).icon}`}>
           <Icon size={18} />
         </div>
         <div className="min-w-0 flex-1">
-          {compact ? null : (
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-              {item.eyebrow}
-            </p>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+                {item.eyebrow}
+              </p>
+              <p className="mt-2 text-sm font-semibold text-slate-950 dark:text-white">{item.title}</p>
+            </div>
+            {item.value ? (
+              <span className={`inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${toneClasses(item.tone).chip}`}>
+                {item.value}
+              </span>
+            ) : null}
+          </div>
+          {!compact ? (
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
+          ) : (
+            <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.description}</p>
           )}
-          <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.title}</p>
-          {compact ? null : (
-            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.description}</p>
-          )}
-          {item.ctaLabel && (
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-violet-700 dark:text-violet-300">
-              {item.ctaLabel} →
-            </span>
-          )}
+          {item.ctaLabel ? (
+            <div className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-slate-700 dark:text-slate-100">
+              {item.ctaLabel}
+              <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+            </div>
+          ) : null}
         </div>
-        {item.value && (
-          <span className="shrink-0 text-lg font-bold text-slate-900 dark:text-white">{item.value}</span>
-        )}
       </div>
     </div>
   );
 
   return item.href ? <Link href={item.href}>{content}</Link> : content;
 }
-
-// ─── Metric Card ──────────────────────────────────────────────────────
 
 export function CompactMetricCard({
   label,
@@ -102,57 +132,57 @@ export function CompactMetricCard({
   icon: LucideIcon;
 }) {
   return (
-    <div className="rounded-[1.35rem] border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
-      <div className="flex items-center gap-2">
-        <div className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ring-1 ${toneClasses(tone).icon}`}>
-          <Icon size={15} />
+    <div className={`group relative overflow-hidden rounded-[1.6rem] border p-4 shadow-[0_24px_56px_-42px_rgba(15,23,42,0.26)] transition duration-200 hover:-translate-y-0.5 ${tonePanelClasses(tone)}`}>
+      <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/45 blur-2xl dark:bg-white/8" />
+      <div className="relative flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+            {label}
+          </p>
+          <p className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            {value}
+          </p>
+          <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{detail}</p>
         </div>
-        <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{label}</span>
+        <div className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ring-1 ${toneClasses(tone).icon}`}>
+          <Icon size={16} />
+        </div>
       </div>
-      <p className="mt-2 text-xl font-bold text-slate-950 dark:text-white">{value}</p>
-      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{detail}</p>
     </div>
   );
 }
-
-// ─── Hero Indicator Pill ──────────────────────────────────────────────
 
 export function HeroIndicatorPill({ indicator }: { indicator: DashboardHeroIndicator }) {
-  const toneText: Record<Tone, { label: string; value: string }> = {
-    violet: { label: "text-violet-500 dark:text-violet-400", value: "text-violet-700 dark:text-violet-200" },
-    emerald: { label: "text-emerald-500 dark:text-emerald-400", value: "text-emerald-700 dark:text-emerald-200" },
-    amber: { label: "text-amber-500 dark:text-amber-400", value: "text-amber-700 dark:text-amber-200" },
-    rose: { label: "text-rose-500 dark:text-rose-400", value: "text-rose-700 dark:text-rose-200" },
-    slate: { label: "text-slate-400 dark:text-slate-500", value: "text-slate-700 dark:text-slate-200" },
-  };
-  const t = toneText[indicator.tone];
   return (
-    <div className={`rounded-full px-3 py-2 ring-1 ${toneClasses(indicator.tone).chip}`}>
-      <p className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${t.label}`}>{indicator.label}</p>
-      <p className={`text-sm font-bold ${t.value}`}>{indicator.value}</p>
+    <div className={`rounded-[1.4rem] border px-4 py-3 shadow-[0_16px_34px_-28px_rgba(15,23,42,0.28)] ${tonePanelClasses(indicator.tone)}`}>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+        {indicator.label}
+      </p>
+      <p className="mt-2 text-base font-semibold text-slate-950 dark:text-white">{indicator.value}</p>
     </div>
   );
 }
-
-// ─── Quick Link Card ──────────────────────────────────────────────────
 
 export function QuickLinkCard({ item }: { item: QuickLinkItem }) {
   const Icon = item.icon;
   return (
     <Link
       href={item.href}
-      className={`rounded-[1.35rem] border border-slate-200/70 bg-white/75 p-4 transition hover:-translate-y-0.5 hover:border-violet-300 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20 ${item.tourClass ?? ""}`}
+      className={`group relative overflow-hidden rounded-[1.5rem] border p-4 shadow-[0_20px_46px_-36px_rgba(15,23,42,0.24)] transition duration-200 hover:-translate-y-0.5 hover:border-violet-300 dark:hover:border-violet-400/20 ${tonePanelClasses(item.tone)} ${item.tourClass ?? ""}`}
     >
-      <div className={`mb-3 inline-flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${toneClasses(item.tone).icon}`}>
-        <Icon size={17} />
+      <div className="absolute -right-10 top-0 h-24 w-24 rounded-full bg-white/40 blur-2xl dark:bg-white/6" />
+      <div className={`relative mb-4 inline-flex h-10 w-10 items-center justify-center rounded-2xl ring-1 ${toneClasses(item.tone).icon}`}>
+        <Icon size={18} />
       </div>
-      <p className="text-sm font-semibold text-slate-950 dark:text-white">{item.label}</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.description}</p>
+      <p className="relative text-sm font-semibold text-slate-950 dark:text-white">{item.label}</p>
+      <p className="relative mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">{item.description}</p>
+      <div className="relative mt-4 inline-flex items-center gap-1 text-sm font-semibold text-slate-700 dark:text-slate-100">
+        Ouvrir
+        <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-0.5" />
+      </div>
     </Link>
   );
 }
-
-// ─── Mobile Disclosure Section ────────────────────────────────────────
 
 export function MobileDisclosureSection({
   title,
@@ -172,7 +202,7 @@ export function MobileDisclosureSection({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      className="client-panel rounded-2xl p-4"
+      className="client-panel rounded-[1.75rem] p-4"
     >
       <details open={defaultOpen} className="group">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
@@ -180,11 +210,11 @@ export function MobileDisclosureSection({
             <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">{title}</p>
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{description}</p>
           </div>
-          {badge !== undefined && (
+          {badge !== undefined ? (
             <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
               {badge}
             </span>
-          )}
+          ) : null}
         </summary>
         <div className="mt-4">{children}</div>
       </details>

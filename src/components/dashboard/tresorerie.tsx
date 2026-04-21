@@ -1,17 +1,46 @@
 "use client";
 
-import Link from "next/link";
-import { TrendingUp, Clock3, TriangleAlert } from "lucide-react";
+import { Clock3, TriangleAlert, TrendingUp } from "lucide-react";
 import { formatCurrency } from "./shared";
 import type { TresorerieSummary } from "./shared";
 
-// ─── Trésorerie Section ───────────────────────────────────────────────
-// Responsive — rendu unique pour mobile ET desktop
+function CashStatCard({
+  title,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  title: string;
+  value: number;
+  tone: "emerald" | "violet" | "rose";
+  icon: typeof TrendingUp;
+}) {
+  const classes =
+    tone === "emerald"
+      ? "border-emerald-200/70 bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(255,255,255,0.96))] text-emerald-800 dark:border-emerald-400/15 dark:bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(15,23,42,0.86))] dark:text-emerald-200"
+      : tone === "rose"
+        ? "border-rose-200/70 bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(255,255,255,0.96))] text-rose-800 dark:border-rose-400/15 dark:bg-[linear-gradient(135deg,rgba(244,63,94,0.12),rgba(15,23,42,0.86))] dark:text-rose-200"
+        : "border-violet-200/70 bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(255,255,255,0.96))] text-violet-800 dark:border-violet-400/15 dark:bg-[linear-gradient(135deg,rgba(124,58,237,0.12),rgba(15,23,42,0.86))] dark:text-violet-200";
+
+  return (
+    <div className={`rounded-[1.5rem] border p-4 shadow-[0_18px_42px_-34px_rgba(15,23,42,0.22)] ${classes}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] opacity-75">{title}</p>
+          <p className="mt-3 text-xl font-semibold tracking-tight">{formatCurrency(value)}</p>
+        </div>
+        <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/55 ring-1 ring-white/50 dark:bg-white/8 dark:ring-white/10">
+          <Icon size={17} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
   if (!data || data.nombreFactures === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-6 text-center dark:border-white/10 dark:bg-white/4">
+      <div className="rounded-[1.6rem] border border-dashed border-slate-300/70 bg-slate-50/70 px-4 py-7 text-center dark:border-white/10 dark:bg-white/4">
         <p className="text-sm font-semibold text-slate-950 dark:text-white">Aucune facture</p>
         <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
           Transformez vos devis acceptés en factures pour suivre votre trésorerie.
@@ -20,59 +49,46 @@ export function DashboardTresorerie({ data }: { data: TresorerieSummary }) {
     );
   }
 
+  const exposed = data.aEncaisser + data.enRetard;
+  const secureRatio = exposed > 0 ? Math.min((data.encaisse / (data.encaisse + exposed)) * 100, 100) : 100;
+
   return (
-    <div className="space-y-3">
-      {/* Encaissé */}
-      <div className="rounded-2xl border border-emerald-200/70 bg-emerald-50/50 p-4 dark:border-emerald-500/20 dark:bg-emerald-500/10">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15">
-            <TrendingUp size={16} className="text-emerald-600 dark:text-emerald-400" />
-          </div>
+    <div className="space-y-4">
+      <div className="rounded-[1.75rem] border border-slate-200/70 bg-white/80 p-5 shadow-[0_24px_56px_-40px_rgba(15,23,42,0.24)] dark:border-white/8 dark:bg-white/4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Encaissé</p>
-            <p className="text-lg font-bold text-emerald-800 dark:text-emerald-200">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
+              Vision encaissement
+            </p>
+            <p className="mt-2 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
               {formatCurrency(data.encaisse)}
             </p>
-          </div>
-        </div>
-      </div>
-
-      {/* À encaisser */}
-      <div className="rounded-2xl border border-violet-200/70 bg-violet-50/50 p-4 dark:border-violet-500/20 dark:bg-violet-500/10">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-500/15">
-            <Clock3 size={16} className="text-violet-600 dark:text-violet-400" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold text-violet-700 dark:text-violet-300">À encaisser</p>
-            <p className="text-lg font-bold text-violet-800 dark:text-violet-200">
-              {formatCurrency(data.aEncaisser)}
+            <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              {formatCurrency(exposed)} restent à surveiller entre factures ouvertes et impayés.
             </p>
           </div>
-        </div>
-      </div>
-
-      {/* En retard */}
-      <div className={`rounded-2xl border p-4 ${data.enRetard > 0 ? "border-rose-200/70 bg-rose-50/50 dark:border-rose-500/20 dark:bg-rose-500/10" : "border-slate-200/70 bg-slate-50/50 dark:border-white/8 dark:bg-white/4"}`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className={`flex h-8 w-8 items-center justify-center rounded-full ${data.enRetard > 0 ? "bg-rose-500/15" : "bg-slate-500/15"}`}>
-              <TriangleAlert size={16} className={data.enRetard > 0 ? "text-rose-600 dark:text-rose-400" : "text-slate-400"} />
-            </div>
-            <div>
-              <p className={`text-xs font-semibold ${data.enRetard > 0 ? "text-rose-700 dark:text-rose-300" : "text-slate-500 dark:text-slate-400"}`}>En retard</p>
-              <p className={`text-lg font-bold ${data.enRetard > 0 ? "text-rose-800 dark:text-rose-200" : "text-slate-400"}`}>
-                {formatCurrency(data.enRetard)}
-              </p>
-            </div>
-          </div>
-          <div className="text-right">
-            <p className="text-[11px] text-slate-400">Recouvrement</p>
-            <p className={`text-lg font-bold ${data.tauxRecouvrement >= 80 ? "text-emerald-600 dark:text-emerald-400" : data.tauxRecouvrement >= 50 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400"}`}>
+          <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
+              Taux de recouvrement
+            </p>
+            <p className={`mt-2 text-2xl font-semibold ${data.tauxRecouvrement >= 80 ? "text-emerald-700 dark:text-emerald-300" : data.tauxRecouvrement >= 50 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300"}`}>
               {data.tauxRecouvrement}%
             </p>
           </div>
         </div>
+
+        <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-emerald-500 via-violet-500 to-rose-500"
+            style={{ width: `${secureRatio}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3">
+        <CashStatCard title="Encaissé" value={data.encaisse} tone="emerald" icon={TrendingUp} />
+        <CashStatCard title="À encaisser" value={data.aEncaisser} tone="violet" icon={Clock3} />
+        <CashStatCard title="En retard" value={data.enRetard} tone="rose" icon={TriangleAlert} />
       </div>
     </div>
   );
