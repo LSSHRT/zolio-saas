@@ -377,31 +377,29 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
 
   const toolGroups = [
     {
-      label: "Commercial",
+      label: "Production",
       items: [
-        { href: "/nouvelle-facture", icon: FileText, label: "Nouvelle facture" },
-        { href: "/notifications", icon: Bell, label: "Notifications" },
         { href: "/planning", icon: Calendar, label: "Planning" },
         { href: "/catalogue", icon: Package, label: "Catalogue" },
         { href: "/modeles", icon: Copy, label: "Modèles" },
+        { href: "/nouvelle-facture", icon: Receipt, label: "Nouvelle facture" },
       ],
     },
     {
-      label: "Finance",
+      label: "Pilotage",
       items: [
+        { href: "/notifications", icon: Bell, label: "Notifications" },
         { href: "/rapports", icon: FileText, label: "Rapports" },
         { href: "/depenses", icon: CreditCard, label: "Dépenses" },
         { href: "/recurrentes", icon: RefreshCw, label: "Récurrences" },
         { href: "/tva", icon: Calculator, label: "TVA" },
       ],
     },
-    {
-      label: "Config",
-      items: [
-        { href: "/parametres", icon: Settings, label: "Paramètres" },
-        { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
-      ],
-    },
+  ];
+
+  const footerItems = [
+    { href: "/parametres", icon: Settings, label: "Paramètres" },
+    { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
   ];
 
   const isActiveNav = (item: { key?: string; href?: string }) => {
@@ -410,150 +408,166 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
     return false;
   };
 
+  const renderNavItem = (
+    item: { href: string; icon: LucideIcon; key?: ClientNavKey; label: string },
+    options?: { compact?: boolean; showBadge?: boolean },
+  ) => {
+    const Icon = item.icon;
+    const itemActive = isActiveNav(item);
+    const compact = options?.compact ?? false;
+    const showBadge = options?.showBadge ?? false;
+
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border px-3 py-3 transition-all duration-200 ${
+          itemActive
+            ? "border-violet-400/35 bg-[linear-gradient(135deg,rgba(124,58,237,0.26),rgba(217,70,239,0.12),rgba(255,255,255,0.08))] text-white shadow-[0_18px_34px_-24px_rgba(124,58,237,0.8)]"
+            : "border-white/6 bg-white/[0.03] text-slate-300 hover:border-white/12 hover:bg-white/[0.06] hover:text-white"
+        } ${compact ? "min-h-10 text-[13px]" : "min-h-12 text-sm font-medium"}`}
+      >
+        <span
+          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 transition ${
+            itemActive
+              ? "bg-white/12 text-white ring-white/14"
+              : "bg-white/[0.045] text-slate-300 ring-white/8 group-hover:bg-white/[0.08] group-hover:text-white"
+          }`}
+        >
+          <Icon size={compact ? 15 : 16} strokeWidth={itemActive ? 2.2 : 1.9} />
+        </span>
+        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+        {showBadge && unreadCount > 0 ? (
+          <span className="ml-auto inline-flex min-w-[22px] items-center justify-center rounded-full bg-rose-500 px-1.5 py-1 text-[10px] font-bold leading-none text-white shadow-[0_8px_20px_-10px_rgba(244,63,94,0.9)]">
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        ) : null}
+      </Link>
+    );
+  };
+
   return (
-    <aside className="fixed inset-y-4 left-4 z-30 hidden w-[260px] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white/92 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
-          <ClientBrandMark />
-          <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Un cockpit bureau pour piloter devis, encaissements et fiches clients sans friction.
+    <aside className="fixed inset-y-4 left-4 z-30 hidden w-[260px] overflow-hidden rounded-3xl border border-slate-900/80 bg-slate-950 text-white shadow-[0_46px_120px_-58px_rgba(15,23,42,0.95)] lg:flex">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(236,72,153,0.22),transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))]" />
+      <div className="relative flex h-full w-full flex-col p-3">
+        <div className="rounded-3xl border border-white/8 bg-white/[0.045] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl">
+          <div className="flex items-start justify-between gap-3">
+            <ClientBrandMark className="text-white" />
+            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-200">
+              Bureau
+            </span>
+          </div>
+
+          <p className="mt-4 text-sm leading-6 text-slate-300">
+            Navigation claire, actions rapides et pilotage métier au même endroit.
           </p>
+
           <div className="mt-4 grid grid-cols-2 gap-2">
             <Link
               href="/nouveau-devis"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:translate-y-[-1px]"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-3 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_-18px_rgba(124,58,237,0.85)] transition hover:-translate-y-0.5"
             >
               <Plus size={16} />
-              Nouveau devis
+              Devis
             </Link>
             <Link
               href="/nouvelle-facture"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/7 px-3 py-3 text-sm font-semibold text-slate-100 transition hover:border-white/16 hover:bg-white/10"
             >
               <Receipt size={16} />
               Facture
             </Link>
           </div>
-        </div>
 
-        <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
-          <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-            Pilotage
-          </p>
-          <nav className="mt-3 flex flex-col gap-1">
-            {mainItems.map((item) => {
-              const Icon = item.icon;
-              const itemActive = isActiveNav(item);
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
-                    itemActive
-                      ? "bg-[linear-gradient(135deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08))] text-slate-950 shadow-[0_16px_30px_-22px_rgba(124,58,237,0.55)] ring-1 ring-violet-300/50 dark:text-white dark:ring-violet-400/20"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-                  }`}
-                >
-                  <Icon size={16} strokeWidth={itemActive ? 2.2 : 1.8} />
-                  <span className="flex-1">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {toolGroups.map((group) => (
-          <div key={group.label} className="mt-4 rounded-2xl border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
-            <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-              {group.label}
-            </p>
-            <nav className="mt-3 flex flex-col gap-1">
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const itemActive = isActiveNav(item);
-                const isNotif = item.href === "/notifications";
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
-                      itemActive
-                        ? "bg-slate-100 font-medium text-slate-950 ring-1 ring-slate-200/80 dark:bg-white/10 dark:text-white dark:ring-white/12"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-                    }`}
-                  >
-                    <Icon size={15} strokeWidth={itemActive ? 2 : 1.8} />
-                    <span className="flex-1">{item.label}</span>
-                    {isNotif && unreadCount > 0 ? (
-                      <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </nav>
+          <div className="mt-4 flex items-center gap-2">
+            <span className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+              ⌘K Recherche
+            </span>
+            <ShortcutsModal />
           </div>
-        ))}
-      </div>
+        </div>
 
-      <div className="mt-4 space-y-3 shrink-0">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
+        <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="space-y-4">
+            <section className="rounded-3xl border border-white/8 bg-white/[0.035] p-3 backdrop-blur-xl">
+              <div className="flex items-center justify-between px-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Navigation
+                </p>
+                <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500">5 modules</span>
+              </div>
+              <nav className="mt-3 flex flex-col gap-2">
+                {mainItems.map((item) => renderNavItem(item))}
+              </nav>
+            </section>
+
+            {toolGroups.map((group) => (
+              <section key={group.label} className="rounded-3xl border border-white/8 bg-white/[0.03] p-3 backdrop-blur-xl">
+                <div className="flex items-center justify-between px-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    {group.label}
+                  </p>
+                </div>
+                <nav className="mt-3 flex flex-col gap-2">
+                  {group.items.map((item) =>
+                    renderNavItem(item, {
+                      compact: true,
+                      showBadge: item.href === "/notifications",
+                    }),
+                  )}
+                </nav>
+              </section>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 shrink-0 rounded-3xl border border-white/8 bg-white/[0.045] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                Raccourcis
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                Support & compte
               </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Support, notifications et recherche globale restent à portée de clavier.
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                Gardez vos réglages, vos notifications et l’aide à portée de main.
               </p>
             </div>
-            <span className="inline-flex rounded-full bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-300/40 dark:text-rose-200 dark:ring-rose-400/20">
+            <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/14 px-2 text-xs font-semibold text-rose-100">
               {unreadCount}
             </span>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href="/notifications"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
-            >
-              <Bell size={15} />
-              Notifications
-            </Link>
+          <div className="mt-4 flex flex-col gap-2">
+            {renderNavItem({ href: "/notifications", icon: Bell, label: "Notifications" }, { compact: true, showBadge: true })}
+            {footerItems.map((item) => renderNavItem(item, { compact: true }))}
             <a
               href={SUPPORT_HREF}
               target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
               rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
+              className="inline-flex min-h-10 items-center gap-3 rounded-2xl border border-white/10 bg-white/7 px-3 py-3 text-[13px] font-medium text-slate-100 transition hover:border-white/16 hover:bg-white/10"
             >
-              <LifeBuoy size={15} />
-              Support
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.045] text-slate-200 ring-1 ring-white/10">
+                <LifeBuoy size={15} />
+              </span>
+              <span className="flex-1">Support</span>
             </a>
           </div>
 
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Astuce: utilisez <span className="font-semibold">⌘K</span> pour lancer la recherche globale.
-          </p>
-        </div>
-
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/84 p-3 dark:border-white/10 dark:bg-white/4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-              Compte
-            </p>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Session et réglages
-            </p>
+          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/8 bg-slate-950/55 px-3 py-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                Session
+              </p>
+              <p className="mt-1 text-sm text-slate-200">Réglages du compte</p>
+            </div>
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "h-9 w-9",
+                  userButtonTrigger: "p-0",
+                },
+              }}
+            />
           </div>
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "h-9 w-9",
-                userButtonTrigger: "p-0",
-              },
-            }}
-          />
         </div>
       </div>
     </aside>
