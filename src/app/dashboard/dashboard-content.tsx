@@ -1,1150 +1,663 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
 import {
-  Bell,
-  BriefcaseBusiness,
+  ArrowRight,
+  Briefcase,
+  Calendar,
   ChevronRight,
-  Clock3,
-  CloudSun,
-  FileCheck2,
+  Clock,
+  CreditCard,
   FileText,
-  LineChart,
-  MoonStar,
   Package,
-  Pencil,
-  Plus,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  SunMedium,
-  Target,
+  Receipt,
+  TrendingDown,
   TrendingUp,
   Users,
   type LucideIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
-import { STATUS, Step } from "react-joyride";
-import type { CallBackProps } from "react-joyride";
-import useSWR from "swr";
-import { useUser } from "@clerk/nextjs";
-import { toast } from "sonner";
-import { ChartSkeleton } from "@/components/Skeleton";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
-  ClientBrandMark,
   ClientDesktopNav,
   ClientMobileDock,
+  ClientBrandMark,
   ClientSupportButton,
 } from "@/components/client-shell";
-import { MobileDialog } from "@/components/mobile-dialog";
-import { DesktopDrawer } from "@/components/desktop-drawer";
-import { DevisEditor } from "@/components/devis-editor";
-import ConversionFunnel from "@/components/conversion-funnel";
-import { PullToRefresh } from "@/components/pull-to-refresh";
-import {
-  readStringMetadata,
-  readBooleanMetadata,
-  formatCurrency,
-  sectionMotion,
-  type DashboardSignal,
-  type DashboardActionPlanItem,
-  type QuickLinkItem,
-  type DashboardHeroIndicator,
-} from "@/components/dashboard/shared";
-import {
-  FocusSignalCard,
-  DashboardActionCard,
-  CompactMetricCard,
-  HeroIndicatorPill,
-  QuickLinkCard,
-} from "@/components/dashboard/ui";
-import { DashboardTresorerie } from "@/components/dashboard/tresorerie";
-import { DashboardBenefice } from "@/components/dashboard/benefice";
+import { GlobalSearch } from "@/components/global-search";
+import { ShortcutsModal } from "@/components/shortcuts-modal";
+import DashboardChart from "@/components/DashboardChart";
 import {
   DashboardRecentQuotes,
   DashboardFollowUps,
   DashboardEcheances,
   DashboardTopClients,
-  type QuoteListItem,
 } from "@/components/dashboard/lists";
-import type { ClientDashboardSummary, ClientDashboardMonthlyDatum } from "@/lib/client-dashboard";
+import { DashboardBenefice } from "@/components/dashboard/benefice";
+import { DashboardTresorerie } from "@/components/dashboard/tresorerie";
 import {
-  DEFAULT_TRADE,
-  TRADE_OPTIONS,
-  getStarterCatalogForTrade,
-  getTradeDefinition,
-  type TradeDefinition,
-  type TradeKey,
-} from "@/lib/trades";
+  formatCurrency,
+  sectionMotion,
+  type ClientDashboardSummary,
+} from "@/components/dashboard/shared";
 
-const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
-const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
+function getGreeting(firstName: string | null): string {
+  const hour = new Date().getHours();
+  const name = firstName ? ` ${firstName}` : "";
+  if (hour < 12) return `Bonjour${name}`;
+  if (hour < 18) return `Bonjour${name}`;
+  return `Bonsoir${name}`;
+}
 
-const fetcher = async (url: string) => {
-  const response = await fetch(url);
-  return response.json();
+function getFocusSignal(summary: ClientDashboardSummary) {
+  if (summary.tresorerie.enRetard > 0) {
+    return {
+      title: `${formatCurrency(summary.tresorerie.enRetard)} en retard de paiement`,
+      description: "Des factures nécessitent une relance urgente.",
+      href: "/factures",
+      tone: "rose" as const,
+    };
+  }
+  if (summary.followUpCount > 0) {
+    return {
+      title: `${summary.followUpCount} devis à relancer`,
+      description: "Des devis en attente depuis plus de 7 jours méritent votre attention.",
+      href: "/devis",
+      tone: "amber" as const,
+    };
+  }
+  if (summary.echeances.length > 0) {
+    return {
+      title: `${summary.echeances.length} échéance${summary.echeances.length > 1 ? "s" : ""} dans les 14 jours`,
+      description: "Des paiements sont attendus prochainement.",
+      href: "/factures",
+      tone: "amber" as const,
+    };
+  }
+  return {
+    title: "Tout est sous contrôle",
+    description: "Aucune action urgente n'est requise pour le moment.",
+    href: undefined,
+    tone: "emerald" as const,
+  };
+}
+
+type QuickLink = {
+  href: string;
+  label: string;
+  description: string;
+  icon: LucideIcon;
 };
 
-function DashboardNotificationsMenu({ dashboardSignals }: { dashboardSignals: DashboardSignal[] }) {
-  const { data } = useSWR("/api/notifications", fetcher, {
-    refreshInterval: 30_000,
-    dedupingInterval: 15_000,
-  });
-  const unreadCount: number = data?.unreadCount ?? 0;
-  const total = dashboardSignals.length + unreadCount;
+const QUICK_LINKS: QuickLink[] = [
+  { href: "/nouveau-devis", label: "Nouveau devis", description: "Créer un devis", icon: FileText },
+  { href: "/nouvelle-facture", label: "Nouvelle facture", description: "Émettre une facture", icon: Receipt },
+  { href: "/clients/nouveau", label: "Nouveau client", description: "Ajouter un contact", icon: Users },
+  { href: "/catalogue", label: "Catalogue", description: "Gérer les prestations", icon: Package },
+  { href: "/planning", label: "Planning", description: "Voir le calendrier", icon: Calendar },
+  { href: "/depenses", label: "Dépenses", description: "Suivre les coûts", icon: CreditCard },
+];
+
+export default function DashboardContent({
+  summary,
+  firstName,
+  companyTrade,
+  canAccessAdmin,
+}: {
+  summary: ClientDashboardSummary;
+  firstName: string | null;
+  imageUrl: string | null;
+  companyTrade: string | undefined;
+  catalogImported: boolean;
+  onboardingDone: boolean;
+  canAccessAdmin: boolean;
+  isPro: boolean;
+}) {
+  const [devisDrawer, setDevisDrawer] = useState<string | null>(null);
+
+  const focusSignal = getFocusSignal(summary);
+  const greeting = getGreeting(firstName);
 
   return (
+    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
+      {/* Background overlays */}
+      <div className="client-grid-overlay pointer-events-none absolute inset-0" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
+
+      {/* Desktop sidebar */}
+      <ClientDesktopNav active="dashboard" />
+
+      {/* Main content area */}
+      <div className="flex min-h-screen w-full flex-col px-4 pt-3 sm:px-6 sm:pt-4 lg:ml-[124px] lg:max-w-[calc(100%-124px)] lg:px-6 xl:px-8">
+        {/* Top bar */}
+        <header className="client-panel sticky top-2 z-40 mb-4 rounded-2xl px-5 py-3 backdrop-blur-xl sm:top-3 sm:px-6">
+          <div className="flex items-center justify-between gap-4">
+            <ClientBrandMark />
+            <div className="flex items-center gap-3">
+              <div className="hidden w-72 xl:block">
+                <GlobalSearch />
+              </div>
+              <ClientSupportButton compact />
+              <ShortcutsModal />
+              {canAccessAdmin && (
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/20 dark:border-violet-400/20 dark:text-violet-200"
+                >
+                  Admin
+                </Link>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Dashboard body */}
+        <main className="flex-1 space-y-5 lg:space-y-6">
+          {/* Hero greeting + focus signal */}
+          <motion.section
+            {...sectionMotion(0)}
+            className="client-panel-strong overflow-hidden rounded-2xl px-5 py-6 sm:px-7 sm:py-7"
+          >
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+              <div className="max-w-xl">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
+                  Tableau de bord
+                </p>
+                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+                  {greeting}
+                </h1>
+                {companyTrade && (
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    {companyTrade}
+                  </p>
+                )}
+                <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Voici un aperçu de votre activité. {summary.totalQuotes} devis créés, {summary.acceptedCount} acceptés.
+                </p>
+              </div>
+
+              {/* Focus signal card */}
+              <div className="shrink-0 lg:w-[340px]">
+                {focusSignal.href ? (
+                  <Link href={focusSignal.href} className="block">
+                    <FocusCard signal={focusSignal} />
+                  </Link>
+                ) : (
+                  <FocusCard signal={focusSignal} />
+                )}
+              </div>
+            </div>
+          </motion.section>
+
+          {/* KPI strip */}
+          <motion.section
+            {...sectionMotion(0.08)}
+            className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <KpiCard
+              label="Chiffre d'affaires"
+              value={formatCurrency(summary.acceptedRevenueHT)}
+              detail={`${summary.acceptedCount} devis acceptés`}
+              tone="emerald"
+              icon={TrendingUp}
+            />
+            <KpiCard
+              label="Pipeline"
+              value={formatCurrency(summary.pipelineRevenueHT)}
+              detail={`${summary.pendingCount} devis en attente`}
+              tone="violet"
+              icon={Briefcase}
+            />
+            <KpiCard
+              label="Taux de conversion"
+              value={`${summary.conversionRate}%`}
+              detail={`Moy. ${formatCurrency(summary.averageTicket)}/devis`}
+              tone={summary.conversionRate >= 50 ? "emerald" : summary.conversionRate >= 30 ? "amber" : "rose"}
+              icon={summary.conversionRate >= 50 ? TrendingUp : TrendingDown}
+            />
+            <KpiCard
+              label="Délai de réponse"
+              value={`${summary.avgResponseDays}j`}
+              detail="Moyenne acceptés/refusés"
+              tone={summary.avgResponseDays <= 3 ? "emerald" : summary.avgResponseDays <= 7 ? "amber" : "rose"}
+              icon={Clock}
+            />
+          </motion.section>
+
+          {/* Main grid: left (chart + financials + funnel + recent) / right (quick links + lists) */}
+          <div className="grid gap-5 xl:grid-cols-[1fr_400px]">
+            {/* Left column */}
+            <div className="space-y-5">
+              {/* Revenue chart */}
+              <motion.section
+                {...sectionMotion(0.12)}
+                className="client-panel rounded-2xl p-5 sm:p-6"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                      Chiffre d'affaires
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                      Évolution sur 6 mois
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                    <TrendingUp size={12} />
+                    HT
+                  </span>
+                </div>
+                <div className="h-64">
+                  <DashboardChart monthlyData={summary.monthlyData} />
+                </div>
+              </motion.section>
+
+              {/* Benefice + Tresorerie */}
+              <div className="grid gap-5 md:grid-cols-2">
+                <motion.section {...sectionMotion(0.16)}>
+                  <div className="client-panel rounded-2xl p-5">
+                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                      Résultat net
+                    </p>
+                    <DashboardBenefice data={summary.benefice} />
+                  </div>
+                </motion.section>
+                <motion.section {...sectionMotion(0.18)}>
+                  <div className="client-panel rounded-2xl p-5">
+                    <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                      Trésorerie
+                    </p>
+                    <DashboardTresorerie data={summary.tresorerie} />
+                  </div>
+                </motion.section>
+              </div>
+
+              {/* Sales funnel */}
+              <motion.section
+                {...sectionMotion(0.2)}
+                className="client-panel rounded-2xl p-5 sm:p-6"
+              >
+                <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                  Tunnel de vente
+                </p>
+                <div className="space-y-3">
+                  {summary.funnel.map((step) => (
+                    <FunnelStep
+                      key={step.label}
+                      label={step.label}
+                      count={step.count}
+                      amount={step.amount}
+                      pct={step.pct}
+                      color={step.color}
+                    />
+                  ))}
+                </div>
+              </motion.section>
+
+              {/* Recent quotes */}
+              <motion.section {...sectionMotion(0.22)}>
+                <div className="client-panel rounded-2xl p-5 sm:p-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                        Devis récents
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                        Derniers devis créés
+                      </p>
+                    </div>
+                    <Link
+                      href="/devis"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 transition hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
+                    >
+                      Tout voir
+                      <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                  <DashboardRecentQuotes
+                    items={summary.recentQuotes}
+                    onSelectDevis={(n) => setDevisDrawer(n)}
+                  />
+                </div>
+              </motion.section>
+            </div>
+
+            {/* Right column */}
+            <div className="space-y-5">
+              {/* Quick links */}
+              <motion.section {...sectionMotion(0.14)}>
+                <div className="client-panel rounded-2xl p-5">
+                  <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                    Accès rapide
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {QUICK_LINKS.map((link) => (
+                      <QuickLinkButton key={link.href} item={link} />
+                    ))}
+                  </div>
+                </div>
+              </motion.section>
+
+              {/* Follow-ups */}
+              <motion.section {...sectionMotion(0.16)}>
+                <div className="client-panel rounded-2xl p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                        Relances
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                        Devis en attente +7j
+                      </p>
+                    </div>
+                    {summary.followUpCount > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300">
+                        {summary.followUpCount}
+                      </span>
+                    )}
+                  </div>
+                  <DashboardFollowUps
+                    items={summary.followUpQuotes}
+                    onSelectDevis={(n) => setDevisDrawer(n)}
+                  />
+                </div>
+              </motion.section>
+
+              {/* Upcoming deadlines */}
+              <motion.section {...sectionMotion(0.18)}>
+                <div className="client-panel rounded-2xl p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                        Échéances
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                        Prochains paiements
+                      </p>
+                    </div>
+                    <Link
+                      href="/factures"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 transition hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
+                    >
+                      Tout voir
+                      <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                  <DashboardEcheances items={summary.echeances} />
+                </div>
+              </motion.section>
+
+              {/* Top clients */}
+              <motion.section {...sectionMotion(0.2)}>
+                <div className="client-panel rounded-2xl p-5">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+                        Top clients
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                        Par chiffre d'affaires
+                      </p>
+                    </div>
+                    <Link
+                      href="/clients"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-violet-600 transition hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-200"
+                    >
+                      Tout voir
+                      <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                  <DashboardTopClients items={summary.topClients} />
+                </div>
+              </motion.section>
+            </div>
+          </div>
+
+          {/* Weekly summary strip */}
+          <motion.section
+            {...sectionMotion(0.24)}
+            className="client-panel rounded-2xl p-5 sm:p-6"
+          >
+            <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+              Cette semaine
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              <WeekStat label="Nouv. devis" value={summary.semaine.nouveauxDevis} />
+              <WeekStat label="Acceptés" value={summary.semaine.devisAcceptes} tone="emerald" />
+              <WeekStat label="Factures" value={summary.semaine.facturesEmises} />
+              <WeekStat label="Payées" value={summary.semaine.facturesPayees} tone="emerald" />
+              <WeekStat label="CA encaissé" value={formatCurrency(summary.semaine.caEncaisse)} tone="emerald" />
+              <WeekStat label="Dépenses" value={formatCurrency(summary.semaine.depensesSemaine)} tone="rose" />
+            </div>
+          </motion.section>
+        </main>
+
+        {/* Footer */}
+        <footer className="hidden border-t border-slate-200/40 py-4 text-center text-xs text-slate-400 dark:border-white/6 md:block">
+          <div className="mx-auto flex max-w-7xl items-center justify-center gap-4 px-6">
+            <span>© {new Date().getFullYear()} Zolio</span>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <Link href="/cgu" className="transition hover:text-slate-600 dark:hover:text-slate-200">CGU</Link>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <Link href="/cgv" className="transition hover:text-slate-600 dark:hover:text-slate-200">CGV</Link>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <Link href="/mentions-legales" className="transition hover:text-slate-600 dark:hover:text-slate-200">Mentions légales</Link>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <Link href="/politique-confidentialite" className="transition hover:text-slate-600 dark:hover:text-slate-200">Confidentialité</Link>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <Link href="/changelog" className="transition hover:text-slate-600 dark:hover:text-slate-200">Changelog</Link>
+            <span className="text-slate-300 dark:text-slate-600">·</span>
+            <ShortcutsModal />
+          </div>
+        </footer>
+      </div>
+
+      {/* Mobile dock */}
+      <ClientMobileDock active="dashboard" />
+    </div>
+  );
+}
+
+/* ─── Sub-components ───────────────────────────────────────────────── */
+
+function FocusCard({ signal }: { signal: { title: string; description: string; href?: string; tone: string } }) {
+  const toneBorder =
+    signal.tone === "rose"
+      ? "border-rose-200/60 dark:border-rose-400/15"
+      : signal.tone === "amber"
+        ? "border-amber-200/60 dark:border-amber-400/15"
+        : "border-emerald-200/60 dark:border-emerald-400/15";
+
+  const toneStripe =
+    signal.tone === "rose"
+      ? "from-rose-500 to-orange-300"
+      : signal.tone === "amber"
+        ? "from-amber-500 to-amber-300"
+        : "from-emerald-500 to-emerald-300";
+
+  const toneIcon =
+    signal.tone === "rose"
+      ? "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+      : signal.tone === "amber"
+        ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+        : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300";
+
+  const Icon = signal.tone === "rose" ? TrendingDown : signal.tone === "amber" ? Clock : TrendingUp;
+
+  return (
+    <div className={`group relative overflow-hidden rounded-xl border bg-white/90 p-4 shadow-md transition hover:-translate-y-0.5 dark:bg-white/5 ${toneBorder}`}>
+      <div className={`absolute inset-y-3 left-0 w-1 rounded-r-full bg-gradient-to-b ${toneStripe}`} />
+      <div className="flex items-start gap-3 pl-2">
+        <div className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${toneIcon}`}>
+          <Icon size={16} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold tracking-tight text-slate-950 dark:text-white">
+            {signal.title}
+          </p>
+          <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+            {signal.description}
+          </p>
+          {signal.href && (
+            <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              Ouvrir
+              <ArrowRight size={12} className="transition-transform group-hover:translate-x-0.5" />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KpiCard({
+  label,
+  value,
+  detail,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  tone: string;
+  icon: LucideIcon;
+}) {
+  const border =
+    tone === "emerald"
+      ? "border-emerald-200/50 dark:border-emerald-400/12"
+      : tone === "amber"
+        ? "border-amber-200/50 dark:border-amber-400/12"
+        : tone === "rose"
+          ? "border-rose-200/50 dark:border-rose-400/12"
+          : "border-violet-200/50 dark:border-violet-400/12";
+
+  const iconBg =
+    tone === "emerald"
+      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+      : tone === "amber"
+        ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+        : tone === "rose"
+          ? "bg-rose-500/10 text-rose-700 dark:text-rose-300"
+          : "bg-violet-500/10 text-violet-700 dark:text-violet-300";
+
+  return (
+    <div className={`client-kpi-card rounded-2xl border bg-white/90 p-4 dark:bg-white/5 ${border}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 dark:text-slate-400">
+            {label}
+          </p>
+          <p className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-2xl">
+            {value}
+          </p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{detail}</p>
+        </div>
+        <div className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconBg}`}>
+          <Icon size={16} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FunnelStep({
+  label,
+  count,
+  amount,
+  pct,
+  color,
+}: {
+  label: string;
+  count: number;
+  amount: number;
+  pct: number;
+  color: string;
+}) {
+  const gradient =
+    color === "emerald"
+      ? "from-emerald-500 to-emerald-300"
+      : color === "amber"
+        ? "from-amber-500 to-amber-300"
+        : color === "blue"
+          ? "from-blue-500 to-blue-300"
+          : "from-violet-500 to-fuchsia-400";
+
+  const barBg =
+    color === "emerald"
+      ? "bg-emerald-500/10 dark:bg-emerald-500/10"
+      : color === "amber"
+        ? "bg-amber-500/10 dark:bg-amber-500/10"
+        : color === "blue"
+          ? "bg-blue-500/10 dark:bg-blue-500/10"
+          : "bg-violet-500/10 dark:bg-violet-500/10";
+
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-24 shrink-0">
+        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">{label}</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">{count}</p>
+      </div>
+      <div className="flex-1">
+        <div className={`h-2.5 overflow-hidden rounded-full ${barBg}`}>
+          <div
+            className={`h-full rounded-full bg-gradient-to-r ${gradient} transition-all duration-700`}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
+      </div>
+      <div className="w-24 shrink-0 text-right">
+        <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+          {formatCurrency(amount)}
+        </p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">{pct}%</p>
+      </div>
+    </div>
+  );
+}
+
+function QuickLinkButton({ item }: { item: QuickLink }) {
+  const Icon = item.icon;
+  return (
     <Link
-      href="/notifications"
-      className="relative inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 lg:h-9 lg:w-9 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-      aria-label="Notifications"
+      href={item.href}
+      className="group flex flex-col items-start gap-2 rounded-xl border border-slate-200/50 bg-white/80 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-violet-300/60 hover:bg-violet-50/50 dark:border-white/8 dark:bg-white/4 dark:hover:border-violet-400/20"
     >
-      <Bell size={20} />
-      {total > 0 ? (
-        <span className="absolute -right-0.5 -top-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 to-orange-400 px-1 text-[10px] font-bold text-white">
-          {total > 99 ? "99+" : total}
-        </span>
-      ) : null}
+      <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 text-violet-700 dark:text-violet-300">
+        <Icon size={15} />
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-slate-950 dark:text-white">{item.label}</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">{item.description}</p>
+      </div>
     </Link>
   );
 }
 
-function TradeOptionCard({
-  active,
-  onSelect,
-  option,
-}: {
-  active: boolean;
-  onSelect: (key: TradeKey) => void;
-  option: TradeDefinition;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onSelect(option.key)}
-      className={`rounded-[1.45rem] border px-4 py-4 text-left transition ${
-        active
-          ? "border-violet-300/70 bg-white/90 shadow-[0_20px_46px_-36px_rgba(124,58,237,0.3)] dark:border-violet-400/20 dark:bg-white/6"
-          : "border-slate-200/70 bg-white/80 hover:border-violet-300 hover:-translate-y-0.5 dark:border-white/8 dark:bg-white/4"
-      }`}
-    >
-      <p className="text-sm font-semibold text-slate-950 dark:text-white">{option.label}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{option.summary}</p>
-    </button>
-  );
-}
-
-function DashboardSectionHeader({
-  eyebrow,
-  title,
-  description,
-  badge,
-  linkHref,
-  linkLabel,
-}: {
-  eyebrow: string;
-  title: string;
-  description?: string;
-  badge?: string;
-  linkHref?: string;
-  linkLabel?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-          {eyebrow}
-        </p>
-        <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{title}</h2>
-        {description ? (
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">{description}</p>
-        ) : null}
-      </div>
-      <div className="flex items-center gap-3">
-        {badge ? (
-          <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-            {badge}
-          </span>
-        ) : null}
-        {linkHref && linkLabel ? (
-          <Link
-            href={linkHref}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-violet-700 dark:text-violet-200"
-          >
-            {linkLabel}
-            <ChevronRight size={16} />
-          </Link>
-        ) : null}
-      </div>
-    </div>
-  );
-}
-
-function GoalSummaryCard({
-  objectifProgress,
-  goalContextLabel,
-  caTTC,
-  objectifActif,
-  onEdit,
-}: {
-  objectifProgress: number;
-  goalContextLabel: string;
-  caTTC: number;
-  objectifActif: number;
-  onEdit: () => void;
-}) {
-  return (
-    <div className="rounded-[1.8rem] border border-white/70 bg-white/84 p-5 shadow-[0_24px_56px_-40px_rgba(15,23,42,0.22)] backdrop-blur-xl dark:border-white/10 dark:bg-white/6">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-            Objectif mensuel
-          </p>
-          <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white">
-            {objectifProgress.toFixed(0)}%
-          </p>
-          <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{goalContextLabel}</p>
-        </div>
-        <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-violet-500/12 text-violet-700 ring-1 ring-violet-300/40 dark:text-violet-200 dark:ring-violet-400/20">
-          <Target size={18} />
-        </div>
-      </div>
-
-      <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700"
-          style={{ width: `${objectifProgress}%` }}
-        />
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-            CA TTC
-          </p>
-          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
-            {formatCurrency(caTTC)}
-          </p>
-        </div>
-        <div className="rounded-[1.35rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-            Cible
-          </p>
-          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">
-            {formatCurrency(objectifActif)}
-          </p>
-        </div>
-      </div>
-
-      <button
-        type="button"
-        onClick={onEdit}
-        className="mt-4 inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-      >
-        <Pencil size={14} />
-        Ajuster
-      </button>
-    </div>
-  );
-}
-
-function WeeklyMiniStat({
-  icon: Icon,
+function WeekStat({
   label,
   value,
-  detail,
+  tone = "violet",
 }: {
-  icon: LucideIcon;
   label: string;
-  value: string;
-  detail: string;
+  value: string | number;
+  tone?: string;
 }) {
-  return (
-    <div className="rounded-[1.35rem] border border-slate-200/70 bg-white/84 p-4 dark:border-white/8 dark:bg-white/4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
-            {label}
-          </p>
-          <p className="mt-3 text-xl font-semibold tracking-tight text-slate-950 dark:text-white">{value}</p>
-          <p className="mt-2 text-xs leading-5 text-slate-500 dark:text-slate-400">{detail}</p>
-        </div>
-        <div className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 ring-1 ring-slate-200/80 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-          <Icon size={15} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function DashboardPage() {
-  const { user, isLoaded } = useUser();
-  const { data: dashboardData, isLoading, mutate: mutateDashboard } = useSWR<ClientDashboardSummary>(
-    "/api/dashboard/summary",
-    fetcher,
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      keepPreviousData: true,
-      dedupingInterval: 30_000,
-      refreshInterval: 0,
-    },
-  );
-
-  const loading = isLoading && !dashboardData;
-  const canAccessAdmin = user?.publicMetadata?.isAdmin === true;
-  const isPro = user?.publicMetadata?.isPro === true;
-  const companyTrade = readStringMetadata(user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade);
-  const catalogImported = readBooleanMetadata(user?.unsafeMetadata?.starterCatalogImported || user?.publicMetadata?.starterCatalogImported);
-  const onboardingDone = readBooleanMetadata(user?.unsafeMetadata?.onboardingCompleted || user?.publicMetadata?.onboardingCompleted);
-  const starterCatalogCount = dashboardData?.starterCatalogCount ?? 0;
-  const starterTrade = getTradeDefinition(companyTrade) ?? getTradeDefinition(DEFAULT_TRADE);
-
-  const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
-  const [isBootstrapping, setIsBootstrapping] = useState(false);
-  const [objectifDialogOpen, setObjectifDialogOpen] = useState(false);
-  const [objectifDraft, setObjectifDraft] = useState("5000");
-  const [runTour, setRunTour] = useState(
-    () => typeof window !== "undefined" && !localStorage.getItem("zolio_has_seen_tour"),
-  );
-  const [currentHour] = useState(() => new Date().getHours());
-  const [selectedDevisNumero, setSelectedDevisNumero] = useState<string | null>(null);
-
-  useEffect(() => {
-    const nextTrade = getTradeDefinition(companyTrade)?.key;
-    if (nextTrade) {
-      setSelectedTrade(nextTrade);
-    }
-  }, [companyTrade]);
-
-  const selectedTradeDef = getTradeDefinition(selectedTrade) ?? getTradeDefinition(DEFAULT_TRADE);
-  const selectedStarterCount = getStarterCatalogForTrade(selectedTrade).length;
-  const setupRequired =
-    isLoaded && (!companyTrade || !catalogImported || !onboardingDone || starterCatalogCount === 0);
-
-  const objectifMensuel = Number(user?.unsafeMetadata?.objectifMensuel);
-  const objectifInitial = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : 5000;
-  const [objectif, setObjectif] = useState(objectifInitial);
-  const objectifActif = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;
-
-  useEffect(() => {
-    setObjectifDraft(objectifActif.toString());
-  }, [objectifActif]);
-
-  const handleBootstrap = async () => {
-    if (!user || !selectedTradeDef) {
-      return;
-    }
-
-    setIsBootstrapping(true);
-    try {
-      const response = await fetch("/api/onboarding/bootstrap", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trade: selectedTradeDef.key }),
-      });
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error || "Erreur");
-      }
-
-      await user.update({
-        unsafeMetadata: {
-          ...user.unsafeMetadata,
-          companyTrade: selectedTradeDef.key,
-          onboardingCompleted: true,
-          starterCatalogImported: true,
-        },
-      });
-      await mutateDashboard();
-      toast.success(payload.imported > 0 ? `${payload.imported} prestation(s) importée(s)` : "Starter déjà en place");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Impossible d'importer");
-    } finally {
-      setIsBootstrapping(false);
-    }
-  };
-
-  const handleUpdateObjectif = async () => {
-    const parsed = Number(objectifDraft.replace(",", ".").trim());
-    if (Number.isNaN(parsed) || parsed <= 0) {
-      toast.error("Objectif invalide.");
-      return;
-    }
-
-    setObjectif(parsed);
-    try {
-      if (user) {
-        await user.update({ unsafeMetadata: { ...user.unsafeMetadata, objectifMensuel: parsed } });
-      }
-      setObjectifDialogOpen(false);
-      toast.success("Objectif mis à jour.");
-    } catch {
-      toast.error("Erreur de sauvegarde.");
-    }
-  };
-
-  const handleTourCallback = (data: CallBackProps) => {
-    if (data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED) {
-      localStorage.setItem("zolio_has_seen_tour", "true");
-      setRunTour(false);
-    }
-  };
-
-  const d = dashboardData;
-  const totalQuotes = d?.totalQuotes ?? 0;
-  const caTTC = d?.totalTTC ?? 0;
-  const acceptedCount = d?.acceptedCount ?? 0;
-  const pendingCount = d?.pendingCount ?? 0;
-  const acceptedRevenueHT = d?.acceptedRevenueHT ?? 0;
-  const pipelineHT = d?.pipelineRevenueHT ?? 0;
-  const conversionRate = d?.conversionRate ?? 0;
-  const averageTicket = d?.averageTicket ?? 0;
-  const avgResponseDays = d?.avgResponseDays ?? 0;
-  const objectifProgress = objectifActif > 0 ? Math.min((caTTC / objectifActif) * 100, 100) : 0;
-  const remainingToGoal = Math.max(objectifActif - caTTC, 0);
-  const devisRecents = (d?.recentQuotes ?? []) as QuoteListItem[];
-  const devisARelancer = (d?.followUpQuotes ?? []) as QuoteListItem[];
-  const monthlyData: ClientDashboardMonthlyDatum[] = d?.monthlyData ?? [];
-  const topClients = d?.topClients ?? [];
-  const tresorerie = d?.tresorerie;
-  const benefice = d?.benefice;
-  const echeances = d?.echeances ?? [];
-  const semaine = d?.semaine;
-  const funnel = d?.funnel;
-
-  let greetingText = "Bonjour";
-  let GreetingIcon = CloudSun;
-  if (currentHour >= 18) {
-    greetingText = "Bonsoir";
-    GreetingIcon = MoonStar;
-  } else if (currentHour >= 12) {
-    greetingText = "Bon après-midi";
-    GreetingIcon = SunMedium;
-  }
-
-  const todayLabel = new Intl.DateTimeFormat("fr-FR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(new Date());
-
-  const signals = useMemo<DashboardSignal[]>(() => {
-    const nextSignals: DashboardSignal[] = [];
-
-    if (setupRequired) {
-      nextSignals.push({
-        id: "setup",
-        title: "Starter métier à activer",
-        description: "Choisissez votre métier et importez votre base de prestations.",
-        tone: "violet",
-      });
-    }
-    if (devisARelancer.length > 0) {
-      nextSignals.push({
-        id: "followups",
-        title: `${devisARelancer.length} relance(s)`,
-        description: "Des devis ont besoin d'une action commerciale rapide.",
-        href: "/devis",
-        tone: "rose",
-      });
-    }
-    if (pendingCount > 0) {
-      nextSignals.push({
-        id: "pipeline",
-        title: `${pendingCount} devis en attente`,
-        description: `${formatCurrency(pipelineHT)} HT restent à convertir.`,
-        href: "/devis",
-        tone: "amber",
-      });
-    }
-    if (tresorerie && tresorerie.enRetard > 0) {
-      nextSignals.push({
-        id: "overdue",
-        title: `${formatCurrency(tresorerie.enRetard)} en retard`,
-        description: "Une partie de la trésorerie doit être sécurisée.",
-        href: "/factures",
-        tone: "rose",
-      });
-    }
-    if (totalQuotes === 0) {
-      nextSignals.push({
-        id: "first",
-        title: "Premier devis à lancer",
-        description: "Le cockpit prendra tout son sens dès la première affaire créée.",
-        href: "/nouveau-devis",
-        tone: "violet",
-      });
-    }
-
-    return nextSignals.slice(0, 4);
-  }, [devisARelancer.length, pendingCount, pipelineHT, setupRequired, totalQuotes, tresorerie]);
-
-  const todayFocus = useMemo<DashboardSignal>(() => {
-    if (setupRequired) {
-      return {
-        id: "focus-setup",
-        title: "Finaliser la configuration métier",
-        description: "Commencez par activer le starter pour avoir un cockpit immédiatement utile.",
-        tone: "violet",
-      };
-    }
-    if (devisARelancer.length > 0) {
-      return {
-        id: "focus-followups",
-        title: `${devisARelancer.length} devis doivent être relancés`,
-        description: "La priorité du moment est commerciale, pas décorative.",
-        href: "/devis",
-        tone: "rose",
-      };
-    }
-    if (pendingCount > 0) {
-      return {
-        id: "focus-pipeline",
-        title: "Le pipeline reste ouvert",
-        description: `${formatCurrency(pipelineHT)} HT peuvent encore être convertis.`,
-        href: "/devis",
-        tone: "amber",
-      };
-    }
-    if (totalQuotes === 0) {
-      return {
-        id: "focus-first",
-        title: "Créer le premier devis",
-        description: "Le dashboard est prêt, mais il lui manque encore un signal réel.",
-        href: "/nouveau-devis",
-        tone: "violet",
-      };
-    }
-    return {
-      id: "focus-steady",
-      title: "Le cockpit est stable",
-      description: "Travaillez maintenant la conversion, la réactivité et l'encaissement.",
-      tone: "emerald",
-    };
-  }, [devisARelancer.length, pendingCount, pipelineHT, setupRequired, totalQuotes]);
-
-  const heroIndicators = useMemo<DashboardHeroIndicator[]>(() => {
-    return [
-      {
-        id: "indicator-pipeline",
-        label: "Pipeline",
-        value: formatCurrency(pipelineHT),
-        tone: pendingCount > 0 ? "amber" : "slate",
-      },
-      {
-        id: "indicator-relances",
-        label: "Relances",
-        value: `${devisARelancer.length} à traiter`,
-        tone: devisARelancer.length > 0 ? "rose" : "slate",
-      },
-      {
-        id: "indicator-cap",
-        label: "Cap restant",
-        value: remainingToGoal > 0 ? formatCurrency(remainingToGoal) : "Atteint",
-        tone: remainingToGoal > 0 ? "violet" : "emerald",
-      },
-    ];
-  }, [devisARelancer.length, pendingCount, pipelineHT, remainingToGoal]);
-
-  const actionPlan = useMemo<DashboardActionPlanItem[]>(() => {
-    const items: DashboardActionPlanItem[] = [
-      {
-        id: "create",
-        eyebrow: "Action",
-        title: totalQuotes === 0 ? "Créer le premier devis" : "Ouvrir un nouveau devis",
-        description: "Le flux principal du cockpit commence ici.",
-        href: "/nouveau-devis",
-        icon: Plus,
-        tone: "violet",
-        ctaLabel: "Créer",
-      },
-    ];
-
-    if (devisARelancer.length > 0) {
-      items.push({
-        id: "followups",
-        eyebrow: "Urgent",
-        title: "Traiter les relances",
-        description: `${devisARelancer.length} devis attendent un rappel.`,
-        href: "/devis",
-        icon: Bell,
-        tone: "rose",
-        value: String(devisARelancer.length),
-        ctaLabel: "Voir",
-      });
-    } else if (pendingCount > 0) {
-      items.push({
-        id: "pipeline",
-        eyebrow: "Commercial",
-        title: "Suivre le pipeline",
-        description: `${pendingCount} devis restent en attente.`,
-        href: "/devis",
-        icon: Clock3,
-        tone: "amber",
-        value: formatCurrency(pipelineHT),
-        ctaLabel: "Ouvrir",
-      });
-    }
-
-    if (!isPro) {
-      items.push({
-        id: "pro",
-        eyebrow: "Croissance",
-        title: "Passer en PRO",
-        description: "Débloquez plus de latitude pour piloter votre activité.",
-        href: "/abonnement",
-        icon: Sparkles,
-        tone: "violet",
-        ctaLabel: "Voir",
-      });
-    }
-
-    return items.slice(0, 3);
-  }, [devisARelancer.length, isPro, pendingCount, pipelineHT, totalQuotes]);
-
-  const quickLinks: QuickLinkItem[] = [
-    { href: "/clients", label: "Clients", description: "Carnet et historique", icon: Users, tone: "violet" },
-    { href: "/factures", label: "Factures", description: "Paiements et relances", icon: FileCheck2, tone: "slate" },
-    { href: "/catalogue", label: "Catalogue", description: "Prestations réutilisables", icon: Package, tone: "amber" },
-    { href: "/parametres", label: "Paramètres", description: "Entreprise et réglages", icon: Settings, tone: "slate" },
-  ];
-
-  const briefingText = useMemo(() => {
-    if (setupRequired) {
-      return "Le dashboard a été vidé de tout bruit inutile. La première étape est maintenant d'activer le starter métier pour lui donner une base réelle.";
-    }
-    if (devisARelancer.length > 0) {
-      return `${devisARelancer.length} devis demandent une relance. C'est l'information la plus importante du moment, devant le reste.`;
-    }
-    if (pendingCount > 0) {
-      return `${pendingCount} devis restent ouverts. Le cockpit se concentre donc sur le pipeline, l'encaissement et la vitesse de conversion.`;
-    }
-    if (totalQuotes === 0) {
-      return "Le dashboard est prêt mais il n'a pas encore de matière. Créez un premier devis pour faire apparaître les vrais signaux.";
-    }
-    return "Le cockpit se concentre désormais sur ce qui compte vraiment: conversion, rythme, trésorerie et clients forts.";
-  }, [devisARelancer.length, pendingCount, setupRequired, totalQuotes]);
-
-  const goalContextLabel =
-    remainingToGoal > 0
-      ? `${formatCurrency(remainingToGoal)} restent à sécuriser pour atteindre la cible`
-      : "Objectif mensuel atteint";
-
-  const tourSteps: Step[] = [
-    {
-      target: ".tour-dashboard",
-      title: "Cockpit",
-      content: "Le dashboard a été recentré sur la hiérarchie des actions et des chiffres clés.",
-      disableBeacon: true,
-      placement: "bottom" as const,
-    },
-    {
-      target: ".tour-nouveau-devis",
-      title: "Nouveau devis",
-      content: "Le point d'entrée principal reste ici.",
-      placement: "bottom" as const,
-    },
-  ];
+  const color =
+    tone === "emerald"
+      ? "text-emerald-700 dark:text-emerald-300"
+      : tone === "rose"
+        ? "text-rose-700 dark:text-rose-300"
+        : "text-slate-950 dark:text-white";
 
   return (
-    <div
-      className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white"
-      data-testid="dashboard-page"
-    >
-      <div className="client-grid-overlay pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
-
-      {runTour ? (
-        <Joyride
-          steps={tourSteps}
-          run={runTour}
-          continuous
-          showSkipButton
-          showProgress
-          callback={handleTourCallback}
-          styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }}
-          locale={{
-            back: "Précédent",
-            close: "Fermer",
-            last: "Terminer",
-            next: "Suivant",
-            skip: "Passer",
-          }}
-        />
-      ) : null}
-
-      <PullToRefresh
-        onRefresh={async () => {
-          await mutateDashboard();
-        }}
-      >
-        <div className="mx-auto flex min-h-screen w-full max-w-[1560px] flex-col px-4 pb-28 pt-4 sm:px-6 lg:px-8 lg:pb-10 lg:pl-[336px]">
-          <header className="client-panel sticky top-3 z-40 rounded-[2rem] px-4 py-4 backdrop-blur-xl sm:px-6">
-            <div className="flex items-center justify-between gap-3">
-              <ClientBrandMark showLabel={false} />
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <Link
-                  href="/parametres"
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 lg:h-9 lg:w-9 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-                  aria-label="Paramètres"
-                >
-                  <Settings size={20} className="lg:h-4 lg:w-4" />
-                </Link>
-                {canAccessAdmin ? (
-                  <Link
-                    href="/admin"
-                    className="hidden items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 md:inline-flex lg:px-3 lg:py-1.5 lg:text-xs dark:border-violet-400/20 dark:text-violet-100"
-                  >
-                    <ShieldCheck size={17} className="lg:h-3.5 lg:w-3.5" />
-                    Admin
-                  </Link>
-                ) : null}
-                <DashboardNotificationsMenu dashboardSignals={signals} />
-                {isLoaded && user?.imageUrl ? (
-                  <Image
-                    src={user.imageUrl}
-                    alt="Avatar"
-                    width={32}
-                    height={32}
-                    unoptimized
-                    className="h-8 w-8 rounded-full object-cover ring-1 ring-white/20 lg:h-7 lg:w-7"
-                  />
-                ) : (
-                  <div className="h-8 w-8 animate-pulse rounded-full bg-slate-200 lg:h-7 lg:w-7 dark:bg-slate-700" />
-                )}
-              </div>
-            </div>
-          </header>
-
-          <ClientDesktopNav active="dashboard" />
-
-          <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
-            {!isLoaded ? (
-              <div className="space-y-6">
-                <div className="h-40 animate-pulse rounded-[2rem] bg-slate-200/80 dark:bg-slate-800/80" />
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  {[...Array(4)].map((_, index) => (
-                    <div
-                      key={index}
-                      className="h-32 animate-pulse rounded-[1.6rem] bg-slate-200/60 dark:bg-slate-800/60"
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <>
-                <motion.section
-                  {...sectionMotion(0)}
-                  className="client-panel-strong relative overflow-hidden rounded-[2.2rem] px-5 py-5 sm:px-6 sm:py-6 lg:px-7"
-                >
-                  <div className="pointer-events-none absolute -left-14 top-12 h-40 w-40 rounded-full bg-violet-500/12 blur-3xl" />
-                  <div className="pointer-events-none absolute -right-10 top-0 h-52 w-52 rounded-full bg-orange-400/10 blur-3xl" />
-
-                  <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_380px]">
-                    <div className="space-y-5">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-white/72 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
-                          <GreetingIcon size={14} />
-                          {todayLabel}
-                        </div>
-                        <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
-                          <BriefcaseBusiness size={13} />
-                          {starterTrade?.shortLabel || "Métier"}
-                        </div>
-                      </div>
-
-                      <div className="max-w-3xl">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-600 dark:text-violet-200">
-                          Cockpit client
-                        </p>
-                        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-                          {greetingText}
-                          {user?.firstName ? `, ${user.firstName}` : ""}.
-                        </h1>
-                        <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                          {briefingText}
-                        </p>
-                      </div>
-
-                      <FocusSignalCard signal={todayFocus} />
-
-                      <div className="flex flex-wrap gap-3">
-                        <Link href="/nouveau-devis" className="tour-nouveau-devis">
-                          <motion.div
-                            whileTap={{ scale: 0.98 }}
-                            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand"
-                          >
-                            <Plus size={17} />
-                            Nouveau devis
-                          </motion.div>
-                        </Link>
-                        <Link
-                          href="/devis"
-                          className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                        >
-                          <FileText size={17} />
-                          Mes devis
-                        </Link>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <GoalSummaryCard
-                        objectifProgress={objectifProgress}
-                        goalContextLabel={goalContextLabel}
-                        caTTC={caTTC}
-                        objectifActif={objectifActif}
-                        onEdit={() => {
-                          setObjectifDraft(objectifActif.toString());
-                          setObjectifDialogOpen(true);
-                        }}
-                      />
-
-                      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                        {heroIndicators.map((indicator) => (
-                          <HeroIndicatorPill key={indicator.id} indicator={indicator} />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </motion.section>
-
-                {setupRequired && selectedTradeDef ? (
-                  <motion.section
-                    id="dashboard-setup-panel"
-                    {...sectionMotion(0.04)}
-                    className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6"
-                  >
-                    <DashboardSectionHeader
-                      eyebrow="Starter métier"
-                      title="Initialiser votre base de travail"
-                      description="Le dashboard est maintenant plus strict. Pour qu'il soit pertinent, il faut lui donner une base métier propre."
-                      badge={`${starterCatalogCount} en base`}
-                    />
-
-                    <div className="mt-5 space-y-4">
-                      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                        {TRADE_OPTIONS.map((option) => (
-                          <TradeOptionCard
-                            key={option.key}
-                            option={option}
-                            active={selectedTrade === option.key}
-                            onSelect={setSelectedTrade}
-                          />
-                        ))}
-                      </div>
-
-                      <div className="rounded-[1.45rem] border border-slate-200/70 bg-slate-50/80 px-4 py-4 dark:border-white/8 dark:bg-white/4">
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDef.label}</p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          {selectedTradeDef.pitch} {selectedStarterCount} prestations seront injectées.
-                        </p>
-                      </div>
-
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <button
-                          type="button"
-                          onClick={handleBootstrap}
-                          disabled={isBootstrapping}
-                          className="inline-flex items-center justify-center gap-2 rounded-[1.3rem] bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60"
-                        >
-                          {isBootstrapping ? "Préparation..." : "Activer mon starter"}
-                        </button>
-                        <Link
-                          href="/parametres"
-                          className="inline-flex items-center justify-center gap-2 rounded-[1.3rem] border border-slate-200/80 bg-white/80 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-                        >
-                          Finaliser mes paramètres
-                        </Link>
-                      </div>
-                    </div>
-                  </motion.section>
-                ) : null}
-
-                <motion.section
-                  {...sectionMotion(0.08)}
-                  className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start"
-                >
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <CompactMetricCard
-                      label="CA validé"
-                      value={formatCurrency(acceptedRevenueHT)}
-                      detail={`${acceptedCount} devis gagnés`}
-                      tone="emerald"
-                      icon={TrendingUp}
-                    />
-                    <CompactMetricCard
-                      label="Pipeline"
-                      value={formatCurrency(pipelineHT)}
-                      detail={`${pendingCount} devis ouverts`}
-                      tone="amber"
-                      icon={Clock3}
-                    />
-                    <CompactMetricCard
-                      label="Ticket moyen"
-                      value={formatCurrency(averageTicket)}
-                      detail={`${conversionRate}% de conversion`}
-                      tone="violet"
-                      icon={LineChart}
-                    />
-                    <CompactMetricCard
-                      label="Réponse"
-                      value={`${avgResponseDays.toFixed(1)} j`}
-                      detail="Délai moyen avant issue"
-                      tone="slate"
-                      icon={FileText}
-                    />
-                  </div>
-
-                  <div className="client-panel rounded-[2rem] p-4 sm:p-5">
-                    <DashboardSectionHeader
-                      eyebrow="À faire maintenant"
-                      title="Plan d'action"
-                      description="Trois actions maximum, sans bruit."
-                    />
-                    <div className="mt-5 grid gap-3">
-                      {actionPlan.map((item) => (
-                        <DashboardActionCard key={item.id} item={item} compact />
-                      ))}
-                    </div>
-                  </div>
-                </motion.section>
-
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(360px,0.9fr)] xl:gap-6">
-                  <div className="space-y-4 xl:space-y-6">
-                    <motion.section {...sectionMotion(0.1)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                      <DashboardSectionHeader
-                        eyebrow="Performance"
-                        title="Rythme et tendance"
-                        description="La courbe mensuelle reste au centre, avec les signaux hebdomadaires à portée directe."
-                      />
-
-                      {semaine ? (
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                          <WeeklyMiniStat
-                            icon={FileText}
-                            label="Nouveaux devis"
-                            value={String(semaine.nouveauxDevis)}
-                            detail={`${semaine.devisAcceptes} accepté${semaine.devisAcceptes > 1 ? "s" : ""}`}
-                          />
-                          <WeeklyMiniStat
-                            icon={FileCheck2}
-                            label="Factures"
-                            value={String(semaine.facturesEmises)}
-                            detail={`${semaine.facturesPayees} payée${semaine.facturesPayees > 1 ? "s" : ""}`}
-                          />
-                          <WeeklyMiniStat
-                            icon={TrendingUp}
-                            label="Encaissé"
-                            value={formatCurrency(semaine.caEncaisse)}
-                            detail="Semaine en cours"
-                          />
-                          <WeeklyMiniStat
-                            icon={Package}
-                            label="Dépenses"
-                            value={formatCurrency(semaine.depensesSemaine)}
-                            detail="Semaine en cours"
-                          />
-                        </div>
-                      ) : null}
-
-                      <div className="mt-5 h-[18rem] overflow-hidden rounded-[1.7rem] border border-slate-200/70 bg-white/75 px-2 py-4 dark:border-white/8 dark:bg-white/4 sm:h-72">
-                        {loading ? <ChartSkeleton /> : <DashboardChart monthlyData={monthlyData} />}
-                      </div>
-                    </motion.section>
-
-                    <motion.section {...sectionMotion(0.12)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                      <DashboardSectionHeader
-                        eyebrow="Pipeline"
-                        title="Affaires en cours"
-                        description="Les devis récents et les relances sont séparés pour éviter les ambiguïtés."
-                        linkHref="/devis"
-                        linkLabel="Voir tous"
-                      />
-
-                      <div className="mt-5 grid gap-4 xl:grid-cols-2">
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Derniers devis</p>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">{devisRecents.length} item(s)</span>
-                          </div>
-                          <DashboardRecentQuotes items={devisRecents} onSelectDevis={setSelectedDevisNumero} />
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Relances à traiter</p>
-                            <span className="text-xs text-slate-500 dark:text-slate-400">{devisARelancer.length} item(s)</span>
-                          </div>
-                          <DashboardFollowUps items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
-                        </div>
-                      </div>
-                    </motion.section>
-
-                    {funnel && funnel.length > 0 ? (
-                      <motion.section {...sectionMotion(0.14)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                        <DashboardSectionHeader
-                          eyebrow="Conversion"
-                          title="Funnel commercial"
-                          description="Lecture rapide du passage du devis jusqu'au paiement."
-                        />
-                        <div className="mt-5">
-                          <ConversionFunnel funnel={funnel} />
-                        </div>
-                      </motion.section>
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-4 xl:space-y-6">
-                    <motion.section {...sectionMotion(0.16)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                      <DashboardSectionHeader
-                        eyebrow="Finance"
-                        title="Trésorerie"
-                        description="Montants encaissés, ouverts et en retard."
-                      />
-                      <div className="mt-5">
-                        {tresorerie ? (
-                          <DashboardTresorerie data={tresorerie} />
-                        ) : (
-                          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement…</p>
-                        )}
-                      </div>
-                    </motion.section>
-
-                    <motion.section {...sectionMotion(0.18)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                      <DashboardSectionHeader
-                        eyebrow="Résultat"
-                        title="Rentabilité"
-                        description="Lecture sobre du net encaissé face aux dépenses."
-                      />
-                      <div className="mt-5">
-                        {benefice ? (
-                          <DashboardBenefice data={benefice} />
-                        ) : (
-                          <p className="text-sm text-slate-500 dark:text-slate-400">Chargement…</p>
-                        )}
-                      </div>
-                    </motion.section>
-
-                    <motion.section {...sectionMotion(0.2)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                      <DashboardSectionHeader
-                        eyebrow="Paiements"
-                        title="Prochaines échéances"
-                        description="Ce qui doit tomber dans les 14 prochains jours."
-                        badge={`${echeances.length}`}
-                      />
-                      <div className="mt-5">
-                        <DashboardEcheances items={echeances} />
-                      </div>
-                    </motion.section>
-                  </div>
-                </div>
-
-                <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:gap-6">
-                  <motion.section {...sectionMotion(0.22)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                    <DashboardSectionHeader
-                      eyebrow="Clients"
-                      title="Comptes les plus forts"
-                      description="Ceux qui concentrent le plus de chiffre gagné."
-                    />
-                    <div className="mt-5">
-                      <DashboardTopClients items={topClients} />
-                    </div>
-                  </motion.section>
-
-                  <motion.section {...sectionMotion(0.24)} className="client-panel rounded-[2rem] p-4 sm:p-5 lg:p-6">
-                    <DashboardSectionHeader
-                      eyebrow="Modules"
-                      title="Accès rapides"
-                      description="Les outils secondaires restent disponibles, sans polluer le haut du cockpit."
-                    />
-                    <div className="mt-5 grid grid-cols-2 gap-3">
-                      {quickLinks.map((item) => (
-                        <QuickLinkCard key={item.href} item={item} />
-                      ))}
-                    </div>
-
-                    <div className="mt-5 space-y-2">
-                      <ClientSupportButton />
-                      {canAccessAdmin ? (
-                        <Link
-                          href="/admin"
-                          className="flex items-center justify-center gap-2 rounded-[1.25rem] border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-100"
-                        >
-                          <ShieldCheck size={16} />
-                          Admin
-                        </Link>
-                      ) : null}
-                    </div>
-                  </motion.section>
-                </div>
-              </>
-            )}
-          </main>
-
-          <DesktopDrawer open={!!selectedDevisNumero} onClose={() => setSelectedDevisNumero(null)}>
-            {selectedDevisNumero ? <DevisEditor numero={selectedDevisNumero} /> : null}
-          </DesktopDrawer>
-
-          <MobileDialog
-            open={objectifDialogOpen}
-            onClose={() => setObjectifDialogOpen(false)}
-            title="Ajuster l'objectif"
-          >
-            <div className="p-6">
-              <p className="text-sm text-slate-500 dark:text-slate-400">
-                Définissez votre objectif de chiffre d'affaires mensuel TTC pour piloter votre progression.
-              </p>
-              <div className="mt-4">
-                <label
-                  htmlFor="objectif"
-                  className="block text-sm font-medium text-slate-700 dark:text-slate-300"
-                >
-                  Objectif mensuel
-                </label>
-                <div className="relative mt-2">
-                  <input
-                    type="text"
-                    name="objectif"
-                    id="objectif"
-                    value={objectifDraft}
-                    onChange={(event) => setObjectifDraft(event.target.value)}
-                    className="block w-full rounded-2xl border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-950 focus:border-violet-500 focus:ring-violet-500 dark:border-white/10 dark:bg-white/5 dark:text-white sm:text-sm"
-                    placeholder="5000"
-                  />
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                    <span className="text-slate-500 sm:text-sm">€ TTC</span>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-6 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setObjectifDialogOpen(false)}
-                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
-                >
-                  Annuler
-                </button>
-                <button
-                  type="button"
-                  onClick={handleUpdateObjectif}
-                  className="flex-1 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700"
-                >
-                  Enregistrer
-                </button>
-              </div>
-            </div>
-          </MobileDialog>
-
-          <ClientMobileDock active="dashboard" />
-        </div>
-      </PullToRefresh>
+    <div className="rounded-xl border border-slate-200/40 bg-white/70 px-3 py-2.5 dark:border-white/6 dark:bg-white/4">
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400 dark:text-slate-500">
+        {label}
+      </p>
+      <p className={`mt-1 text-sm font-semibold tracking-tight ${color}`}>
+        {typeof value === "number" ? value : value}
+      </p>
     </div>
   );
 }

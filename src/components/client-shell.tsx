@@ -366,6 +366,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
 export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
   const unreadCount = useUnreadNotificationsCount();
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   const mainItems = [
     { href: "/dashboard", icon: Home, key: "dashboard" as const, label: "Accueil" },
@@ -410,153 +411,221 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
     return false;
   };
 
+  useOverlayCloseSignal(() => setToolsOpen(false));
+
+  useEffect(() => {
+    setToolsOpen(false);
+  }, [pathname]);
+
   return (
-    <aside className="fixed inset-y-4 left-4 z-30 hidden w-[260px] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white/92 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.3)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/82 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] dark:border-white/10 dark:bg-white/4">
-          <ClientBrandMark />
-          <p className="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-300">
-            Un cockpit bureau pour piloter devis, encaissements et fiches clients sans friction.
-          </p>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <Link
-              href="/nouveau-devis"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-3 py-3 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:translate-y-[-1px]"
-            >
-              <Plus size={16} />
+    <>
+      <aside className="fixed inset-y-4 left-4 z-30 hidden w-[84px] flex-col items-center rounded-[2rem] border border-slate-200/80 bg-white/92 px-3 py-4 shadow-[0_32px_80px_-48px_rgba(15,23,42,0.28)] backdrop-blur-xl lg:flex dark:border-white/10 dark:bg-slate-950/84">
+        <Link
+          href="/dashboard"
+          className="inline-flex h-14 w-14 items-center justify-center rounded-[1.35rem] bg-white/86 ring-1 ring-slate-200/80 transition hover:-translate-y-0.5 dark:bg-white/6 dark:ring-white/10"
+          aria-label="Accueil Zolio"
+        >
+          <Image
+            src="/logo.png"
+            alt="Zolio"
+            width={28}
+            height={28}
+            className="h-7 w-auto object-contain"
+            priority
+          />
+        </Link>
+
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <Link
+            href="/nouveau-devis"
+            className="group relative inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/20 transition hover:-translate-y-0.5"
+            aria-label="Nouveau devis"
+          >
+            <Plus size={18} />
+            <span className="pointer-events-none absolute left-[calc(100%+0.9rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white/96 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-lg group-hover:flex dark:border-white/10 dark:bg-slate-950/96 dark:text-slate-100">
               Nouveau devis
-            </Link>
-            <Link
-              href="/nouvelle-facture"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200/80 bg-white/90 px-3 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
-            >
-              <Receipt size={16} />
-              Facture
-            </Link>
-          </div>
-        </div>
-
-        <div className="mt-4 rounded-2xl border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
-          <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-            Pilotage
-          </p>
-          <nav className="mt-3 flex flex-col gap-1">
-            {mainItems.map((item) => {
-              const Icon = item.icon;
-              const itemActive = isActiveNav(item);
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  className={`flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
-                    itemActive
-                      ? "bg-[linear-gradient(135deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08))] text-slate-950 shadow-[0_16px_30px_-22px_rgba(124,58,237,0.55)] ring-1 ring-violet-300/50 dark:text-white dark:ring-violet-400/20"
-                      : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-                  }`}
-                >
-                  <Icon size={16} strokeWidth={itemActive ? 2.2 : 1.8} />
-                  <span className="flex-1">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {toolGroups.map((group) => (
-          <div key={group.label} className="mt-4 rounded-2xl border border-slate-200/80 bg-white/82 p-3 dark:border-white/10 dark:bg-white/4">
-            <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-              {group.label}
-            </p>
-            <nav className="mt-3 flex flex-col gap-1">
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const itemActive = isActiveNav(item);
-                const isNotif = item.href === "/notifications";
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`relative flex min-h-11 items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${
-                      itemActive
-                        ? "bg-slate-100 font-medium text-slate-950 ring-1 ring-slate-200/80 dark:bg-white/10 dark:text-white dark:ring-white/12"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-                    }`}
-                  >
-                    <Icon size={15} strokeWidth={itemActive ? 2 : 1.8} />
-                    <span className="flex-1">{item.label}</span>
-                    {isNotif && unreadCount > 0 ? (
-                      <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-4 space-y-3 shrink-0">
-        <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-                Raccourcis
-              </p>
-              <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Support, notifications et recherche globale restent à portée de clavier.
-              </p>
-            </div>
-            <span className="inline-flex rounded-full bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-700 ring-1 ring-rose-300/40 dark:text-rose-200 dark:ring-rose-400/20">
-              {unreadCount}
             </span>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href="/notifications"
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
-            >
-              <Bell size={15} />
-              Notifications
-            </Link>
-            <a
-              href={SUPPORT_HREF}
-              target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
-              rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-              className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
-            >
-              <LifeBuoy size={15} />
-              Support
-            </a>
-          </div>
-
-          <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-            Astuce: utilisez <span className="font-semibold">⌘K</span> pour lancer la recherche globale.
-          </p>
+          </Link>
+          <Link
+            href="/nouvelle-facture"
+            className="group relative inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/90 text-slate-700 transition hover:-translate-y-0.5 hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+            aria-label="Nouvelle facture"
+          >
+            <Receipt size={17} />
+            <span className="pointer-events-none absolute left-[calc(100%+0.9rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white/96 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-lg group-hover:flex dark:border-white/10 dark:bg-slate-950/96 dark:text-slate-100">
+              Nouvelle facture
+            </span>
+          </Link>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white/84 p-3 dark:border-white/10 dark:bg-white/4">
+        <nav className="mt-6 flex flex-1 flex-col items-center gap-2">
+          {mainItems.map((item) => {
+            const Icon = item.icon;
+            const itemActive = isActiveNav(item);
+            return (
+              <Link
+                key={item.key}
+                href={item.href}
+                className={`group relative inline-flex h-12 w-12 items-center justify-center rounded-2xl transition ${
+                  itemActive
+                    ? "bg-[linear-gradient(135deg,rgba(124,58,237,0.16),rgba(236,72,153,0.08))] text-slate-950 shadow-[0_16px_30px_-22px_rgba(124,58,237,0.45)] ring-1 ring-violet-300/50 dark:text-white dark:ring-violet-400/20"
+                    : "text-slate-500 hover:bg-white/90 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/6 dark:hover:text-white"
+                }`}
+                aria-label={item.label}
+              >
+                <Icon size={18} strokeWidth={itemActive ? 2.2 : 1.9} />
+                <span className="pointer-events-none absolute left-[calc(100%+0.9rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white/96 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-lg group-hover:flex dark:border-white/10 dark:bg-slate-950/96 dark:text-slate-100">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="mt-auto flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setToolsOpen((prev) => !prev)}
+            className={`group relative inline-flex h-12 w-12 items-center justify-center rounded-2xl border transition ${
+              toolsOpen
+                ? "border-violet-300/60 bg-violet-500/10 text-violet-700 dark:border-violet-400/20 dark:text-violet-200"
+                : "border-slate-200/80 bg-white/90 text-slate-700 hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+            }`}
+            aria-label="Ouvrir les modules"
+          >
+            <MoreHorizontal size={18} />
+            {unreadCount > 0 ? (
+              <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            ) : null}
+            <span className="pointer-events-none absolute left-[calc(100%+0.9rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white/96 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-lg group-hover:flex dark:border-white/10 dark:bg-slate-950/96 dark:text-slate-100">
+              Modules
+            </span>
+          </button>
+
+          <a
+            href={SUPPORT_HREF}
+            target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
+            rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
+            className="group relative inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/90 text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+            aria-label="Support"
+          >
+            <LifeBuoy size={17} />
+            <span className="pointer-events-none absolute left-[calc(100%+0.9rem)] top-1/2 hidden -translate-y-1/2 whitespace-nowrap rounded-full border border-slate-200/80 bg-white/96 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-lg group-hover:flex dark:border-white/10 dark:bg-slate-950/96 dark:text-slate-100">
+              Support
+            </span>
+          </a>
+
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200/80 bg-white/90 shadow-[0_18px_36px_-30px_rgba(15,23,42,0.24)] dark:border-white/10 dark:bg-white/6">
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "h-9 w-9",
+                  userButtonTrigger: "p-0",
+                },
+              }}
+            />
+          </div>
+        </div>
+      </aside>
+
+      {toolsOpen ? (
+        <button
+          type="button"
+          onClick={() => setToolsOpen(false)}
+          className="fixed inset-0 z-30 hidden bg-slate-950/20 backdrop-blur-[2px] lg:block"
+          aria-label="Fermer les modules"
+        />
+      ) : null}
+
+      <motion.aside
+        initial={false}
+        animate={{
+          opacity: toolsOpen ? 1 : 0,
+          x: toolsOpen ? 0 : -16,
+          pointerEvents: toolsOpen ? "auto" : "none",
+        }}
+        transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed left-[116px] top-4 z-40 hidden w-[340px] overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white/94 p-4 shadow-[0_40px_90px_-52px_rgba(15,23,42,0.28)] backdrop-blur-xl lg:block dark:border-white/10 dark:bg-slate-950/92"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+              Modules
+            </p>
+            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Navigation secondaire, recherche et raccourcis bureau.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setToolsOpen(false)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/90 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300"
+            aria-label="Fermer"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        <div className="mt-4 rounded-[1.6rem] border border-slate-200/80 bg-white/86 p-4 dark:border-white/10 dark:bg-white/4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+            Recherche globale
+          </p>
+          <div className="mt-3">
+            <GlobalSearch className="max-w-none" />
+          </div>
+        </div>
+
+        <div className="mt-4 max-h-[calc(100vh-17rem)] space-y-4 overflow-y-auto pr-1">
+          {toolGroups.map((group) => (
+            <div key={group.label} className="rounded-[1.6rem] border border-slate-200/80 bg-white/86 p-4 dark:border-white/10 dark:bg-white/4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
+                {group.label}
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const itemActive = isActiveNav(item);
+                  const isNotif = item.href === "/notifications";
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`relative flex min-h-[88px] flex-col items-start justify-between rounded-[1.2rem] border px-3 py-3 text-left text-sm font-semibold transition hover:-translate-y-0.5 ${
+                        itemActive
+                          ? "border-violet-300/60 bg-violet-500/10 text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200"
+                          : "border-slate-200/80 bg-white/92 text-slate-700 hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
+                      }`}
+                    >
+                      <Icon size={18} />
+                      <span className="leading-5">{item.label}</span>
+                      {isNotif && unreadCount > 0 ? (
+                        <span className="absolute right-2 top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                          {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                      ) : null}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3 rounded-[1.6rem] border border-slate-200/80 bg-white/86 p-4 dark:border-white/10 dark:bg-white/4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">
-              Compte
+              Bureau
             </p>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Session et réglages
+            <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+              Support, notifications et raccourcis restent à portée.
             </p>
           </div>
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "h-9 w-9",
-                userButtonTrigger: "p-0",
-              },
-            }}
-          />
+          <ShortcutsModal />
         </div>
-      </div>
-    </aside>
+      </motion.aside>
+    </>
   );
 }
 
@@ -810,7 +879,7 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 xl:px-6">
+      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[124px] lg:max-w-[calc(100%-124px)] lg:px-4 xl:px-6">
         <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
@@ -847,7 +916,7 @@ export function ClientSubpageShell({
               <div className="min-w-0">
                 <ClientBrandMark />
                 <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                  Navigation desktop
+                  Workspace bureau
                 </p>
               </div>
             </div>

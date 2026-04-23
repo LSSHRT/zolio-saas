@@ -25,6 +25,15 @@ export default async function DashboardPage() {
   const imageUrl = user?.imageUrl || null;
 
   return (
-    <DashboardContent />
+    <DashboardContent
+      summary={summary}
+      firstName={firstName}
+      imageUrl={imageUrl}
+      companyTrade={companyTrade}
+      catalogImported={catalogImported}
+      onboardingDone={onboardingDone}
+      canAccessAdmin={canAccessAdmin}
+      isPro={isPro}
+    />
   );
 }
