@@ -312,16 +312,8 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   );
 }
 
-const STORAGE_KEY = "zolio-hinted-cmdk-closed";
-
 export function CmdKLauncher() {
-  const [hasSeenHint, setHasSeenHint] = useState(false);
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (!dismissed) setHasSeenHint(true);
-  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -358,28 +350,6 @@ export function CmdKLauncher() {
           <code className="rounded-md border border-slate-200/80 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-400 dark:border-white/12 dark:bg-white/6 dark:text-slate-500">
             ⌘K
           </code>
-
-          {/* First-time hint */}
-          {hasSeenHint && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="absolute -top-12 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-xl bg-slate-900 px-3 py-2 text-xs font-medium text-white shadow-lg dark:bg-white dark:text-slate-900"
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setHasSeenHint(false);
-                  localStorage.setItem(STORAGE_KEY, "1");
-                }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white dark:text-slate-900/60 dark:hover:text-slate-900"
-              >
-                ×
-              </button>
-              Appuyez sur <kbd>⌘K</kbd> pour lancer
-            </motion.div>
-          )}
         </motion.button>
       </div>
     </>

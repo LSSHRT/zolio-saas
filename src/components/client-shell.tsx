@@ -867,14 +867,14 @@ export function ClientSubpageShell({
   title: string;
 }) {
   return (
-    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white sm:pb-32">
+    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 pt-16 text-slate-950 dark:text-white sm:pb-32">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      {/* Fixed sidebar (desktop) */}
+      {/* Desktop top bar */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[124px] lg:max-w-[calc(100%-124px)] lg:px-4 xl:px-6">
+      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:px-8 xl:px-10">
         <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
