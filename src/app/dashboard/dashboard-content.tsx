@@ -21,11 +21,7 @@ import {
 import {
   ClientDesktopNav,
   ClientMobileDock,
-  ClientBrandMark,
-  ClientSupportButton,
 } from "@/components/client-shell";
-import { GlobalSearch } from "@/components/global-search";
-import { ShortcutsModal } from "@/components/shortcuts-modal";
 import DashboardChart from "@/components/DashboardChart";
 import {
   DashboardRecentQuotes,
@@ -119,38 +115,16 @@ export default function DashboardContent({
   const greeting = getGreeting(firstName);
 
   return (
-    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
+    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 pt-16 text-slate-950 dark:text-white">
       {/* Background overlays */}
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      {/* Desktop sidebar */}
+      {/* Desktop top bar */}
       <ClientDesktopNav active="dashboard" />
 
       {/* Main content area */}
-      <div className="flex min-h-screen w-full flex-col px-4 pt-3 sm:px-6 sm:pt-4 lg:ml-[124px] lg:max-w-[calc(100%-124px)] lg:px-6 xl:px-8">
-        {/* Top bar */}
-        <header className="client-panel sticky top-2 z-40 mb-4 rounded-2xl px-5 py-3 backdrop-blur-xl sm:top-3 sm:px-6">
-          <div className="flex items-center justify-between gap-4">
-            <ClientBrandMark />
-            <div className="flex items-center gap-3">
-              <div className="hidden w-72 xl:block">
-                <GlobalSearch />
-              </div>
-              <ClientSupportButton compact />
-              <ShortcutsModal />
-              {canAccessAdmin && (
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/20 dark:border-violet-400/20 dark:text-violet-200"
-                >
-                  Admin
-                </Link>
-              )}
-            </div>
-          </div>
-        </header>
-
+      <div className="flex min-h-screen w-full flex-col px-4 pt-4 sm:px-6 sm:pt-5 lg:px-8 xl:px-10">
         {/* Dashboard body */}
         <main className="flex-1 space-y-5 lg:space-y-6">
           {/* Hero greeting + focus signal */}
@@ -446,8 +420,6 @@ export default function DashboardContent({
             <Link href="/politique-confidentialite" className="transition hover:text-slate-600 dark:hover:text-slate-200">Confidentialité</Link>
             <span className="text-slate-300 dark:text-slate-600">·</span>
             <Link href="/changelog" className="transition hover:text-slate-600 dark:hover:text-slate-200">Changelog</Link>
-            <span className="text-slate-300 dark:text-slate-600">·</span>
-            <ShortcutsModal />
           </div>
         </footer>
       </div>
