@@ -30,8 +30,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
-import { GlobalSearch } from "@/components/global-search";
-import { ShortcutsModal } from "@/components/shortcuts-modal";
 import { UserButton } from "@clerk/nextjs";
 
 function useUnreadNotificationsCount() {
@@ -187,11 +185,10 @@ export function ClientBrandMark({ showLabel = true, className = "" }: { showLabe
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const unreadCount = useUnreadNotificationsCount();
 
-  useBodyScrollLock(toolsOpen || searchOpen);
-  useOverlayCloseSignal(() => { setToolsOpen(false); setSearchOpen(false); });
+  useBodyScrollLock(toolsOpen);
+  useOverlayCloseSignal(() => { setToolsOpen(false); });
 
   return (
     <>
@@ -266,26 +263,6 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         )}
       </motion.button>
 
-      {/* Search modal mobile */}
-      {searchOpen ? (
-        <div className="fixed inset-0 z-[80] bg-white dark:bg-slate-950 lg:hidden">
-          <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(false)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/8"
-              aria-label="Fermer"
-            >
-              <X size={20} />
-            </button>
-            <p className="text-sm font-semibold text-slate-950 dark:text-white">Rechercher</p>
-          </div>
-          <div className="p-4">
-            <GlobalSearch />
-          </div>
-        </div>
-      ) : null}
-
       {toolsOpen ? (
         <div className="fixed inset-0 z-[70] lg:hidden">
           <button
@@ -320,22 +297,9 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
-              {CLIENT_TOOL_ITEMS.map((item) => {
+              {CLIENT_TOOL_ITEMS.filter((item) => !item.isSearch).map((item) => {
                 const Icon = item.icon;
                 const isNotif = item.href === "/notifications";
-                if (item.isSearch) {
-                  return (
-                    <button
-                      key="search-tool"
-                      type="button"
-                      onClick={() => { setToolsOpen(false); setSearchOpen(true); }}
-                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses("default")}`}
-                    >
-                      <Icon size={18} />
-                      <span className="leading-5">{item.label}</span>
-                    </button>
-                  );
-                }
                 return (
                   <Link
                     key={item.href}
@@ -467,12 +431,8 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </nav>
         </div>
 
-        {/* Center: search */}
-        <div className="mx-auto w-80">
-          <GlobalSearch />
-        </div>
-
         {/* Right: actions */}
+        <div className="flex-1" />
         <div className="flex items-center gap-2">
           <Link
             href="/nouveau-devis"
@@ -531,8 +491,6 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           >
             <LifeBuoy size={17} />
           </a>
-
-          <ShortcutsModal />
 
           <div className="mx-1 h-6 w-px bg-slate-200/60 dark:bg-white/10" />
 
@@ -955,50 +913,10 @@ export function ClientSubpageShell({
                   </p>
                 </div>
 
-                <div className="hidden xl:grid gap-3">
-                  <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
-                      Recherche globale
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Retrouvez un client, un devis, une facture ou une dépense sans quitter cette page.
-                    </p>
-                    <GlobalSearch className="mt-0 max-w-none" />
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                          Utilitaires
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Gardez le support et les raccourcis à proximité pendant vos tâches bureau.
-                        </p>
-                      </div>
-                      <ShortcutsModal />
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <ClientSupportButton compact />
-                      <Link
-                        href="/notifications"
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
-                      >
-                        <Bell size={15} />
-                        Notifications
-                      </Link>
-                    </div>
-                  </div>
-                </div>
               </div>
 
               {mobileSummary ? <div className="md:hidden">{mobileSummary}</div> : null}
               {summary ? <div className={mobileSummary ? "hidden md:block" : ""}>{summary}</div> : null}
-
-              <div className="hidden md:block xl:hidden">
-                <GlobalSearch className="max-w-none" />
-              </div>
             </div>
           </section>
 
@@ -1019,8 +937,6 @@ export function ClientSubpageShell({
           <Link href="/politique-confidentialite" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Confidentialité</Link>
           <span className="text-slate-300 dark:text-slate-600">·</span>
           <Link href="/changelog" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Changelog</Link>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <ShortcutsModal />
         </div>
       </footer>
 
