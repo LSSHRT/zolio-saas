@@ -34,8 +34,6 @@ import useSWR from "swr";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { GlobalSearch } from "@/components/global-search";
-import { ShortcutsModal } from "@/components/shortcuts-modal";
 import {
   ClientBrandMark,
   ClientDesktopNav,
@@ -459,39 +457,24 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
         <main className="mt-4 flex-1 lg:mt-6">
           <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
             <div className="min-w-0 space-y-6">
-              <motion.section {...sectionMotion(0)} className="client-panel rounded-3xl px-6 py-4 xl:px-8">
-                <div className="flex items-center justify-between gap-4">
+              <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-3xl px-6 py-5 xl:px-8">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_72%)]" />
+                <div className="relative flex items-center justify-between gap-4">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
                       Cockpit bureau
                     </p>
-                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                      Vue d’ensemble du workspace, actions prioritaires et performance du moment.
+                    <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
+                      Vue d'ensemble du workspace, actions prioritaires et performance du moment.
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center justify-end gap-2">
+                  <div className="flex items-center gap-2">
                     {canAccessAdmin && (
-                      <Link href="/admin" className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100">
-                        <ShieldCheck size={15} /> Admin
+                      <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100">
+                        <ShieldCheck size={13} /> Admin
                       </Link>
                     )}
                     <ThemeToggle />
-                    <Link href="/parametres" className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-violet-400/20 dark:hover:text-white" aria-label="Paramètres">
-                      <Settings size={16} />
-                    </Link>
-                    <DashboardNotificationsMenu dashboardSignals={signals} />
-                    {clerkUser?.imageUrl ? (
-                      <Image
-                        src={clerkUser?.imageUrl}
-                        alt="Avatar"
-                        width={36}
-                        height={36}
-                        unoptimized
-                        className="h-9 w-9 rounded-full object-cover ring-1 ring-white/40 dark:ring-white/10"
-                      />
-                    ) : (
-                      <div className="h-9 w-9 animate-pulse rounded-full bg-slate-200 dark:bg-slate-700" />
-                    )}
                   </div>
                 </div>
               </motion.section>
@@ -552,10 +535,6 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                       Pilotez votre activité sans friction : visualisez les priorités, le pipeline commercial et les prochaines entrées d’argent avant même d’ouvrir un module.
                     </p>
 
-                    <div className="mt-5 max-w-2xl">
-                      <GlobalSearch className="mt-0 max-w-none" />
-                    </div>
-
                     <div className="mt-5 flex flex-wrap gap-3">
                       <Link href="/nouveau-devis" className="tour-nouveau-devis">
                         <motion.div whileTap={{ scale: 0.98 }} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand">
@@ -565,7 +544,6 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                       <Link href="/devis" className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100">
                         <FileText size={17} /> Ouvrir le pipe
                       </Link>
-                      <ShortcutsModal />
                     </div>
                   </div>
 

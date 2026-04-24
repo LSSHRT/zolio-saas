@@ -479,27 +479,13 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
             </Link>
           </div>
 
-          <div className="mt-4 flex items-center gap-2">
-            <span className="inline-flex flex-1 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/60 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
-              ⌘K Recherche
-            </span>
-            <ShortcutsModal />
-          </div>
         </div>
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-          <div className="space-y-4">
-            <section className="rounded-3xl border border-white/8 bg-white/[0.035] p-3 backdrop-blur-xl">
-              <div className="flex items-center justify-between px-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                  Navigation
-                </p>
-                <span className="text-[10px] font-medium uppercase tracking-[0.22em] text-slate-500">5 modules</span>
-              </div>
-              <nav className="mt-3 flex flex-col gap-2">
-                {mainItems.map((item) => renderNavItem(item))}
-              </nav>
-            </section>
+          <div className="space-y-3">
+            <nav className="flex flex-col gap-1.5">
+              {mainItems.map((item) => renderNavItem(item))}
+            </nav>
 
             {toolGroups.map((group) => (
               <section key={group.label} className="rounded-3xl border border-white/8 bg-white/[0.03] p-3 backdrop-blur-xl">
