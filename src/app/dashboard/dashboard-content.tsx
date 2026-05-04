@@ -42,7 +42,6 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import { DesktopDrawer } from "@/components/desktop-drawer";
-import { DevisEditor } from "@/components/devis-editor";
 import ConversionFunnel from "@/components/conversion-funnel";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
@@ -108,6 +107,10 @@ interface DashboardContentProps {
 
 const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
+const DevisEditor = dynamic(
+  () => import("@/components/devis-editor").then((module) => module.DevisEditor),
+  { ssr: false },
+);
 
 const fetcher = async (url: string) => {
   const response = await fetch(url);
@@ -325,6 +328,11 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     }
   };
 
+  const closeDevisDrawer = () => {
+    setSelectedDevisNumero(null);
+    void mutateDashboard();
+  };
+
   // --- Computed data -----------------------------------------------
 
   const d = dashboardData;
@@ -465,7 +473,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                       Cockpit bureau
                     </p>
                     <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
-                      Vue d'ensemble du workspace, actions prioritaires et performance du moment.
+                      Vue d&apos;ensemble du workspace, actions prioritaires et performance du moment.
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1100,12 +1108,12 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
       </MobileDialog>
 
       {/* --- Desktop Drawer --------------------------------------- */}
-      <DesktopDrawer open={!!selectedDevisNumero} onClose={() => setSelectedDevisNumero(null)}>
+      <DesktopDrawer open={!!selectedDevisNumero} onClose={closeDevisDrawer}>
         {selectedDevisNumero && (
           <DevisEditor
             numero={selectedDevisNumero}
             isDrawer
-            onClose={() => setSelectedDevisNumero(null)}
+            onClose={closeDevisDrawer}
           />
         )}
       </DesktopDrawer>

@@ -283,28 +283,42 @@ export function DashboardTopClients({ items }: { items: Array<{ nom: string; dev
     );
   }
 
+  const maxRevenue = Math.max(...items.map((client) => client.revenueHT), 1);
+
   return (
-    <div className="space-y-3">
-      {items.map((client) => (
-        <div key={client.nom} className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 dark:border-white/8 dark:bg-white/4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
-                <span className="text-sm font-bold">{client.nom.charAt(0).toUpperCase()}</span>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-950 dark:text-white">{client.nom}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {client.devisCount} devis acceptés
+    <div className="overflow-hidden rounded-2xl border border-slate-200/70 bg-white/75 dark:border-white/8 dark:bg-white/4">
+      <div className="divide-y divide-slate-200/70 dark:divide-white/10">
+        {items.map((client, index) => {
+          const width = Math.max((client.revenueHT / maxRevenue) * 100, 8);
+
+          return (
+            <div key={client.nom} className="px-4 py-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-700 ring-1 ring-violet-300/30 dark:text-violet-200 dark:ring-violet-400/20">
+                    <span className="text-xs font-bold">{index + 1}</span>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-slate-950 dark:text-white">{client.nom}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {client.devisCount} devis accepté{client.devisCount > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                <p className="shrink-0 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  {formatCurrency(client.revenueHT)}
                 </p>
               </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-violet-600 to-emerald-400"
+                  style={{ width: `${width}%` }}
+                />
+              </div>
             </div>
-            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">
-              {formatCurrency(client.revenueHT)}
-            </p>
-          </div>
-        </div>
-      ))}
+          );
+        })}
+      </div>
     </div>
   );
 }
