@@ -469,29 +469,11 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
           <div className="hidden lg:flex lg:flex-col lg:gap-10">
 
             {/* ─── TOP BAR ──────────────────────────────────────────── */}
-            <motion.header {...sectionMotion(0)} className="flex items-center justify-between">
-              <div className="flex items-baseline gap-4">
-                <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
-                  {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
-                </h1>
-                <span className="text-sm font-medium text-slate-400 dark:text-slate-500 capitalize">{todayLabel}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <ThemeToggle />
-                {canAccessAdmin && (
-                  <Link href="/admin" className="rounded-full border border-violet-200 bg-violet-50 px-3.5 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-100 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20">
-                    <ShieldCheck size={12} className="mr-1 inline -translate-y-px" />Admin
-                  </Link>
-                )}
-                <Link href="/devis" className="rounded-full border border-slate-200 px-4 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-300 dark:hover:bg-white/5">
-                  <FileText size={14} className="mr-1.5 inline -translate-y-px" />Pipeline
-                </Link>
-                <Link href="/nouveau-devis" className="tour-nouveau-devis">
-                  <motion.button whileTap={{ scale: 0.96 }} className="rounded-full bg-violet-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-700 hover:shadow-violet-600/30">
-                    <Plus size={15} className="mr-1.5 inline -translate-y-px" />Nouveau devis
-                  </motion.button>
-                </Link>
-              </div>
+            <motion.header {...sectionMotion(0)} className="flex items-baseline gap-4">
+              <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+                {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
+              </h1>
+              <span className="text-sm font-medium text-slate-400 dark:text-slate-500 capitalize">{todayLabel}</span>
             </motion.header>
 
             {/* ─── CHIFFRES CLÉS — les 3 nombres qui comptent ───────── */}
@@ -677,22 +659,6 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
               )}
             </div>
 
-            {/* ─── RACCOURCIS — barre en bas ─────────────────────────── */}
-            <motion.section {...sectionMotion(0.16)} className="rounded-2xl bg-slate-50 p-4 dark:bg-white/[0.02]">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  {quickLinks.map((item) => {
-                    const QIcon = item.icon;
-                    return (
-                      <Link key={item.href} href={item.href} className="inline-flex items-center gap-2 rounded-xl border border-slate-200/60 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:shadow-sm dark:border-white/8 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-white/15">
-                        <QIcon size={16} className="text-slate-400" /> {item.label}
-                      </Link>
-                    );
-                  })}
-                </div>
-                <ClientSupportButton />
-              </div>
-            </motion.section>
           </div>
 
           <div className="space-y-4 lg:hidden">
