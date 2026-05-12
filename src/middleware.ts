@@ -43,7 +43,9 @@ async function getSystemStatus(req: Request) {
       headers: {
         cookie: req.headers.get('cookie') ?? '',
       },
-      cache: 'no-store',
+      // Cache for 60s so middleware doesn't add latency on every navigation.
+      // Maintenance toggle propagates within ~1 minute which is acceptable.
+      next: { revalidate: 60 },
     });
 
     if (!response.ok) {

@@ -121,10 +121,11 @@ export function statusBadgeClasses(status: string) {
   return "bg-slate-900/6 text-slate-700 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10";
 }
 
-export function sectionMotion(delay = 0) {
+export function sectionMotion(_delay = 0) {
+  // Animations removed — content appears instantly, no perceived loading delay
   return {
-    initial: { opacity: 0, y: 16 },
+    initial: false as const,
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number], delay },
+    transition: { duration: 0 },
   };
 }
