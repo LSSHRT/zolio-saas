@@ -1,22 +1,11 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+
+import DashboardContent from "./dashboard-content";
 
 export const metadata = {
   title: "Tableau de bord",
   description: "Vue d'ensemble de votre activité : chiffre d'affaires, devis, factures et statistiques de votre entreprise.",
-};
-
-// Data is fetched client-side via SWR for instant navigation
-// import { getClientDashboardSummary } from "@/lib/client-dashboard";
-import DashboardContent from "./dashboard-content";
-
-const EMPTY_INITIAL_DATA = {
-  companyTrade: null,
-  catalogImported: false,
-  onboardingDone: false,
-  starterCatalogCount: 0,
-  canAccessAdmin: false,
-  isPro: false,
 };
 
 const EMPTY_SUMMARY = {
@@ -45,35 +34,34 @@ const EMPTY_SUMMARY = {
   funnel: [],
 };
 
+const EMPTY_INITIAL_DATA = {
+  companyTrade: null,
+  catalogImported: false,
+  onboardingDone: false,
+  starterCatalogCount: 0,
+  canAccessAdmin: false,
+  isPro: false,
+};
+
 export default async function DashboardPage() {
-  const { userId } = await auth();
+  const { userId, sessionClaims } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const user = await currentUser();
-  const summary = EMPTY_SUMMARY;
-
-  const companyTrade = (user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade) as string | undefined;
-  const catalogImported = !!(user?.unsafeMetadata?.starterCatalogImported || user?.publicMetadata?.starterCatalogImported);
-  const onboardingDone = !!(user?.unsafeMetadata?.onboardingCompleted || user?.publicMetadata?.onboardingCompleted);
-  const canAccessAdmin = user?.publicMetadata?.isAdmin === true;
-  const isPro = user?.publicMetadata?.isPro === true;
-  const firstName = user?.firstName || null;
-  const imageUrl = user?.imageUrl || null;
-
+  // Read flags directly from JWT claims (no Clerk API call). The client `useUser()` hook
+  // hydrates with full user data once mounted.
+  const claims = sessionClaims as Record<string, unknown> | null;
+  const publicMeta = (claims?.publicMetadata as Record<string, unknown>) || {};
   const initialData = {
-    companyTrade: companyTrade || null,
-    catalogImported,
-    onboardingDone,
-    starterCatalogCount: summary?.starterCatalogCount ?? 0,
-    canAccessAdmin,
-    isPro,
+    ...EMPTY_INITIAL_DATA,
+    canAccessAdmin: publicMeta.isAdmin === true,
+    isPro: publicMeta.isPro === true,
   };
 
   return (
     <DashboardContent
-      initialUser={{ firstName, imageUrl }}
+      initialUser={{ firstName: null, imageUrl: null }}
       initialData={initialData}
-      initialSummary={summary}
+      initialSummary={EMPTY_SUMMARY}
     />
   );
 }
