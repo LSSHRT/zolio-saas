@@ -4,17 +4,20 @@
 import {
   Bell,
   BriefcaseBusiness,
+  Building2,
   ChevronDown,
   ChevronRight,
   Clock3,
   CloudSun,
   FileCheck2,
   FileText,
+  Image as ImageIcon,
   LineChart,
   MoonStar,
   Package,
   Pencil,
   Plus,
+  Send,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -68,6 +71,7 @@ import { PaywallModal } from "@/components/paywall-modal";
 import { usePaywall } from "@/lib/use-paywall";
 import { QuotaBanner } from "@/components/quota-banner";
 import { TrialBanner } from "@/components/trial-banner";
+import { OnboardingChecklist, type OnboardingStep } from "@/components/onboarding-checklist";
 
 // Dashboard components
 import {
@@ -456,6 +460,62 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     return items;
   }, [totalQuotes, devisARelancer.length, pendingCount, pipelineHT, isPro, relanceCountLabel, tresorerie]);
 
+  // Onboarding checklist — drives the gamified panel.
+  // We rely on existing data: trade selected, catalog imported, devis count,
+  // accepted devis (= envoi/signature implicite réussi), profile (entreprise) filled.
+  const hasCompanyName = Boolean(
+    (clerkUser?.unsafeMetadata as Record<string, unknown> | undefined)?.companyName
+      || (clerkUser?.publicMetadata as Record<string, unknown> | undefined)?.companyName,
+  );
+  const hasLogo = Boolean(
+    (clerkUser?.unsafeMetadata as Record<string, unknown> | undefined)?.logoUrl
+      || (clerkUser?.publicMetadata as Record<string, unknown> | undefined)?.logoUrl,
+  );
+  const onboardingSteps = useMemo<OnboardingStep[]>(() => [
+    {
+      id: "trade",
+      title: "Choisir mon métier",
+      description: "Active votre catalogue starter (peintre, plombier, électricien, etc.).",
+      icon: BriefcaseBusiness,
+      done: Boolean(companyTrade) && catalogImported,
+      href: "/dashboard#dashboard-setup-panel-desktop",
+    },
+    {
+      id: "first-devis",
+      title: "Créer mon premier devis",
+      description: "Lancez votre première proposition commerciale.",
+      icon: FileText,
+      done: totalQuotes > 0,
+      href: "/nouveau-devis",
+    },
+    {
+      id: "first-accepted",
+      title: "Faire accepter / envoyer un devis",
+      description: "Envoyez-le par lien public ou email pour signature.",
+      icon: Send,
+      done: acceptedCount > 0,
+      href: "/devis",
+    },
+    {
+      id: "company",
+      title: "Compléter mon entreprise",
+      description: "Nom, adresse, SIRET et coordonnées sur vos PDF.",
+      icon: Building2,
+      done: hasCompanyName,
+      href: "/parametres",
+    },
+    {
+      id: "logo",
+      title: "Importer mon logo",
+      description: "Pour des devis et factures qui marquent.",
+      icon: ImageIcon,
+      done: hasLogo,
+      href: "/parametres",
+    },
+  ], [companyTrade, catalogImported, totalQuotes, acceptedCount, hasCompanyName, hasLogo]);
+
+  const showOnboardingChecklist = !setupRequired || onboardingSteps.some((s) => s.done);
+
   const quickLinks: QuickLinkItem[] = [
     { href: "/clients", label: "Clients", description: "Contacts et historique.", icon: Users, tone: "violet" },
     { href: "/factures", label: "Factures", description: "Suivi des paiements.", icon: FileCheck2, tone: "slate" },
@@ -544,6 +604,9 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                 onUpgradeClick={() => openPaywall("quota_80", { used: quotaData.used, limit: quotaData.limit })}
               />
             )}
+
+            {/* ─── ONBOARDING CHECKLIST (gamifiée) ──────────────────── */}
+            {showOnboardingChecklist && <OnboardingChecklist steps={onboardingSteps} />}
 
             {/* ─── CHIFFRES CLÉS — les 3 nombres qui comptent ───────── */}
             <motion.section {...sectionMotion(0.04)} className="grid grid-cols-3 gap-6">
@@ -741,6 +804,8 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
               onUpgradeClick={() => openPaywall("quota_80", { used: quotaData.used, limit: quotaData.limit })}
             />
           )}
+          {/* --- Onboarding checklist (mobile) ----------------- */}
+          {showOnboardingChecklist && <OnboardingChecklist steps={onboardingSteps} />}
           {/* --- Hero ------------------------------------------ */}
           <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
