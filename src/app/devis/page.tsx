@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -37,6 +37,8 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import CompareOptions from "@/components/compare-options";
+import { PaywallModal } from "@/components/paywall-modal";
+import { usePaywall, computeQuotaTrigger } from "@/lib/use-paywall";
 
 interface Devis {
   id: string;
@@ -122,6 +124,27 @@ export default function DevisPage() {
   const [converting, setConverting] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
   const [deleteDialog, setDeleteDialog] = useState<DeleteDialogState>(null);
+
+  // Paywall — intelligent contextual prompt based on quota usage.
+  const { paywallProps, openPaywall } = usePaywall();
+  const autoTriggeredRef = useRef(false);
+  useEffect(() => {
+    if (autoTriggeredRef.current) return;
+    if (!quotaData) return;
+    const trigger = computeQuotaTrigger(quotaData);
+    if (!trigger) return;
+    // Only nudge once per session for the 80% case.
+    if (trigger.trigger === "quota_80") {
+      try {
+        if (sessionStorage.getItem("zolio_paywall_80_seen") === "1") return;
+        sessionStorage.setItem("zolio_paywall_80_seen", "1");
+      } catch {
+        /* ignore storage errors */
+      }
+    }
+    autoTriggeredRef.current = true;
+    openPaywall(trigger.trigger, trigger.context);
+  }, [quotaData, openPaywall]);
 
   const handleConvertToFacture = async (numero: string) => {
     setConverting(numero);
@@ -459,13 +482,14 @@ export default function DevisPage() {
       eyebrow="Pipeline commercial"
       mobilePrimaryAction={
         quota.remaining <= 0 && !quota.isPro ? (
-          <Link
-            href="/abonnement"
+          <button
+            type="button"
+            onClick={() => openPaywall("quota_100", { used: quota.used, limit: quota.limit })}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-amber-500 px-3.5 text-sm font-semibold text-white shadow-brand"
           >
             <Sparkles size={16} />
             Passer Pro
-          </Link>
+          </button>
         ) : (
           <Link
             href="/nouveau-devis"
@@ -488,12 +512,14 @@ export default function DevisPage() {
             </button>
           </div>
           {quota.remaining <= 0 && !quota.isPro ? (
-            <Link href="/abonnement">
-              <motion.button whileTap={{ scale: 0.98 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-brand">
-                <Sparkles size={16} /> Passer Pro
-              </motion.button>
-            </Link>
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              onClick={() => openPaywall("quota_100", { used: quota.used, limit: quota.limit })}
+              className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-brand"
+            >
+              <Sparkles size={16} /> Passer Pro
+            </motion.button>
           ) : (
             <div className="flex items-center gap-2">
               <Link href="/nouveau-devis">
@@ -1070,6 +1096,8 @@ export default function DevisPage() {
           ) : null}
         </div>
       </MobileDialog>
+
+      <PaywallModal {...paywallProps} />
     </>
   );
 }

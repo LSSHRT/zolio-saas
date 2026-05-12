@@ -28,8 +28,10 @@ export async function POST(request: Request) {
 
     const userEmail = user.emailAddresses[0]?.emailAddress;
 
-    const { isAnnual } = await request.json();
-    
+    const body = await request.json().catch(() => ({}));
+    const isAnnual = body?.isAnnual === true;
+    const trialRequested = body?.trial === true;
+
     // Pour l'instant nous utilisons le mode paiement unique (payment) 
     // ou abonnement (subscription). Faisons abonnement.
     // Idéalement, il faut créer les "Produits" et "Prix" dans le dashboard Stripe
@@ -37,19 +39,35 @@ export async function POST(request: Request) {
     
     const amount = isAnnual ? 1900 * 12 : 2900; // en centimes (19€*12 ou 29€)
 
+    // Trial guard: prevent reusing the 7-day trial. We rely on Clerk publicMetadata
+    // flag `trialUsedAt` (set by the Stripe webhook on first trial activation).
+    const trialUsedAt = (user.publicMetadata as Record<string, unknown>)?.trialUsedAt;
+    const trialEligible = trialRequested && !trialUsedAt;
+
+    const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+      metadata: { userId, ...(trialEligible ? { trialStarted: "true" } : {}) },
+    };
+    if (trialEligible) {
+      subscriptionData.trial_period_days = 7;
+      // After trial ends without payment method, cancel the subscription.
+      subscriptionData.trial_settings = {
+        end_behavior: { missing_payment_method: "cancel" },
+      };
+    }
+
     const session = await getStripe().checkout.sessions.create({
       payment_method_types: ["card"],
-      mode: "subscription", 
+      mode: "subscription",
       customer_email: userEmail,
       client_reference_id: userId,
+      // For trial flows without payment method collection upfront, allow Stripe
+      // to gather it but make it optional.
+      payment_method_collection: trialEligible ? "if_required" : "always",
       metadata: {
         userId,
+        ...(trialEligible ? { trial: "true" } : {}),
       },
-      subscription_data: {
-        metadata: {
-          userId,
-        },
-      },
+      subscription_data: subscriptionData,
       line_items: [
         {
           price_data: {

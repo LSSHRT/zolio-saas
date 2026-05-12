@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import {
   ArrowRight,
   BadgeCheck,
@@ -48,7 +50,12 @@ const ACTIVATION_STEPS = [
 
 export default function AbonnementPage() {
   const [loading, setLoading] = useState(false);
+  const [trialLoading, setTrialLoading] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
+  const searchParams = useSearchParams();
+  const { user } = useUser();
+  const trialUsedAt = (user?.publicMetadata?.trialUsedAt as string | undefined) ?? null;
+  const isTrialEligible = !trialUsedAt;
 
   const price = isAnnual ? 19 : 29;
   const billedLabel = isAnnual ? "228€ / an" : "29€ / mois";
@@ -60,28 +67,59 @@ export default function AbonnementPage() {
   });
   const supportIsExternal = isExternalSupportHref(supportHref);
 
-  const handleSubscribe = async () => {
-    setLoading(true);
+  const launchCheckout = async (opts: { trial?: boolean } = {}) => {
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isAnnual }),
+        body: JSON.stringify({ isAnnual, trial: opts.trial === true }),
       });
       const payload = await res.json();
-
       if (!res.ok || !payload.url) {
         throw new Error(payload.error || "Erreur lors de l'initialisation du paiement Stripe.");
       }
-
       window.location.href = payload.url;
     } catch (error) {
       logError("abonnement", error);
       toast.error(error instanceof Error ? error.message : "Impossible de lancer le paiement Stripe.");
+      throw error;
+    }
+  };
+
+  const handleSubscribe = async () => {
+    setLoading(true);
+    try {
+      await launchCheckout();
+    } catch {
+      /* toast already shown */
     } finally {
       setLoading(false);
     }
   };
+
+  const handleTrial = async () => {
+    if (!isTrialEligible) {
+      toast.info("Vous avez déjà utilisé votre essai gratuit.");
+      return;
+    }
+    setTrialLoading(true);
+    try {
+      await launchCheckout({ trial: true });
+    } catch {
+      /* toast already shown */
+    } finally {
+      setTrialLoading(false);
+    }
+  };
+
+  // Auto-trigger trial flow when arriving with ?trial=1 (from paywall CTA).
+  useEffect(() => {
+    if (searchParams?.get("trial") !== "1") return;
+    if (!user) return; // wait for Clerk hydration
+    if (!isTrialEligible) return;
+    void handleTrial();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, user, isTrialEligible]);
 
   return (
     <ClientSubpageShell
@@ -227,11 +265,31 @@ export default function AbonnementPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                {isTrialEligible && (
+                  <button
+                    type="button"
+                    onClick={() => void handleTrial()}
+                    disabled={trialLoading || loading}
+                    className="group inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-violet-500/30 transition hover:shadow-violet-500/50 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
+                  >
+                    {trialLoading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                        Préparation...
+                      </span>
+                    ) : (
+                      <>
+                        <Sparkles size={16} /> Tester 7 jours gratuits
+                        <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
+                      </>
+                    )}
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => void handleSubscribe()}
-                  disabled={loading}
+                  disabled={loading || trialLoading}
                   className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
                 >
                   {loading ? (
@@ -241,7 +299,7 @@ export default function AbonnementPage() {
                     </span>
                   ) : (
                     <>
-                      S&apos;abonner à Zolio Pro
+                      {isTrialEligible ? "S'abonner directement" : "S'abonner à Zolio Pro"}
                       <ArrowRight size={16} />
                     </>
                   )}

@@ -64,6 +64,10 @@ import { MobileDialog } from "@/components/mobile-dialog";
 import { DesktopDrawer } from "@/components/desktop-drawer";
 import ConversionFunnel from "@/components/conversion-funnel";
 import { PullToRefresh } from "@/components/pull-to-refresh";
+import { PaywallModal } from "@/components/paywall-modal";
+import { usePaywall } from "@/lib/use-paywall";
+import { QuotaBanner } from "@/components/quota-banner";
+import { TrialBanner } from "@/components/trial-banner";
 
 // Dashboard components
 import {
@@ -275,6 +279,14 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     },
   );
 
+  // Quota fetch — used by the paywall and the inline banner.
+  const { data: quotaData } = useSWR<{ isPro: boolean; used: number; limit: number; remaining: number }>(
+    "/api/quota",
+    fetcher,
+    { revalidateOnFocus: false, refreshInterval: 60000 },
+  );
+  const { paywallProps, openPaywall } = usePaywall();
+
   const safeData = initialData ?? {
     companyTrade: null,
     catalogImported: false,
@@ -286,6 +298,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
   const canAccessAdmin = safeData.canAccessAdmin || clerkUser?.publicMetadata?.isAdmin === true;
   const isPro = safeData.isPro || clerkUser?.publicMetadata?.isPro === true;
+  const trialEndsAt = (clerkUser?.publicMetadata?.trialEndsAt as string | undefined) ?? null;
   // Read from BOTH unsafeMetadata and publicMetadata — the bootstrap handler writes
   // to unsafeMetadata, while admin-set flags live in publicMetadata.
   const unsafeMeta = (clerkUser?.unsafeMetadata ?? {}) as Record<string, unknown>;
@@ -520,6 +533,18 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
               </div>
             </motion.header>
 
+            {/* ─── TRIAL BANNER (essai Pro 7 jours) ─────────────────── */}
+            {isPro && trialEndsAt && <TrialBanner trialEndsAt={trialEndsAt} />}
+
+            {/* ─── QUOTA BANNER (conditionnel, dès 60% utilisation) ─── */}
+            {quotaData && !quotaData.isPro && Number.isFinite(quotaData.limit) && (
+              <QuotaBanner
+                used={quotaData.used}
+                limit={quotaData.limit}
+                onUpgradeClick={() => openPaywall("quota_80", { used: quotaData.used, limit: quotaData.limit })}
+              />
+            )}
+
             {/* ─── CHIFFRES CLÉS — les 3 nombres qui comptent ───────── */}
             <motion.section {...sectionMotion(0.04)} className="grid grid-cols-3 gap-6">
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 text-white shadow-lg shadow-emerald-600/20">
@@ -706,6 +731,16 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
           </div>
 
           <div className="space-y-4 lg:hidden">
+          {/* --- Trial banner (mobile) ------------------------ */}
+          {isPro && trialEndsAt && <TrialBanner trialEndsAt={trialEndsAt} />}
+          {/* --- Quota banner (mobile) ------------------------ */}
+          {quotaData && !quotaData.isPro && Number.isFinite(quotaData.limit) && (
+            <QuotaBanner
+              used={quotaData.used}
+              limit={quotaData.limit}
+              onUpgradeClick={() => openPaywall("quota_80", { used: quotaData.used, limit: quotaData.limit })}
+            />
+          )}
           {/* --- Hero ------------------------------------------ */}
           <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-2xl px-4 py-5 sm:px-6">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_70%)]" />
@@ -1046,6 +1081,9 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
       {/* --- Mobile Dock --------------------------------------- */}
       <ClientMobileDock active="dashboard" />
+
+      {/* --- Paywall modal (intelligent quota nudges) --------- */}
+      <PaywallModal {...paywallProps} />
 
     </div>
   );

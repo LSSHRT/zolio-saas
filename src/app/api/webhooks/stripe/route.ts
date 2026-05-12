@@ -155,21 +155,41 @@ export async function POST(req: Request) {
             });
           }
         } else if (userIdForSub) {
-          // C'est un abonnement
+          // C'est un abonnement — détecter le trial si présent.
+          let trialEndsAt: string | undefined;
+          let isTrial = false;
+          if (session.subscription) {
+            try {
+              const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+                apiVersion: "2026-02-25.clover",
+              });
+              const sub = await stripe.subscriptions.retrieve(session.subscription as string);
+              if (sub.trial_end && sub.status === "trialing") {
+                isTrial = true;
+                trialEndsAt = new Date(sub.trial_end * 1000).toISOString();
+              }
+            } catch (e) {
+              logWarn("stripe-webhook", `Failed to fetch subscription for trial detection: ${e instanceof Error ? e.message : "unknown"}`);
+            }
+          }
+
           const client = await clerkClient();
           await client.users.updateUserMetadata(userIdForSub, {
             publicMetadata: {
               isPro: true,
               stripeCustomerId: session.customer as string,
+              ...(isTrial ? { trialUsedAt: new Date().toISOString(), trialEndsAt } : {}),
             },
           });
-          logInfo("stripe-webhook", `Utilisateur ${userIdForSub} passé en Pro via Webhook.`);
+          logInfo("stripe-webhook", `Utilisateur ${userIdForSub} passé en Pro via Webhook${isTrial ? " (trial 7j)" : ""}.`);
 
           await createNotification({
             userId: userIdForSub,
             type: "subscription_activated",
-            title: "Bienvenue en Pro !",
-            description: "Votre abonnement est actif. Profitez de toutes les fonctionnalités.",
+            title: isTrial ? "Essai Pro activé !" : "Bienvenue en Pro !",
+            description: isTrial
+              ? "Vous avez 7 jours pour tout tester sans limite. Pensez à ajouter une carte avant la fin pour continuer."
+              : "Votre abonnement est actif. Profitez de toutes les fonctionnalités.",
             href: "/dashboard",
             tone: "emerald",
           });
