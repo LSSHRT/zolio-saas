@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SWRProvider } from "@/components/SWRProvider";
 import { SystemRuntimeLayer } from "@/components/SystemRuntimeLayer";
 import { NotificationPrompt } from "@/components/NotificationPrompt";
+import { CmdKWrapper } from "@/components/cmdk-wrapper";
 import { I18nProvider } from "@/lib/i18n/context";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
@@ -96,6 +97,7 @@ export default function RootLayout({
                   <SystemRuntimeLayer />
                   <NotificationPrompt />
                   {children}
+                  <CmdKWrapper />
                   <Toaster
                     position="bottom-center"
                     offset={80}

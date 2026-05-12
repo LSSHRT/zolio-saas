@@ -335,8 +335,13 @@ export function CmdKLauncher() {
         setOpen(true);
       }
     };
+    const openHandler = () => setOpen(true);
     document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    document.addEventListener("zolio:open-command-palette", openHandler);
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.removeEventListener("zolio:open-command-palette", openHandler);
+    };
   }, []);
 
   return (
@@ -345,8 +350,8 @@ export function CmdKLauncher() {
         {open && <CommandPalette open={open} onClose={() => setOpen(false)} />}
       </AnimatePresence>
 
-      {/* Floating launcher — hidden on mobile (dock has its own search) */}
-      <div className="fixed bottom-6 left-4 z-20 hidden md:block">
+      {/* Floating launcher — tablet only. Mobile uses dock, desktop uses sidebar. */}
+      <div className="fixed bottom-6 left-4 z-20 hidden md:block lg:hidden">
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.95 }}

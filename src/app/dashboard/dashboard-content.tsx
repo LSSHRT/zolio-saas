@@ -581,15 +581,39 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
           <div className="hidden lg:flex lg:flex-col lg:gap-10">
 
             {/* ─── TOP BAR ──────────────────────────────────────────── */}
-            <motion.header {...sectionMotion(0)}>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400">
-                Tableau de bord
-              </p>
-              <div className="mt-1 flex items-baseline gap-4">
-                <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+            <motion.header {...sectionMotion(0)} className="flex items-start justify-between gap-6">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400">
+                    Tableau de bord
+                  </p>
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[11px] font-medium capitalize text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                    <GreetingIcon size={12} className="text-violet-500" /> {todayLabel}
+                  </span>
+                  {starterTrade?.shortLabel && (
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                      <BriefcaseBusiness size={12} className="text-violet-500" /> {starterTrade.shortLabel}
+                    </span>
+                  )}
+                </div>
+                <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
                   {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
                 </h1>
-                <span className="text-sm font-medium text-slate-400 dark:text-slate-500 capitalize">{todayLabel}</span>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <span className="font-semibold text-slate-700 dark:text-slate-200">{todayFocus.title}</span>
+                  {todayFocus.description ? <span className="ml-1.5">· {todayFocus.description}</span> : null}
+                </p>
+              </div>
+              <div className="hidden shrink-0 items-center gap-2 lg:flex">
+                {canAccessAdmin && (
+                  <Link
+                    href="/admin"
+                    className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-3.5 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
+                  >
+                    <ShieldCheck size={14} /> Admin
+                  </Link>
+                )}
+                <DashboardNotificationsMenu dashboardSignals={signals} />
               </div>
             </motion.header>
 
@@ -673,25 +697,32 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
             </motion.section>
 
             {/* ─── GRAPHE CA — full width ────────────────────────────── */}
-            <motion.section {...sectionMotion(0.08)} className="rounded-2xl bg-slate-900 p-6 dark:bg-slate-800/80">
-              <div className="flex items-center justify-between">
+            <motion.section
+              {...sectionMotion(0.08)}
+              className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/30 p-6 shadow-sm dark:border-white/8 dark:from-slate-900 dark:via-slate-900 dark:to-violet-950/30"
+            >
+              <div className="pointer-events-none absolute -top-12 -right-10 h-40 w-40 rounded-full bg-gradient-to-br from-violet-400/15 to-fuchsia-400/15 blur-3xl dark:from-violet-500/20 dark:to-fuchsia-500/15" />
+              <div className="relative flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-white">Évolution du CA</h2>
-                  <p className="text-sm text-slate-400">6 derniers mois</p>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+                    Performance
+                  </p>
+                  <h2 className="mt-1 text-lg font-bold text-slate-900 dark:text-white">Évolution du CA</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">6 derniers mois</p>
                 </div>
                 {semaine && (
                   <div className="flex gap-6">
                     <div className="text-right">
-                      <p className="text-2xl font-bold tabular-nums text-white">{semaine.nouveauxDevis}</p>
-                      <p className="text-xs text-slate-400">devis cette semaine</p>
+                      <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{semaine.nouveauxDevis}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">devis cette semaine</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold tabular-nums text-emerald-400">{formatCurrency(semaine.caEncaisse)}</p>
-                      <p className="text-xs text-slate-400">encaissé</p>
+                      <p className="text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{formatCurrency(semaine.caEncaisse)}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">encaissé</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold tabular-nums text-amber-400">{semaine.facturesEmises}</p>
-                      <p className="text-xs text-slate-400">factures émises</p>
+                      <p className="text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{semaine.facturesEmises}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">factures émises</p>
                     </div>
                   </div>
                 )}

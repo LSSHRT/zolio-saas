@@ -22,6 +22,7 @@ import {
   Plus,
   Receipt,
   RefreshCw,
+  Search,
   Settings,
   StickyNote,
   Users,
@@ -31,6 +32,7 @@ import {
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
 import { UserButton } from "@clerk/nextjs";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 function useUnreadNotificationsCount() {
   const { data } = useSWR<{ unreadCount: number }>(
@@ -398,15 +400,35 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
     );
   };
 
+  const openCommandPalette = () => {
+    if (typeof document !== "undefined") {
+      document.dispatchEvent(new Event("zolio:open-command-palette"));
+    }
+  };
+
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-800 bg-slate-950 lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-950 via-slate-950 to-[#080611] lg:flex">
       <div className="h-[2px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400" />
       <div className="flex h-full flex-col px-3 py-4">
 
         {/* Logo */}
-        <div className="mb-6 px-2.5">
+        <div className="mb-3 px-2.5">
           <ClientBrandMark className="text-white" />
         </div>
+
+        {/* Search (Cmd+K) */}
+        <button
+          type="button"
+          onClick={openCommandPalette}
+          aria-label="Rechercher · Cmd+K"
+          className="mb-3 flex h-9 items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-2.5 text-[12.5px] text-slate-400 transition-colors hover:border-white/12 hover:bg-white/[0.06] hover:text-white"
+        >
+          <Search size={14} strokeWidth={1.8} className="shrink-0" />
+          <span className="flex-1 text-left">Rechercher</span>
+          <kbd className="hidden items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 xl:inline-flex">
+            ⌘K
+          </kbd>
+        </button>
 
         {/* New quote button */}
         <Link
@@ -422,7 +444,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         </nav>
 
         {/* Separator */}
-        <div className="my-3 border-t border-white/6" />
+        <div className="my-3 border-t border-white/[0.06]" />
 
         {/* Tool groups */}
         {toolGroups.map((group) => (
@@ -441,34 +463,36 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Separator */}
-        <div className="mb-3 border-t border-white/6" />
-
         {/* Footer items */}
-        <nav className="flex flex-col gap-0.5">
-          {footerItems.map((item) => navLink(item))}
-          <a
-            href={SUPPORT_HREF}
-            target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
-            rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-            className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
-          >
-            <LifeBuoy size={16} strokeWidth={1.7} className="shrink-0" />
-            <span className="flex-1">Support</span>
-          </a>
-        </nav>
+        <div className="border-t border-white/[0.06] pt-3">
+          <nav className="flex flex-col gap-0.5">
+            {footerItems.map((item) => navLink(item))}
+            <a
+              href={SUPPORT_HREF}
+              target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
+              rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
+              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <LifeBuoy size={16} strokeWidth={1.7} className="shrink-0" />
+              <span className="flex-1">Support</span>
+            </a>
+          </nav>
 
-        {/* User */}
-        <div className="mt-3 flex items-center gap-2.5 rounded-lg px-2.5 py-2">
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "h-7 w-7",
-                userButtonTrigger: "p-0",
-              },
-            }}
-          />
-          <span className="flex-1 truncate text-[13px] text-slate-300">Mon compte</span>
+          {/* User row */}
+          <div className="mt-2 flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
+            <UserButton
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: "h-7 w-7",
+                  userButtonTrigger: "p-0",
+                },
+              }}
+            />
+            <span className="flex-1 truncate text-[12.5px] font-medium text-slate-200">Mon compte</span>
+            <div className="shrink-0 [&_button]:!h-8 [&_button]:!w-8">
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
       </div>
     </aside>
