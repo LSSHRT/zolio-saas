@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import {
@@ -48,7 +48,7 @@ const ACTIVATION_STEPS = [
   "Configuration entreprise et logo en quelques minutes",
 ] as const;
 
-export default function AbonnementPage() {
+function AbonnementPageContent() {
   const [loading, setLoading] = useState(false);
   const [trialLoading, setTrialLoading] = useState(false);
   const [isAnnual, setIsAnnual] = useState(false);
@@ -407,5 +407,13 @@ export default function AbonnementPage() {
         </div>
       </ClientSectionCard>
     </ClientSubpageShell>
+  );
+}
+
+export default function AbonnementPage() {
+  return (
+    <Suspense fallback={null}>
+      <AbonnementPageContent />
+    </Suspense>
   );
 }
