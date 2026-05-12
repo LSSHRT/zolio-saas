@@ -463,212 +463,252 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
         <ClientDesktopNav active="dashboard" />
 
         <main className="mt-4 flex-1 lg:mt-6">
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
-            <div className="min-w-0 space-y-6">
+          {/* ============================================================= */}
+          {/* DESKTOP LAYOUT — from scratch                                  */}
+          {/* ============================================================= */}
+          <div className="hidden lg:block">
 
-              <motion.section {...sectionMotion(0)}>
-                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <GreetingIcon size={16} />
-                  <span>{todayLabel}</span>
-                  {starterTrade && <span className="text-slate-300 dark:text-slate-600">·</span>}
+            {/* ── Row 1 : Hero ─────────────────────────────────────────── */}
+            <motion.div {...sectionMotion(0)} className="mb-8 flex items-end justify-between">
+              <div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <GreetingIcon size={15} className="mr-1.5 inline -translate-y-px" />
+                  {todayLabel}
+                  {starterTrade && <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>}
                   {starterTrade && <span>{starterTrade.shortLabel}</span>}
-                </div>
-                <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${(clerkUser?.firstName || initialUser.firstName)}` : ""}.
+                </p>
+                <h1 className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
+                  {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
                 </h1>
-                <div className="mt-4 flex items-center gap-3">
-                  <Link href="/nouveau-devis" className="tour-nouveau-devis">
-                    <motion.div whileTap={{ scale: 0.97 }} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm">
-                      <Plus size={16} /> Nouveau devis
-                    </motion.div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Link href="/nouveau-devis" className="tour-nouveau-devis">
+                  <motion.button whileTap={{ scale: 0.97 }} className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700">
+                    <Plus size={15} /> Nouveau devis
+                  </motion.button>
+                </Link>
+                <Link href="/devis" className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
+                  <FileText size={15} /> Pipeline
+                </Link>
+                {canAccessAdmin && (
+                  <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200">
+                    <ShieldCheck size={13} /> Admin
                   </Link>
-                  <Link href="/devis" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
-                    <FileText size={16} /> Ouvrir le pipe
-                  </Link>
-                  <div className="ml-auto flex items-center gap-2">
-                    {canAccessAdmin && (
-                      <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200">
-                        <ShieldCheck size={13} /> Admin
+                )}
+                <ThemeToggle />
+              </div>
+            </motion.div>
+
+            {/* ── Row 2 : 4 KPI cards ──────────────────────────────────── */}
+            <motion.div {...sectionMotion(0.03)} className="mb-8 grid grid-cols-4 gap-4">
+              {[
+                { label: "CA validé", value: formatCurrency(acceptedRevenueHT), sub: `${acceptedCount} devis`, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", icon: TrendingUp },
+                { label: "Pipeline", value: formatCurrency(pipelineHT), sub: `${pendingCount} en attente`, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", icon: Clock3 },
+                { label: "Relances", value: String(devisARelancer.length), sub: "à traiter", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10", icon: Bell },
+                { label: "Ticket moyen", value: formatCurrency(averageTicket), sub: `${conversionRate}% conv.`, color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-500/10", icon: LineChart },
+              ].map((kpi) => (
+                <div key={kpi.label} className="rounded-xl border border-slate-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">{kpi.label}</span>
+                    <span className={`inline-flex h-7 w-7 items-center justify-center rounded-lg ${kpi.bg}`}>
+                      <kpi.icon size={14} className={kpi.color} />
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{kpi.value}</p>
+                  <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{kpi.sub}</p>
+                </div>
+              ))}
+            </motion.div>
+
+            {/* ── Row 3 : Objectif progress ────────────────────────────── */}
+            <motion.div {...sectionMotion(0.05)} className="mb-8 rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-baseline gap-3">
+                  <span className="text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">Objectif mensuel</span>
+                  <span className="text-xl font-bold tabular-nums text-slate-900 dark:text-white">{formatCurrency(CA_TTC)}</span>
+                  <span className="text-sm text-slate-400 dark:text-slate-500">/ {formatCurrency(objectifActif)}</span>
+                  <span className={`rounded-md px-2 py-0.5 text-xs font-bold tabular-nums ${objectifProgress >= 100 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"}`}>
+                    {objectifProgress.toFixed(0)}%
+                  </span>
+                </div>
+                <button type="button" onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }} className="text-xs font-medium text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200">
+                  <Pencil size={12} className="mr-1 inline -translate-y-px" /> Ajuster
+                </button>
+              </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-white/8">
+                <div className="h-full rounded-full bg-violet-600 transition-all duration-700 dark:bg-violet-500" style={{ width: `${objectifProgress}%` }} />
+              </div>
+            </motion.div>
+
+            {/* ── Setup métier (only when needed) ──────────────────────── */}
+            {setupRequired && selectedTradeDef && (
+              <motion.div id="dashboard-setup-panel-desktop" {...sectionMotion(0.06)} className="mb-8 rounded-xl border border-violet-200/60 bg-violet-50/50 p-6 dark:border-violet-400/15 dark:bg-violet-500/5">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Préparez votre cockpit</h2>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">Choisissez votre métier et importez le catalogue starter.</p>
+                <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {TRADE_OPTIONS.map((opt) => (
+                      <TradeOptionCard key={opt.key} option={opt} active={selectedTrade === opt.key} onSelect={setSelectedTrade} />
+                    ))}
+                  </div>
+                  <div className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                    <p className="font-semibold text-slate-900 dark:text-white">{selectedTradeDef.label}</p>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                      {selectedTradeDef.pitch} {selectedStarterCount} prestations seront injectées.
+                    </p>
+                    <div className="mt-4 flex gap-3">
+                      <button type="button" onClick={handleBootstrap} disabled={isBootstrapping} className="rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:opacity-60">
+                        {isBootstrapping ? "Préparation..." : "Activer mon starter"}
+                      </button>
+                      <Link href="/parametres" className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-white/10 dark:text-slate-200">
+                        Paramètres
                       </Link>
-                    )}
-                    <ThemeToggle />
+                    </div>
                   </div>
                 </div>
-              </motion.section>
+              </motion.div>
+            )}
 
-              {setupRequired && selectedTradeDef && (
-                <motion.section id="dashboard-setup-panel-desktop" {...sectionMotion(0.02)} className="client-panel rounded-3xl p-6">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Starter métier</p>
-                      <h2 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Préparez votre cockpit avant de produire</h2>
-                    </div>
-                    <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40">{starterCatalogCount} en base</span>
+            {/* ── Main grid : content + sidebar ────────────────────────── */}
+            <div className="grid grid-cols-[minmax(0,1fr)_300px] gap-8">
+
+              {/* ── LEFT COLUMN ───────────────────────────────────────── */}
+              <div className="min-w-0 space-y-6">
+
+                {/* Chart + cadence semaine inline */}
+                <motion.div {...sectionMotion(0.07)} className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Chiffre d&apos;affaires</h2>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">6 derniers mois</span>
                   </div>
-                  <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {TRADE_OPTIONS.map((opt) => (
-                        <TradeOptionCard key={opt.key} option={opt} active={selectedTrade === opt.key} onSelect={setSelectedTrade} />
-                      ))}
-                    </div>
-                    <div className="rounded-3xl border border-slate-200/70 bg-slate-50/80 p-5 dark:border-white/8 dark:bg-white/4">
-                      <p className="text-sm font-semibold text-slate-950 dark:text-white">{selectedTradeDef.label}</p>
-                      <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                        {selectedTradeDef.pitch} {selectedStarterCount} prestations seront injectées pour structurer vos devis plus vite.
-                      </p>
-                      <div className="mt-5 grid gap-3">
-                        <button type="button" onClick={handleBootstrap} disabled={isBootstrapping} className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-semibold text-white shadow-brand disabled:opacity-60">
-                          {isBootstrapping ? "Préparation..." : "Activer mon starter"}
-                        </button>
-                        <Link href="/parametres" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200/80 bg-white/85 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100">
-                          Finaliser mes paramètres
-                        </Link>
+                  {semaine && (
+                    <div className="mt-4 grid grid-cols-3 gap-3">
+                      <div className="rounded-lg bg-violet-50/80 px-3 py-2.5 dark:bg-violet-500/8">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-400">Devis semaine</p>
+                        <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">{semaine.nouveauxDevis} <span className="text-xs font-normal text-slate-500">({semaine.devisAcceptes} ok)</span></p>
+                      </div>
+                      <div className="rounded-lg bg-emerald-50/80 px-3 py-2.5 dark:bg-emerald-500/8">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Factures</p>
+                        <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">{semaine.facturesEmises} <span className="text-xs font-normal text-slate-500">({semaine.facturesPayees} payées)</span></p>
+                      </div>
+                      <div className="rounded-lg bg-amber-50/80 px-3 py-2.5 dark:bg-amber-500/8">
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-600 dark:text-amber-400">Encaissé</p>
+                        <p className="mt-0.5 text-lg font-bold tabular-nums text-slate-900 dark:text-white">{formatCurrency(semaine.caEncaisse)}</p>
                       </div>
                     </div>
+                  )}
+                  <div className="mt-4 h-[280px]">
+                    <DashboardChart monthlyData={monthlyData} />
                   </div>
-                </motion.section>
-              )}
+                </motion.div>
 
-              <motion.section {...sectionMotion(0.04)} className="grid grid-cols-4 gap-4">
-                <CompactMetricCard label="CA validé" value={formatCurrency(acceptedRevenueHT)} detail={`${acceptedCount} acceptés`} tone="emerald" icon={TrendingUp} />
-                <CompactMetricCard label="Pipeline" value={formatCurrency(pipelineHT)} detail={`${pendingCount} en attente`} tone="amber" icon={Clock3} />
-                <CompactMetricCard label="Relances" value={String(devisARelancer.length)} detail="Dossiers à réveiller" tone="rose" icon={Bell} />
-                <CompactMetricCard label="Ticket moyen" value={formatCurrency(averageTicket)} detail={`${conversionRate}% de conversion`} tone="violet" icon={LineChart} />
-              </motion.section>
-
-              <motion.section {...sectionMotion(0.06)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Objectif mensuel</p>
-                    <div className="mt-2 flex items-baseline gap-3">
-                      <span className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{formatCurrency(CA_TTC)}</span>
-                      <span className="text-sm text-slate-500 dark:text-slate-400">/ {formatCurrency(objectifActif)}</span>
-                      <span className="rounded-lg bg-violet-100 px-2.5 py-1 text-sm font-bold text-violet-700 dark:bg-violet-500/20 dark:text-violet-200">{objectifProgress.toFixed(0)}%</span>
+                {/* Funnel (conditionnel) */}
+                {funnel && funnel.length > 0 && (
+                  <motion.div {...sectionMotion(0.09)} className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                    <div className="mb-4 flex items-center gap-2">
+                      <Target size={16} className="text-violet-500" />
+                      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Conversion</h2>
                     </div>
-                  </div>
-                  <button type="button" onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                    <Pencil size={12} /> Ajuster
-                  </button>
-                </div>
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/8">
-                  <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 transition-all duration-700" style={{ width: `${objectifProgress}%` }} />
-                </div>
-              </motion.section>
-
-              <motion.section {...sectionMotion(0.08)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                {semaine && (
-                  <div className="mb-5 grid grid-cols-3 gap-4">
-                    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/4">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-violet-500">Devis semaine</p>
-                      <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">{semaine.nouveauxDevis}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{semaine.devisAcceptes} acceptés</p>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/4">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-500">Factures</p>
-                      <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">{semaine.facturesEmises}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{semaine.facturesPayees} payées</p>
-                    </div>
-                    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/4">
-                      <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-500">Encaissé</p>
-                      <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">{formatCurrency(semaine.caEncaisse)}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{formatCurrency(semaine.depensesSemaine)} dép.</p>
-                    </div>
-                  </div>
+                    <ConversionFunnel funnel={funnel} />
+                  </motion.div>
                 )}
-                <div className="h-[320px] overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50 px-2 py-4 dark:border-white/5 dark:bg-white/[0.02]">
-                  <DashboardChart monthlyData={monthlyData} />
+
+                {/* Derniers devis + Top clients */}
+                <div className="grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] gap-6">
+                  <motion.div {...sectionMotion(0.1)} className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Derniers devis</h2>
+                      <Link href="/devis" className="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">Tous <ChevronRight size={12} className="inline" /></Link>
+                    </div>
+                    <div className="mt-3">
+                      <DashboardRecentQuotes items={devisRecents} onSelectDevis={setSelectedDevisNumero} />
+                    </div>
+                  </motion.div>
+
+                  <motion.div {...sectionMotion(0.11)} className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                    <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Top clients</h2>
+                    <div className="mt-3">
+                      <DashboardTopClients items={topClients} />
+                    </div>
+                  </motion.div>
                 </div>
-              </motion.section>
 
-              {funnel && funnel.length > 0 && (
-                <motion.section {...sectionMotion(0.09)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                  <div className="mb-4 flex items-center gap-2">
-                    <Target size={18} className="text-violet-500" />
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Funnel de conversion</h2>
-                  </div>
-                  <ConversionFunnel funnel={funnel} />
-                </motion.section>
-              )}
+                {/* Trésorerie + Bénéfice */}
+                <div className="grid grid-cols-2 gap-6">
+                  <motion.div {...sectionMotion(0.12)} className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Trésorerie</h2>
+                      {tresorerie && (
+                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold tabular-nums ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>
+                          {tresorerie.tauxRecouvrement}% rec.
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3">{tresorerie ? <DashboardTresorerie data={tresorerie} /> : <p className="text-xs text-slate-400">Chargement…</p>}</div>
+                  </motion.div>
 
-              <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
-                <motion.section {...sectionMotion(0.1)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Derniers devis</h2>
-                    <Link href="/devis" className="text-sm font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">Voir tous <ChevronRight size={14} className="inline" /></Link>
-                  </div>
-                  <div className="mt-4">
-                    <DashboardRecentQuotes items={devisRecents} onSelectDevis={setSelectedDevisNumero} />
-                  </div>
-                </motion.section>
-
-                <motion.section {...sectionMotion(0.12)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Top clients</h2>
-                  <div className="mt-4">
-                    <DashboardTopClients items={topClients} />
-                  </div>
-                </motion.section>
+                  <motion.div {...sectionMotion(0.13)} className="rounded-xl border border-slate-200/60 bg-white p-5 dark:border-white/8 dark:bg-white/[0.03]">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-sm font-semibold text-slate-900 dark:text-white">Bénéfice net</h2>
+                      {benefice && (
+                        <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold tabular-nums ${benefice.margePct >= 70 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : benefice.margePct >= 40 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>
+                          {benefice.margePct}% marge
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-3">{benefice ? <DashboardBenefice data={benefice} /> : <p className="text-xs text-slate-400">Chargement…</p>}</div>
+                  </motion.div>
+                </div>
               </div>
 
-              <div className="grid gap-6 xl:grid-cols-2">
-                <motion.section {...sectionMotion(0.14)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Trésorerie</h2>
-                    {tresorerie && <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>{tresorerie.tauxRecouvrement}% recouvrement</span>}
-                  </div>
-                  <div className="mt-4">{tresorerie ? <DashboardTresorerie data={tresorerie} /> : <p className="text-sm text-slate-500">Chargement…</p>}</div>
-                </motion.section>
+              {/* ── RIGHT SIDEBAR (sticky) ────────────────────────────── */}
+              <aside className="space-y-5 self-start lg:sticky lg:top-6">
 
-                <motion.section {...sectionMotion(0.16)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
-                  <div className="flex items-center justify-between gap-3">
-                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Bénéfice net</h2>
-                    {benefice && <span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${benefice.margePct >= 70 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : benefice.margePct >= 40 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>{benefice.margePct}% marge</span>}
+                {/* Actions à faire */}
+                <motion.div {...sectionMotion(0.06)} className="rounded-xl border border-slate-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">À faire</h3>
+                    <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-slate-600 dark:bg-white/8 dark:text-slate-300">{actionPlan.length}</span>
                   </div>
-                  <div className="mt-4">{benefice ? <DashboardBenefice data={benefice} /> : <p className="text-sm text-slate-500">Chargement…</p>}</div>
-                </motion.section>
-              </div>
+                  <div className="mt-3 space-y-2">
+                    {actionPlan.map((item) => <DashboardActionCard key={item.id} item={item} compact />)}
+                  </div>
+                </motion.div>
+
+                {/* Relances urgentes */}
+                <motion.div {...sectionMotion(0.08)} className="rounded-xl border border-slate-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Relances</h3>
+                    {devisARelancer.length > 0 && <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">{devisARelancer.length}</span>}
+                  </div>
+                  <div className="mt-3">
+                    <DesktopPriorityQuotes items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
+                  </div>
+                </motion.div>
+
+                {/* Échéances proches */}
+                <motion.div {...sectionMotion(0.1)} className="rounded-xl border border-slate-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/[0.03]">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Échéances</h3>
+                    {echeances.length > 0 && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{echeances.length}</span>}
+                  </div>
+                  <div className="mt-3">
+                    <DesktopPaymentStack items={echeances} />
+                  </div>
+                </motion.div>
+
+                {/* Accès rapides */}
+                <motion.div {...sectionMotion(0.12)} className="rounded-xl border border-slate-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/[0.03]">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Accès rapides</h3>
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    {quickLinks.map((item) => <QuickLinkCard key={item.href} item={item} />)}
+                  </div>
+                  <div className="mt-3">
+                    <ClientSupportButton />
+                  </div>
+                </motion.div>
+              </aside>
             </div>
-
-            <aside className="space-y-5 self-start lg:sticky lg:top-6">
-              <motion.section {...sectionMotion(0.06)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">À faire</h3>
-                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-white/8 dark:text-slate-300">{actionPlan.length}</span>
-                </div>
-                <div className="mt-3 grid gap-2.5">
-                  {actionPlan.map((item) => <DashboardActionCard key={item.id} item={item} />)}
-                </div>
-              </motion.section>
-
-              <motion.section {...sectionMotion(0.08)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Relances</h3>
-                  <span className="rounded-md bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">{devisARelancer.length}</span>
-                </div>
-                <div className="mt-3">
-                  <DesktopPriorityQuotes items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
-                </div>
-              </motion.section>
-
-              <motion.section {...sectionMotion(0.1)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
-                <div className="flex items-center justify-between gap-3">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Échéances</h3>
-                  <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{echeances.length}</span>
-                </div>
-                <div className="mt-3">
-                  <DesktopPaymentStack items={echeances} />
-                </div>
-              </motion.section>
-
-              <motion.section {...sectionMotion(0.12)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Accès rapides</h3>
-                <div className="mt-3 grid grid-cols-2 gap-2.5">
-                  {quickLinks.map((item) => <QuickLinkCard key={item.href} item={item} />)}
-                </div>
-                <div className="mt-4 flex flex-col gap-2">
-                  <ClientSupportButton />
-                </div>
-              </motion.section>
-            </aside>
           </div>
 
           <div className="space-y-4 lg:hidden">
