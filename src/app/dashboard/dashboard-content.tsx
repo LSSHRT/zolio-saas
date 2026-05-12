@@ -470,11 +470,16 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
           <div className="hidden lg:flex lg:flex-col lg:gap-10">
 
             {/* ─── TOP BAR ──────────────────────────────────────────── */}
-            <motion.header {...sectionMotion(0)} className="flex items-baseline gap-4">
-              <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
-                {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
-              </h1>
-              <span className="text-sm font-medium text-slate-400 dark:text-slate-500 capitalize">{todayLabel}</span>
+            <motion.header {...sectionMotion(0)}>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400">
+                Tableau de bord
+              </p>
+              <div className="mt-1 flex items-baseline gap-4">
+                <h1 className="text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+                  {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
+                </h1>
+                <span className="text-sm font-medium text-slate-400 dark:text-slate-500 capitalize">{todayLabel}</span>
+              </div>
             </motion.header>
 
             {/* ─── CHIFFRES CLÉS — les 3 nombres qui comptent ───────── */}
@@ -491,14 +496,14 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                 <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight">{formatCurrency(pipelineHT)}</p>
                 <p className="mt-1 text-sm text-amber-200">{pendingCount} devis en attente · ticket moy. {formatCurrency(averageTicket)}</p>
               </div>
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 p-6 text-white shadow-lg shadow-violet-600/20">
-                <Target size={48} className="absolute -right-2 -top-2 rotate-12 text-white/10" />
-                <p className="text-sm font-medium text-violet-200">Objectif du mois</p>
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-400 p-6 text-white shadow-lg shadow-violet-600/25">
+                <Target size={48} className="absolute -right-2 -top-2 rotate-12 text-white/15" />
+                <p className="text-sm font-medium text-violet-100">Objectif du mois</p>
                 <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight">{objectifProgress.toFixed(0)}%</p>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/20">
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/25">
                   <div className="h-full rounded-full bg-white transition-all duration-700" style={{ width: `${objectifProgress}%` }} />
                 </div>
-                <div className="mt-2 flex items-center justify-between text-sm text-violet-200">
+                <div className="mt-2 flex items-center justify-between text-sm text-white/85">
                   <span>{formatCurrency(CA_TTC)} / {formatCurrency(objectifActif)}</span>
                   <button type="button" onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }} className="text-white/70 transition hover:text-white">
                     <Pencil size={12} className="inline -translate-y-px" />
