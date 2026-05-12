@@ -1,5 +1,4 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
 
 // Définir les routes publiques qui ne nécessitent pas d'être connecté
 const isPublicRoute = createRouteMatcher([
@@ -26,55 +25,10 @@ const isPublicRoute = createRouteMatcher([
   '/api/webhooks/stripe(.*)',
 ]);
 
-const isMaintenanceBypassRoute = createRouteMatcher([
-  '/admin(.*)',
-  '/maintenance',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/api/cron/prospect(.*)',
-  '/api/prospect-domains/track(.*)',
-  '/api/system/status(.*)',
-  '/api/webhooks/stripe(.*)',
-]);
-
-async function getSystemStatus(req: Request) {
-  try {
-    const response = await fetch(new URL('/api/system/status', req.url), {
-      headers: {
-        cookie: req.headers.get('cookie') ?? '',
-      },
-      // Aggressive cache — maintenance toggle propagates within ~5 minutes.
-      // This eliminates the per-navigation HTTP round-trip from middleware.
-      next: { revalidate: 300, tags: ['system-status'] },
-    });
-
-    if (!response.ok) {
-      return null;
-    }
-
-    return (await response.json()) as {
-      maintenanceEnabled?: boolean;
-      canBypassMaintenance?: boolean;
-    };
-  } catch (error) {
-    console.error('[maintenance-check]', error);
-    return null;
-  }
-}
-
+// NOTE: maintenance check removed from middleware (was hitting /api/system/status
+// on every navigation, blocking each page load with a server fetch). Maintenance
+// status is now checked at the layout/page level if needed.
 export default clerkMiddleware(async (auth, req) => {
-  if (!isMaintenanceBypassRoute(req)) {
-    const systemStatus = await getSystemStatus(req);
-
-    if (systemStatus?.maintenanceEnabled && !systemStatus.canBypassMaintenance) {
-      if (req.nextUrl.pathname.startsWith('/api/')) {
-        return NextResponse.json({ error: 'Maintenance en cours' }, { status: 503 });
-      }
-
-      return NextResponse.redirect(new URL('/maintenance', req.url));
-    }
-  }
-
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
