@@ -28,8 +28,28 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
-import type { CallBackProps, Step } from "react-joyride";
+import { useEffect, useMemo, useState, type ComponentType } from "react";
+
+// Local minimal types — react-joyride uses `export = ReactJoyride` (CJS) which
+// breaks named ESM imports under moduleResolution: bundler.
+type JoyrideStep = {
+  target: string;
+  title?: string;
+  content: string;
+  disableBeacon?: boolean;
+  placement?: string;
+};
+type JoyrideCallBackProps = { status: string };
+type JoyrideProps = {
+  steps: JoyrideStep[];
+  run: boolean;
+  continuous?: boolean;
+  showSkipButton?: boolean;
+  showProgress?: boolean;
+  callback?: (data: JoyrideCallBackProps) => void;
+  styles?: { options?: { primaryColor?: string; zIndex?: number } };
+  locale?: { back?: string; close?: string; last?: string; next?: string; skip?: string };
+};
 import useSWR from "swr";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -105,7 +125,13 @@ interface DashboardContentProps {
   initialSummary: ClientDashboardSummary;
 }
 
-const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
+const Joyride = dynamic(
+  () => import("react-joyride").then((m) => {
+    const mod = m as unknown as { default?: ComponentType<JoyrideProps> } & ComponentType<JoyrideProps>;
+    return mod.default ?? mod;
+  }),
+  { ssr: false },
+) as ComponentType<JoyrideProps>;
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
 const DevisEditor = dynamic(
   () => import("@/components/devis-editor").then((module) => module.DevisEditor),
@@ -334,7 +360,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     } catch { toast.error("Erreur de sauvegarde."); }
   };
 
-  const handleTourCallback = (data: CallBackProps) => {
+  const handleTourCallback = (data: JoyrideCallBackProps) => {
     if (data.status === "finished" || data.status === "skipped") {
       localStorage.setItem("zolio_has_seen_tour", "true");
       setRunTour(false);
@@ -426,7 +452,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
   // --- Tour steps --------------------------------------------------
 
-  const tourSteps: Step[] = [
+  const tourSteps: JoyrideStep[] = [
     { target: ".tour-nouveau-devis", title: "Bienvenue sur Zolio 👋", content: "Votre cockpit d'activité. Créez un devis en un clic ici.", disableBeacon: true, placement: "bottom-start" as const },
     { target: ".tour-dashboard", title: "Votre tableau de bord", content: "Suivez votre chiffre d'affaires, vos relances et votre pipeline en un coup d'œil.", placement: "bottom" as const },
   ];
