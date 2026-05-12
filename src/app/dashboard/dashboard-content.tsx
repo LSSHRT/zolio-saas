@@ -463,22 +463,31 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
         <ClientDesktopNav active="dashboard" />
 
         <main className="mt-4 flex-1 lg:mt-6">
-          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
+          <div className="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
             <div className="min-w-0 space-y-6">
-              <motion.section {...sectionMotion(0)} className="client-panel-strong relative overflow-hidden rounded-3xl px-6 py-5 xl:px-8">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_72%)]" />
-                <div className="relative flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
-                      Cockpit bureau
-                    </p>
-                    <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
-                      Vue d&apos;ensemble du workspace, actions prioritaires et performance du moment.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
+
+              <motion.section {...sectionMotion(0)}>
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <GreetingIcon size={16} />
+                  <span>{todayLabel}</span>
+                  {starterTrade && <span className="text-slate-300 dark:text-slate-600">·</span>}
+                  {starterTrade && <span>{starterTrade.shortLabel}</span>}
+                </div>
+                <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                  {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${(clerkUser?.firstName || initialUser.firstName)}` : ""}.
+                </h1>
+                <div className="mt-4 flex items-center gap-3">
+                  <Link href="/nouveau-devis" className="tour-nouveau-devis">
+                    <motion.div whileTap={{ scale: 0.97 }} className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm">
+                      <Plus size={16} /> Nouveau devis
+                    </motion.div>
+                  </Link>
+                  <Link href="/devis" className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-200">
+                    <FileText size={16} /> Ouvrir le pipe
+                  </Link>
+                  <div className="ml-auto flex items-center gap-2">
                     {canAccessAdmin && (
-                      <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-full border border-violet-300/50 bg-violet-500/10 px-3 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100">
+                      <Link href="/admin" className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200">
                         <ShieldCheck size={13} /> Admin
                       </Link>
                     )}
@@ -520,176 +529,80 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                 </motion.section>
               )}
 
-              <motion.section {...sectionMotion(0.04)} className="client-panel-strong relative overflow-hidden rounded-3xl px-6 py-6 xl:px-8 xl:py-8">
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_68%)]" />
-                <div className="relative grid gap-6 xl:grid-cols-[minmax(0,1.08fr)_minmax(320px,0.92fr)]">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-violet-700 ring-1 ring-violet-200/60 dark:bg-white/7 dark:text-violet-100 dark:ring-white/10">
-                        <GreetingIcon size={14} /> {todayLabel}
-                      </div>
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
-                        <BriefcaseBusiness size={13} /> {starterTrade?.shortLabel || "Métier"}
-                      </div>
-                      <div className="inline-flex items-center gap-2 rounded-full border border-white/45 bg-white/72 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-white/4 dark:text-slate-200">
-                        <Clock3 size={13} /> Réponse moyenne {avgResponseDays} j
-                      </div>
-                    </div>
-
-                    <h1 className="mt-5 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white xl:text-5xl">
-                      {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${(clerkUser?.firstName || initialUser.firstName)}` : ""}.
-                    </h1>
-                    <p className="mt-3 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">
-                      Pilotez votre activité sans friction : visualisez les priorités, le pipeline commercial et les prochaines entrées d’argent avant même d’ouvrir un module.
-                    </p>
-
-                    <div className="mt-5 flex flex-wrap gap-3">
-                      <Link href="/nouveau-devis" className="tour-nouveau-devis">
-                        <motion.div whileTap={{ scale: 0.98 }} className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 py-3 text-sm font-semibold text-white shadow-brand">
-                          <Plus size={17} /> Nouveau devis
-                        </motion.div>
-                      </Link>
-                      <Link href="/devis" className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/80 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100">
-                        <FileText size={17} /> Ouvrir le pipe
-                      </Link>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4">
-                    <div className="rounded-3xl border border-white/70 bg-white/82 p-5 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.28)] dark:border-white/10 dark:bg-slate-950/50">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">Objectif mensuel</p>
-                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">CA TTC du mois en cours</p>
-                        </div>
-                        <button type="button" onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }} className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/85 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100">
-                          <Pencil size={14} /> Ajuster
-                        </button>
-                      </div>
-                      <div className="mt-5 flex items-end justify-between gap-4">
-                        <div>
-                          <p className="text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">{formatCurrency(CA_TTC)}</p>
-                          <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">sur {formatCurrency(objectifActif)} visés ce mois-ci</p>
-                        </div>
-                        <div className="rounded-2xl border border-violet-200/70 bg-violet-500/10 px-4 py-3 text-right dark:border-violet-400/20">
-                          <p className="text-[11px] uppercase tracking-[0.18em] text-violet-500 dark:text-violet-300">Progression</p>
-                          <p className="mt-1 text-2xl font-semibold text-violet-700 dark:text-violet-100">{objectifProgress.toFixed(0)}%</p>
-                        </div>
-                      </div>
-                      <div className="mt-5 overflow-hidden rounded-full bg-slate-200/70 dark:bg-white/10">
-                        <div className="h-3 rounded-full bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 transition-all duration-700" style={{ width: `${objectifProgress}%` }} />
-                      </div>
-                      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                        {heroIndicators.map((indicator) => (
-                          <HeroIndicatorPill key={indicator.id} indicator={indicator} />
-                        ))}
-                      </div>
-                    </div>
-
-                    <FocusSignalCard signal={todayFocus} />
-                  </div>
-                </div>
-              </motion.section>
-
-              <motion.section {...sectionMotion(0.06)} className="grid gap-4 xl:grid-cols-4">
+              <motion.section {...sectionMotion(0.04)} className="grid grid-cols-4 gap-4">
                 <CompactMetricCard label="CA validé" value={formatCurrency(acceptedRevenueHT)} detail={`${acceptedCount} acceptés`} tone="emerald" icon={TrendingUp} />
                 <CompactMetricCard label="Pipeline" value={formatCurrency(pipelineHT)} detail={`${pendingCount} en attente`} tone="amber" icon={Clock3} />
                 <CompactMetricCard label="Relances" value={String(devisARelancer.length)} detail="Dossiers à réveiller" tone="rose" icon={Bell} />
                 <CompactMetricCard label="Ticket moyen" value={formatCurrency(averageTicket)} detail={`${conversionRate}% de conversion`} tone="violet" icon={LineChart} />
               </motion.section>
 
-              <motion.section {...sectionMotion(0.08)} className="client-panel rounded-3xl p-6">
-                <div className="flex items-end justify-between gap-3">
+              <motion.section {...sectionMotion(0.06)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Pilotage commercial</p>
-                    <h2 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Vision activité + conversion</h2>
+                    <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">Objectif mensuel</p>
+                    <div className="mt-2 flex items-baseline gap-3">
+                      <span className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{formatCurrency(CA_TTC)}</span>
+                      <span className="text-sm text-slate-500 dark:text-slate-400">/ {formatCurrency(objectifActif)}</span>
+                      <span className="rounded-lg bg-violet-100 px-2.5 py-1 text-sm font-bold text-violet-700 dark:bg-violet-500/20 dark:text-violet-200">{objectifProgress.toFixed(0)}%</span>
+                    </div>
                   </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">
-                    {totalQuotes} devis cumulés
-                  </span>
+                  <button type="button" onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 transition hover:border-slate-300 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                    <Pencil size={12} /> Ajuster
+                  </button>
                 </div>
-                <div className="mt-5 grid gap-6 xl:grid-cols-[minmax(0,1fr)_300px]">
-                  <div className="rounded-3xl border border-slate-200/70 bg-white/76 p-4 dark:border-white/8 dark:bg-white/4">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-slate-950 dark:text-white">Courbe de CA</p>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Évolution sur les 6 derniers mois</p>
-                      </div>
-                      <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-700 dark:text-violet-200">
-                        {formatCurrency(acceptedRevenueHT)} validés
-                      </span>
-                    </div>
-                    <div className="mt-4 h-[360px] overflow-hidden rounded-3xl border border-slate-200/70 bg-white/82 px-2 py-4 dark:border-white/8 dark:bg-slate-950/40">
-                      <DashboardChart monthlyData={monthlyData} />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-4">
-                    {semaine && (
-                      <div className="rounded-3xl border border-slate-200/70 bg-white/76 p-4 dark:border-white/8 dark:bg-white/4">
-                        <div className="flex items-end justify-between gap-3">
-                          <div>
-                            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Semaine</p>
-                            <h3 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Cadence terrain</h3>
-                          </div>
-                        </div>
-                        <div className="mt-4 grid gap-3">
-                          <div className="rounded-3xl bg-violet-50/80 p-4 dark:bg-violet-500/10">
-                            <p className="text-[11px] uppercase tracking-[0.2em] text-violet-500">Devis créés</p>
-                            <p className="mt-2 text-2xl font-semibold text-violet-700 dark:text-violet-200">{semaine.nouveauxDevis}</p>
-                            <p className="mt-1 text-sm text-violet-600/80 dark:text-violet-300">{semaine.devisAcceptes} acceptés</p>
-                          </div>
-                          <div className="rounded-3xl bg-emerald-50/80 p-4 dark:bg-emerald-500/10">
-                            <p className="text-[11px] uppercase tracking-[0.2em] text-emerald-500">Factures</p>
-                            <p className="mt-2 text-2xl font-semibold text-emerald-700 dark:text-emerald-200">{semaine.facturesEmises}</p>
-                            <p className="mt-1 text-sm text-emerald-600/80 dark:text-emerald-300">{semaine.facturesPayees} payées</p>
-                          </div>
-                          <div className="rounded-3xl bg-amber-50/80 p-4 dark:bg-amber-500/10">
-                            <p className="text-[11px] uppercase tracking-[0.2em] text-amber-500">Encaissement</p>
-                            <p className="mt-2 text-2xl font-semibold text-amber-700 dark:text-amber-200">{formatCurrency(semaine.caEncaisse)}</p>
-                            <p className="mt-1 text-sm text-amber-600/80 dark:text-amber-300">{formatCurrency(semaine.depensesSemaine)} de dépenses</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {funnel && funnel.length > 0 ? (
-                      <div className="rounded-3xl border border-slate-200/70 bg-white/76 p-4 dark:border-white/8 dark:bg-white/4">
-                        <div className="mb-3 flex items-center gap-2">
-                          <Target size={18} className="text-violet-500" />
-                          <div>
-                            <p className="text-sm font-semibold text-slate-950 dark:text-white">Funnel</p>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Devis → facturation → paiement</p>
-                          </div>
-                        </div>
-                        <ConversionFunnel funnel={funnel} />
-                      </div>
-                    ) : null}
-                  </div>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-white/8">
+                  <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 transition-all duration-700" style={{ width: `${objectifProgress}%` }} />
                 </div>
               </motion.section>
 
-              <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
-                <motion.section {...sectionMotion(0.1)} className="client-panel rounded-3xl p-6">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Affaires récentes</p>
-                      <h2 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Derniers devis</h2>
+              <motion.section {...sectionMotion(0.08)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                {semaine && (
+                  <div className="mb-5 grid grid-cols-3 gap-4">
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/4">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-violet-500">Devis semaine</p>
+                      <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">{semaine.nouveauxDevis}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{semaine.devisAcceptes} acceptés</p>
                     </div>
-                    <Link href="/devis" className="inline-flex items-center gap-1 text-sm font-semibold text-violet-700 dark:text-violet-200">Voir tous <ChevronRight size={16} /></Link>
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/4">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-emerald-500">Factures</p>
+                      <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">{semaine.facturesEmises}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{semaine.facturesPayees} payées</p>
+                    </div>
+                    <div className="rounded-xl bg-slate-50 px-4 py-3 dark:bg-white/4">
+                      <p className="text-[10px] font-semibold uppercase tracking-widest text-amber-500">Encaissé</p>
+                      <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">{formatCurrency(semaine.caEncaisse)}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{formatCurrency(semaine.depensesSemaine)} dép.</p>
+                    </div>
+                  </div>
+                )}
+                <div className="h-[320px] overflow-hidden rounded-xl border border-slate-100 bg-slate-50/50 px-2 py-4 dark:border-white/5 dark:bg-white/[0.02]">
+                  <DashboardChart monthlyData={monthlyData} />
+                </div>
+              </motion.section>
+
+              {funnel && funnel.length > 0 && (
+                <motion.section {...sectionMotion(0.09)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                  <div className="mb-4 flex items-center gap-2">
+                    <Target size={18} className="text-violet-500" />
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Funnel de conversion</h2>
+                  </div>
+                  <ConversionFunnel funnel={funnel} />
+                </motion.section>
+              )}
+
+              <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(280px,0.8fr)]">
+                <motion.section {...sectionMotion(0.1)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Derniers devis</h2>
+                    <Link href="/devis" className="text-sm font-medium text-violet-600 hover:text-violet-700 dark:text-violet-400">Voir tous <ChevronRight size={14} className="inline" /></Link>
                   </div>
                   <div className="mt-4">
                     <DashboardRecentQuotes items={devisRecents} onSelectDevis={setSelectedDevisNumero} />
                   </div>
                 </motion.section>
 
-                <motion.section {...sectionMotion(0.12)} className="client-panel rounded-3xl p-6">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Top clients</p>
-                      <h2 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Ceux qui pèsent le plus</h2>
-                    </div>
-                  </div>
+                <motion.section {...sectionMotion(0.12)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Top clients</h2>
                   <div className="mt-4">
                     <DashboardTopClients items={topClients} />
                   </div>
@@ -697,83 +610,62 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
               </div>
 
               <div className="grid gap-6 xl:grid-cols-2">
-                <motion.section {...sectionMotion(0.14)} className="client-panel rounded-3xl p-6">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Trésorerie</p>
-                      <h2 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">État des factures</h2>
-                    </div>
-                    {tresorerie && <span className={`client-chip ring-1 ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-500/12 text-amber-700 ring-amber-300/40" : "bg-rose-500/12 text-rose-700 ring-rose-300/40"}`}>{tresorerie.tauxRecouvrement}% rec.</span>}
+                <motion.section {...sectionMotion(0.14)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Trésorerie</h2>
+                    {tresorerie && <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>{tresorerie.tauxRecouvrement}% recouvrement</span>}
                   </div>
                   <div className="mt-4">{tresorerie ? <DashboardTresorerie data={tresorerie} /> : <p className="text-sm text-slate-500">Chargement…</p>}</div>
                 </motion.section>
 
-                <motion.section {...sectionMotion(0.16)} className="client-panel rounded-3xl p-6">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Bénéfice net</p>
-                      <h2 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Votre résultat</h2>
-                    </div>
-                    {benefice && <span className={`rounded-full px-3 py-1.5 text-sm font-bold ${benefice.margePct >= 70 ? "bg-emerald-500/12 text-emerald-700" : benefice.margePct >= 40 ? "bg-amber-500/12 text-amber-700" : "bg-rose-500/12 text-rose-700"}`}>{benefice.margePct}% marge</span>}
+                <motion.section {...sectionMotion(0.16)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-6 dark:border-white/8 dark:bg-white/4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Bénéfice net</h2>
+                    {benefice && <span className={`rounded-lg px-2.5 py-1 text-xs font-bold ${benefice.margePct >= 70 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : benefice.margePct >= 40 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>{benefice.margePct}% marge</span>}
                   </div>
                   <div className="mt-4">{benefice ? <DashboardBenefice data={benefice} /> : <p className="text-sm text-slate-500">Chargement…</p>}</div>
                 </motion.section>
               </div>
             </div>
 
-            <aside className="space-y-6 self-start lg:sticky lg:top-6">
-              <motion.section {...sectionMotion(0.08)} className="client-panel rounded-3xl p-5">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Priorités</p>
-                    <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">À faire maintenant</h2>
-                  </div>
-                  <span className="client-chip bg-slate-900/6 text-slate-700 ring-1 ring-slate-300/40 dark:bg-white/8 dark:text-slate-200 dark:ring-white/10">{actionPlan.length}</span>
+            <aside className="space-y-5 self-start lg:sticky lg:top-6">
+              <motion.section {...sectionMotion(0.06)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">À faire</h3>
+                  <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600 dark:bg-white/8 dark:text-slate-300">{actionPlan.length}</span>
                 </div>
-                <div className="mt-4 grid gap-3">
+                <div className="mt-3 grid gap-2.5">
                   {actionPlan.map((item) => <DashboardActionCard key={item.id} item={item} />)}
                 </div>
               </motion.section>
 
-              <motion.section {...sectionMotion(0.1)} className="client-panel rounded-3xl p-5">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Relances</p>
-                    <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Dossiers chauds</h2>
-                  </div>
-                  <span className="client-chip bg-rose-500/12 text-rose-700 ring-rose-300/40">{devisARelancer.length}</span>
+              <motion.section {...sectionMotion(0.08)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Relances</h3>
+                  <span className="rounded-md bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">{devisARelancer.length}</span>
                 </div>
-                <div className="mt-4">
+                <div className="mt-3">
                   <DesktopPriorityQuotes items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
                 </div>
               </motion.section>
 
-              <motion.section {...sectionMotion(0.12)} className="client-panel rounded-3xl p-5">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Encaissements</p>
-                    <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Paiements proches</h2>
-                  </div>
-                  <span className="client-chip bg-amber-500/12 text-amber-700 ring-amber-300/40">{echeances.length}</span>
+              <motion.section {...sectionMotion(0.1)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Échéances</h3>
+                  <span className="rounded-md bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{echeances.length}</span>
                 </div>
-                <div className="mt-4">
+                <div className="mt-3">
                   <DesktopPaymentStack items={echeances} />
                 </div>
               </motion.section>
 
-              <motion.section {...sectionMotion(0.14)} className="client-panel rounded-3xl p-5">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Modules</p>
-                    <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">Accès rapides</h2>
-                  </div>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
+              <motion.section {...sectionMotion(0.12)} className="rounded-2xl border border-slate-200/70 bg-white/80 p-5 dark:border-white/8 dark:bg-white/4">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Accès rapides</h3>
+                <div className="mt-3 grid grid-cols-2 gap-2.5">
                   {quickLinks.map((item) => <QuickLinkCard key={item.href} item={item} />)}
                 </div>
                 <div className="mt-4 flex flex-col gap-2">
                   <ClientSupportButton />
-                  {canAccessAdmin && <Link href="/admin" className="flex items-center justify-center gap-2 rounded-2xl border border-violet-300/50 bg-violet-500/10 px-4 py-3 text-sm font-semibold text-violet-700 dark:border-violet-400/20 dark:text-violet-100"><ShieldCheck size={16} /> Admin</Link>}
                 </div>
               </motion.section>
             </aside>

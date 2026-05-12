@@ -29,8 +29,8 @@ export function renderSignalIcon(tone: Tone, size = 16) {
 export function FocusSignalCard({ signal }: { signal: DashboardSignal }) {
   const content = (
     <div
-      className={`rounded-3xl border border-white/70 bg-white/72 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.28)] transition dark:border-white/10 dark:bg-white/4 ${
-        signal.href ? "cursor-pointer hover:-translate-y-0.5 hover:border-violet-300/70 hover:shadow-[0_28px_60px_-42px_rgba(124,58,237,0.35)] dark:hover:border-violet-400/20" : ""
+      className={`rounded-3xl border border-white/70 bg-white/72 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.28)] backdrop-blur-sm transition-all duration-300 dark:border-white/10 dark:bg-white/4 ${
+        signal.href ? "cursor-pointer hover:-translate-y-1 hover:border-violet-300/70 hover:shadow-[0_28px_60px_-42px_rgba(124,58,237,0.35)] dark:hover:border-violet-400/20" : ""
       }`}
     >
       <div className="flex items-start gap-3">
@@ -57,7 +57,7 @@ export function DashboardActionCard({ item, compact = false }: { item: Dashboard
   const Icon = item.icon;
   const content = (
     <div
-      className={`rounded-2xl border p-4 transition hover:-translate-y-0.5 ${
+      className={`rounded-2xl border p-4 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 ${
         item.tone === "rose"
           ? "border-rose-200/70 bg-rose-50/80 dark:border-rose-400/12 dark:bg-rose-500/8"
           : item.tone === "amber"
@@ -88,7 +88,7 @@ export function DashboardActionCard({ item, compact = false }: { item: Dashboard
           )}
         </div>
         {item.value && (
-          <span className="shrink-0 text-lg font-bold text-slate-900 dark:text-white">{item.value}</span>
+          <span className="shrink-0 text-lg font-bold text-slate-900 dark:text-white tabular-nums">{item.value}</span>
         )}
       </div>
     </div>
@@ -113,14 +113,14 @@ export function CompactMetricCard({
   icon: LucideIcon;
 }) {
   return (
-    <div className="rounded-3xl border border-white/70 bg-white/78 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_28px_65px_-42px_rgba(124,58,237,0.28)] dark:border-white/8 dark:bg-white/4">
+    <div className="rounded-3xl border border-white/70 bg-white/78 p-4 shadow-[0_20px_50px_-38px_rgba(15,23,42,0.22)] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_65px_-42px_rgba(124,58,237,0.28)] dark:border-white/8 dark:bg-white/4">
       <div className="flex items-center gap-2">
         <div className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ring-1 ${toneClasses(tone).icon}`}>
           <Icon size={15} />
         </div>
         <span className="text-[11px] uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">{label}</span>
       </div>
-      <p className="mt-3 text-xl font-bold tracking-tight text-slate-950 dark:text-white">{value}</p>
+      <p className="mt-3 text-xl font-bold tracking-tight text-slate-950 dark:text-white tabular-nums">{value}</p>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{detail}</p>
     </div>
   );
