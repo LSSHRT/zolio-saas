@@ -1,12 +1,6 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
+"use client";
 
 import DashboardContent from "./dashboard-content";
-
-export const metadata = {
-  title: "Tableau de bord",
-  description: "Vue d'ensemble de votre activité : chiffre d'affaires, devis, factures et statistiques de votre entreprise.",
-};
 
 const EMPTY_SUMMARY = {
   totalQuotes: 0,
@@ -43,24 +37,14 @@ const EMPTY_INITIAL_DATA = {
   isPro: false,
 };
 
-export default async function DashboardPage() {
-  const { userId, sessionClaims } = await auth();
-  if (!userId) redirect("/sign-in");
-
-  // Read flags directly from JWT claims (no Clerk API call). The client `useUser()` hook
-  // hydrates with full user data once mounted.
-  const claims = sessionClaims as Record<string, unknown> | null;
-  const publicMeta = (claims?.publicMetadata as Record<string, unknown>) || {};
-  const initialData = {
-    ...EMPTY_INITIAL_DATA,
-    canAccessAdmin: publicMeta.isAdmin === true,
-    isPro: publicMeta.isPro === true,
-  };
-
+// Pure client page (matches /devis pattern). Auth is enforced by middleware.
+// User data (firstName, imageUrl, admin/pro flags) is hydrated via useUser() inside DashboardContent.
+// Dashboard summary is fetched via SWR. No server roundtrip = instant navigation.
+export default function DashboardPage() {
   return (
     <DashboardContent
       initialUser={{ firstName: null, imageUrl: null }}
-      initialData={initialData}
+      initialData={EMPTY_INITIAL_DATA}
       initialSummary={EMPTY_SUMMARY}
     />
   );

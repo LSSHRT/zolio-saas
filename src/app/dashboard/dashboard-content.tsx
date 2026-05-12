@@ -258,8 +258,8 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     isPro: false,
   };
 
-  const canAccessAdmin = safeData.canAccessAdmin;
-  const isPro = safeData.isPro;
+  const canAccessAdmin = safeData.canAccessAdmin || clerkUser?.publicMetadata?.isAdmin === true;
+  const isPro = safeData.isPro || clerkUser?.publicMetadata?.isPro === true;
   const companyTrade = readStringMetadata(safeData.companyTrade || clerkUser?.publicMetadata?.companyTrade as string | undefined);
   const catalogImported = safeData.catalogImported || readBooleanMetadata(clerkUser?.publicMetadata?.starterCatalogImported as boolean | undefined);
   const onboardingDone = safeData.onboardingDone || readBooleanMetadata(clerkUser?.publicMetadata?.onboardingCompleted as boolean | undefined);
