@@ -25,6 +25,7 @@ import {
   ClientSubpageShell,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { EmptyState } from "@/components/empty-state";
 import {
   DEFAULT_TRADE,
   STARTER_CATEGORIES,
@@ -777,40 +778,30 @@ function CatalogueContent() {
               <Loader2 size={28} className="animate-spin text-violet-500" />
             </div>
           ) : filteredPrestations.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-white/6 dark:text-slate-500">
-                <Package size={26} />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-slate-950 dark:text-white">
-                  {search ? "Aucune prestation trouvée" : "Catalogue vide"}
-                </h2>
-                <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  {search
-                    ? "Essayez un autre mot-clé ou réinitialisez la recherche pour retrouver vos lignes métier."
-                    : "Importez votre starter métier, chargez un CSV ou ajoutez une première prestation manuellement."}
-                </p>
-              </div>
-              <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row">
-                <button
-                  type="button"
-                  onClick={() => void handleImportStarterCatalog()}
-                  disabled={isImportingStarter}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg border border-slate-200/80 bg-white/90 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20 dark:hover:text-white sm:flex-1"
-                >
-                  {isImportingStarter ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                  Starter {activeTradeDefinition?.shortLabel || "métier"}
-                </button>
-                <button
-                  type="button"
-                  onClick={openCreateForm}
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-gradient-zolio px-4 py-3 text-sm font-semibold text-white shadow-brand sm:flex-1"
-                >
-                  <Plus size={16} />
-                  Ajouter une ligne
-                </button>
-              </div>
-            </div>
+            search ? (
+              <EmptyState
+                icon={Search}
+                tone="slate"
+                title="Aucune prestation trouvée"
+                description="Essayez un autre mot-clé ou réinitialisez la recherche pour retrouver vos lignes métier."
+              />
+            ) : (
+              <EmptyState
+                icon={Package}
+                tone="violet"
+                title="Catalogue vide"
+                description="Importez votre starter métier, chargez un CSV ou ajoutez une première prestation manuellement."
+                actions={[
+                  { label: "Ajouter une ligne", onClick: openCreateForm, variant: "primary", icon: Plus },
+                  {
+                    label: `Starter ${activeTradeDefinition?.shortLabel || "métier"}`,
+                    onClick: () => void handleImportStarterCatalog(),
+                    variant: "secondary",
+                    icon: Download,
+                  },
+                ]}
+              />
+            )
           ) : (
             <div className="space-y-4">
               {filteredPrestations.map((prestation, index) => (

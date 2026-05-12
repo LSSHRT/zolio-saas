@@ -33,6 +33,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { EmptyState } from "@/components/empty-state";
 
 interface Facture {
   numero: string;
@@ -699,10 +700,22 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
             {/* Vue liste */}
             {viewMode === "list" && (
               filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
-                  <FileText size={48} strokeWidth={1} />
-                  <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
-                </div>
+                search ? (
+                  <EmptyState
+                    icon={Search}
+                    tone="slate"
+                    title="Aucun résultat"
+                    description={`Aucune facture ne correspond à "${search}".`}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={FileText}
+                    tone="emerald"
+                    title="Aucune facture générée"
+                    description="Convertissez un devis accepté en facture, ou créez-en une directement."
+                    actions={[{ label: "Nouvelle facture", href: "/nouvelle-facture", variant: "primary", icon: FileText }]}
+                  />
+                )
               ) : (
                 <div className="space-y-3">
                   <div className="flex flex-col gap-2 rounded-2xl border border-slate-200/70 bg-slate-50/70 px-4 py-3 dark:border-white/8 dark:bg-white/4 sm:flex-row sm:items-center sm:justify-between">
@@ -946,10 +959,22 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
             {/* Vue Kanban */}
             {viewMode === "kanban" && (
               filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
-                  <FileText size={48} strokeWidth={1} />
-                  <p className="text-sm">{search ? "Aucun résultat" : "Aucune facture générée"}</p>
-                </div>
+                search ? (
+                  <EmptyState
+                    icon={Search}
+                    tone="slate"
+                    title="Aucun résultat"
+                    description={`Aucune facture ne correspond à "${search}".`}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={FileText}
+                    tone="emerald"
+                    title="Aucune facture générée"
+                    description="Convertissez un devis accepté en facture, ou créez-en une directement."
+                    actions={[{ label: "Nouvelle facture", href: "/nouvelle-facture", variant: "primary", icon: FileText }]}
+                  />
+                )
               ) : (
                 <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory">
                   {[

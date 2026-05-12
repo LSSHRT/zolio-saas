@@ -34,6 +34,7 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import { CsvUploader } from "@/components/CsvUploader";
+import { EmptyState } from "@/components/empty-state";
 
 interface Client {
   id: string;
@@ -577,10 +578,22 @@ function ClientsContent() {
           {!loading && (
             <>
               {filtered.length === 0 ? (
-                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center text-slate-400">
-                  <User size={48} strokeWidth={1} />
-                  <p className="text-sm">{search ? "Aucun résultat" : "Aucun client pour l'instant"}</p>
-                </div>
+                search ? (
+                  <EmptyState
+                    icon={Search}
+                    tone="slate"
+                    title="Aucun résultat"
+                    description={`Aucun client ne correspond à "${search}".`}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={User}
+                    tone="violet"
+                    title="Aucun client pour l'instant"
+                    description="Centralisez vos contacts pour réutiliser leurs coordonnées sur vos devis et factures."
+                    actions={[{ label: "Ajouter un client", onClick: () => setShowForm(true), variant: "primary", icon: Plus }]}
+                  />
+                )
               ) : (
                 <div className="space-y-3">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

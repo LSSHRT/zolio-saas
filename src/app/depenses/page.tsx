@@ -14,6 +14,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { EmptyState } from "@/components/empty-state";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface Depense {
@@ -298,20 +299,13 @@ function DepensesContent() {
             ))}
           </div>
         ) : filteredDepenses.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-200 px-6 py-14 text-center dark:border-white/10">
-            <Receipt className="text-slate-300 dark:text-slate-600" size={46} />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Aucune dépense trouvée</h2>
-            <p className="max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
-              Ajoutez vos achats au fil du terrain pour garder un suivi propre des matériaux, sous-traitants et frais divers.
-            </p>
-            <Link
-              href="/depenses/nouveau"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100"
-            >
-              <Plus size={16} />
-              Ajouter une dépense
-            </Link>
-          </div>
+          <EmptyState
+            icon={Receipt}
+            tone="amber"
+            title="Aucune dépense trouvée"
+            description="Ajoutez vos achats au fil du terrain pour garder un suivi propre des matériaux, sous-traitants et frais divers."
+            actions={[{ label: "Ajouter une dépense", href: "/depenses/nouveau", variant: "primary", icon: Plus }]}
+          />
         ) : (
           <div className="space-y-3">
             {filteredDepenses.map((depense) => (

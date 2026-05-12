@@ -39,6 +39,7 @@ import { MobileDialog } from "@/components/mobile-dialog";
 import CompareOptions from "@/components/compare-options";
 import { PaywallModal } from "@/components/paywall-modal";
 import { usePaywall, computeQuotaTrigger } from "@/lib/use-paywall";
+import { EmptyState } from "@/components/empty-state";
 
 interface Devis {
   id: string;
@@ -770,15 +771,23 @@ export default function DevisPage() {
         {/* Liste devis */}
         {!loading && (
           filtered.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-2 py-12">
-              <FileText size={48} strokeWidth={1} />
-              <p className="text-sm">{search ? "Aucun résultat" : "Aucun devis encore"}</p>
-              <Link href="/nouveau-devis">
-                <motion.button whileTap={{ scale: 0.96 }} className="mt-4 px-6 py-3 bg-gradient-zolio text-white font-semibold rounded-xl shadow-lg text-sm">
-                  Créer mon premier devis
-                </motion.button>
-              </Link>
-            </div>
+            search ? (
+              <EmptyState
+                icon={Search}
+                tone="slate"
+                title="Aucun résultat"
+                description={`Aucun devis ne correspond à "${search}". Essayez avec d'autres mots-clés.`}
+              />
+            ) : (
+              <EmptyState
+                icon={FileText}
+                tone="violet"
+                title="Aucun devis encore"
+                description="Créez votre premier devis pour démarrer votre pipeline commercial."
+                actions={[{ label: "Créer mon premier devis", href: "/nouveau-devis", variant: "primary", icon: FileText }]}
+                footnote="3 devis gratuits par mois — illimité avec Pro."
+              />
+            )
           ) : (
             <div className="flex flex-col gap-3">
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{totalDisplayed} devis</p>
