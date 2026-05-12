@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Outfit } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
-import { frFR } from "@clerk/localizations";
+import { ClerkThemedProvider } from "@/components/clerk-themed-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SWRProvider } from "@/components/SWRProvider";
 import { SystemRuntimeLayer } from "@/components/SystemRuntimeLayer";
@@ -60,39 +59,8 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <ClerkProvider
-      localization={frFR}
-      appearance={{
-        variables: {
-          colorPrimary: "#7c3aed",
-          colorText: "#0f172a",
-          colorTextSecondary: "#64748b",
-          colorBackground: "#ffffff",
-          colorInputText: "#0f172a",
-          colorInputBackground: "#f8fafc",
-          borderRadius: "1rem",
-          fontFamily: "var(--font-outfit), ui-sans-serif, system-ui, sans-serif",
-        },
-        elements: {
-          card: "shadow-xl shadow-violet-500/8 border border-slate-200/60 rounded-2xl",
-          headerTitle: "text-slate-950",
-          headerSubtitle: "text-slate-500",
-          socialButtonsBlockButton: "rounded-xl border-slate-200 hover:border-violet-300 transition",
-          formButtonPrimary: "rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-500 hover:from-violet-700 hover:to-fuchsia-600 shadow-md shadow-violet-500/20",
-          formFieldInput: "rounded-xl border-slate-200 focus:border-violet-400 focus:ring-violet-400/20",
-          footerActionLink: "text-violet-600 hover:text-violet-700 font-medium",
-          dividerLine: "bg-slate-200",
-          dividerText: "text-slate-400 text-xs",
-          formFieldLabel: "text-slate-700 font-medium text-sm",
-          identityPreviewText: "text-slate-600",
-          identityPreviewEditButton: "text-violet-600 hover:text-violet-700",
-        },
-      }}
-    >
-      <html lang="fr" suppressHydrationWarning>
-        <body
-          className={`${outfit.variable} font-sans antialiased`}
-        >
+    <html lang="fr" suppressHydrationWarning>
+      <body className={`${outfit.variable} font-sans antialiased`}>
           {/* Anti-zoom iOS : force 16px inline sur chaque input + bloque pinch-zoom */}
           <Script id="anti-zoom-nuclear" strategy="afterInteractive">{`
             (function(){
@@ -120,23 +88,27 @@ export default function RootLayout({
             attribute="class"
             defaultTheme="system"
             enableSystem
+            disableTransitionOnChange
           >
-            <I18nProvider>
-              <SWRProvider>
-              <SystemRuntimeLayer />
-              <NotificationPrompt />
-              {children}
-              <Toaster
-                position="bottom-center"
-                offset={80}
-                toastOptions={{
-                  classNames: {
-                    toast: "font-sans",
-                  },
-                }}
-              />
-            </SWRProvider>
-            </I18nProvider>
+            <ClerkThemedProvider>
+              <I18nProvider>
+                <SWRProvider>
+                  <SystemRuntimeLayer />
+                  <NotificationPrompt />
+                  {children}
+                  <Toaster
+                    position="bottom-center"
+                    offset={80}
+                    theme="system"
+                    toastOptions={{
+                      classNames: {
+                        toast: "font-sans",
+                      },
+                    }}
+                  />
+                </SWRProvider>
+              </I18nProvider>
+            </ClerkThemedProvider>
           </ThemeProvider>
           <Analytics />
           <Script id="sw-register" strategy="afterInteractive">{`
@@ -144,8 +116,7 @@ export default function RootLayout({
               navigator.serviceWorker.register("/sw.js");
             }
           `}</Script>
-        </body>
-      </html>
-    </ClerkProvider>
+      </body>
+    </html>
   );
 }
