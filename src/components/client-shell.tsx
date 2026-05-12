@@ -385,8 +385,8 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         href={item.href}
         className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
           isActive
-            ? "bg-gradient-to-r from-violet-600/20 to-orange-500/10 font-semibold text-white"
-            : "text-slate-400 hover:bg-white/5 hover:text-white"
+            ? "bg-gradient-to-r from-violet-500/15 to-orange-400/10 font-semibold text-violet-700 dark:from-violet-600/20 dark:to-orange-500/10 dark:text-white"
+            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
         }`}
       >
         <Icon size={16} strokeWidth={isActive ? 2.2 : 1.7} className="shrink-0" />
@@ -407,24 +407,24 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-950 via-slate-950 to-[#080611] lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-200/80 bg-gradient-to-b from-white via-white to-slate-50/80 lg:flex dark:border-slate-800/80 dark:from-slate-950 dark:via-slate-950 dark:to-[#080611]">
       <div className="h-[2px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400" />
 
       {/* ── TOP (fixe) : brand + search + CTA ───────────────── */}
       <div className="shrink-0 space-y-3 px-3 pt-4">
         <div className="px-2.5">
-          <ClientBrandMark className="text-white" />
+          <ClientBrandMark />
         </div>
 
         <button
           type="button"
           onClick={openCommandPalette}
           aria-label="Rechercher · Cmd+K"
-          className="flex h-9 w-full items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-2.5 text-[12.5px] text-slate-400 transition-colors hover:border-white/12 hover:bg-white/[0.06] hover:text-white"
+          className="flex h-9 w-full items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[12.5px] text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-900 dark:border-white/8 dark:bg-white/[0.03] dark:text-slate-400 dark:hover:border-white/12 dark:hover:bg-white/[0.06] dark:hover:text-white"
         >
           <Search size={14} strokeWidth={1.8} className="shrink-0" />
           <span className="flex-1 text-left">Rechercher</span>
-          <kbd className="hidden items-center rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-slate-500 xl:inline-flex">
+          <kbd className="hidden items-center rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-500 xl:inline-flex dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
             ⌘K
           </kbd>
         </button>
@@ -443,11 +443,11 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           {mainItems.map((item) => navLink(item))}
         </nav>
 
-        <div className="my-3 border-t border-white/[0.06]" />
+        <div className="my-3 border-t border-slate-200/70 dark:border-white/[0.06]" />
 
         {toolGroups.map((group) => (
           <div key={group.label} className="mb-3">
-            <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               {group.label}
             </p>
             <nav className="flex flex-col gap-0.5">
@@ -458,14 +458,14 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </div>
         ))}
 
-        <div className="mt-3 border-t border-white/[0.06] pt-3">
+        <div className="mt-3 border-t border-slate-200/70 pt-3 dark:border-white/[0.06]">
           <nav className="flex flex-col gap-0.5">
             {footerItems.map((item) => navLink(item))}
             <a
               href={SUPPORT_HREF}
               target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
               rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
             >
               <LifeBuoy size={16} strokeWidth={1.7} className="shrink-0" />
               <span className="flex-1">Support</span>
@@ -475,8 +475,8 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
       </div>
 
       {/* ── BOTTOM (fixe) : user + theme toggle ─────────────── */}
-      <div className="shrink-0 border-t border-white/[0.06] px-3 py-3">
-        <div className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
+      <div className="shrink-0 border-t border-slate-200/70 px-3 py-3 dark:border-white/[0.06]">
+        <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white/80 px-2 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.02]">
           <UserButton
             appearance={{
               elements: {
@@ -485,7 +485,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
               },
             }}
           />
-          <span className="flex-1 truncate text-[12.5px] font-medium text-slate-200">Mon compte</span>
+          <span className="flex-1 truncate text-[12.5px] font-medium text-slate-700 dark:text-slate-200">Mon compte</span>
           <div className="shrink-0 [&_button]:!h-8 [&_button]:!w-8">
             <ThemeToggle />
           </div>
