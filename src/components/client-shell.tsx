@@ -409,19 +409,18 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-800/80 bg-gradient-to-b from-slate-950 via-slate-950 to-[#080611] lg:flex">
       <div className="h-[2px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400" />
-      <div className="flex h-full flex-col px-3 py-4">
 
-        {/* Logo */}
-        <div className="mb-3 px-2.5">
+      {/* ── TOP (fixe) : brand + search + CTA ───────────────── */}
+      <div className="shrink-0 space-y-3 px-3 pt-4">
+        <div className="px-2.5">
           <ClientBrandMark className="text-white" />
         </div>
 
-        {/* Search (Cmd+K) */}
         <button
           type="button"
           onClick={openCommandPalette}
           aria-label="Rechercher · Cmd+K"
-          className="mb-3 flex h-9 items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-2.5 text-[12.5px] text-slate-400 transition-colors hover:border-white/12 hover:bg-white/[0.06] hover:text-white"
+          className="flex h-9 w-full items-center gap-2 rounded-lg border border-white/8 bg-white/[0.03] px-2.5 text-[12.5px] text-slate-400 transition-colors hover:border-white/12 hover:bg-white/[0.06] hover:text-white"
         >
           <Search size={14} strokeWidth={1.8} className="shrink-0" />
           <span className="flex-1 text-left">Rechercher</span>
@@ -430,23 +429,22 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </kbd>
         </button>
 
-        {/* New quote button */}
         <Link
           href="/nouveau-devis"
-          className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:shadow-violet-600/30 hover:brightness-110"
+          className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:shadow-violet-600/30 hover:brightness-110"
         >
           <Plus size={15} /> Nouveau devis
         </Link>
+      </div>
 
-        {/* Main nav */}
+      {/* ── MIDDLE (scrollable) : nav + outils + footer ─────── */}
+      <div className="client-sidebar-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
         <nav className="flex flex-col gap-0.5">
           {mainItems.map((item) => navLink(item))}
         </nav>
 
-        {/* Separator */}
         <div className="my-3 border-t border-white/[0.06]" />
 
-        {/* Tool groups */}
         {toolGroups.map((group) => (
           <div key={group.label} className="mb-3">
             <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
@@ -460,11 +458,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </div>
         ))}
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Footer items */}
-        <div className="border-t border-white/[0.06] pt-3">
+        <div className="mt-3 border-t border-white/[0.06] pt-3">
           <nav className="flex flex-col gap-0.5">
             {footerItems.map((item) => navLink(item))}
             <a
@@ -477,21 +471,23 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
               <span className="flex-1">Support</span>
             </a>
           </nav>
+        </div>
+      </div>
 
-          {/* User row */}
-          <div className="mt-2 flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: "h-7 w-7",
-                  userButtonTrigger: "p-0",
-                },
-              }}
-            />
-            <span className="flex-1 truncate text-[12.5px] font-medium text-slate-200">Mon compte</span>
-            <div className="shrink-0 [&_button]:!h-8 [&_button]:!w-8">
-              <ThemeToggle />
-            </div>
+      {/* ── BOTTOM (fixe) : user + theme toggle ─────────────── */}
+      <div className="shrink-0 border-t border-white/[0.06] px-3 py-3">
+        <div className="flex items-center gap-1 rounded-lg border border-white/[0.06] bg-white/[0.02] px-2 py-1.5">
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "h-7 w-7",
+                userButtonTrigger: "p-0",
+              },
+            }}
+          />
+          <span className="flex-1 truncate text-[12.5px] font-medium text-slate-200">Mon compte</span>
+          <div className="shrink-0 [&_button]:!h-8 [&_button]:!w-8">
+            <ThemeToggle />
           </div>
         </div>
       </div>
