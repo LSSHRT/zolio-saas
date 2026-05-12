@@ -260,9 +260,21 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
   const canAccessAdmin = safeData.canAccessAdmin || clerkUser?.publicMetadata?.isAdmin === true;
   const isPro = safeData.isPro || clerkUser?.publicMetadata?.isPro === true;
-  const companyTrade = readStringMetadata(safeData.companyTrade || clerkUser?.publicMetadata?.companyTrade as string | undefined);
-  const catalogImported = safeData.catalogImported || readBooleanMetadata(clerkUser?.publicMetadata?.starterCatalogImported as boolean | undefined);
-  const onboardingDone = safeData.onboardingDone || readBooleanMetadata(clerkUser?.publicMetadata?.onboardingCompleted as boolean | undefined);
+  // Read from BOTH unsafeMetadata and publicMetadata — the bootstrap handler writes
+  // to unsafeMetadata, while admin-set flags live in publicMetadata.
+  const unsafeMeta = (clerkUser?.unsafeMetadata ?? {}) as Record<string, unknown>;
+  const publicMeta = (clerkUser?.publicMetadata ?? {}) as Record<string, unknown>;
+  const companyTrade = readStringMetadata(
+    safeData.companyTrade
+      || (unsafeMeta.companyTrade as string | undefined)
+      || (publicMeta.companyTrade as string | undefined),
+  );
+  const catalogImported = safeData.catalogImported
+    || readBooleanMetadata(unsafeMeta.starterCatalogImported as boolean | undefined)
+    || readBooleanMetadata(publicMeta.starterCatalogImported as boolean | undefined);
+  const onboardingDone = safeData.onboardingDone
+    || readBooleanMetadata(unsafeMeta.onboardingCompleted as boolean | undefined)
+    || readBooleanMetadata(publicMeta.onboardingCompleted as boolean | undefined);
   const starterCatalogCount = dashboardData?.starterCatalogCount ?? safeData.starterCatalogCount;
   const currentTrade = companyTrade || DEFAULT_TRADE;
   const starterTrade = getTradeDefinition(currentTrade);
