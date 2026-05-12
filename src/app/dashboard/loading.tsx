@@ -4,7 +4,7 @@ export default function DashboardLoading() {
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
 
-      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 lg:pb-10">
+      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 lg:pb-10">
         <main className="mt-4 flex-1 lg:mt-6">
           {/* Desktop skeleton */}
           <div className="hidden lg:flex lg:flex-col lg:gap-10 animate-pulse">

@@ -408,38 +408,27 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
     return false;
   };
 
-  const renderNavItem = (
-    item: { href: string; icon: LucideIcon; key?: ClientNavKey; label: string },
-    options?: { compact?: boolean; showBadge?: boolean },
+  const navLink = (
+    item: { href: string; icon: LucideIcon; key?: string; label: string },
+    options?: { badge?: number },
   ) => {
     const Icon = item.icon;
-    const itemActive = isActiveNav(item);
-    const compact = options?.compact ?? false;
-    const showBadge = options?.showBadge ?? false;
-
+    const isActive = isActiveNav(item);
     return (
       <Link
         key={item.href}
         href={item.href}
-        className={`group relative flex items-center gap-3 overflow-hidden rounded-2xl border px-3 py-3 transition-all duration-200 ${
-          itemActive
-            ? "border-violet-400/35 bg-[linear-gradient(135deg,rgba(124,58,237,0.26),rgba(217,70,239,0.12),rgba(255,255,255,0.08))] text-white shadow-[0_18px_34px_-24px_rgba(124,58,237,0.8)]"
-            : "border-white/6 bg-white/[0.03] text-slate-300 hover:border-white/12 hover:bg-white/[0.06] hover:text-white"
-        } ${compact ? "min-h-10 text-[13px]" : "min-h-12 text-sm font-medium"}`}
+        className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
+          isActive
+            ? "bg-white/10 font-semibold text-white"
+            : "text-slate-400 hover:bg-white/5 hover:text-white"
+        }`}
       >
-        <span
-          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 transition ${
-            itemActive
-              ? "bg-white/12 text-white ring-white/14"
-              : "bg-white/[0.045] text-slate-300 ring-white/8 group-hover:bg-white/[0.08] group-hover:text-white"
-          }`}
-        >
-          <Icon size={compact ? 15 : 16} strokeWidth={itemActive ? 2.2 : 1.9} />
-        </span>
-        <span className="min-w-0 flex-1 truncate">{item.label}</span>
-        {showBadge && unreadCount > 0 ? (
-          <span className="ml-auto inline-flex min-w-[22px] items-center justify-center rounded-full bg-rose-500 px-1.5 py-1 text-[10px] font-bold leading-none text-white shadow-[0_8px_20px_-10px_rgba(244,63,94,0.9)]">
-            {unreadCount > 99 ? "99+" : unreadCount}
+        <Icon size={16} strokeWidth={isActive ? 2.2 : 1.7} className="shrink-0" />
+        <span className="flex-1 truncate">{item.label}</span>
+        {options?.badge && options.badge > 0 ? (
+          <span className="ml-auto inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1 py-0.5 text-[10px] font-bold leading-none text-white">
+            {options.badge > 99 ? "99+" : options.badge}
           </span>
         ) : null}
       </Link>
@@ -447,113 +436,75 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-4 left-4 z-30 hidden w-[260px] overflow-hidden rounded-3xl border border-slate-900/80 bg-slate-950 text-white shadow-[0_46px_120px_-58px_rgba(15,23,42,0.95)] lg:flex">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(139,92,246,0.28),transparent_34%),radial-gradient(circle_at_85%_12%,rgba(236,72,153,0.22),transparent_26%),linear-gradient(180deg,rgba(15,23,42,0.94),rgba(2,6,23,0.98))]" />
-      <div className="relative flex h-full w-full flex-col p-3">
-        <div className="rounded-3xl border border-white/8 bg-white/[0.045] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-3">
-            <ClientBrandMark className="text-white" />
-            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-200">
-              Bureau
-            </span>
-          </div>
+    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-800 bg-slate-950 lg:flex">
+      <div className="flex h-full flex-col px-3 py-4">
 
-          <p className="mt-4 text-sm leading-6 text-slate-300">
-            Navigation claire, actions rapides et pilotage métier au même endroit.
-          </p>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <Link
-              href="/nouveau-devis"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400 px-3 py-3 text-sm font-semibold text-white shadow-[0_16px_34px_-18px_rgba(124,58,237,0.85)] transition hover:-translate-y-0.5"
-            >
-              <Plus size={16} />
-              Devis
-            </Link>
-            <Link
-              href="/nouvelle-facture"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/7 px-3 py-3 text-sm font-semibold text-slate-100 transition hover:border-white/16 hover:bg-white/10"
-            >
-              <Receipt size={16} />
-              Facture
-            </Link>
-          </div>
-
+        {/* Logo */}
+        <div className="mb-6 px-2.5">
+          <ClientBrandMark className="text-white" />
         </div>
 
-        <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
-          <div className="space-y-3">
-            <nav className="flex flex-col gap-1.5">
-              {mainItems.map((item) => renderNavItem(item))}
+        {/* New quote button */}
+        <Link
+          href="/nouveau-devis"
+          className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-violet-700"
+        >
+          <Plus size={15} /> Nouveau devis
+        </Link>
+
+        {/* Main nav */}
+        <nav className="flex flex-col gap-0.5">
+          {mainItems.map((item) => navLink(item))}
+        </nav>
+
+        {/* Separator */}
+        <div className="my-3 border-t border-white/6" />
+
+        {/* Tool groups */}
+        {toolGroups.map((group) => (
+          <div key={group.label} className="mb-3">
+            <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              {group.label}
+            </p>
+            <nav className="flex flex-col gap-0.5">
+              {group.items.map((item) =>
+                navLink(item, { badge: item.href === "/notifications" ? unreadCount : undefined }),
+              )}
             </nav>
-
-            {toolGroups.map((group) => (
-              <section key={group.label} className="rounded-3xl border border-white/8 bg-white/[0.03] p-3 backdrop-blur-xl">
-                <div className="flex items-center justify-between px-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    {group.label}
-                  </p>
-                </div>
-                <nav className="mt-3 flex flex-col gap-2">
-                  {group.items.map((item) =>
-                    renderNavItem(item, {
-                      compact: true,
-                      showBadge: item.href === "/notifications",
-                    }),
-                  )}
-                </nav>
-              </section>
-            ))}
           </div>
-        </div>
+        ))}
 
-        <div className="mt-4 shrink-0 rounded-3xl border border-white/8 bg-white/[0.045] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-xl">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Support & compte
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                Gardez vos réglages, vos notifications et l’aide à portée de main.
-              </p>
-            </div>
-            <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full border border-rose-400/20 bg-rose-500/14 px-2 text-xs font-semibold text-rose-100">
-              {unreadCount}
-            </span>
-          </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-          <div className="mt-4 flex flex-col gap-2">
-            {renderNavItem({ href: "/notifications", icon: Bell, label: "Notifications" }, { compact: true, showBadge: true })}
-            {footerItems.map((item) => renderNavItem(item, { compact: true }))}
-            <a
-              href={SUPPORT_HREF}
-              target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
-              rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-              className="inline-flex min-h-10 items-center gap-3 rounded-2xl border border-white/10 bg-white/7 px-3 py-3 text-[13px] font-medium text-slate-100 transition hover:border-white/16 hover:bg-white/10"
-            >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.045] text-slate-200 ring-1 ring-white/10">
-                <LifeBuoy size={15} />
-              </span>
-              <span className="flex-1">Support</span>
-            </a>
-          </div>
+        {/* Separator */}
+        <div className="mb-3 border-t border-white/6" />
 
-          <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/8 bg-slate-950/55 px-3 py-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Session
-              </p>
-              <p className="mt-1 text-sm text-slate-200">Réglages du compte</p>
-            </div>
-            <UserButton
-              appearance={{
-                elements: {
-                  userButtonAvatarBox: "h-9 w-9",
-                  userButtonTrigger: "p-0",
-                },
-              }}
-            />
-          </div>
+        {/* Footer items */}
+        <nav className="flex flex-col gap-0.5">
+          {footerItems.map((item) => navLink(item))}
+          <a
+            href={SUPPORT_HREF}
+            target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
+            rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
+            className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <LifeBuoy size={16} strokeWidth={1.7} className="shrink-0" />
+            <span className="flex-1">Support</span>
+          </a>
+        </nav>
+
+        {/* User */}
+        <div className="mt-3 flex items-center gap-2.5 rounded-lg px-2.5 py-2">
+          <UserButton
+            appearance={{
+              elements: {
+                userButtonAvatarBox: "h-7 w-7",
+                userButtonTrigger: "p-0",
+              },
+            }}
+          />
+          <span className="flex-1 truncate text-[13px] text-slate-300">Mon compte</span>
         </div>
       </div>
     </aside>
@@ -810,7 +761,7 @@ export function ClientSubpageShell({
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[276px] lg:max-w-[calc(100%-276px)] lg:px-4 xl:px-6">
+      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 xl:px-8">
         <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4">
           <div className="flex items-center justify-between gap-3 md:hidden">
             <div className="flex min-w-0 items-center gap-3">
