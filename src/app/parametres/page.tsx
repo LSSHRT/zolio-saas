@@ -16,6 +16,7 @@ import {
   Gift,
   Image as ImageIcon,
   Landmark,
+  Mail,
   MapPin,
   Palette,
   Phone,
@@ -175,6 +176,11 @@ export default function ParametresEntreprise() {
   const [reminderEnabled, setReminderEnabled] = useState(
     (user?.unsafeMetadata?.reminderEnabled as boolean | undefined) ?? true
   );
+  const [weeklyDigestEnabled, setWeeklyDigestEnabled] = useState(
+    ((user?.unsafeMetadata?.weeklyDigestEnabled as boolean | undefined)
+      ?? (user?.publicMetadata?.weeklyDigestEnabled as boolean | undefined)
+      ?? true) === true
+  );
 
   useEffect(() => {
     if (!isLoaded || !user || hydratedUserId === user.id) return;
@@ -321,6 +327,7 @@ export default function ParametresEntreprise() {
           companyGoogleReview: formData.companyGoogleReview,
           referredBy: formData.referredBy,
           reminderEnabled,
+          weeklyDigestEnabled,
         },
       });
       setMessage({ type: "success", text: "Paramètres enregistrés avec succès." });
@@ -557,6 +564,41 @@ export default function ParametresEntreprise() {
             >
               <span
                 className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${reminderEnabled ? 'translate-x-5' : 'translate-x-0'}`}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* Récap hebdomadaire */}
+        <div className="flex items-center gap-3 rounded-[1.35rem] border border-slate-200/80 bg-white/70 px-4 py-3 dark:border-white/8 dark:bg-white/4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-violet-500/12 text-violet-600 dark:bg-violet-500/12 dark:text-violet-300">
+            <Mail size={17} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-slate-950 dark:text-white">Récap hebdomadaire</p>
+            <p className="hidden text-sm leading-6 text-slate-600 dark:text-slate-300 sm:block">
+              Recevez chaque lundi matin un résumé de votre activité : devis, factures et CA encaissé.
+            </p>
+          </div>
+          <div className="mt-1">
+            <button
+              type="button"
+              onClick={() => {
+                const newVal = !weeklyDigestEnabled;
+                setWeeklyDigestEnabled(newVal);
+                user.update({
+                  unsafeMetadata: {
+                    ...user.unsafeMetadata,
+                    weeklyDigestEnabled: newVal,
+                  },
+                }).catch(() => setWeeklyDigestEnabled(!newVal));
+              }}
+              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${weeklyDigestEnabled ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+              aria-pressed={weeklyDigestEnabled}
+              aria-label="Activer le récap hebdomadaire par email"
+            >
+              <span
+                className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${weeklyDigestEnabled ? 'translate-x-5' : 'translate-x-0'}`}
               />
             </button>
           </div>
