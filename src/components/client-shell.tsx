@@ -476,15 +476,8 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
 
       {/* ── BOTTOM (fixe) : user + theme toggle ─────────────── */}
       <div className="shrink-0 border-t border-slate-200/70 px-3 py-3 dark:border-white/[0.06]">
-        <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white/80 px-2 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.02]">
-          <UserButton
-            appearance={{
-              elements: {
-                userButtonAvatarBox: "h-7 w-7",
-                userButtonTrigger: "p-0",
-              },
-            }}
-          />
+        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/80 px-2 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.02]">
+          <UserButton />
           <span className="flex-1 truncate text-[12.5px] font-medium text-slate-700 dark:text-slate-200">Mon compte</span>
           <div className="shrink-0 [&_button]:!h-8 [&_button]:!w-8">
             <ThemeToggle />

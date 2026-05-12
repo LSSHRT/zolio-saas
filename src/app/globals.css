@@ -903,10 +903,16 @@
   animation: landing-drift 14s ease-in-out infinite;
 }
 
-/* Clerk UserButton — z-index défensif pour s'assurer que l'avatar reste au-dessus */
-.cl-avatarImage.cl-userButtonAvatarImage {
-  position: relative;
-  z-index: 1;
+/* Clerk UserButton — l'image doit toujours être visible et au-dessus du fallback */
+.cl-avatarImage,
+.cl-userButtonAvatarImage {
+  z-index: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+/* Cache le fallback "?" overlay UNIQUEMENT s'il n'est pas l'avatar lui-même */
+.cl-userButtonAvatarBox > span:last-child:not(.cl-avatarImage):not(.cl-userButtonAvatarImage) {
+  display: none !important;
 }
 
 /* ─── Sidebar scrollbar (fine, discrète) ─── */
