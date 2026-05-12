@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm ci --legacy-peer-deps --prefer-offline --no-audit --no-fund",
   "crons": [
     {
       "path": "/api/cron/prospect",

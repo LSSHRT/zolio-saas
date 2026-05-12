@@ -1,0 +1,13 @@
+# Files/dirs not needed for Vercel deployment (faster upload)
+docs/
+memory/
+.idea/
+.DS_Store
+*.tsbuildinfo
+test-*.js
+update_*.js
+README.md
+CHANGELOG.md
+AGENTS.md
+vitest.config.ts
+vitest.setup.ts
