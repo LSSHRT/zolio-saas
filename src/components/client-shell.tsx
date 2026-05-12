@@ -26,6 +26,7 @@ import {
   StickyNote,
   Users,
   X,
+  Gift,
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
@@ -84,6 +85,7 @@ const CLIENT_TOOL_ITEMS: Array<{
   { href: "/modeles", icon: Copy, label: "Modèles" },
   { href: "/recurrentes", icon: RefreshCw, label: "Récurrence" },
   { href: "/tva", icon: Calculator, label: "TVA" },
+  { href: "/parametres/parrainage", icon: Gift, label: "Parrainer" },
   { href: "/parametres", icon: Settings, label: "Paramètres" },
   { href: "/abonnement", icon: LifeBuoy, label: "Abonnement" },
 ] as const;

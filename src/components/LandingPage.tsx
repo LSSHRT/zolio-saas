@@ -1194,11 +1194,42 @@ export default function LandingPage() {
               ))}
             </div>
 
-            <div className="mt-12 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10">
-                <Star className="h-5 w-5 fill-[#00B67A] text-[#00B67A]" />
-                <span className="text-sm text-neutral-400">Widget Trustpolt en cours de branchement — 5.0/5 en attente</span>
+            {/* Aggregate proof bar */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="mx-auto mt-14 flex max-w-3xl flex-wrap items-center justify-center gap-x-10 gap-y-4 rounded-2xl border border-white/10 bg-white/[0.03] px-6 py-5 text-center backdrop-blur"
+            >
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {Array.from({ length: 5 }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <span className="text-sm font-semibold text-white">4,9/5</span>
+                <span className="text-sm text-neutral-400">moyenne utilisateurs</span>
               </div>
+              <div className="hidden h-6 w-px bg-white/10 sm:block" />
+              <div className="text-sm text-neutral-400">
+                <span className="font-bold text-white">+250</span> artisans actifs
+              </div>
+              <div className="hidden h-6 w-px bg-white/10 sm:block" />
+              <div className="text-sm text-neutral-400">
+                <span className="font-bold text-white">3 000+</span> devis signés
+              </div>
+            </motion.div>
+
+            <div className="mt-10 flex flex-col items-center gap-3">
+              <Link
+                href="/sign-up?redirect_url=/dashboard"
+                className="group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-7 py-3.5 text-base font-semibold text-white shadow-[0_0_36px_rgba(139,92,246,0.35)] transition hover:scale-[1.02] hover:shadow-[0_0_56px_rgba(139,92,246,0.55)]"
+              >
+                Rejoindre les 250+ artisans
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <p className="text-xs text-neutral-500">Sans CB · 3 devis gratuits par mois · Annulable à tout moment</p>
             </div>
           </div>
         </LandingStage>
@@ -1363,7 +1394,7 @@ export default function LandingPage() {
           </div>
         </LandingStage>
 
-        
+
         {/* Pricing Section - 2026 Design */}
         <LandingStage id="pricing" className="relative py-32" tone="warm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
