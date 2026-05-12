@@ -65,7 +65,6 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import { DesktopDrawer } from "@/components/desktop-drawer";
-import ConversionFunnel from "@/components/conversion-funnel";
 import { PullToRefresh } from "@/components/pull-to-refresh";
 import { PaywallModal } from "@/components/paywall-modal";
 import { usePaywall } from "@/lib/use-paywall";
@@ -141,6 +140,7 @@ const Joyride = dynamic(
   { ssr: false },
 ) as ComponentType<JoyrideProps>;
 const DashboardChart = dynamic(() => import("@/components/DashboardChart"), { ssr: false });
+const ConversionFunnel = dynamic(() => import("@/components/conversion-funnel"), { ssr: false });
 const DevisEditor = dynamic(
   () => import("@/components/devis-editor").then((module) => module.DevisEditor),
   { ssr: false },

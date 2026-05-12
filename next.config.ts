@@ -51,6 +51,21 @@ const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
   poweredByHeader: false,
   serverExternalPackages: ["jspdf", "@prisma/client", "prisma"],
+
+  // Aggressive tree-shaking for heavy packages (lucide has 1500+ icons,
+  // framer-motion is large, recharts pulls d3). Next 15+ handles this natively
+  // via optimizePackageImports without the need for explicit modularizeImports.
+  experimental: {
+    optimizePackageImports: [
+      "lucide-react",
+      "framer-motion",
+      "recharts",
+      "@clerk/nextjs",
+      "date-fns",
+      "sonner",
+    ],
+  },
+
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "i.pravatar.cc" },
