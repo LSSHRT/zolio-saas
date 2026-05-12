@@ -29,7 +29,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { CallBackProps, STATUS, Step } from "react-joyride";
+import type { CallBackProps, Step } from "react-joyride";
 import useSWR from "swr";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -323,7 +323,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   };
 
   const handleTourCallback = (data: CallBackProps) => {
-    if (data.status === STATUS.FINISHED || data.status === STATUS.SKIPPED) {
+    if (data.status === "finished" || data.status === "skipped") {
       localStorage.setItem("zolio_has_seen_tour", "true");
       setRunTour(false);
     }

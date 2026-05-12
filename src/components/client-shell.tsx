@@ -379,6 +379,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
       <Link
         key={item.href}
         href={item.href}
+        prefetch={true}
         className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
           isActive
             ? "bg-gradient-to-r from-violet-600/20 to-orange-500/10 font-semibold text-white"

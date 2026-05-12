@@ -43,9 +43,9 @@ async function getSystemStatus(req: Request) {
       headers: {
         cookie: req.headers.get('cookie') ?? '',
       },
-      // Cache for 60s so middleware doesn't add latency on every navigation.
-      // Maintenance toggle propagates within ~1 minute which is acceptable.
-      next: { revalidate: 60 },
+      // Aggressive cache — maintenance toggle propagates within ~5 minutes.
+      // This eliminates the per-navigation HTTP round-trip from middleware.
+      next: { revalidate: 300, tags: ['system-status'] },
     });
 
     if (!response.ok) {
