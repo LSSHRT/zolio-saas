@@ -22,7 +22,6 @@ import {
   Plus,
   Receipt,
   RefreshCw,
-  Search,
   Settings,
   StickyNote,
   Users,
@@ -30,8 +29,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
-import { GlobalSearch } from "@/components/global-search";
-import { ShortcutsModal } from "@/components/shortcuts-modal";
 import { UserButton } from "@clerk/nextjs";
 
 function useUnreadNotificationsCount() {
@@ -76,11 +73,9 @@ const CLIENT_TOOL_ITEMS: Array<{
   href: string;
   icon: LucideIcon;
   label: string;
-  isSearch?: boolean;
 }> = [
   { href: "/nouvelle-facture", icon: Plus, label: "Nouvelle facture" },
   { href: "/notifications", icon: Bell, label: "Notifications" },
-  { href: "", icon: Search, label: "Rechercher", isSearch: true },
   { href: "/rapports", icon: FileText, label: "Rapports" },
   { href: "/planning", icon: Calendar, label: "Planning" },
   { href: "/catalogue", icon: Package, label: "Catalogue" },
@@ -187,11 +182,10 @@ export function ClientBrandMark({ showLabel = true, className = "" }: { showLabe
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const unreadCount = useUnreadNotificationsCount();
 
-  useBodyScrollLock(toolsOpen || searchOpen);
-  useOverlayCloseSignal(() => { setToolsOpen(false); setSearchOpen(false); });
+  useBodyScrollLock(toolsOpen);
+  useOverlayCloseSignal(() => { setToolsOpen(false); });
 
   return (
     <>
@@ -266,26 +260,6 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         )}
       </motion.button>
 
-      {/* Search modal mobile */}
-      {searchOpen ? (
-        <div className="fixed inset-0 z-[80] bg-white dark:bg-slate-950 lg:hidden">
-          <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-3 dark:border-white/10">
-            <button
-              type="button"
-              onClick={() => setSearchOpen(false)}
-              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-white/8"
-              aria-label="Fermer"
-            >
-              <X size={20} />
-            </button>
-            <p className="text-sm font-semibold text-slate-950 dark:text-white">Rechercher</p>
-          </div>
-          <div className="p-4">
-            <GlobalSearch />
-          </div>
-        </div>
-      ) : null}
-
       {toolsOpen ? (
         <div className="fixed inset-0 z-[70] lg:hidden">
           <button
@@ -323,19 +297,6 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
               {CLIENT_TOOL_ITEMS.map((item) => {
                 const Icon = item.icon;
                 const isNotif = item.href === "/notifications";
-                if (item.isSearch) {
-                  return (
-                    <button
-                      key="search-tool"
-                      type="button"
-                      onClick={() => { setToolsOpen(false); setSearchOpen(true); }}
-                      className={`inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses("default")}`}
-                    >
-                      <Icon size={18} />
-                      <span className="leading-5">{item.label}</span>
-                    </button>
-                  );
-                }
                 return (
                   <Link
                     key={item.href}
@@ -420,7 +381,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         href={item.href}
         className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
           isActive
-            ? "bg-white/10 font-semibold text-white"
+            ? "bg-gradient-to-r from-violet-600/20 to-orange-500/10 font-semibold text-white"
             : "text-slate-400 hover:bg-white/5 hover:text-white"
         }`}
       >
@@ -437,6 +398,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
 
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-800 bg-slate-950 lg:flex">
+      <div className="h-[2px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400" />
       <div className="flex h-full flex-col px-3 py-4">
 
         {/* Logo */}
@@ -447,7 +409,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
         {/* New quote button */}
         <Link
           href="/nouveau-devis"
-          className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-violet-700"
+          className="mb-4 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:shadow-violet-600/30 hover:brightness-110"
         >
           <Plus size={15} /> Nouveau devis
         </Link>
@@ -756,14 +718,15 @@ export function ClientSubpageShell({
   return (
     <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white sm:pb-32">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)]" />
 
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
       <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 xl:px-8">
-        <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4">
-          <div className="flex items-center justify-between gap-3 md:hidden">
+        {/* Mobile header */}
+        <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4 lg:hidden">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">
               <Link
                 href={backHref}
@@ -785,131 +748,56 @@ export function ClientSubpageShell({
               <div className="flex items-center gap-2">{actions}</div>
             ) : null}
           </div>
-
-          <div className="hidden flex-col gap-4 md:flex md:flex-row md:items-center md:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <Link
-                href={backHref}
-                className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-900/5 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/8 dark:hover:text-white"
-                aria-label="Retour"
-              >
-                <ArrowLeft size={20} />
-              </Link>
-              <div className="min-w-0">
-                <ClientBrandMark />
-                <p className="mt-1 text-xs uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                  Navigation desktop
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 md:justify-end">
-              <ClientSupportButton compact />
-              {actions}
-            </div>
-          </div>
         </header>
 
         <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
-          <section className="client-panel-strong overflow-hidden rounded-2xl px-5 py-6 sm:px-6 lg:px-7">
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
-                <div className="max-w-3xl">
-                  {breadcrumbs && breadcrumbs.length > 0 && (
-                    <nav aria-label="Fil d'Ariane" className="mb-2 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-                      {breadcrumbs.map((crumb, i) => (
-                        <span key={i} className="flex items-center gap-1.5">
-                          {i > 0 && <ChevronRight size={12} className="shrink-0" />}
-                          {crumb.href ? (
-                            <Link href={crumb.href} className="transition hover:text-slate-600 dark:hover:text-slate-300">
-                              {crumb.label}
-                            </Link>
-                          ) : (
-                            <span className="font-medium text-slate-500 dark:text-slate-400">{crumb.label}</span>
-                          )}
-                        </span>
-                      ))}
-                    </nav>
-                  )}
-                  <p className="hidden text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200 sm:block">
+          {/* Page header */}
+          <section className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 px-5 py-5 backdrop-blur-sm dark:border-white/8 dark:bg-white/[0.03] sm:px-6 sm:py-6">
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-violet-500/[0.04] via-fuchsia-500/[0.02] to-orange-400/[0.04] dark:from-violet-500/[0.06] dark:via-fuchsia-500/[0.03] dark:to-orange-400/[0.05]" />
+            <div className="relative">
+              {breadcrumbs && breadcrumbs.length > 0 && (
+                <nav aria-label="Fil d'Ariane" className="mb-3 flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                  {breadcrumbs.map((crumb, i) => (
+                    <span key={i} className="flex items-center gap-1.5">
+                      {i > 0 && <ChevronRight size={12} className="shrink-0" />}
+                      {crumb.href ? (
+                        <Link href={crumb.href} className="transition hover:text-slate-600 dark:hover:text-slate-300">
+                          {crumb.label}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-slate-500 dark:text-slate-400">{crumb.label}</span>
+                      )}
+                    </span>
+                  ))}
+                </nav>
+              )}
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400 sm:block">
                     {eyebrow}
                   </p>
-                  <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:mt-4 sm:text-3xl lg:text-4xl">
+                  <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                     {title}
                   </h1>
-                  <p className="mt-2 hidden text-sm leading-7 text-slate-600 dark:text-slate-300 sm:block sm:text-base">
+                  <p className="mt-1 hidden text-sm text-slate-500 dark:text-slate-400 sm:block">
                     {description}
                   </p>
                 </div>
 
-                <div className="hidden xl:grid gap-3">
-                  <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
-                      Recherche globale
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                      Retrouvez un client, un devis, une facture ou une dépense sans quitter cette page.
-                    </p>
-                    <GlobalSearch className="mt-0 max-w-none" />
-                  </div>
-
-                  <div className="rounded-2xl border border-slate-200/80 bg-white/84 p-4 dark:border-white/10 dark:bg-white/4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400 dark:text-slate-500">
-                          Utilitaires
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                          Gardez le support et les raccourcis à proximité pendant vos tâches bureau.
-                        </p>
-                      </div>
-                      <ShortcutsModal />
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <ClientSupportButton compact />
-                      <Link
-                        href="/notifications"
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200/80 bg-white/90 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-100 dark:hover:border-violet-400/20"
-                      >
-                        <Bell size={15} />
-                        Notifications
-                      </Link>
-                    </div>
-                  </div>
+                <div className="hidden shrink-0 items-center gap-2 sm:flex">
+                  {actions}
                 </div>
               </div>
 
-              {mobileSummary ? <div className="md:hidden">{mobileSummary}</div> : null}
-              {summary ? <div className={mobileSummary ? "hidden md:block" : ""}>{summary}</div> : null}
-
-              <div className="hidden md:block xl:hidden">
-                <GlobalSearch className="max-w-none" />
-              </div>
+              {mobileSummary ? <div className="mt-4 md:hidden">{mobileSummary}</div> : null}
+              {summary ? <div className={`mt-4 ${mobileSummary ? "hidden md:block" : ""}`}>{summary}</div> : null}
             </div>
           </section>
 
           {children}
         </main>
       </div>
-
-      <footer className="hidden border-t border-slate-200/60 py-4 text-center text-xs text-slate-400 dark:border-white/6 md:block">
-        <div className="mx-auto flex max-w-7xl items-center justify-center gap-4 px-6">
-          <span>© {new Date().getFullYear()} Zolio</span>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <Link href="/cgu" className="hover:text-slate-600 dark:hover:text-slate-200 transition">CGU</Link>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <Link href="/cgv" className="hover:text-slate-600 dark:hover:text-slate-200 transition">CGV</Link>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <Link href="/mentions-legales" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Mentions légales</Link>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <Link href="/politique-confidentialite" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Confidentialité</Link>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <Link href="/changelog" className="hover:text-slate-600 dark:hover:text-slate-200 transition">Changelog</Link>
-          <span className="text-slate-300 dark:text-slate-600">·</span>
-          <ShortcutsModal />
-        </div>
-      </footer>
 
       {showMobileDock ? <ClientMobileDock active={activeNav} /> : null}
     </div>

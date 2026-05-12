@@ -6,7 +6,8 @@ export const metadata = {
   description: "Vue d'ensemble de votre activité : chiffre d'affaires, devis, factures et statistiques de votre entreprise.",
 };
 
-import { getClientDashboardSummary } from "@/lib/client-dashboard";
+// Data is fetched client-side via SWR for instant navigation
+// import { getClientDashboardSummary } from "@/lib/client-dashboard";
 import DashboardContent from "./dashboard-content";
 
 const EMPTY_INITIAL_DATA = {
@@ -49,13 +50,7 @@ export default async function DashboardPage() {
   if (!userId) redirect("/sign-in");
 
   const user = await currentUser();
-  let summary;
-  try {
-    summary = await getClientDashboardSummary(userId);
-  } catch (error) {
-    console.error("[DashboardPage] Failed to load summary:", error);
-    summary = EMPTY_SUMMARY;
-  }
+  const summary = EMPTY_SUMMARY;
 
   const companyTrade = (user?.unsafeMetadata?.companyTrade || user?.publicMetadata?.companyTrade) as string | undefined;
   const catalogImported = !!(user?.unsafeMetadata?.starterCatalogImported || user?.publicMetadata?.starterCatalogImported);

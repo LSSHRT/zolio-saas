@@ -240,10 +240,11 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
     fetcher,
     {
       fallbackData: initialSummary,
+      revalidateOnMount: true,
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
       keepPreviousData: true,
-      dedupingInterval: 30000,
+      dedupingInterval: 5000,
       refreshInterval: 0,
     },
   );
@@ -423,7 +424,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   return (
     <div className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white" data-testid="dashboard-page">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)]" />
 
       {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 

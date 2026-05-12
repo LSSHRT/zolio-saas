@@ -2,7 +2,7 @@ export default function DashboardLoading() {
   return (
     <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.18),transparent_56%)] dark:bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.22),transparent_58%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)]" />
 
       <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 lg:pb-10">
         <main className="mt-4 flex-1 lg:mt-6">
