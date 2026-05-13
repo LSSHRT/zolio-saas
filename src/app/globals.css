@@ -228,6 +228,25 @@
   }
 
   /*
+   * iOS auto-zoom guard.
+   * Mobile Safari zooms in when a focused input has a computed
+   * font-size below 16px and never zooms back out automatically.
+   * Forcing 16px on inputs at the mobile breakpoint stops that
+   * behaviour at the source — we used to do this with a heavy JS
+   * MutationObserver in the root layout; CSS does it for free,
+   * inheritably, and even on dynamically-injected Clerk inputs.
+   * The !important is necessary to win against inline font-size
+   * styles set by third-party widgets (Clerk modals in particular).
+   */
+  @media (max-width: 768px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+
+  /*
    * Global keyboard-only focus baseline.
    * Many components use 'focus:outline-none' which strips the outline for
    * BOTH mouse and keyboard users — a WCAG 2.4.7 violation. By scoping a

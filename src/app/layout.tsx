@@ -16,6 +16,7 @@ import "./globals.css";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -62,29 +63,6 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${outfit.variable} font-sans antialiased`}>
-          {/* Anti-zoom iOS : force 16px inline sur chaque input + bloque pinch-zoom */}
-          <Script id="anti-zoom-nuclear" strategy="afterInteractive">{`
-            (function(){
-              function fixInputs(){
-                document.querySelectorAll('input,textarea,select').forEach(function(el){
-                  el.style.fontSize='16px';
-                });
-              }
-              fixInputs();
-              new MutationObserver(fixInputs).observe(document.body,{childList:true,subtree:true});
-              document.addEventListener('focusin',function(e){
-                if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'){
-                  e.target.style.fontSize='16px';
-                }
-              },true);
-              document.addEventListener('gesturestart',function(e){e.preventDefault();},{passive:false});
-              document.addEventListener('gesturechange',function(e){e.preventDefault();},{passive:false});
-              document.addEventListener('gestureend',function(e){e.preventDefault();},{passive:false});
-              document.addEventListener('touchstart',function(e){
-                if(e.touches.length>1)e.preventDefault();
-              },{passive:false});
-            })();
-          `}</Script>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -113,11 +91,13 @@ export default function RootLayout({
             </ClerkThemedProvider>
           </ThemeProvider>
           <Analytics />
-          <Script id="sw-register" strategy="afterInteractive">{`
-            if ("serviceWorker" in navigator) {
-              navigator.serviceWorker.register("/sw.js");
-            }
-          `}</Script>
+          {process.env.NODE_ENV === "production" && (
+            <Script id="sw-register" strategy="afterInteractive">{`
+              if ("serviceWorker" in navigator) {
+                navigator.serviceWorker.register("/sw.js");
+              }
+            `}</Script>
+          )}
       </body>
     </html>
   );
