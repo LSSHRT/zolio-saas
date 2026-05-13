@@ -548,44 +548,93 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
   return (
     <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
       {/* Header */}
-      <header className="flex items-center gap-2 p-4 pt-8 sm:gap-4 sm:p-6 sm:pt-10">
-        <Link href="/devis" onClick={(e) => {
-          if (isDrawer && onClose) {
-            e.preventDefault();
-            onClose();
-          }
-        }}>
-          <motion.div whileTap={{ scale: 0.9 }} className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300">
-            <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
-          </motion.div>
-        </Link>
-        <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate sm:text-xl">Modifier le devis</h1>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate sm:text-xs">{numero} · {devisInfo?.nomClient}</p>
+      <header className="p-4 pt-8 sm:p-6 sm:pt-10">
+        <div className="flex items-start gap-2 sm:gap-4">
+          <Link href="/devis" onClick={(e) => {
+            if (isDrawer && onClose) {
+              e.preventDefault();
+              onClose();
+            }
+          }}>
+            <motion.div whileTap={{ scale: 0.9 }} className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 mt-0.5">
+              <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
+            </motion.div>
+          </Link>
+          <div className="flex-1 min-w-0">
+            {/* Desktop breadcrumb */}
+            <nav aria-label="Fil d'Ariane" className="hidden items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-500 sm:flex">
+              <Link href="/devis" className="transition hover:text-slate-600 dark:hover:text-slate-300">Devis</Link>
+              <span>›</span>
+              <span className="font-medium text-slate-500 dark:text-slate-400">{numero}</span>
+            </nav>
+            <h1 className="text-lg font-bold text-slate-900 dark:text-white truncate sm:mt-0.5 sm:text-2xl">
+              <span className="sm:hidden">Modifier le devis</span>
+              <span className="hidden sm:inline">Devis {numero}</span>
+            </h1>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate sm:text-sm">
+              <span className="sm:hidden">{numero} · {devisInfo?.nomClient}</span>
+              <span className="hidden sm:inline">Pour {devisInfo?.nomClient || "—"}</span>
+            </p>
+
+            {/* Desktop status pills */}
+            {devisInfo ? (
+              <div className="mt-3 hidden flex-wrap items-center gap-2 sm:flex">
+                {devisInfo.statut ? (
+                  <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+                    devisInfo.statut === "Accepté"
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200"
+                      : devisInfo.statut === "Refusé"
+                        ? "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200"
+                        : devisInfo.statut === "En attente"
+                          ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200"
+                          : "border-slate-200 bg-white/80 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
+                  }`}>
+                    {devisInfo.statut === "Accepté" ? <Check size={12} /> : <Eye size={12} />}
+                    {devisInfo.statut}
+                  </span>
+                ) : null}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-violet-200 bg-violet-50/80 px-2.5 py-1 text-[11px] font-medium text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200">
+                  {totalTTC.toFixed(2)}€ TTC
+                </span>
+                {lignes.length > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                    <FileText size={12} />
+                    {lignes.length} ligne{lignes.length > 1 ? "s" : ""}
+                  </span>
+                ) : null}
+                {devisInfo.factures && devisInfo.factures.length > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200">
+                    <FileText size={12} />
+                    {devisInfo.factures.length} facture{devisInfo.factures.length > 1 ? "s" : ""} liée{devisInfo.factures.length > 1 ? "s" : ""}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
+          {devisInfo?.statut === "En attente" ? (
+            <>
+              <div className="hidden items-center gap-2 sm:flex">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setShowSignModal(true)}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 dark:bg-emerald-900/50 dark:border-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 transition shrink-0"
+                >
+                  <PenTool size={14} />
+                  <span>Signer sur place</span>
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleCopySignLink}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
+                >
+                  <PenTool size={14} />
+                  <span>Lien signature</span>
+                </motion.button>
+              </div>
+              <ClientMobileActionsMenu items={mobileHeaderActions} panelAlign="left" />
+            </>
+          ) : null}
         </div>
-        {devisInfo?.statut === "En attente" ? (
-          <>
-            <div className="hidden items-center gap-2 sm:flex">
-              <motion.button 
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setShowSignModal(true)}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 dark:bg-emerald-900/50 dark:border-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 transition shrink-0"
-              >
-                <PenTool size={14} />
-                <span>Signer sur place</span>
-              </motion.button>
-              <motion.button 
-                whileTap={{ scale: 0.9 }}
-                onClick={handleCopySignLink}
-                className="flex items-center justify-center gap-1.5 px-3 py-2 bg-violet-100 text-violet-700 rounded-xl text-xs font-bold border border-violet-200 dark:bg-violet-900/50 dark:border-violet-700 dark:text-violet-300 hover:bg-violet-200 transition shrink-0"
-              >
-                <PenTool size={14} />
-                <span>Lien signature</span>
-              </motion.button>
-            </div>
-            <ClientMobileActionsMenu items={mobileHeaderActions} panelAlign="left" />
-          </>
-        ) : null}
       </header>
 
       <main className="flex-1 px-4 flex flex-col gap-4 overflow-y-auto sm:px-6 sm:gap-5">
@@ -926,7 +975,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
         {devisInfo?.factures && devisInfo.factures.length > 0 && (
           <div className="mt-3 space-y-2">
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">Factures liées</p>
-            {devisInfo.factures.map((f: any) => (
+            {devisInfo.factures.map((f) => (
               <Link
                 key={f.numero}
                 href={`/factures/${f.numero}`}
@@ -1007,7 +1056,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
             className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 py-3 text-sm font-bold text-violet-700 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           >
             <Banknote size={16} />
-            Créer facture d'acompte
+            Créer facture d&apos;acompte
           </motion.button>
         )}
 

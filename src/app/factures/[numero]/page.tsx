@@ -8,6 +8,8 @@ import {
   ArrowLeft,
   BadgeCheck,
   BookOpen,
+  Calendar,
+  CheckCircle,
   Clock,
   Download,
   FileText,
@@ -35,7 +37,7 @@ interface FactureDetail {
   nomClient: string;
   emailClient: string;
   totalHT: number;
-  tva: any;
+  tva: number | string;
   totalTTC: number;
   statut: string;
   date: string;
@@ -308,13 +310,57 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
     );
   }
 
+  const ttcAmount = Number(facture.totalTTC) || 0;
+  const isPayee = facture.statut === "Payée";
   return (
     <ClientSubpageShell
       title={`Facture ${facture.numero}`}
       description={`Facture pour ${facture.nomClient}`}
       activeNav="factures"
-      eyebrow={`Facture · ${formatDateFR(facture.date)}`}
+      eyebrow="Suivi de facture"
       backHref="/factures"
+      breadcrumbs={[
+        { label: "Factures", href: "/factures" },
+        { label: facture.numero },
+      ]}
+      metaPills={[
+        ...(isPayee
+          ? [{ icon: CheckCircle, label: "Payée", tone: "emerald" as const }]
+          : late
+            ? [{ icon: AlertTriangle, label: "En retard", tone: "rose" as const }]
+            : [{ icon: Clock, label: facture.statut || "En attente", tone: "amber" as const }]),
+        { icon: Calendar, label: `Émise le ${formatDateFR(facture.date)}`, tone: "slate" as const },
+        ...(facture.dateEcheance
+          ? [{
+              icon: Calendar,
+              label: `Échéance ${formatDateFR(facture.dateEcheance)}`,
+              tone: (late && !isPayee ? "rose" : "slate") as "rose" | "slate",
+            }]
+          : []),
+        { label: `${ttcAmount.toFixed(2)}€ TTC`, tone: "violet" as const },
+      ]}
+      focusLine={
+        isPayee ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Facture réglée</span>
+            {" "}· Pensez à demander un avis Google si ce n&apos;est pas déjà fait.
+          </>
+        ) : late ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Échéance dépassée
+            </span>
+            {" "}· Lancez une relance dès aujourd&apos;hui pour débloquer votre trésorerie.
+          </>
+        ) : facture.stripePaymentLink ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Lien de paiement actif</span>
+            {" "}· Partagez-le par email ou SMS pour accélérer le règlement.
+          </>
+        ) : (
+          <>Activez un lien de paiement Stripe pour permettre le règlement en ligne en un clic.</>
+        )
+      }
       mobilePrimaryAction={
         facture.statut !== "Payée" ? (
           <button
@@ -421,7 +467,7 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
               </span>
             </div>
             <div className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800/50">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Date d'échéance</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Date d&apos;échéance</span>
               <span className={`text-sm font-semibold ${late && facture.statut !== "Payée" ? "text-rose-600 dark:text-rose-400" : "text-slate-700 dark:text-slate-200"}`}>
                 {formatDateFR(facture.dateEcheance)}
               </span>
