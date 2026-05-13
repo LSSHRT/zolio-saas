@@ -3,20 +3,7 @@ import nodemailer from "nodemailer";
 import { SUPPORT_EMAIL } from "@/lib/support";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { rateLimitResponse } from "@/lib/http";
-
-/**
- * Minimal HTML escape for user-supplied values rendered in the
- * outgoing mail body. The plaintext fallback already handles raw
- * data so this only protects the html branch.
- */
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import { escapeHtml } from "@/lib/escape-html";
 
 // Field length caps — generous enough for legit support requests, tight
 // enough to stop someone using the form to push 1MB of payload through
