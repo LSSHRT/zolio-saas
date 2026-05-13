@@ -4,12 +4,15 @@ import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
 import {
+  Calendar,
+  CheckCircle,
   Pause,
   Play,
   Plus,
   RefreshCw,
   Search,
   Trash2,
+  TrendingUp,
 } from "lucide-react";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -192,9 +195,44 @@ export default function RecurrentesPage() {
   return (
     <ClientSubpageShell
       title="Factures récurrentes"
-      description="Automatisez votre facturation récurrente. Créez des contrats mensuels, trimestriels ou annuels et laissez Zolio générer les factures pour vous."
+      description="Automatisez votre facturation mensuelle, trimestrielle ou annuelle."
       activeNav="tools"
       eyebrow="Automatisation"
+      breadcrumbs={[{ label: "Outils" }, { label: "Récurrences" }]}
+      metaPills={[
+        ...(actives > 0
+          ? [{ icon: CheckCircle, label: `${actives} active${actives > 1 ? "s" : ""}`, tone: "emerald" as const }]
+          : []),
+        ...(enPause > 0
+          ? [{ icon: Pause, label: `${enPause} en pause`, tone: "amber" as const }]
+          : []),
+        ...(totalMensuel > 0
+          ? [{ icon: TrendingUp, label: `${totalMensuel.toFixed(0)}€/mois estimés`, tone: "violet" as const }]
+          : []),
+        ...(recurrentes.length > 0
+          ? [{ icon: Calendar, label: `${recurrentes.length} contrat${recurrentes.length > 1 ? "s" : ""}`, tone: "slate" as const }]
+          : []),
+      ]}
+      focusLine={
+        recurrentes.length === 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Aucune récurrence</span>
+            {" "}· Créez un contrat pour automatiser une facturation mensuelle (abonnement, maintenance, etc.).
+          </>
+        ) : actives === 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Toutes en pause</span>
+            {" "}· Aucune facture ne sera générée automatiquement tant qu&apos;un contrat n&apos;est pas réactivé.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              {totalMensuel.toFixed(0)}€ de CA récurrent prévu
+            </span>
+            {" "}· Zolio génère et envoie automatiquement vos factures à la date programmée.
+          </>
+        )
+      }
       mobilePrimaryAction={
         <button
           type="button"

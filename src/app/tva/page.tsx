@@ -93,9 +93,42 @@ export default function TvaPage() {
   return (
     <ClientSubpageShell
       title="Récapitulatif TVA"
-      description="Visualisez votre TVA collectée et déductible par période. Exportez le récapitulatif en PDF pour votre comptable."
+      description="TVA collectée et déductible par période. Export PDF pour votre comptable."
       activeNav="tools"
       eyebrow="Fiscalité"
+      breadcrumbs={[{ label: "Outils" }, { label: "TVA" }]}
+      metaPills={[
+        {
+          icon: Calculator,
+          label: trimestre ? `Trimestre ${trimestre} ${annee}` : `Année ${annee}`,
+          tone: "slate",
+        },
+        ...(data
+          ? [
+              { icon: TrendingUp, label: `${formatMontant(data.tvaCollectee)} collectée`, tone: "emerald" as const },
+              { icon: TrendingDown, label: `${formatMontant(data.tvaDepenses)} déductible`, tone: "amber" as const },
+            ]
+          : []),
+      ]}
+      focusLine={
+        !data ? (
+          <>Sélectionnez une année et un trimestre pour calculer votre TVA sur la période.</>
+        ) : data.solde >= 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Solde à reverser : {formatMontant(data.solde)}
+            </span>
+            {" "}· Provisionnez ce montant pour la prochaine échéance fiscale.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Solde à récupérer : {formatMontant(Math.abs(data.solde))}
+            </span>
+            {" "}· Vos dépenses ont généré plus de TVA que vos encaissements sur la période.
+          </>
+        )
+      }
       mobilePrimaryAction={
         <button
           type="button"

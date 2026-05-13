@@ -55,8 +55,12 @@ export default function RapportsPage() {
   const [trimestre, setTrimestre] = useState("");
 
   const { data: dashboard } = useSWR<DashboardData>("/api/dashboard/summary", fetcher);
-  const { data: facturesData } = useSWR<{ data: any[] }>("/api/factures?page=1&limit=1000", fetcher);
-  const { data: depensesData } = useSWR<{ data: any[] }>("/api/depenses?page=1&limit=1000", fetcher);
+  const { data: facturesData } = useSWR<{
+    data: Array<{ date: string; statut: string; totalHT?: number; totalTTC?: number }>;
+  }>("/api/factures?page=1&limit=1000", fetcher);
+  const { data: depensesData } = useSWR<{
+    data: Array<{ date: string; categorie?: string; montant?: number; montantTTC?: number }>;
+  }>("/api/depenses?page=1&limit=1000", fetcher);
 
   const factures = useMemo(() => facturesData?.data ?? [], [facturesData]);
   const depenses = useMemo(() => depensesData?.data ?? [], [depensesData]);
@@ -181,9 +185,44 @@ export default function RapportsPage() {
   return (
     <ClientSubpageShell
       title="Rapports & exports"
-      description="Vos chiffres clés, exports comptables et bilans — tout centralisé pour votre comptable."
+      description="Chiffres clés et exports comptables centralisés pour votre comptable."
       eyebrow="Centre de rapports"
       activeNav="tools"
+      breadcrumbs={[{ label: "Outils" }, { label: "Rapports" }]}
+      metaPills={[
+        { icon: Calculator, label: `Année ${annee}`, tone: "slate" },
+        ...(factureSummary.totalPayeTTC > 0
+          ? [{ icon: BarChart3, label: `${factureSummary.totalPayeTTC.toFixed(0)}€ encaissés`, tone: "emerald" as const }]
+          : []),
+        ...(factureSummary.total > 0
+          ? [{ icon: FileText, label: `${factureSummary.total} facture${factureSummary.total > 1 ? "s" : ""}`, tone: "violet" as const }]
+          : []),
+        ...(depenseSummary.totalTTC > 0
+          ? [{ icon: Download, label: `${depenseSummary.totalTTC.toFixed(0)}€ dépenses`, tone: "amber" as const }]
+          : []),
+      ]}
+      focusLine={
+        factureSummary.total === 0 && depenseSummary.totalTTC === 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Aucune donnée pour {annee}</span>
+            {" "}· Les rapports apparaîtront dès vos premières factures et dépenses enregistrées.
+          </>
+        ) : (factureSummary.totalPayeTTC - depenseSummary.totalTTC) > 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Bénéfice net : {(factureSummary.totalPayeTTC - depenseSummary.totalTTC).toFixed(0)}€
+            </span>
+            {" "}· CA encaissé moins dépenses {annee}. Exportez en FEC ou CSV pour votre comptable.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Marge négative : {(factureSummary.totalPayeTTC - depenseSummary.totalTTC).toFixed(0)}€
+            </span>
+            {" "}· Vos dépenses dépassent vos encaissements sur {annee}. Vérifiez avec votre comptable.
+          </>
+        )
+      }
       summary={
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <ClientHeroStat

@@ -162,9 +162,45 @@ export default function PlanningPage() {
   return (
     <ClientSubpageShell
       title="Planning"
-      description="Vue mensuelle de vos échéances, fins de devis et factures récurrentes."
+      description="Vos échéances, fins de devis et factures récurrentes en un coup d'œil."
       eyebrow="Calendrier"
       activeNav="tools"
+      breadcrumbs={[{ label: "Outils" }, { label: "Planning" }]}
+      metaPills={[
+        {
+          icon: Calendar,
+          label: new Date(viewYear, viewMonth - 1).toLocaleDateString("fr-FR", { month: "long", year: "numeric" }),
+          tone: "slate",
+        },
+        ...(events.length > 0
+          ? [{ icon: TrendingUp, label: `${events.length} événement${events.length > 1 ? "s" : ""}`, tone: "violet" as const }]
+          : []),
+        ...(eventsByDate[todayStr]?.length
+          ? [{ icon: Clock, label: `${eventsByDate[todayStr].length} aujourd'hui`, tone: "amber" as const }]
+          : []),
+      ]}
+      focusLine={
+        events.length === 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Mois calme</span>
+            {" "}· Aucun événement programmé. Vos factures et échéances de devis apparaîtront ici automatiquement.
+          </>
+        ) : eventsByDate[todayStr]?.length ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              {eventsByDate[todayStr].length} événement{eventsByDate[todayStr].length > 1 ? "s" : ""} aujourd&apos;hui
+            </span>
+            {" "}· Cliquez sur la date pour voir le détail et ouvrir les documents liés.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              {events.length} événement{events.length > 1 ? "s" : ""} ce mois-ci
+            </span>
+            {" "}· Échéances de devis, factures et événements manuels regroupés sur une seule vue.
+          </>
+        )
+      }
       mobilePrimaryAction={
         <div className="flex gap-2">
           <button
@@ -179,7 +215,7 @@ export default function PlanningPage() {
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
           >
             <Calendar size={16} />
-            Aujourd'hui
+            Aujourd&apos;hui
           </button>
         </div>
       }

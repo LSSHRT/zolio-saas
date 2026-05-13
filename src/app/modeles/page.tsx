@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { FileText, LayoutTemplate, Plus, Search, Sparkles, Trash2, Users, Wrench } from "lucide-react";
+import { Calculator, FileText, LayoutTemplate, Plus, Search, Sparkles, Trash2, Users, Wrench } from "lucide-react";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
 import {
@@ -13,7 +13,7 @@ import {
   ClientSubpageShell,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
-import { getTradeBundlesForTrade, TRADE_OPTIONS, type TradeKey } from "@/lib/trades";
+import { getTradeBundlesForTrade, TRADE_OPTIONS } from "@/lib/trades";
 
 interface TemplateLigne {
   id: string;
@@ -253,9 +253,39 @@ export default function ModelesPage() {
   return (
     <ClientSubpageShell
       title="Modèles de devis"
-      description="Créez et gérez vos modèles de devis pour gagner du temps sur les projets récurrents."
+      description="Vos packs de devis prêts à l'emploi pour gagner du temps."
       eyebrow="Bibliothèque modèles"
       activeNav="devis"
+      breadcrumbs={[{ label: "Devis", href: "/devis" }, { label: "Modèles" }]}
+      metaPills={[
+        { icon: LayoutTemplate, label: `${totalTemplates} modèle${totalTemplates > 1 ? "s" : ""}`, tone: "violet" },
+        ...(totalLignes > 0
+          ? [{ icon: FileText, label: `${totalLignes} ligne${totalLignes > 1 ? "s" : ""}`, tone: "slate" as const }]
+          : []),
+        ...(estimatedTotal > 0
+          ? [{ icon: Calculator, label: `${estimatedTotal.toFixed(0)}€ estimés`, tone: "emerald" as const }]
+          : []),
+        ...(tradeBundles.length > 0
+          ? [{ icon: Wrench, label: `${tradeBundles.length} métiers`, tone: "slate" as const }]
+          : []),
+      ]}
+      focusLine={
+        totalTemplates === 0 ? (
+          <>Importez un pack métier ou créez votre premier modèle pour gagner du temps sur les devis récurrents.</>
+        ) : totalTemplates < 3 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Bonne base</span>
+            {" "}· Plus vous capitalisez de modèles, plus la création de devis devient instantanée.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Bibliothèque solide
+            </span>
+            {" "}· Utilisez « Créer un devis » depuis un modèle pour ne plus jamais repartir d&apos;une page blanche.
+          </>
+        )
+      }
       mobilePrimaryAction={
         <button
           type="button"
@@ -526,7 +556,7 @@ export default function ModelesPage() {
           <div className="rounded-xl border border-violet-200/60 bg-gradient-to-br from-violet-50/80 to-fuchsia-50/60 p-4 dark:border-violet-400/20 dark:from-violet-500/8 dark:to-fuchsia-500/5">
             <div className="mb-3 flex items-center gap-2">
               <Sparkles size={16} className="text-violet-600 dark:text-violet-300" />
-              <span className="text-sm font-semibold text-violet-700 dark:text-violet-200">Générer avec l'IA</span>
+              <span className="text-sm font-semibold text-violet-700 dark:text-violet-200">Générer avec l&apos;IA</span>
             </div>
             <div className="space-y-2">
               <select

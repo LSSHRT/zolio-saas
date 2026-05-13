@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import useSWR from "swr";
-import { ArrowUpRight, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
+import { ArrowUpRight, Calendar, FileText, Loader2, Plus, Save, StickyNote, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -139,9 +139,36 @@ export default function CalepinPage() {
   return (
     <ClientSubpageShell
       title="Mon calepin"
-      description="Capturez vos dimensions, vos idées et vos notes de chantier dans un espace rapide, tactile et beaucoup plus agréable à consulter partout."
+      description="Capturez vos dimensions, idées et notes de chantier au pouce."
       activeNav="calepin"
       eyebrow="Mémoire chantier"
+      breadcrumbs={[{ label: "Calepin" }]}
+      metaPills={[
+        { icon: StickyNote, label: `${noteList.length} note${noteList.length > 1 ? "s" : ""}`, tone: "violet" },
+        ...(titledNotes > 0
+          ? [{ icon: FileText, label: `${titledNotes} avec titre`, tone: "slate" as const }]
+          : []),
+        ...(noteList.length > 0 && noteList[0]?.date
+          ? [{ icon: Calendar, label: `Dernière le ${new Date(noteList[0].date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}`, tone: "slate" as const }]
+          : []),
+      ]}
+      focusLine={
+        noteList.length === 0 ? (
+          <>Commencez par capturer une mesure de chantier, une consigne ou une idée — vos notes vous suivent partout.</>
+        ) : noteList.length < 5 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Bon début</span>
+            {" "}· Pensez à ajouter une note dès que vous avez une dimension ou une consigne à retenir.
+          </>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              {noteList.length} notes capturées
+            </span>
+            {" "}· Toutes restent accessibles depuis vos chantiers ou en mode hors-ligne.
+          </>
+        )
+      }
       mobilePrimaryAction={
         <button
           type="button"

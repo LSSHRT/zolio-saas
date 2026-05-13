@@ -4,13 +4,16 @@ import { Suspense, useEffect, useMemo, useRef, useState, type ChangeEvent, type 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
+  Boxes,
   Copy,
   Download,
+  Euro,
   Loader2,
   Package,
   Pencil,
   Plus,
   Search,
+  Tag,
   Trash2,
   Upload,
   X,
@@ -428,9 +431,42 @@ function CatalogueContent() {
 
       <ClientSubpageShell
         title="Catalogue prestations"
-        description="Gardez votre bibliothèque métier claire sur mobile vertical : recherche rapide, import starter et actions de ligne restent lisibles sans écraser l'écran."
+        description="Votre bibliothèque métier : prestations, prix, stocks, import CSV."
         eyebrow="Base métier"
         activeNav="tools"
+        breadcrumbs={[{ label: "Outils" }, { label: "Catalogue" }]}
+        metaPills={[
+          { icon: Package, label: `${prestations.length} prestation${prestations.length > 1 ? "s" : ""}`, tone: "violet" },
+          ...(categoriesCount > 0
+            ? [{ icon: Tag, label: `${categoriesCount} catégorie${categoriesCount > 1 ? "s" : ""}`, tone: "slate" as const }]
+            : []),
+          ...(stockedCount > 0
+            ? [{ icon: Boxes, label: `${stockedCount} avec stock`, tone: "emerald" as const }]
+            : []),
+          ...(averagePrice > 0
+            ? [{ icon: Euro, label: `${averagePrice}€ moy.`, tone: "slate" as const }]
+            : []),
+        ]}
+        focusLine={
+          prestations.length === 0 ? (
+            <>
+              <span className="font-semibold text-slate-800 dark:text-slate-100">
+                Catalogue vide
+              </span>
+              {" "}· Importez un pack starter {(activeTradeDefinition?.label ?? "métier").toLowerCase()} ({starterCount} prestations) ou créez votre première ligne.
+            </>
+          ) : prestations.length < 10 ? (
+            <>
+              <span className="font-semibold text-slate-800 dark:text-slate-100">Bon démarrage</span>
+              {" "}· Ajoutez vos prestations fréquentes pour accélérer la création de devis.
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-slate-800 dark:text-slate-100">Catalogue solide</span>
+              {" "}· Pensez à exporter en CSV pour archiver ou maintenir un référentiel partagé.
+            </>
+          )
+        }
         actions={
           <>
             <button
