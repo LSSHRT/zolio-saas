@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { ChevronLeft, ChevronRight, Download, Plus, Receipt, Search, Tag, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -15,7 +16,17 @@ import {
   ClientSubpageShell,
 } from "@/components/client-shell";
 import { EmptyState } from "@/components/empty-state";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
+
+// recharts is ~150KB — lazy load it so it only ships when the chart is
+// actually rendered (desktop + non-empty expenses)
+const DepensesPieChart = dynamic(() => import("@/components/DepensesPieChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full w-full items-center justify-center text-xs text-slate-400">
+      Chargement du graphique…
+    </div>
+  ),
+});
 
 interface Depense {
   categorie: string;
@@ -113,7 +124,6 @@ function DepensesContent() {
       .slice(0, 8);
   }, [filteredDepenses]);
 
-  const COLORS = ["#7c3aed", "#a855f7", "#c084fc", "#6366f1", "#818cf8", "#3b82f6", "#06b6d4", "#10b981"];
 
   const handleExportCSV = () => {
     setExporting(true);
@@ -255,37 +265,7 @@ function DepensesContent() {
         <ClientSectionCard>
           <h2 className="text-sm font-semibold text-slate-700 dark:text-white mb-4">Répartition par catégorie</h2>
           <div className="h-[220px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categorieBreakdown}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {categorieBreakdown.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  content={({ payload }) => {
-                    if (!payload || !payload[0]) return null;
-                    const val = payload[0].value as number;
-                    const name = payload[0].name as string;
-                    return (
-                      <div className="rounded-lg bg-slate-900 px-3 py-2 text-xs text-white shadow-lg">
-                        <span className="text-slate-300">{name}</span>: <span className="font-bold">{val.toFixed(2)}€</span>
-                      </div>
-                    );
-                  }}
-                />
-                <Legend verticalAlign="bottom" height={36} iconType="circle" />
-              </PieChart>
-            </ResponsiveContainer>
+            <DepensesPieChart data={categorieBreakdown} />
           </div>
         </ClientSectionCard>
         </div>
