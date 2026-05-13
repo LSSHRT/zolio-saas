@@ -2,7 +2,8 @@
 
 import { type FormEvent, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail, Send, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, Mail, Send, Loader2 } from "lucide-react";
+import { SUPPORT_EMAIL } from "@/lib/support";
 
 export default function ContactPage() {
   const [sending, setSending] = useState(false);
@@ -47,7 +48,11 @@ export default function ContactPage() {
       {/* Sticky header */}
       <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl dark:border-white/8 dark:bg-slate-950/90">
         <div className="mx-auto flex h-14 max-w-2xl items-center gap-3 px-4">
-          <Link href="/dashboard" className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/8 dark:hover:text-white">
+          <Link
+            href="/"
+            aria-label="Retour à l'accueil"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-white/8 dark:hover:text-white"
+          >
             <ArrowLeft size={20} />
           </Link>
           <h1 className="text-lg font-semibold text-slate-950 dark:text-white">Contact</h1>
@@ -65,10 +70,10 @@ export default function ContactPage() {
               Nous vous répondrons dans les plus brefs délais.
             </p>
             <Link
-              href="/dashboard"
+              href="/"
               className="mt-6 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-700"
             >
-              Retour au tableau de bord
+              Retour à l&apos;accueil
             </Link>
           </div>
         ) : (
@@ -76,9 +81,16 @@ export default function ContactPage() {
             <h2 className="text-lg font-semibold text-slate-950 dark:text-white">Besoin d&apos;aide ?</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
               Remplissez le formulaire ci-dessous ou contactez-nous directement à{" "}
-              <a href="mailto:support@zolio.fr" className="font-medium text-violet-600 underline decoration-violet-300/40 underline-offset-2 dark:text-violet-400">
-                support@zolio.fr
+              <a
+                href={`mailto:${SUPPORT_EMAIL}`}
+                className="font-medium text-violet-600 underline decoration-violet-300/40 underline-offset-2 dark:text-violet-400"
+              >
+                {SUPPORT_EMAIL}
               </a>
+            </p>
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-slate-50/80 px-3 py-1 text-xs font-medium text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400">
+              <Clock size={12} />
+              Réponse sous 24 h ouvrées
             </p>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -143,6 +155,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={sending}
+                aria-busy={sending}
                 className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {sending ? (

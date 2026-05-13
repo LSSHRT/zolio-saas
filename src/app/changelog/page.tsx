@@ -16,6 +16,22 @@ const ICONS = {
 
 const CHANGELOG = [
   {
+    date: "2026-05-13",
+    version: "2.0.0",
+    entries: [
+      { type: "feature" as const, title: "Pages d'authentification allégées", desc: "Inscription et connexion repensées : badges de confiance (RGPD, hébergé en France) visibles sur mobile, chargement instantané, plus de dépendances externes." },
+      { type: "feature" as const, title: "Centre de notifications enrichi", desc: "Filtres par catégorie, regroupement par date, état vide soigné. Tout est plus lisible et plus rapide à traiter." },
+      { type: "feature" as const, title: "Signature client enrichie", desc: "Aperçu détaillé des lignes de devis et totaux dans le portail de signature, autosave de la signature, parcours mobile fluide." },
+      { type: "improvement" as const, title: "Pages secondaires unifiées", desc: "Calepin, Modèles, Catalogue, Planning, TVA, Rapports et Récurrences partagent maintenant le même en-tête avec fil d'Ariane et indicateurs clés." },
+      { type: "improvement" as const, title: "Pages d'erreur à la marque", desc: "Erreurs 404, 500 et erreurs de page partagées habillées aux couleurs Zolio, avec actions claires pour reprendre la main." },
+      { type: "improvement" as const, title: "Pages légales unifiées", desc: "CGU, CGV, mentions légales et politique de confidentialité alignées sur la même mise en forme dark, lisible sur mobile." },
+      { type: "improvement" as const, title: "Accessibilité clavier", desc: "Anneau de focus visible quand vous naviguez au clavier, libellés ARIA sur les boutons-icones, meilleur contraste sur les pills d'état." },
+      { type: "performance" as const, title: "Dépendances externes éliminées", desc: "Plus d'images chargées depuis pravatar.cc ou transparenttextures.com sur les pages publiques. CSP plus stricte, LCP réduit." },
+      { type: "performance" as const, title: "Graphiques chargés à la demande", desc: "Le camembert des dépenses ne charge recharts qu'au moment du rendu : page /dépenses plus légère au premier affichage." },
+      { type: "security" as const, title: "Email de support aligné", desc: "Les messages envoyés depuis /contact arrivent maintenant sur la bonne boîte (contact@zolio.site). Échappement HTML ajouté sur les contenus utilisateur." },
+    ],
+  },
+  {
     date: "2026-04-06",
     version: "1.9.0",
     entries: [
@@ -79,11 +95,11 @@ export default function ChangelogPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
         <Link
-          href="/dashboard"
+          href="/"
           className="mb-8 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
         >
           <ArrowLeft size={16} />
-          Retour au dashboard
+          Retour à l&apos;accueil
         </Link>
 
         <div className="mb-12 text-center">
