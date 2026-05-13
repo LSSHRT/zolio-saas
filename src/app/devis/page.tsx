@@ -71,7 +71,7 @@ const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string
   "En attente": { icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
   "En attente (Modifié)": { icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
   "Accepté": { icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
-  "Refusé": { icon: XCircle, color: "text-red-500", bg: "bg-red-50" },
+  "Refusé": { icon: XCircle, color: "text-rose-500", bg: "bg-rose-50" },
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -718,7 +718,7 @@ export default function DevisPage() {
               return (
                 <div key={colStatus} className="min-w-[280px] w-[280px] flex-shrink-0 flex flex-col gap-3 snap-start">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className={`font-bold ${colConfig.color} flex items-center gap-2`}>
+                    <h3 className={`text-sm font-semibold ${colConfig.color} flex items-center gap-2`}>
                       <ColIcon size={16} /> {colStatus}
                     </h3>
                     <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full text-slate-500 font-semibold">{colDevis.length}</span>
@@ -753,11 +753,11 @@ export default function DevisPage() {
                         {pending && (
                           <div className="flex gap-2">
                             <button onClick={() => handleUpdateStatut(d.numero, "Accepté")} disabled={isUpdating} className="flex-1 min-h-[40px] py-2 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg hover:bg-emerald-100 transition dark:bg-slate-800 dark:border-slate-700 dark:text-white"><Check size={14} className="inline mr-1"/>Valider</button>
-                            <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 min-h-[40px] py-2 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
+                            <button onClick={() => handleUpdateStatut(d.numero, "Refusé")} disabled={isUpdating} className="flex-1 min-h-[40px] py-2 bg-rose-50 text-rose-600 text-xs font-semibold rounded-lg hover:bg-rose-100 transition"><X size={14} className="inline mr-1"/>Refuser</button>
                             <button onClick={(e) => {
                               e.preventDefault();
                               window.location.href = buildFollowUpMailTo(d);
-                            }} className="min-h-[40px] py-2 px-2.5 bg-violet-50 dark:bg-violet-500/10 text-brand-violet text-xs font-semibold rounded-lg hover:bg-violet-100 dark:bg-violet-900/30 transition" title="Relancer par email">
+                            }} className="min-h-[40px] py-2 px-2.5 bg-violet-50 text-brand-violet text-xs font-semibold rounded-lg transition hover:bg-violet-100 dark:bg-violet-500/10 dark:hover:bg-violet-500/20" title="Relancer par email">
                               <Mail size={14}/>
                             </button>
                           </div>
@@ -970,7 +970,7 @@ export default function DevisPage() {
                               whileTap={{ scale: 0.96 }}
                               onClick={() => handleUpdateStatut(d.numero, "Refusé")}
                               disabled={isUpdating}
-                              className="flex-1 py-2.5 bg-red-50 border border-red-200 text-red-500 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-red-100 hover:border-red-400 transition disabled:opacity-50"
+                              className="flex-1 py-2.5 bg-rose-50 border border-rose-200 text-rose-500 font-semibold rounded-xl flex items-center justify-center gap-2 text-sm hover:bg-rose-100 hover:border-rose-400 transition disabled:opacity-50"
                             >
                               <X size={16} /> {isUpdating ? "..." : "Refuser"}
                             </motion.button>
@@ -1018,7 +1018,7 @@ export default function DevisPage() {
                           whileTap={{ scale: 0.96 }}
                           onClick={() => handleDelete(d.numero)}
                           disabled={deleting === d.numero}
-                          className="py-2.5 px-4 bg-white dark:bg-slate-900 border border-red-200 text-red-500 font-semibold rounded-xl flex items-center justify-center gap-1 text-sm hover:bg-red-50 hover:border-red-400 transition disabled:opacity-50"
+                          className="py-2.5 px-4 bg-white dark:bg-slate-900 border border-rose-200 text-rose-500 font-semibold rounded-xl flex items-center justify-center gap-1 text-sm hover:bg-rose-50 hover:border-rose-400 transition disabled:opacity-50"
                         >
                           <Trash2 size={14} /> {deleting === d.numero ? "..." : ""}
                         </motion.button>

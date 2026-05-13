@@ -688,8 +688,8 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
             {/* ─── ACTIONS À TRAITER — le plus important ────────────── */}
             <motion.section {...sectionMotion(0.06)}>
               <div className="mb-4 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-rose-500 animate-pulse" />
-                <h2 className="text-lg font-bold text-slate-900 dark:text-white">À traiter</h2>
+                <div className="h-2 w-2 rounded-full bg-rose-500 motion-safe:animate-pulse" aria-hidden="true" />
+                <h2 className="text-[15px] font-semibold text-slate-900 dark:text-white">À traiter</h2>
               </div>
               <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
                 {actionPlan.map((item) => <DashboardActionCard key={item.id} item={item} />)}
@@ -707,7 +707,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
                     Performance
                   </p>
-                  <h2 className="mt-1 text-lg font-bold text-slate-900 dark:text-white">Évolution du CA</h2>
+                  <h2 className="mt-1 text-[15px] font-semibold text-slate-900 dark:text-white">Évolution du CA</h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400">6 derniers mois</p>
                 </div>
                 {semaine && (

@@ -908,7 +908,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-300 backdrop-blur-md">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-violet-500"></span>
+                <span className="h-2 w-2 rounded-full bg-violet-500 motion-safe:animate-pulse"></span>
                 Simple comme 1, 2, 3
               </div>
               <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
@@ -949,7 +949,7 @@ export default function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-300 backdrop-blur-md">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+                <span className="h-2 w-2 rounded-full bg-emerald-500 motion-safe:animate-pulse"></span>
                 Mises à jour récentes
               </div>
               <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
@@ -1030,7 +1030,7 @@ export default function LandingPage() {
               className="text-center mb-20 relative"
             >
               <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                <span className="w-2 h-2 rounded-full bg-orange-500 mr-2 animate-pulse"></span>
+                <span className="w-2 h-2 rounded-full bg-orange-500 mr-2 motion-safe:animate-pulse"></span>
                 <span className="text-sm font-medium text-neutral-300">L&apos;évolution est en marche</span>
               </div>
               <h2 className="text-4xl md:text-6xl font-bold mb-6 text-white tracking-tight">
@@ -1284,7 +1284,7 @@ export default function LandingPage() {
               className="text-center mb-20 flex flex-col items-center"
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-8 backdrop-blur-md">
-                <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-violet-500 motion-safe:animate-pulse"></div>
                 <span className="text-sm font-medium text-neutral-300">L&apos;écosystème parfait</span>
               </div>
               <h2 className="text-4xl md:text-6xl font-extrabold mb-6 tracking-tight text-white">
@@ -1374,7 +1374,7 @@ export default function LandingPage() {
                   {/* Badge & Verify Animation */}
                   <div className="mt-6 flex items-center justify-between p-3 rounded-lg border border-white/5 bg-white/5">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                      <div className="w-2 h-2 rounded-full bg-blue-500 motion-safe:animate-pulse"></div>
                       <span className="text-xs font-medium text-blue-200">Factur-X Ready</span>
                     </div>
                     <svg className="w-4 h-4 text-blue-400 opacity-50 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1444,7 +1444,7 @@ export default function LandingPage() {
                 viewport={{ once: true }}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6"
               >
-                <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-violet-500 motion-safe:animate-pulse"></div>
                 <span className="text-sm font-medium text-white/80 tracking-wide uppercase">SANS ENGAGEMENT</span>
               </motion.div>
               <motion.h2 

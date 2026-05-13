@@ -64,7 +64,7 @@ interface FacturesResponse {
 const statutConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
   "Émise": { icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
   "Payée": { icon: BadgeCheck, color: "text-blue-600", bg: "bg-blue-50" },
-  "En retard": { icon: Clock, color: "text-red-500", bg: "bg-red-50" },
+  "En retard": { icon: Clock, color: "text-rose-500", bg: "bg-rose-50" },
 };
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -1010,7 +1010,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                   {[
                     { key: "émise", label: "Émise", color: "text-emerald-600" },
                     { key: "payée", label: "Payée", color: "text-blue-600" },
-                    { key: "retard", label: "En retard", color: "text-red-500" },
+                    { key: "retard", label: "En retard", color: "text-rose-500" },
                   ].map(colStatus => {
                     const colFactures = filtered.filter(f => {
                       const displayStatut = f.statut === "Payée" ? "Payée" : isLate(f) ? "En retard" : f.statut;
@@ -1026,7 +1026,7 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                     return (
                       <div key={colStatus.key} className="min-w-[280px] w-[280px] flex-shrink-0 flex flex-col gap-3 snap-start">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className={`font-bold ${colStatus.color} flex items-center gap-2`}>
+                          <h3 className={`text-sm font-semibold ${colStatus.color} flex items-center gap-2`}>
                             <ColIcon size={16} /> {colStatus.label}
                           </h3>
                           <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full text-slate-500 font-semibold">{colFactures.length}</span>

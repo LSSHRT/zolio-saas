@@ -819,7 +819,7 @@ function ClientsContent() {
                                 type="button"
                                 onClick={() => setPendingDeleteClient(client)}
                                 disabled={deletingId === client.id}
-                                className="rounded-xl p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500 disabled:opacity-50 dark:hover:bg-red-500/10"
+                                className="rounded-xl p-2 text-slate-400 transition hover:bg-rose-50 hover:text-rose-500 disabled:opacity-50 dark:hover:bg-rose-500/10"
                                 title="Supprimer"
                               >
                                 <Trash2 size={16} />
