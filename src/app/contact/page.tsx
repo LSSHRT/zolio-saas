@@ -31,6 +31,13 @@ export default function ContactPage() {
       });
 
       if (!res.ok) {
+        if (res.status === 429) {
+          const retryAfter = Number(res.headers.get("Retry-After")) || 60;
+          const minutes = Math.max(1, Math.ceil(retryAfter / 60));
+          throw new Error(
+            `Trop de tentatives — merci de réessayer dans ${minutes} min.`,
+          );
+        }
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || "Erreur lors de l'envoi");
       }

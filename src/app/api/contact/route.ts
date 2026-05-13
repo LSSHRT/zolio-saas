@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { SUPPORT_EMAIL } from "@/lib/support";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimitResponse } from "@/lib/http";
 
 /**
  * Minimal HTML escape for user-supplied values rendered in the
@@ -16,8 +18,26 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+// Field length caps — generous enough for legit support requests, tight
+// enough to stop someone using the form to push 1MB of payload through
+// our SMTP connection.
+const MAX_NAME_LEN = 120;
+const MAX_EMAIL_LEN = 254; // RFC 5321
+const MAX_SUBJECT_LEN = 200;
+const MAX_MESSAGE_LEN = 5_000;
+
+// RFC-light email check — we just need to reject obvious garbage; the
+// actual SMTP server will fail on real syntax issues anyway.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: Request) {
   try {
+    // 5 submissions / 10 min / IP. The form is anonymous so there is
+    // no user-scoped key — IP is the best identifier we have.
+    const ip = getClientIp(req);
+    const rl = rateLimit(`contact:${ip}`, 5, 10 * 60_000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
+
     const body = await req.json();
     const { name, email, subject, message } = body as {
       name?: string;
@@ -28,6 +48,19 @@ export async function POST(req: Request) {
 
     if (!name?.trim() || !email?.trim() || !message?.trim()) {
       return NextResponse.json({ error: "Champs obligatoires manquants" }, { status: 400 });
+    }
+
+    if (
+      name.length > MAX_NAME_LEN ||
+      email.length > MAX_EMAIL_LEN ||
+      (subject ?? "").length > MAX_SUBJECT_LEN ||
+      message.length > MAX_MESSAGE_LEN
+    ) {
+      return NextResponse.json({ error: "Champ trop long" }, { status: 400 });
+    }
+
+    if (!EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "Email invalide" }, { status: 400 });
     }
 
     const host = process.env.SMTP_HOST || "smtp.gmail.com";

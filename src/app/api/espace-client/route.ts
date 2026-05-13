@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyClientPortalToken } from "@/lib/client-portal";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { rateLimitResponse } from "@/lib/http";
 
 export async function GET(req: NextRequest) {
   try {
+    // 60 requests / minute / IP. The portal is anonymous (token-only),
+    // so IP is the only viable identifier. The cap is generous enough
+    // for legit polling but stops a script from looping the endpoint.
+    const ip = getClientIp(req);
+    const rl = rateLimit(`espace-client:${ip}`, 60, 60_000);
+    if (!rl.allowed) return rateLimitResponse(rl.resetAt);
+
     const token = req.nextUrl.searchParams.get("token");
     if (!token) return NextResponse.json({ error: "Token requis" }, { status: 400 });
 
