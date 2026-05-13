@@ -797,6 +797,35 @@ export default function NouveauDevisPage() {
       eyebrow="Wizard devis"
       steps={WIZARD_STEPS}
       title="Nouveau devis"
+      headerExtra={
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+            draftStatus === "saving"
+              ? "border-amber-200/70 bg-amber-50/80 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200"
+              : draftSavedLabel
+                ? "border-emerald-200/70 bg-emerald-50/80 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200"
+                : "border-slate-200/70 bg-white/80 text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-300"
+          }`}
+          aria-live="polite"
+        >
+          {draftStatus === "saving" ? (
+            <>
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />
+              Sauvegarde…
+            </>
+          ) : draftSavedLabel ? (
+            <>
+              <Save size={11} />
+              Enregistré à {draftSavedLabel}
+            </>
+          ) : (
+            <>
+              <Save size={11} />
+              Autosauvegarde active
+            </>
+          )}
+        </span>
+      }
       footer={
         <CreationWizardFooter
           mobileMeta={

@@ -22,6 +22,7 @@ export function CreationWizardShell({
   description,
   eyebrow = "Parcours guidé",
   footer,
+  headerExtra,
   steps,
   title,
 }: {
@@ -32,6 +33,7 @@ export function CreationWizardShell({
   description: string;
   eyebrow?: string;
   footer?: ReactNode;
+  headerExtra?: ReactNode;
   steps: CreationWizardStep[];
   title: string;
 }) {
@@ -130,57 +132,81 @@ export function CreationWizardShell({
             </div>
           </section>
 
-          <section className="client-panel-strong hidden overflow-hidden rounded-2xl px-5 py-6 md:block sm:px-6 lg:px-7">
-            <div className="flex flex-col gap-6">
-              <div className="max-w-3xl">
-                <p className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
-                  {eyebrow}
-                </p>
-                <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
-                  {title}
-                </h1>
-                <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300 sm:text-base">
-                  {description}
-                </p>
+          <section className="client-panel-strong hidden overflow-hidden rounded-2xl px-5 py-5 md:block sm:px-6 lg:px-7">
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0 max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-600 dark:text-violet-200">
+                      {eyebrow}
+                    </p>
+                    {headerExtra}
+                  </div>
+                  <h1 className="mt-2 text-[26px] font-bold tracking-tight text-slate-950 dark:text-white sm:text-[30px]">
+                    {title}
+                  </h1>
+                  <p className="mt-1.5 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                    {description}
+                  </p>
+                </div>
               </div>
 
-              <div className="grid gap-3 lg:grid-cols-3">
+              {/* Compact horizontal stepper */}
+              <ol className="flex items-center gap-0 overflow-x-auto">
                 {steps.map((step, index) => {
                   const isActive = index === currentStep;
                   const isDone = index < currentStep;
+                  const isLast = index === steps.length - 1;
 
                   return (
-                    <div
+                    <li
                       key={step.title}
-                      className={`rounded-2xl border p-4 transition ${
-                        isActive
-                          ? "border-violet-300/50 bg-violet-500/10 shadow-[0_22px_60px_-36px_rgba(124,58,237,0.55)] dark:border-violet-400/20 dark:bg-violet-500/12"
-                          : "border-slate-200/70 bg-white/70 dark:border-white/8 dark:bg-white/4"
-                      }`}
+                      className={`flex min-w-0 items-center ${isLast ? "" : "flex-1"}`}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <div
-                          className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-sm font-semibold ring-1 ${
+                          className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ring-1 transition ${
                             isDone
-                              ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40 dark:text-emerald-300 dark:ring-emerald-400/20"
+                              ? "bg-emerald-500/15 text-emerald-700 ring-emerald-300/50 dark:text-emerald-300 dark:ring-emerald-400/30"
                               : isActive
-                                ? "bg-violet-500/12 text-violet-700 ring-violet-300/40 dark:text-violet-200 dark:ring-violet-400/20"
-                                : "bg-slate-900/6 text-slate-600 ring-slate-300/40 dark:bg-white/8 dark:text-slate-300 dark:ring-white/10"
+                                ? "bg-violet-500/15 text-violet-700 ring-violet-300/60 shadow-[0_0_0_4px_rgba(124,58,237,0.08)] dark:text-violet-200 dark:ring-violet-400/30 dark:shadow-[0_0_0_4px_rgba(124,58,237,0.16)]"
+                                : "bg-slate-900/5 text-slate-500 ring-slate-300/50 dark:bg-white/8 dark:text-slate-400 dark:ring-white/10"
                           }`}
                         >
-                          {isDone ? <Check size={18} /> : index + 1}
+                          {isDone ? <Check size={14} /> : index + 1}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-950 dark:text-white">{step.title}</p>
-                          <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
-                            {step.description}
+                          <p
+                            className={`truncate text-[13px] font-semibold ${
+                              isActive
+                                ? "text-slate-950 dark:text-white"
+                                : isDone
+                                  ? "text-slate-700 dark:text-slate-300"
+                                  : "text-slate-500 dark:text-slate-400"
+                            }`}
+                          >
+                            {step.title}
                           </p>
+                          {isActive ? (
+                            <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                              {step.description}
+                            </p>
+                          ) : null}
                         </div>
                       </div>
-                    </div>
+                      {!isLast ? (
+                        <div
+                          className={`mx-3 h-px flex-1 transition-colors ${
+                            isDone
+                              ? "bg-gradient-to-r from-emerald-300/60 to-violet-300/60 dark:from-emerald-400/30 dark:to-violet-400/30"
+                              : "bg-slate-200 dark:bg-white/10"
+                          }`}
+                        />
+                      ) : null}
+                    </li>
                   );
                 })}
-              </div>
+              </ol>
             </div>
           </section>
 
