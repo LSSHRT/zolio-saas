@@ -19,16 +19,29 @@ import {
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
+type PublicQuoteLine = {
+  isOptional?: boolean;
+  nomPrestation?: string | null;
+  prixUnitaire?: number | string | null;
+  quantite?: number | string | null;
+};
+
 type PublicQuote = {
+  date?: string | null;
   entreprise?: {
     color?: string | null;
     logo?: string | null;
     nom?: string | null;
   } | null;
+  lignes?: PublicQuoteLine[] | null;
   nomClient?: string | null;
+  numero?: string | null;
+  remise?: number | string | null;
   signature?: string | null;
   statut?: string | null;
+  totalHT?: number | string | null;
   totalTTC?: number | string | null;
+  tva?: number | string | null;
 };
 
 const formatCurrency = (value?: number | string | null) => {
@@ -40,6 +53,22 @@ const formatCurrency = (value?: number | string | null) => {
     minimumFractionDigits: 2,
   }).format(Number.isFinite(amount) ? amount : 0);
 };
+
+function ZolioFooter() {
+  return (
+    <a
+      href="https://www.zolio.site"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-8 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3.5 py-1.5 text-xs font-medium text-slate-500 shadow-sm backdrop-blur transition hover:border-violet-200 hover:text-violet-700"
+    >
+      <span className="flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-500">
+        <NextImage src="/logo.png" alt="" width={10} height={10} className="h-2.5 w-2.5" />
+      </span>
+      Propulsé par <span className="font-semibold text-slate-700">Zolio</span>
+    </a>
+  );
+}
 
 function SignerDevisContent({ params }: { params: Promise<{ numero: string }> }) {
   const unwrappedParams = use(params);
@@ -163,21 +192,43 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
   }
 
   if (success || devis.statut === "Accepté" || devis.signature) {
+    const wasJustSigned = success;
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.08),_transparent_35%),linear-gradient(180deg,#f0fdf4_0%,#fff_100%)] px-6 py-10">
-        <div className="w-full max-w-md rounded-2xl border border-emerald-100 bg-white p-7 text-center shadow-xl shadow-emerald-100/40">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-500/10"
-          >
-            <CheckCircle className="h-10 w-10 text-emerald-600" />
-          </motion.div>
-          <h1 className="mt-6 text-2xl font-bold text-slate-900 dark:text-white">Devis signé</h1>
-          <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-slate-400">
-            Le devis n°{numero} a bien été validé. Vous pouvez maintenant fermer cette page.
-          </p>
+      <div className="flex min-h-screen flex-col items-center justify-between bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.10),_transparent_35%),linear-gradient(180deg,#f0fdf4_0%,#fff_100%)] px-6 py-10">
+        <div className="flex flex-1 items-center">
+          <div className="w-full max-w-md rounded-2xl border border-emerald-100 bg-white p-8 text-center shadow-xl shadow-emerald-100/40">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", damping: 12, stiffness: 200 }}
+              className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100"
+            >
+              <CheckCircle className="h-10 w-10 text-emerald-600" />
+            </motion.div>
+            <h1 className="mt-6 text-2xl font-bold text-slate-900">
+              {wasJustSigned ? "Merci, votre devis est signé !" : "Ce devis est déjà signé"}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              {wasJustSigned ? (
+                <>
+                  Le devis <span className="font-semibold text-slate-700">n°{numero}</span> de <span className="font-semibold text-slate-700">{companyName}</span> a bien été validé.
+                  Une copie va être envoyée par email si une adresse était renseignée.
+                </>
+              ) : (
+                <>
+                  Le devis <span className="font-semibold text-slate-700">n°{numero}</span> a déjà été validé. Vous pouvez fermer cette page en toute sérénité.
+                </>
+              )}
+            </p>
+            {devis.totalTTC != null ? (
+              <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">
+                <CheckCircle className="h-4 w-4" />
+                Montant signé : {formatCurrency(devis.totalTTC)}
+              </div>
+            ) : null}
+          </div>
         </div>
+        <ZolioFooter />
       </div>
     );
   }
@@ -257,6 +308,72 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
             </div>
           </div>
 
+          {Array.isArray(devis.lignes) && devis.lignes.length > 0 ? (
+            <div className="border-b border-slate-100 px-5 py-5 sm:px-8 sm:py-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-base font-semibold text-slate-900">Détail du devis</h2>
+                <span className="text-xs font-medium text-slate-500">
+                  {devis.lignes.length} prestation{devis.lignes.length > 1 ? "s" : ""}
+                </span>
+              </div>
+              <ul className="mt-4 divide-y divide-slate-100 rounded-2xl border border-slate-200 bg-white">
+                {devis.lignes.map((ligne, i) => {
+                  const qte = Number(ligne.quantite ?? 0);
+                  const prix = Number(ligne.prixUnitaire ?? 0);
+                  const total = qte * prix;
+                  return (
+                    <li key={i} className="flex items-start justify-between gap-4 px-4 py-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-900">
+                          {ligne.nomPrestation || "Prestation"}
+                          {ligne.isOptional ? (
+                            <span className="ml-2 inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                              Option
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {qte} × {formatCurrency(prix)}
+                        </p>
+                      </div>
+                      <p className="shrink-0 text-sm font-semibold text-slate-900 tabular-nums">
+                        {formatCurrency(total)}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+              <dl className="mt-4 space-y-1.5 rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+                {devis.totalHT != null ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-slate-600">Total HT</dt>
+                    <dd className="font-medium text-slate-900 tabular-nums">{formatCurrency(devis.totalHT)}</dd>
+                  </div>
+                ) : null}
+                {devis.tva != null && Number(devis.tva) > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-slate-600">TVA ({Number(devis.tva)}%)</dt>
+                    <dd className="font-medium text-slate-900 tabular-nums">
+                      {formatCurrency(Number(devis.totalTTC ?? 0) - Number(devis.totalHT ?? 0))}
+                    </dd>
+                  </div>
+                ) : null}
+                {devis.remise != null && Number(devis.remise) > 0 ? (
+                  <div className="flex items-center justify-between text-emerald-700">
+                    <dt>Remise globale</dt>
+                    <dd className="font-medium tabular-nums">−{Number(devis.remise)}%</dd>
+                  </div>
+                ) : null}
+                <div className="mt-2 flex items-center justify-between border-t border-slate-200 pt-2">
+                  <dt className="text-sm font-semibold text-slate-900">Total TTC</dt>
+                  <dd className="text-base font-bold tabular-nums" style={{ color: accentColor }}>
+                    {formatCurrency(devis.totalTTC)}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          ) : null}
+
           <div className="px-5 py-5 sm:px-8 sm:py-7">
             <div className="rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-4 shadow-inner shadow-slate-100/80 sm:p-5">
               <div className="flex items-start justify-between gap-3">
@@ -276,12 +393,12 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
                 </button>
               </div>
 
-              <div className="mt-4 overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
+              <div className="mt-4 overflow-hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.9)] touch-none select-none">
                 <SignaturePad
                   ref={sigCanvas}
                   penColor="#0f172a"
                   backgroundColor="rgb(255,255,255)"
-                  canvasProps={{ className: "h-[280px] w-full cursor-crosshair bg-white sm:h-72" }}
+                  canvasProps={{ className: "h-[280px] w-full cursor-crosshair bg-white sm:h-72 touch-none" }}
                 />
               </div>
 
@@ -308,6 +425,10 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
               Signature sécurisée, sans application à installer. Prenez le téléphone en portrait pour plus de confort.
             </p>
           </div>
+        </div>
+
+        <div className="mt-6 flex justify-center pb-2">
+          <ZolioFooter />
         </div>
       </div>
     </div>

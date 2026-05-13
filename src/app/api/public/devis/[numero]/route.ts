@@ -9,7 +9,6 @@ import { getCompanyProfile } from "@/lib/company";
 import { internalServerError, jsonError, logServerError, rateLimitResponse, safeJsonParse } from "@/lib/http";
 import { verifyPublicDevisToken } from "@/lib/public-devis-token";
 import {
-  parseLignes,
   normalizeLigneForOutput,
   computeTotals,
   parseNumber,
@@ -67,20 +66,29 @@ export async function GET(request: Request, context: { params: Promise<{ numero:
 
     const remiseGlobale = parseNumber(devis.remise, 0);
     const tvaGlobale = parseNumber(devis.tva, 20);
-    const { totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
+    const { totalHT, totalTTC } = computeTotals(lignes, tvaGlobale, remiseGlobale);
 
     return NextResponse.json({
       numero: devis.numero,
       nomClient: devis.client?.nom || "",
       date: devis.date.toLocaleDateString("fr-FR"),
       statut: devis.statut,
+      totalHT: totalHT.toFixed(2),
       totalTTC: totalTTC.toFixed(2),
+      tva: tvaGlobale,
+      remise: remiseGlobale,
       signature: devis.signature || "",
       entreprise: {
         nom: entreprise.nom,
         color: entreprise.color,
         logo: entreprise.logo,
       },
+      lignes: lignes.map((ligne) => ({
+        nomPrestation: ligne.nomPrestation,
+        quantite: ligne.quantite,
+        prixUnitaire: ligne.prixUnitaire,
+        isOptional: ligne.isOptional,
+      })),
     });
   } catch (error) {
     if (error instanceof Error) {
