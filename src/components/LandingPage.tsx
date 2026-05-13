@@ -7,8 +7,6 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import Link from "next/link";
-import Script from "next/script";
-import Head from "next/head";
 import {
   Lock,
   ArrowRight,
@@ -138,7 +136,16 @@ const LandingStage = ({
   id?: string;
   tone?: "violet" | "warm" | "neutral" | "band";
 }) => (
-  <section id={id} className={`landing-stage landing-stage-${tone} ${className}`}>
+  <section
+    id={id}
+    /*
+     * scroll-mt-28 (~112px) keeps the section heading clear of the
+     * sticky nav (top-4 + h-[4.5rem] ≈ 88px) when users follow #anchor
+     * links. Only applied when the section has an id since unlabelled
+     * stages are never scroll targets.
+     */
+    className={`landing-stage landing-stage-${tone} ${id ? "scroll-mt-28" : ""} ${className}`}
+  >
     <div className="landing-stage-bridge" />
     {children}
   </section>
@@ -408,12 +415,17 @@ export default function LandingPage() {
 
   return (
     <>
-      <Head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-      </Head>
+      {/*
+       * JSON-LD is rendered inline in the body — App Router does not pick
+       * up children from next/head. Google's structured-data parser
+       * accepts JSON-LD anywhere in the document, so this is correct and
+       * actually delivers the schema (the previous <Head> wrapper was a
+       * silent no-op in App Router).
+       */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="landing-shell min-h-screen selection:bg-violet-500/30 overflow-x-hidden relative">
         <div className="relative z-10">
       <div className="relative z-10">
@@ -447,7 +459,14 @@ export default function LandingPage() {
               </div>
 
               <div className="md:hidden flex items-center">
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-neutral-300 hover:text-white">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="landing-mobile-menu"
+                  aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+                  className="text-neutral-300 hover:text-white"
+                >
                   {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
               </div>
@@ -457,6 +476,7 @@ export default function LandingPage() {
           <AnimatePresence>
             {isMobileMenuOpen && (
               <motion.div
+                id="landing-mobile-menu"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
@@ -464,11 +484,11 @@ export default function LandingPage() {
               >
                 <div className="landing-panel rounded-2xl px-4 pb-6 pt-4">
                   <div className="space-y-4 flex flex-col">
-                  <a href="#features" className="block text-base font-medium text-neutral-300 hover:text-white">Fonctionnalités</a>
-                  <a href="#pricing" className="block text-base font-medium text-neutral-300 hover:text-white">Tarifs</a>
-                  <a href="#faq" className="block text-base font-medium text-neutral-300 hover:text-white">FAQ</a>
-                  <Link href="/sign-in?redirect_url=/dashboard" className="block text-base font-medium text-neutral-300 hover:text-white">Se connecter</Link>
-                  <Link href="/sign-up?redirect_url=/dashboard" className="inline-block px-5 py-3 rounded-xl bg-white text-black text-base font-semibold text-center w-full mt-4">
+                  <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Fonctionnalités</a>
+                  <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Tarifs</a>
+                  <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">FAQ</a>
+                  <Link href="/sign-in?redirect_url=/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Se connecter</Link>
+                  <Link href="/sign-up?redirect_url=/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="inline-block px-5 py-3 rounded-xl bg-white text-black text-base font-semibold text-center w-full mt-4">
                     Essayer Zolio
                   </Link>
                 </div>
