@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -380,6 +380,25 @@ const jsonLd = {
 
 export default function LandingPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileCtaVisible, setMobileCtaVisible] = useState(false);
+
+  // Show the sticky mobile CTA only after user scrolls past the hero CTA
+  // (≈ 600px on most phones). Uses rAF so we don't block the scroll thread.
+  useEffect(() => {
+    let rafId = 0;
+    const handleScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        setMobileCtaVisible(window.scrollY > 600);
+      });
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
   const supportHref = getSupportHref({
     subject: "Démo accompagnée Zolio",
     message:
@@ -876,7 +895,7 @@ export default function LandingPage() {
                 Prêt en <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">5 minutes</span>
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400">
-                Pas de configuration complexe. Choisissez votre métier, c'est prêt.
+                Pas de configuration complexe. Choisissez votre métier, c&apos;est prêt.
               </p>
             </div>
 
@@ -1626,15 +1645,33 @@ export default function LandingPage() {
           </div>
         </footer>
 
-        {/* Mobile Floating CTA */}
-        <div className="fixed bottom-6 left-4 right-4 z-50 md:hidden">
-          <Link 
-            href="/sign-up?redirect_url=/dashboard"
-            className="block w-full py-4 rounded-full bg-white text-black font-semibold text-center text-lg shadow-[0_10px_40px_rgba(255,255,255,0.2)]"
-          >
-            Créer mon compte
-          </Link>
-        </div>
+        {/* Mobile Floating CTA — scroll-aware, brand gradient, trust line */}
+        <AnimatePresence>
+          {mobileCtaVisible && (
+            <motion.div
+              initial={{ y: 120, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 120, opacity: 0 }}
+              transition={{ type: "spring", damping: 22, stiffness: 260 }}
+              className="fixed inset-x-3 z-50 md:hidden"
+              style={{ bottom: "calc(env(safe-area-inset-bottom) + 12px)" }}
+            >
+              <div className="rounded-2xl border border-white/10 bg-[#05050A]/85 p-2 pb-3 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                <Link
+                  href="/sign-up?redirect_url=/dashboard"
+                  className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 text-[15px] font-semibold text-white shadow-[0_8px_28px_rgba(139,92,246,0.45)] active:scale-[0.98]"
+                >
+                  Créer mon compte — 1 devis offert
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </Link>
+                <p className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-neutral-400">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  Sans carte bancaire · Annulable à tout moment
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* PLG Badge (Product Led Growth) */}
         <Link
