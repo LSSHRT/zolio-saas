@@ -715,12 +715,51 @@ export default function ParametresEntreprise() {
     </ClientSectionCard>
   );
 
+  const firstMissingBlock = completionItems.find((item) => !item.filled);
+
   return (
     <ClientSubpageShell
       title="Paramètres entreprise"
-      description="Préparez une base claire pour vos devis et factures sans interface tassée : identité, banque, visuel et mentions restent lisibles sur mobile vertical."
+      description="Configurez votre identité commerciale, vos coordonnées bancaires et vos relances."
       eyebrow="Réglages société"
       activeNav="tools"
+      breadcrumbs={[{ label: "Outils" }, { label: "Paramètres" }]}
+      metaPills={[
+        {
+          icon: completionPercent === 100 ? CheckCircle2 : Sparkles,
+          label: `${completionPercent}% complet`,
+          tone: completionPercent === 100 ? "emerald" : completionPercent >= 60 ? "violet" : "amber",
+        },
+        {
+          icon: documentReady ? CheckCircle2 : Sparkles,
+          label: documentReady ? "Documents OK" : "Identité à finir",
+          tone: documentReady ? "emerald" : "amber",
+        },
+        {
+          label: payoutReady ? "Banque OK" : "IBAN manquant",
+          tone: payoutReady ? "emerald" : "slate",
+        },
+        {
+          label: reviewReady ? "Avis activés" : "Avis off",
+          tone: reviewReady ? "violet" : "slate",
+        },
+      ]}
+      focusLine={
+        completionPercent === 100 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Tout est paramétré</span>
+            {" "}· Vos devis et factures s&apos;émettront avec une identité professionnelle complète.
+          </>
+        ) : firstMissingBlock ? (
+          <>
+            Pour finaliser :{" "}
+            <span className="font-semibold text-slate-800 dark:text-slate-100">{firstMissingBlock.label.toLowerCase()}</span>
+            {" "}· {firstMissingBlock.detail}
+          </>
+        ) : (
+          <>Quelques blocs encore à compléter pour des documents pro de bout en bout.</>
+        )
+      }
       actions={
         <button
           type="button"
