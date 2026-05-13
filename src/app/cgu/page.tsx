@@ -1,29 +1,63 @@
+import { LegalPageShell, LegalSection } from "@/components/legal-page-shell";
+
 export const metadata = {
   title: "Conditions Générales d'Utilisation",
-  description: "Conditions générales d'utilisation de Zolio, le logiciel de devis et factures pour artisans.",
+  description:
+    "Conditions générales d'utilisation de Zolio, le logiciel de devis et factures pour artisans.",
 };
 
 export default function CGU() {
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Conditions Générales d&apos;Utilisation (CGU)</h1>
-      <p className="mb-4">Dernière mise à jour : {new Date().toLocaleDateString()}</p>
-      
-      <h2 className="text-xl font-semibold mt-6 mb-2">1. Objet</h2>
-      <p className="mb-4">Les présentes CGU définissent les règles d&apos;accès et d&apos;utilisation de Zolio. L&apos;accès au service implique l&apos;acceptation sans réserve de ces conditions.</p>
+    <LegalPageShell
+      title="Conditions Générales d'Utilisation (CGU)"
+      lastUpdated="Mai 2026"
+      tone="emerald"
+    >
+      <LegalSection title="1. Objet">
+        <p>
+          Les présentes CGU définissent les règles d&apos;accès et d&apos;utilisation de
+          Zolio. L&apos;accès au service implique l&apos;acceptation sans réserve de
+          ces conditions.
+        </p>
+      </LegalSection>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">2. Accès au service</h2>
-      <p className="mb-4">Le service est accessible aux professionnels du bâtiment. L&apos;utilisateur s&apos;engage à fournir des informations exactes lors de son inscription.</p>
+      <LegalSection title="2. Accès au service">
+        <p>
+          Le service est accessible aux professionnels du bâtiment.
+          L&apos;utilisateur s&apos;engage à fournir des informations exactes lors de
+          son inscription.
+        </p>
+      </LegalSection>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">3. Propriété intellectuelle</h2>
-      <p className="mb-4">L&apos;ensemble des éléments constituant l&apos;application (code, design, textes) est la propriété exclusive de Zolio et ne peut être reproduit sans autorisation.</p>
+      <LegalSection title="3. Propriété intellectuelle">
+        <p>
+          L&apos;ensemble des éléments constituant l&apos;application (code, design,
+          textes) est la propriété exclusive de Zolio et ne peut être reproduit
+          sans autorisation.
+        </p>
+      </LegalSection>
 
-      <h2 className="text-xl font-semibold mt-6 mb-2">4. Utilisation du service</h2>
-      <p className="mb-4">L&apos;utilisateur est seul responsable de l&apos;usage qu&apos;il fait de l&apos;application et des documents générés. Zolio ne vérifie pas l&apos;exactitude légale ou comptable des devis et factures édités par l&apos;utilisateur.</p>
+      <LegalSection title="4. Utilisation du service">
+        <p>
+          L&apos;utilisateur est seul responsable de l&apos;usage qu&apos;il fait de
+          l&apos;application et des documents générés. Zolio ne vérifie pas
+          l&apos;exactitude légale ou comptable des devis et factures édités par
+          l&apos;utilisateur.
+        </p>
+      </LegalSection>
 
-      <div className="mt-8 pt-4 border-t">
-        <a href="/dashboard" className="text-blue-600 hover:underline">← Retour à l&apos;accueil</a>
-      </div>
-    </div>
+      <LegalSection title="5. Données personnelles">
+        <p>
+          Le traitement des données personnelles est détaillé dans notre{" "}
+          <a
+            href="/politique-confidentialite"
+            className="text-emerald-300 underline decoration-emerald-300/40 underline-offset-4 hover:text-emerald-200"
+          >
+            politique de confidentialité
+          </a>
+          . Pour exercer vos droits RGPD : contact@zolio.site.
+        </p>
+      </LegalSection>
+    </LegalPageShell>
   );
 }
