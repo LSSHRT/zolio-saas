@@ -227,6 +227,23 @@
     border-radius: var(--radius-zolio-sm);
   }
 
+  /*
+   * Global keyboard-only focus baseline.
+   * Many components use 'focus:outline-none' which strips the outline for
+   * BOTH mouse and keyboard users — a WCAG 2.4.7 violation. By scoping a
+   * fallback ring on ':focus-visible' (only active for keyboard
+   * navigation) we restore the visible affordance without re-introducing
+   * the ugly default ring on mouse clicks.
+   */
+  :where(button, a, [role="button"], [tabindex]:not([tabindex="-1"]), input, select, textarea, summary):focus-visible {
+    outline: 2px solid rgba(124, 58, 237, 0.7);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  .dark :where(button, a, [role="button"], [tabindex]:not([tabindex="-1"]), input, select, textarea, summary):focus-visible {
+    outline-color: rgba(196, 181, 253, 0.85);
+  }
+
   .font-mono {
     font-family: var(--font-mono), monospace;
   }

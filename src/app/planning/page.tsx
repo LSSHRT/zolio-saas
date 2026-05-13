@@ -223,13 +223,13 @@ export default function PlanningPage() {
       {/* Calendrier */}
       <ClientSectionCard>
         <div className="mb-3 flex items-center justify-between sm:mb-4">
-          <button onClick={prevMonth} className="rounded-xl p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button onClick={prevMonth} aria-label="Mois précédent" className="rounded-xl p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
             <ChevronLeft size={18} className="sm:w-5 sm:h-5" />
           </button>
           <h2 className="text-base font-bold text-slate-800 dark:text-white sm:text-lg">
             {MOIS_LABELS[viewMonth - 1]} {viewYear}
           </h2>
-          <button onClick={nextMonth} className="rounded-xl p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button onClick={nextMonth} aria-label="Mois suivant" className="rounded-xl p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
             <ChevronRight size={18} className="sm:w-5 sm:h-5" />
           </button>
         </div>
@@ -385,7 +385,7 @@ export default function PlanningPage() {
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">Nouvel événement</h3>
-              <button onClick={() => setShowCreateModal(false)} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+              <button type="button" onClick={() => setShowCreateModal(false)} aria-label="Fermer" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <X size={18} />
               </button>
             </div>

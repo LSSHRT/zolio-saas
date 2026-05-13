@@ -1055,6 +1055,7 @@ function HistoryModal({ client, onClose }: { client: Client; onClose: () => void
             <button
               type="button"
               onClick={onClose}
+              aria-label="Fermer le panneau client"
               className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-white/8 dark:hover:text-white"
             >
               <X className="h-5 w-5" />

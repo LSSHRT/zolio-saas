@@ -550,12 +550,16 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
       {/* Header */}
       <header className="p-4 pt-8 sm:p-6 sm:pt-10">
         <div className="flex items-start gap-2 sm:gap-4">
-          <Link href="/devis" onClick={(e) => {
-            if (isDrawer && onClose) {
-              e.preventDefault();
-              onClose();
-            }
-          }}>
+          <Link
+            href="/devis"
+            aria-label="Retour aux devis"
+            onClick={(e) => {
+              if (isDrawer && onClose) {
+                e.preventDefault();
+                onClose();
+              }
+            }}
+          >
             <motion.div whileTap={{ scale: 0.9 }} className="w-9 h-9 sm:w-10 sm:h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 mt-0.5">
               <ArrowLeft size={18} className="sm:w-5 sm:h-5" />
             </motion.div>
@@ -823,7 +827,7 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
                     />
                     {l.isOptional && <span className="text-[10px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full ml-2 shrink-0">Optionnel</span>}
                   </div>
-                  <button onClick={() => removeLigne(i)} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                  <button type="button" onClick={() => removeLigne(i)} aria-label={`Supprimer la ligne ${l.nomPrestation || i + 1}`} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <div>
