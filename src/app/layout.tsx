@@ -20,7 +20,11 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.zolio.site"),
   manifest: "/manifest.json",
+  alternates: {
+    canonical: "/",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -44,7 +48,8 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Zolio — Devis & Factures pour Artisans",
     description: "Devis en 3 min depuis le chantier. Signature digitale, facturation en 1 clic. Essayez gratuitement.",
-  }
+    images: ["/opengraph-image"],
+  },
 };
 
 export const viewport: Viewport = {

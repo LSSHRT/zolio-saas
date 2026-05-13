@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "devis chantier",
     ],
     openGraph: { title, description, type: "website" },
-    alternates: { canonical: `https://zolio.site/m/${metier}` },
+    alternates: { canonical: `https://www.zolio.site/m/${metier}` },
   };
 }
 
