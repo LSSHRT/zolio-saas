@@ -5,7 +5,9 @@ import useSWR from "swr";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import {
+  AlertTriangle,
   BadgeCheck,
+  Calendar,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
@@ -461,6 +463,34 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
       description="Suivez votre facturation, vos encaissements et vos relances dans un cockpit plus lisible, plus dense et pensé pour une vraie consultation terrain."
       activeNav="factures"
       eyebrow="Suivi de trésorerie"
+      metaPills={[
+        { icon: Calendar, label: new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }), tone: "slate" },
+        ...(lateInvoices > 0
+          ? [{ icon: AlertTriangle, label: `${lateInvoices} en retard`, tone: "rose" as const }]
+          : []),
+        ...(totalPaid > 0
+          ? [{ icon: BadgeCheck, label: `${totalPaid.toFixed(0)}€ encaissé`, tone: "emerald" as const }]
+          : []),
+      ]}
+      focusLine={
+        lateInvoices > 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              {lateInvoices} facture{lateInvoices > 1 ? "s" : ""} en retard
+            </span>
+            {" "}· Relancez dès aujourd&apos;hui pour débloquer votre trésorerie.
+          </>
+        ) : factures.length === 0 ? (
+          <>Transformez un devis accepté en facture en un clic — la numérotation et la TVA sont gérées automatiquement.</>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Trésorerie saine
+            </span>
+            {" "}· Pas de retard, continuez sur cette lancée.
+          </>
+        )
+      }
       mobileSecondaryActions={[
         {
           href: "/nouvelle-facture",

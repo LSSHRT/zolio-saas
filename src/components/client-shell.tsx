@@ -701,6 +701,12 @@ export function ClientSectionCard({
   return <section className={`client-panel rounded-2xl p-4 sm:p-5 md:p-6 ${className}`}>{children}</section>;
 }
 
+export type ClientMetaPill = {
+  icon?: LucideIcon;
+  label: string;
+  tone?: "violet" | "emerald" | "amber" | "rose" | "slate";
+};
+
 export function ClientSubpageShell({
   actions,
   activeNav,
@@ -709,6 +715,8 @@ export function ClientSubpageShell({
   children,
   description,
   eyebrow = "Espace client",
+  focusLine,
+  metaPills,
   mobilePrimaryAction,
   mobileSecondaryActions = [],
   mobileSummary,
@@ -723,6 +731,8 @@ export function ClientSubpageShell({
   children: ReactNode;
   description: string;
   eyebrow?: string;
+  focusLine?: ReactNode;
+  metaPills?: ClientMetaPill[];
   mobilePrimaryAction?: ReactNode;
   mobileSecondaryActions?: ClientMobileAction[];
   mobileSummary?: ReactNode;
@@ -730,6 +740,18 @@ export function ClientSubpageShell({
   summary?: ReactNode;
   title: string;
 }) {
+  const pillToneClass: Record<NonNullable<ClientMetaPill["tone"]>, string> = {
+    violet:
+      "border-violet-200/70 bg-violet-50/80 text-violet-700 dark:border-violet-400/20 dark:bg-violet-500/10 dark:text-violet-200 [&_svg]:text-violet-500",
+    emerald:
+      "border-emerald-200/70 bg-emerald-50/80 text-emerald-700 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-200 [&_svg]:text-emerald-500",
+    amber:
+      "border-amber-200/70 bg-amber-50/80 text-amber-700 dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200 [&_svg]:text-amber-500",
+    rose:
+      "border-rose-200/70 bg-rose-50/80 text-rose-700 dark:border-rose-400/20 dark:bg-rose-500/10 dark:text-rose-200 [&_svg]:text-rose-500",
+    slate:
+      "border-slate-200/70 bg-white/80 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 [&_svg]:text-violet-500",
+  };
   return (
     <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white sm:pb-32">
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
@@ -787,17 +809,40 @@ export function ClientSubpageShell({
                 </nav>
               )}
 
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="hidden text-xs font-semibold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400 sm:block">
-                    {eyebrow}
-                  </p>
-                  <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="hidden flex-wrap items-center gap-2 sm:flex">
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400">
+                      {eyebrow}
+                    </p>
+                    {metaPills && metaPills.length > 0 ? (
+                      <>
+                        {metaPills.map((pill, i) => {
+                          const Icon = pill.icon;
+                          return (
+                            <span
+                              key={`${pill.label}-${i}`}
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${pillToneClass[pill.tone ?? "slate"]}`}
+                            >
+                              {Icon ? <Icon size={12} /> : null}
+                              {pill.label}
+                            </span>
+                          );
+                        })}
+                      </>
+                    ) : null}
+                  </div>
+                  <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:mt-2 sm:text-2xl">
                     {title}
                   </h1>
                   <p className="mt-1 hidden text-sm text-slate-500 dark:text-slate-400 sm:block">
                     {description}
                   </p>
+                  {focusLine ? (
+                    <p className="mt-2 hidden text-sm text-slate-600 dark:text-slate-300 sm:block">
+                      {focusLine}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div className="hidden shrink-0 items-center gap-2 sm:flex">

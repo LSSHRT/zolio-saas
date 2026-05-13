@@ -6,6 +6,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Calendar,
   CheckCircle,
   Download,
   FileText,
@@ -20,6 +21,7 @@ import {
   Trash2,
   Upload,
   User,
+  Users,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -396,6 +398,34 @@ function ClientsContent() {
         description="Gardez vos coordonnées, votre historique et vos fiches de chantier dans un CRM plus propre, plus rapide et bien plus agréable sur mobile."
         activeNav="clients"
         eyebrow="CRM terrain"
+        metaPills={[
+          { icon: Calendar, label: new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }), tone: "slate" },
+          ...(clients.length > 0
+            ? [{ icon: Users, label: `${clients.length} fiche${clients.length > 1 ? "s" : ""}`, tone: "violet" as const }]
+            : []),
+          ...(clientsAvecEmail > 0
+            ? [{ icon: Mail, label: `${clientsAvecEmail} joignable${clientsAvecEmail > 1 ? "s" : ""} par email`, tone: "emerald" as const }]
+            : []),
+        ]}
+        focusLine={
+          clients.length === 0 ? (
+            <>Ajoutez votre premier client ou importez un CSV — vos devis iront plus vite ensuite.</>
+          ) : fichesCompletes < clients.length ? (
+            <>
+              <span className="font-semibold text-slate-800 dark:text-slate-100">
+                {clients.length - fichesCompletes} fiche{clients.length - fichesCompletes > 1 ? "s" : ""} à compléter
+              </span>
+              {" "}· Ajoutez email, téléphone et adresse pour des relances sans friction.
+            </>
+          ) : (
+            <>
+              <span className="font-semibold text-slate-800 dark:text-slate-100">
+                Portefeuille complet
+              </span>
+              {" "}· Toutes vos fiches sont enrichies, prêtes pour toute relance.
+            </>
+          )
+        }
         mobilePrimaryAction={
           <Link
             href="/clients/nouveau"

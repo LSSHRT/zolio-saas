@@ -21,6 +21,8 @@ import {
   CopyPlus,
   Sparkles,
   Layers,
+  Calendar,
+  TrendingUp,
   type LucideIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -481,6 +483,34 @@ export default function DevisPage() {
       description="Pilotez vos propositions, vos signatures et vos relances dans un espace plus clair, plus dense et plus mobile-friendly."
       activeNav="devis"
       eyebrow="Pipeline commercial"
+      metaPills={[
+        { icon: Calendar, label: new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }), tone: "slate" },
+        ...(totalEnAttente > 0
+          ? [{ icon: Clock, label: `${totalEnAttente} en attente de signature`, tone: "amber" as const }]
+          : []),
+        ...(totalAcceptes > 0
+          ? [{ icon: TrendingUp, label: `${totalValide.toFixed(0)}€ validés`, tone: "emerald" as const }]
+          : []),
+      ]}
+      focusLine={
+        totalEnAttente > 0 ? (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              {totalEnAttente} devis en attente
+            </span>
+            {" "}· Relancez ceux qui n&apos;ont pas répondu depuis 5+ jours pour maximiser vos conversions.
+          </>
+        ) : devis.length === 0 ? (
+          <>Créez votre premier devis en moins de 3 minutes — les templates métier font le plus gros du travail.</>
+        ) : (
+          <>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">
+              Pipeline propre
+            </span>
+            {" "}· Continuez à envoyer des devis pour alimenter votre chiffre d&apos;affaires.
+          </>
+        )
+      }
       mobilePrimaryAction={
         quota.remaining <= 0 && !quota.isPro ? (
           <button
