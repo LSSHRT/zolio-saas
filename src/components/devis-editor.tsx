@@ -1075,7 +1075,10 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
       </main>
 
       {/* Bottom action */}
-      <div className="sticky bottom-0 left-0 right-0 mt-auto border-t border-slate-100 bg-white/95 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:rounded-b-[3rem]">
+      <div
+        className="sticky bottom-0 left-0 right-0 mt-auto border-t border-slate-100 bg-white/95 p-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 sm:rounded-b-[3rem]"
+        style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+      >
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link href="/devis" className="flex-1" onClick={(e) => {
             if (isDrawer && onClose) {

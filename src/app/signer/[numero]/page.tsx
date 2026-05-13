@@ -409,7 +409,10 @@ function SignerDevisContent({ params }: { params: Promise<{ numero: string }> })
           </div>
         </motion.div>
 
-        <div className="sticky bottom-0 z-20 -mx-4 mt-auto border-t border-slate-200 bg-white/98 px-4 py-4 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-2xl sm:border sm:px-5 sm:py-5 sm:shadow-lg sm:shadow-slate-200/40">
+        <div
+          className="sticky bottom-0 z-20 -mx-4 mt-auto border-t border-slate-200 bg-white/98 px-4 backdrop-blur sm:mx-0 sm:mt-6 sm:rounded-2xl sm:border sm:px-5 sm:shadow-lg sm:shadow-slate-200/40"
+          style={{ paddingTop: "1rem", paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+        >
           <div className="space-y-3">
             <button
               type="button"

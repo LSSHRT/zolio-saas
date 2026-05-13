@@ -197,7 +197,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
-        className="client-nav-dock fixed inset-x-3 bottom-5 z-30 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-2xl px-2 py-2 lg:hidden"
+        className="client-nav-dock fixed inset-x-3 z-30 mx-auto flex w-[calc(100%-1.5rem)] max-w-md items-center justify-around gap-0.5 rounded-2xl px-2 py-2 lg:hidden"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
         data-testid="mobile-nav-dock"
       >
         {/* 2 liens gauche */}
@@ -252,7 +253,8 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
         onClick={() => setToolsOpen(true)}
-        className="fixed bottom-[5.5rem] right-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
+        className="fixed right-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
+        style={{ bottom: "calc(env(safe-area-inset-bottom) + 88px)" }}
         aria-label="Plus d'outils"
         data-testid="mobile-tools-btn"
       >
@@ -753,14 +755,20 @@ export function ClientSubpageShell({
       "border-slate-200/70 bg-white/80 text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 [&_svg]:text-violet-500",
   };
   return (
-    <div className="client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white sm:pb-32">
+    <div
+      className="client-workspace relative min-h-screen overflow-x-hidden text-slate-950 dark:text-white"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 7rem)" }}
+    >
       <div className="client-grid-overlay pointer-events-none absolute inset-0" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)]" />
 
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
-      <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-3 sm:px-6 sm:pb-32 sm:pt-4 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 xl:px-8">
+      <div
+        className="flex min-h-screen w-full flex-col px-4 pt-3 sm:px-6 sm:pt-4 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 xl:px-8"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 7rem)" }}
+      >
         {/* Mobile header */}
         <header className="client-panel sticky top-2 z-40 rounded-2xl px-4 py-3 backdrop-blur-xl sm:top-3 sm:rounded-2xl sm:px-6 sm:py-4 lg:hidden">
           <div className="flex items-center justify-between gap-3">
