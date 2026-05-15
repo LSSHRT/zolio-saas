@@ -37,6 +37,8 @@ import {
 import { MobileDialog } from "@/components/mobile-dialog";
 import { CsvUploader } from "@/components/CsvUploader";
 import { EmptyState } from "@/components/empty-state";
+import { DataTable, MetricTile, Toolbar } from "@/components/desktop";
+import { MoreHorizontal } from "lucide-react";
 
 interface Client {
   id: string;
@@ -525,6 +527,8 @@ function ClientsContent() {
           />
         }
       >
+        {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+        <div className="space-y-4 sm:space-y-6 lg:hidden">
         <ClientSectionCard className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
           <label className="flex min-h-[50px] items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-violet-500 focus-within:ring-2 focus-within:ring-violet-500/20 dark:border-white/10 dark:bg-white/6">
             <span className="flex h-5 w-5 shrink-0 items-center justify-center text-slate-400">
@@ -835,6 +839,247 @@ function ClientsContent() {
             </>
           )}
         </ClientSectionCard>
+        </div>
+
+        {/* ─── Desktop view (lg+) — v2 dense table ───────────────── */}
+        <div className="hidden lg:block lg:space-y-6">
+          {/* KPI strip */}
+          <div className="grid gap-4 lg:grid-cols-4">
+            <MetricTile
+              label="Portefeuille"
+              value={String(clients.length)}
+              detail={`${filtered.length} fiche${filtered.length > 1 ? "s" : ""} visible${filtered.length > 1 ? "s" : ""}`}
+              icon={Users}
+              tone="primary"
+            />
+            <MetricTile
+              label="Joignables"
+              value={String(clientsAvecEmail)}
+              detail="Avec une adresse email"
+              icon={Mail}
+              tone="success"
+            />
+            <MetricTile
+              label="Téléphones"
+              value={String(clientsAvecTelephone)}
+              detail="Pour relances rapides"
+              icon={Phone}
+              tone="warning"
+            />
+            <MetricTile
+              label="Fiches complètes"
+              value={String(fichesCompletes)}
+              detail="Email + téléphone + adresse"
+              icon={CheckCircle}
+              tone={fichesCompletes === clients.length && clients.length > 0 ? "success" : "neutral"}
+            />
+          </div>
+
+          {/* Toolbar */}
+          <Toolbar
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Rechercher par nom ou email…"
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={() => setImportDialogOpen(true)}
+                  disabled={isImporting}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <Upload size={14} aria-hidden />
+                  {isImporting ? "Import…" : "Importer CSV"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportCSV}
+                  disabled={clients.length === 0}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <Download size={14} aria-hidden /> Exporter CSV
+                </button>
+                <Link href="/clients/nouveau" className="lg-v2-btn lg-v2-btn-primary">
+                  <Plus size={14} aria-hidden /> Nouveau client
+                </Link>
+              </>
+            }
+            selectionBar={
+              selectedIds.size > 0 ? (
+                <>
+                  <span className="text-xs font-semibold lg-v2-text-muted">
+                    {selectedIds.size} sélectionné{selectedIds.size > 1 ? "s" : ""}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmBulkDeleteOpen(true)}
+                    disabled={isDeletingBulk}
+                    className="lg-v2-btn lg-v2-btn-secondary !text-[var(--v2-danger)] disabled:opacity-50"
+                  >
+                    <Trash2 size={14} aria-hidden />
+                    {isDeletingBulk ? "…" : "Supprimer"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedIds(new Set())}
+                    className="lg-v2-btn lg-v2-btn-ghost ml-auto"
+                  >
+                    Effacer
+                  </button>
+                </>
+              ) : null
+            }
+          />
+
+          {/* DataTable */}
+          {loading ? (
+            <div className="lg-v2-panel p-6">
+              <div className="space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center gap-4">
+                    <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-200/70 dark:bg-white/8" />
+                    <div className="h-4 flex-1 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                    <div className="h-4 w-32 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                    <div className="h-4 w-28 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={search ? Search : User}
+              tone={search ? "slate" : "violet"}
+              title={search ? "Aucun résultat" : "Aucun client pour l'instant"}
+              description={
+                search
+                  ? `Aucun client ne correspond à "${search}".`
+                  : "Centralisez vos contacts pour réutiliser leurs coordonnées sur vos devis et factures."
+              }
+              actions={
+                search
+                  ? undefined
+                  : [{ label: "Ajouter un client", href: "/clients/nouveau", variant: "primary", icon: Plus }]
+              }
+            />
+          ) : (
+            <DataTable
+              ariaLabel="Liste des clients"
+              data={filtered}
+              getRowKey={(c) => c.id}
+              rowHref={(c) => `/clients/${c.id}`}
+              selectable
+              selectedKeys={selectedIds}
+              onSelectionChange={(keys) => setSelectedIds(keys as Set<string>)}
+              defaultSortKey="nom"
+              defaultSortDirection="asc"
+              pageSize={1000}
+              columns={[
+                {
+                  key: "nom",
+                  header: "Client",
+                  cell: (c) => (
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v2-primary-soft)] text-sm font-semibold text-[var(--v2-primary)]">
+                        {(c.nom || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate text-sm font-medium lg-v2-text-strong">
+                        {c.nom}
+                      </span>
+                    </div>
+                  ),
+                  sortValue: (c) => (c.nom || "").toLowerCase(),
+                },
+                {
+                  key: "email",
+                  header: "Email",
+                  cell: (c) =>
+                    c.email ? (
+                      <span className="text-sm lg-v2-text-muted truncate block">{c.email}</span>
+                    ) : (
+                      <span className="text-xs lg-v2-text-subtle italic">—</span>
+                    ),
+                  sortValue: (c) => (c.email || "").toLowerCase(),
+                },
+                {
+                  key: "telephone",
+                  header: "Téléphone",
+                  cell: (c) =>
+                    c.telephone ? (
+                      <span className="text-sm tabular-nums lg-v2-text-muted">{c.telephone}</span>
+                    ) : (
+                      <span className="text-xs lg-v2-text-subtle italic">—</span>
+                    ),
+                  sortValue: (c) => c.telephone || "",
+                  width: "150px",
+                },
+                {
+                  key: "adresse",
+                  header: "Adresse",
+                  cell: (c) =>
+                    c.adresse ? (
+                      <span className="text-sm lg-v2-text-muted truncate block">{c.adresse}</span>
+                    ) : (
+                      <span className="text-xs lg-v2-text-subtle italic">—</span>
+                    ),
+                  sortValue: (c) => (c.adresse || "").toLowerCase(),
+                },
+                {
+                  key: "dateAjout",
+                  header: "Ajouté le",
+                  cell: (c) => <span className="text-sm lg-v2-text-muted">{c.dateAjout}</span>,
+                  sortValue: (c) => {
+                    const parts = (c.dateAjout || "").split("/");
+                    return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : c.dateAjout;
+                  },
+                  width: "120px",
+                },
+              ]}
+              rowActions={(c) => (
+                <div className="flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setHistoryClient(c);
+                    }}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0"
+                    title="Voir l'historique"
+                    aria-label={`Voir l'historique de ${c.nom}`}
+                  >
+                    <History size={14} aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleEdit(c);
+                    }}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0"
+                    title="Modifier"
+                    aria-label={`Modifier la fiche de ${c.nom}`}
+                  >
+                    <Pencil size={14} aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setPendingDeleteClient(c);
+                    }}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 hover:!text-[var(--v2-danger)]"
+                    title="Supprimer"
+                    aria-label={`Supprimer ${c.nom}`}
+                  >
+                    <MoreHorizontal size={14} aria-hidden />
+                  </button>
+                </div>
+              )}
+            />
+          )}
+        </div>
       </ClientSubpageShell>
 
       <MobileDialog
