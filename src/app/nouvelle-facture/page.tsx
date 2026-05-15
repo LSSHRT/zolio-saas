@@ -1,35 +1,30 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  Check,
   FileText,
+  Loader2,
   Plus,
   Save,
+  Search,
   Send,
   Sparkles,
-  Trash2,
-  Search,
   Tag,
-  Loader2,
-  Check,
+  Trash2,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  ClientBrandMark,
-  ClientDesktopNav,
-  ClientMobileDock,
-  ClientMobileActionsMenu,
   ClientSectionCard,
   ClientSubpageShell,
+  type ClientMetaPill,
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
-import { getTradeDefinition } from "@/lib/trades";
 
 interface LigneEditable {
   id: string;
@@ -75,7 +70,6 @@ function clearDraft() {
 }
 
 export default function NouvelleFacturePage() {
-  const { user } = useUser();
   const router = useRouter();
 
   const [step, setStep] = useState(1);
@@ -96,6 +90,9 @@ export default function NouvelleFacturePage() {
   const [aiGenerating, setAiGenerating] = useState(false);
 
   const initRef = useRef(false);
+  const draftLoadedRef = useRef(false);
+  const [draftSavedAt, setDraftSavedAt] = useState<Date | null>(null);
+  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   // Init
   useEffect(() => {
@@ -110,7 +107,10 @@ export default function NouvelleFacturePage() {
       if (draft.acompte) setAcompte(draft.acompte as string);
       if (draft.remise) setRemise(draft.remise as string);
       if (draft.step) setStep(draft.step as number);
+      setDraftSavedAt(new Date());
+      setDraftStatus("saved");
     }
+    draftLoadedRef.current = true;
 
     Promise.all([
       fetch("/api/clients").then((r) => r.json()),
@@ -123,9 +123,16 @@ export default function NouvelleFacturePage() {
       .catch(() => {});
   }, []);
 
-  // Auto-save
+  // Auto-save (debounced + skip first effect tick to avoid wiping on mount)
   useEffect(() => {
-    saveDraft({ lignes, selectedClientId, tva, acompte, remise, step });
+    if (!draftLoadedRef.current) return;
+    setDraftStatus("saving");
+    const handle = window.setTimeout(() => {
+      saveDraft({ lignes, selectedClientId, tva, acompte, remise, step });
+      setDraftSavedAt(new Date());
+      setDraftStatus("saved");
+    }, 400);
+    return () => window.clearTimeout(handle);
   }, [lignes, selectedClientId, tva, acompte, remise, step]);
 
   const selectedClient = clients.find((c) => c.id === selectedClientId);
@@ -258,9 +265,6 @@ export default function NouvelleFacturePage() {
     finally { setAiGenerating(false); }
   };
 
-  const companyTrade = getTradeDefinition(user?.unsafeMetadata?.companyTrade ?? user?.publicMetadata?.companyTrade);
-  const activeTradeKey = companyTrade?.key ?? "default";
-
   const mobileActions: ClientMobileAction[] = [
     { label: "Annuler", onClick: () => router.push("/factures"), icon: ArrowLeft },
   ];
@@ -274,27 +278,107 @@ export default function NouvelleFacturePage() {
 
   const canNext = step === 1 ? (selectedClientId || newClient.nom.trim()) : step === 2 ? lignes.length > 0 : true;
 
+  const draftLabel = (() => {
+    if (draftStatus === "saving") return "Enregistrement…";
+    if (draftStatus === "saved" && draftSavedAt) {
+      return `Brouillon · ${draftSavedAt.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+    return null;
+  })();
+
+  const clientName = selectedClient?.nom || newClient.nom.trim();
+  const metaPills: ClientMetaPill[] = [
+    { icon: FileText, label: `Étape ${step}/${steps.length} · ${steps[step - 1]?.title}`, tone: "violet" },
+    ...(clientName
+      ? [{ icon: Users, label: clientName, tone: "emerald" as const }]
+      : []),
+    ...(lignes.length > 0
+      ? [{ icon: FileText, label: `${lignes.length} ligne${lignes.length > 1 ? "s" : ""}`, tone: "slate" as const }]
+      : []),
+    ...(totalTTC > 0
+      ? [{ label: `${totalTTC.toFixed(2)}€ TTC`, tone: "violet" as const }]
+      : []),
+    ...(draftLabel
+      ? [{
+          icon: draftStatus === "saving" ? Loader2 : Save,
+          label: draftLabel,
+          tone: "slate" as const,
+        }]
+      : []),
+  ];
+
+  const focusLine = step === 1
+    ? <>Choisissez un client existant ou créez-en un nouveau pour démarrer.</>
+    : step === 2
+      ? <>Ajoutez vos prestations depuis le catalogue ou laissez l&apos;IA générer un brouillon.</>
+      : step === 3
+        ? <>Affinez TVA, remise et acompte avant de générer la facture.</>
+        : <>Vérifiez les informations puis créez la facture (avec ou sans envoi email).</>;
+
   return (
     <ClientSubpageShell
       title="Nouvelle facture"
       description="Créez une facture directement — sans passer par un devis."
       eyebrow="Création rapide"
-      activeNav="tools"
+      activeNav="factures"
+      backHref="/factures"
+      breadcrumbs={[
+        { label: "Factures", href: "/factures" },
+        { label: "Nouvelle facture" },
+      ]}
+      metaPills={metaPills}
+      focusLine={focusLine}
+      mobileSecondaryActions={mobileActions}
       mobilePrimaryAction={
-        <Link href="/factures" className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+        <Link
+          href="/factures"
+          aria-label="Retour aux factures"
+          className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-100 px-3.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200"
+        >
           <ArrowLeft size={16} /> Retour
         </Link>
       }
     >
       {/* Steps */}
       <ClientSectionCard className="!p-3">
-        <div className="flex items-center gap-1.5">
-          {steps.map((s) => (
-            <div key={s.num} className={`flex-1 rounded-lg py-1.5 text-center text-xs font-semibold transition ${step === s.num ? "bg-gradient-zolio text-white" : step > s.num ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500"}`}>
-              {step > s.num ? "✓" : s.num} {s.title}
-            </div>
-          ))}
-        </div>
+        <ol
+          aria-label="Étapes de création"
+          className="flex items-center gap-1.5"
+        >
+          {steps.map((s) => {
+            const isActive = step === s.num;
+            const isDone = step > s.num;
+            const canJumpBack = isDone;
+            const baseClass =
+              "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-center text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40";
+            const stateClass = isActive
+              ? "bg-gradient-zolio text-white shadow-brand"
+              : isDone
+                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20"
+                : "bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500";
+            return (
+              <li key={s.num} className="flex flex-1">
+                {canJumpBack ? (
+                  <button
+                    type="button"
+                    onClick={() => setStep(s.num)}
+                    aria-label={`Revenir à l'étape ${s.num} (${s.title})`}
+                    className={`${baseClass} ${stateClass}`}
+                  >
+                    <Check size={12} aria-hidden /> {s.title}
+                  </button>
+                ) : (
+                  <span
+                    aria-current={isActive ? "step" : undefined}
+                    className={`${baseClass} ${stateClass}`}
+                  >
+                    <span aria-hidden>{s.num}</span> {s.title}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ol>
       </ClientSectionCard>
 
       {/* STEP 1: Client */}
@@ -313,7 +397,14 @@ export default function NouvelleFacturePage() {
                 <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">{selectedClient.nom}</p>
                 <p className="text-xs text-slate-500 truncate">{selectedClient.email || selectedClient.telephone}</p>
               </div>
-              <button onClick={() => setSelectedClientId("")} className="shrink-0 p-2 text-slate-400"><Trash2 size={16} /></button>
+              <button
+                type="button"
+                onClick={() => setSelectedClientId("")}
+                aria-label="Retirer le client sélectionné"
+                className="shrink-0 rounded-full p-2 text-slate-400 transition hover:bg-slate-900/5 hover:text-rose-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/40 dark:hover:bg-white/8"
+              >
+                <Trash2 size={16} aria-hidden />
+              </button>
             </div>
           ) : (
             <>
@@ -383,7 +474,7 @@ export default function NouvelleFacturePage() {
           </ClientSectionCard>
 
           {/* Lignes */}
-          {lignes.map((l, i) => (
+          {lignes.map((l) => (
             <ClientSectionCard key={l.id} className="!p-4">
               <div className="flex items-center justify-between mb-2">
                 <input
@@ -392,7 +483,14 @@ export default function NouvelleFacturePage() {
                   placeholder="Nom de la prestation..."
                   className="flex-1 mr-2 bg-transparent border-b border-slate-200 dark:border-slate-700 py-1 text-sm font-medium focus:outline-none focus:border-violet-500 dark:text-white"
                 />
-                <button onClick={() => removeLine(l.id)} className="text-red-400"><Trash2 size={14} /></button>
+                <button
+                  type="button"
+                  onClick={() => removeLine(l.id)}
+                  aria-label={`Supprimer la ligne ${l.nomPrestation || "sans nom"}`}
+                  className="shrink-0 rounded-full p-2 text-rose-400 transition hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/40 dark:hover:bg-rose-500/10"
+                >
+                  <Trash2 size={14} aria-hidden />
+                </button>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div>
@@ -503,9 +601,13 @@ export default function NouvelleFacturePage() {
         <div className="client-panel rounded-2xl px-4 py-4 shadow-[0_32px_90px_-52px_rgba(15,23,42,0.42)] sm:rounded-2xl">
           <div className="flex items-center gap-3">
             {step > 1 && step < 4 && (
-              <button onClick={() => setStep(step - 1)}
-                className="flex items-center justify-center rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                <ArrowLeft size={16} />
+              <button
+                type="button"
+                onClick={() => setStep(step - 1)}
+                aria-label={`Étape précédente : ${steps[step - 2]?.title}`}
+                className="flex items-center justify-center rounded-xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                <ArrowLeft size={16} aria-hidden />
               </button>
             )}
 
