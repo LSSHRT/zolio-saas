@@ -36,6 +36,8 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import { EmptyState } from "@/components/empty-state";
+import { DataTable, MetricTile, Toolbar } from "@/components/desktop";
+import { MoreHorizontal } from "lucide-react";
 
 interface Facture {
   numero: string;
@@ -617,6 +619,8 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
         />
       }
     >
+      {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard className="grid gap-3 xl:grid-cols-[1.1fr_0.9fr]">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1134,6 +1138,322 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense table ───────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Facturé"
+            value={`${totalFacture.toFixed(0)}€`}
+            detail={`${factures.length} facture${factures.length > 1 ? "s" : ""} émises`}
+            icon={FileText}
+            tone="primary"
+          />
+          <MetricTile
+            label="Encaissé"
+            value={`${totalPaid.toFixed(0)}€`}
+            detail={`${paidInvoices} facture${paidInvoices > 1 ? "s" : ""} réglée${paidInvoices > 1 ? "s" : ""}`}
+            icon={BadgeCheck}
+            tone="success"
+          />
+          <MetricTile
+            label="En retard"
+            value={String(lateInvoices)}
+            detail="À relancer en priorité"
+            icon={AlertTriangle}
+            tone={lateInvoices > 0 ? "danger" : "neutral"}
+          />
+          <MetricTile
+            label="Vue active"
+            value={String(filtered.length)}
+            detail={`${factures.length} factures au total`}
+            tone="neutral"
+          />
+        </div>
+
+        {/* Toolbar : search + actions globales + bulk */}
+        <Toolbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Rechercher par client ou n° facture…"
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={handleExportURSSAF}
+                className="lg-v2-btn lg-v2-btn-secondary"
+              >
+                <FileText size={14} aria-hidden /> Livre URSSAF
+              </button>
+              <button
+                type="button"
+                onClick={() => window.open("/api/export/fec?year=2026", "_blank")}
+                className="lg-v2-btn lg-v2-btn-secondary"
+              >
+                <FileText size={14} aria-hidden /> Export FEC
+              </button>
+              <button
+                type="button"
+                onClick={handleExportCSV}
+                className="lg-v2-btn lg-v2-btn-primary"
+              >
+                <Download size={14} aria-hidden /> Export comptable
+              </button>
+            </>
+          }
+          selectionBar={
+            selectedIds.size > 0 ? (
+              <>
+                <span className="text-xs font-semibold lg-v2-text-muted">
+                  {selectedIds.size} sélectionné{selectedIds.size > 1 ? "s" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleBulkMarkPaid}
+                  disabled={isBulkMarkingPaid}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <BadgeCheck size={14} aria-hidden />
+                  {isBulkMarkingPaid ? "…" : "Marquer payées"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkSendRelance}
+                  disabled={isBulkRelancing}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <Send size={14} aria-hidden />
+                  {isBulkRelancing ? "…" : "Relancer"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBatchPdfExport}
+                  disabled={isExportingPdf}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <FileText size={14} aria-hidden />
+                  {isExportingPdf ? "…" : "Export PDF"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmBulkDeleteOpen(true)}
+                  disabled={isDeletingBulk}
+                  className="lg-v2-btn lg-v2-btn-secondary !text-[var(--v2-danger)] disabled:opacity-50"
+                >
+                  <Trash2 size={14} aria-hidden />
+                  {isDeletingBulk ? "…" : "Supprimer"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="lg-v2-btn lg-v2-btn-ghost ml-auto"
+                >
+                  Effacer
+                </button>
+              </>
+            ) : null
+          }
+        />
+
+        {/* DataTable */}
+        {loading ? (
+          <div className="lg-v2-panel p-6">
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="h-4 w-20 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  <div className="h-4 flex-1 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  <div className="h-4 w-24 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  <div className="h-4 w-20 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={search ? Search : FileText}
+            tone={search ? "slate" : "emerald"}
+            title={search ? "Aucun résultat" : "Aucune facture générée"}
+            description={
+              search
+                ? `Aucune facture ne correspond à "${search}".`
+                : "Convertissez un devis accepté en facture, ou créez-en une directement."
+            }
+            actions={
+              search
+                ? undefined
+                : [{ label: "Nouvelle facture", href: "/nouvelle-facture", variant: "primary", icon: FileText }]
+            }
+          />
+        ) : (
+          <>
+            <DataTable
+              ariaLabel="Liste des factures"
+              data={filtered}
+              getRowKey={(f) => f.numero}
+              rowHref={(f) => `/factures/${f.numero}`}
+              selectable
+              selectedKeys={selectedIds}
+              onSelectionChange={(keys) => setSelectedIds(keys as Set<string>)}
+              defaultSortKey="date"
+              defaultSortDirection="desc"
+              pageSize={1000}
+              columns={[
+                {
+                  key: "numero",
+                  header: "N°",
+                  cell: (f) => (
+                    <span className="font-mono text-sm font-medium lg-v2-text">{f.numero}</span>
+                  ),
+                  sortValue: (f) => f.numero,
+                  width: "120px",
+                },
+                {
+                  key: "date",
+                  header: "Date",
+                  cell: (f) => <span className="text-sm lg-v2-text-muted">{f.date}</span>,
+                  sortValue: (f) => {
+                    const parts = (f.date || "").split("/");
+                    return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : f.date;
+                  },
+                  width: "110px",
+                },
+                {
+                  key: "client",
+                  header: "Client",
+                  cell: (f) => (
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--v2-primary-soft)] text-xs font-semibold text-[var(--v2-primary)]">
+                        {(f.nomClient || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <span className="truncate text-sm font-medium lg-v2-text-strong">
+                        {f.nomClient}
+                      </span>
+                    </div>
+                  ),
+                  sortValue: (f) => (f.nomClient || "").toLowerCase(),
+                },
+                {
+                  key: "ht",
+                  header: "Total HT",
+                  cell: (f) => (
+                    <span className="text-sm tabular-nums lg-v2-text-muted">{f.totalHT}€</span>
+                  ),
+                  sortValue: (f) => parseFloat(f.totalHT) || 0,
+                  align: "right",
+                  width: "110px",
+                },
+                {
+                  key: "ttc",
+                  header: "Total TTC",
+                  cell: (f) => (
+                    <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                      {f.totalTTC}€
+                    </span>
+                  ),
+                  sortValue: (f) => parseFloat(f.totalTTC) || 0,
+                  align: "right",
+                  width: "120px",
+                },
+                {
+                  key: "statut",
+                  header: "Statut",
+                  cell: (f) => {
+                    const late = isLate(f);
+                    const display =
+                      f.statut === "Payée" ? "Payée" : late ? "En retard" : f.statut;
+                    const tone =
+                      display === "Payée"
+                        ? "lg-v2-pill-info"
+                        : display === "En retard"
+                          ? "lg-v2-pill-danger"
+                          : "lg-v2-pill-success";
+                    return <span className={`lg-v2-pill ${tone}`}>{display}</span>;
+                  },
+                  sortValue: (f) => f.statut,
+                  width: "120px",
+                },
+              ]}
+              rowActions={(f) => (
+                <div className="flex items-center justify-end gap-1">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDownloadPDF(f);
+                    }}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0"
+                    title="Télécharger PDF"
+                    aria-label={`Télécharger PDF facture ${f.numero}`}
+                  >
+                    <Download size={14} aria-hidden />
+                  </button>
+                  {f.statut !== "Payée" ? (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void handleMarkAsPaid(f.numero);
+                      }}
+                      disabled={markingPaid === f.numero}
+                      className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 disabled:opacity-50"
+                      title="Marquer payée"
+                      aria-label={`Marquer la facture ${f.numero} comme payée`}
+                    >
+                      <BadgeCheck size={14} aria-hidden />
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setPendingDeleteFacture(f);
+                    }}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 hover:!text-[var(--v2-danger)]"
+                    title="Supprimer"
+                    aria-label={`Supprimer la facture ${f.numero}`}
+                  >
+                    <MoreHorizontal size={14} aria-hidden />
+                  </button>
+                </div>
+              )}
+            />
+
+            {pagination && pagination.totalPages > 1 ? (
+              <div className="flex items-center justify-between rounded-xl lg-v2-panel-muted px-4 py-3">
+                <p className="text-xs lg-v2-text-muted">
+                  Page {pagination.page} sur {pagination.totalPages} · {pagination.total} facture{pagination.total > 1 ? "s" : ""}
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={pagination.page <= 1}
+                    className="lg-v2-btn lg-v2-btn-secondary !py-1.5 disabled:opacity-40"
+                  >
+                    <ChevronLeft size={14} aria-hidden />
+                    Précédent
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                    disabled={pagination.page >= pagination.totalPages}
+                    className="lg-v2-btn lg-v2-btn-secondary !py-1.5 disabled:opacity-40"
+                  >
+                    Suivant
+                    <ChevronRight size={14} aria-hidden />
+                  </button>
+                </div>
+              </div>
+            ) : null}
+          </>
+        )}
+      </div>
 
       <MobileDialog
         open={Boolean(pendingDeleteFacture)}
