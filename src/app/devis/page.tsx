@@ -42,6 +42,8 @@ import CompareOptions from "@/components/compare-options";
 import { PaywallModal } from "@/components/paywall-modal";
 import { usePaywall, computeQuotaTrigger } from "@/lib/use-paywall";
 import { EmptyState } from "@/components/empty-state";
+import { DataTable, MetricTile, Toolbar, ToggleGroup } from "@/components/desktop";
+import { MoreHorizontal } from "lucide-react";
 
 interface Devis {
   id: string;
@@ -617,6 +619,8 @@ export default function DevisPage() {
         />
       }
     >
+      {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1084,6 +1088,384 @@ export default function DevisPage() {
           )
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense table ───────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="CA validé"
+            value={`${totalValide.toFixed(0)}€`}
+            detail={`${totalAcceptes} devis acceptés`}
+            icon={CheckCircle}
+            tone="success"
+          />
+          <MetricTile
+            label="En attente"
+            value={`${totalAttente.toFixed(0)}€`}
+            detail={`${totalEnAttente} signature${totalEnAttente > 1 ? "s" : ""} à convertir`}
+            icon={Clock}
+            tone={totalEnAttente > 0 ? "warning" : "neutral"}
+          />
+          <MetricTile
+            label="Total TTC"
+            value={`${totalMois.toFixed(0)}€`}
+            detail="Vision globale du portefeuille"
+            icon={TrendingUp}
+            tone="primary"
+          />
+          <MetricTile
+            label="Quota"
+            value={quota.isPro ? "∞" : `${quota.remaining}/${quota.limit}`}
+            detail={quota.isPro ? "Plan Pro actif" : "Devis restants ce mois"}
+            tone={quota.remaining <= 0 && !quota.isPro ? "danger" : "neutral"}
+          />
+        </div>
+
+        {/* Toolbar : search + view toggle + actions globales + bulk */}
+        <Toolbar
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Rechercher par client ou n° devis…"
+          filters={
+            <ToggleGroup
+              ariaLabel="Mode d'affichage"
+              value={viewMode}
+              onChange={(v) => setViewMode(v)}
+              items={[
+                { value: "list", label: "Liste", icon: <List size={13} aria-hidden /> },
+                { value: "kanban", label: "Kanban", icon: <LayoutGrid size={13} aria-hidden /> },
+              ]}
+            />
+          }
+          actions={
+            <>
+              <Link href="/nouveau-devis/options" className="lg-v2-btn lg-v2-btn-secondary">
+                <Layers size={14} aria-hidden /> Multi-options
+              </Link>
+              {quota.remaining <= 0 && !quota.isPro ? (
+                <button
+                  type="button"
+                  onClick={() => openPaywall("quota_100", { used: quota.used, limit: quota.limit })}
+                  className="lg-v2-btn lg-v2-btn-primary"
+                  style={{ backgroundColor: "var(--v2-warning)" }}
+                >
+                  <Sparkles size={14} aria-hidden /> Passer Pro
+                </button>
+              ) : (
+                <Link href="/nouveau-devis" className="lg-v2-btn lg-v2-btn-primary">
+                  <FileText size={14} aria-hidden /> Nouveau devis
+                </Link>
+              )}
+            </>
+          }
+          selectionBar={
+            selectedIds.size > 0 ? (
+              <>
+                <span className="text-xs font-semibold lg-v2-text-muted">
+                  {selectedIds.size} sélectionné{selectedIds.size > 1 ? "s" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleBulkStatut("Accepté")}
+                  disabled={isBulkUpdating}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <CheckCircle size={14} aria-hidden />
+                  {isBulkUpdating ? "…" : "Accepter"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleBulkStatut("Refusé")}
+                  disabled={isBulkUpdating}
+                  className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                >
+                  <XCircle size={14} aria-hidden />
+                  {isBulkUpdating ? "…" : "Refuser"}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleBulkDelete}
+                  disabled={isDeletingBulk}
+                  className="lg-v2-btn lg-v2-btn-secondary !text-[var(--v2-danger)] disabled:opacity-50"
+                >
+                  <Trash2 size={14} aria-hidden />
+                  {isDeletingBulk ? "…" : "Supprimer"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="lg-v2-btn lg-v2-btn-ghost ml-auto"
+                >
+                  Effacer
+                </button>
+              </>
+            ) : null
+          }
+        />
+
+        {/* Desktop list (table) or Kanban */}
+        {loading ? (
+          <div className="lg-v2-panel p-6">
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className="h-4 w-20 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  <div className="h-4 flex-1 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  <div className="h-4 w-24 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                  <div className="h-4 w-20 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : filtered.length === 0 ? (
+          <EmptyState
+            icon={search ? Search : FileText}
+            tone={search ? "slate" : "violet"}
+            title={search ? "Aucun résultat" : "Aucun devis encore"}
+            description={
+              search
+                ? `Aucun devis ne correspond à "${search}". Essayez avec d'autres mots-clés.`
+                : "Créez votre premier devis pour démarrer votre pipeline commercial."
+            }
+            actions={
+              search
+                ? undefined
+                : [{ label: "Créer mon premier devis", href: "/nouveau-devis", variant: "primary", icon: FileText }]
+            }
+            footnote={search ? undefined : "3 devis gratuits par mois — illimité avec Pro."}
+          />
+        ) : viewMode === "list" ? (
+          <DataTable
+            ariaLabel="Liste des devis"
+            data={filtered}
+            getRowKey={(d) => d.numero}
+            rowHref={(d) => `/devis/${d.numero}`}
+            selectable
+            selectedKeys={selectedIds}
+            onSelectionChange={(keys) => setSelectedIds(keys as Set<string>)}
+            defaultSortKey="date"
+            defaultSortDirection="desc"
+            pageSize={1000}
+            columns={[
+              {
+                key: "numero",
+                header: "N°",
+                cell: (d) => (
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-medium lg-v2-text">{d.numero}</span>
+                    {d.optionLabel ? (
+                      <span className="lg-v2-pill lg-v2-pill-primary !py-0.5 capitalize">
+                        <Layers size={10} aria-hidden /> {d.optionLabel}
+                      </span>
+                    ) : null}
+                  </div>
+                ),
+                sortValue: (d) => d.numero,
+                width: "180px",
+              },
+              {
+                key: "date",
+                header: "Date",
+                cell: (d) => <span className="text-sm lg-v2-text-muted">{d.date}</span>,
+                sortValue: (d) => {
+                  const parts = (d.date || "").split("/");
+                  return parts.length === 3 ? `${parts[2]}-${parts[1]}-${parts[0]}` : d.date;
+                },
+                width: "110px",
+              },
+              {
+                key: "client",
+                header: "Client",
+                cell: (d) => (
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--v2-primary-soft)] text-xs font-semibold text-[var(--v2-primary)]">
+                      {(d.nomClient || "?").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium lg-v2-text-strong">{d.nomClient}</p>
+                      {d.lu_le ? (
+                        <p className="truncate text-[11px] lg-v2-text-subtle">
+                          Lu le {new Date(d.lu_le).toLocaleDateString("fr-FR")}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                ),
+                sortValue: (d) => (d.nomClient || "").toLowerCase(),
+              },
+              {
+                key: "ht",
+                header: "Total HT",
+                cell: (d) => (
+                  <span className="text-sm tabular-nums lg-v2-text-muted">{d.totalHT}€</span>
+                ),
+                sortValue: (d) => parseFloat(d.totalHT) || 0,
+                align: "right",
+                width: "110px",
+              },
+              {
+                key: "ttc",
+                header: "Total TTC",
+                cell: (d) => (
+                  <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                    {d.totalTTC}€
+                  </span>
+                ),
+                sortValue: (d) => parseFloat(d.totalTTC) || 0,
+                align: "right",
+                width: "120px",
+              },
+              {
+                key: "statut",
+                header: "Statut",
+                cell: (d) => {
+                  const tone = isEnAttente(d.statut)
+                    ? "lg-v2-pill-warning"
+                    : d.statut === "Accepté"
+                      ? "lg-v2-pill-success"
+                      : d.statut === "Refusé"
+                        ? "lg-v2-pill-danger"
+                        : "lg-v2-pill-neutral";
+                  return <span className={`lg-v2-pill ${tone}`}>{d.statut}</span>;
+                },
+                sortValue: (d) => d.statut,
+                width: "140px",
+              },
+            ]}
+            rowActions={(d) => {
+              const pending = isEnAttente(d.statut);
+              return (
+                <div className="flex items-center justify-end gap-1">
+                  {pending ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          void handleUpdateStatut(d.numero, "Accepté");
+                        }}
+                        disabled={updatingStatut === d.numero}
+                        className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 hover:!text-[var(--v2-success)] disabled:opacity-50"
+                        title="Valider"
+                        aria-label={`Valider le devis ${d.numero}`}
+                      >
+                        <Check size={14} aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          void handleUpdateStatut(d.numero, "Refusé");
+                        }}
+                        disabled={updatingStatut === d.numero}
+                        className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 hover:!text-[var(--v2-danger)] disabled:opacity-50"
+                        title="Refuser"
+                        aria-label={`Refuser le devis ${d.numero}`}
+                      >
+                        <X size={14} aria-hidden />
+                      </button>
+                    </>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      void handleDuplicate(d.numero);
+                    }}
+                    disabled={duplicating === d.numero}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 disabled:opacity-50"
+                    title="Dupliquer"
+                    aria-label={`Dupliquer le devis ${d.numero}`}
+                  >
+                    <CopyPlus size={14} aria-hidden />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      void handleDelete(d.numero);
+                    }}
+                    disabled={deleting === d.numero}
+                    className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 hover:!text-[var(--v2-danger)] disabled:opacity-50"
+                    title="Supprimer"
+                    aria-label={`Supprimer le devis ${d.numero}`}
+                  >
+                    <MoreHorizontal size={14} aria-hidden />
+                  </button>
+                </div>
+              );
+            }}
+          />
+        ) : (
+          /* Kanban v2 */
+          <div className="grid grid-cols-3 gap-4">
+            {["En attente", "Accepté", "Refusé"].map((colStatus) => {
+              const colDevis = filtered.filter((d) =>
+                colStatus === "En attente" ? isEnAttente(d.statut) : d.statut === colStatus,
+              );
+              const tonePill =
+                colStatus === "En attente"
+                  ? "lg-v2-pill-warning"
+                  : colStatus === "Accepté"
+                    ? "lg-v2-pill-success"
+                    : "lg-v2-pill-danger";
+              const ColIcon =
+                colStatus === "En attente" ? Clock : colStatus === "Accepté" ? CheckCircle : XCircle;
+              return (
+                <div key={colStatus} className="lg-v2-panel p-4">
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ColIcon size={16} className="lg-v2-text-muted" aria-hidden />
+                      <h3 className="text-sm font-semibold lg-v2-text-strong">{colStatus}</h3>
+                    </div>
+                    <span className={`lg-v2-pill ${tonePill}`}>{colDevis.length}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {colDevis.length === 0 ? (
+                      <p className="rounded-lg border border-dashed lg-v2-divider px-3 py-6 text-center text-xs lg-v2-text-subtle">
+                        Aucun devis
+                      </p>
+                    ) : (
+                      colDevis.map((d) => (
+                        <Link
+                          key={d.numero}
+                          href={`/devis/${d.numero}`}
+                          className="lg-v2-card-interactive block p-3"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-semibold lg-v2-text-strong">
+                                {d.nomClient}
+                              </p>
+                              <p className="mt-0.5 font-mono text-[11px] lg-v2-text-subtle">
+                                {d.numero}
+                              </p>
+                            </div>
+                            <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                              {d.totalTTC}€
+                            </span>
+                          </div>
+                          {d.optionLabel ? (
+                            <span className="lg-v2-pill lg-v2-pill-primary mt-2 capitalize">
+                              <Layers size={10} aria-hidden /> {d.optionLabel}
+                            </span>
+                          ) : null}
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </ClientSubpageShell>
 
       <MobileDialog
