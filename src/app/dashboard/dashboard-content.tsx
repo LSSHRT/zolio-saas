@@ -794,7 +794,21 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                     </span>
                   )}
                 </div>
-                <div className="mt-4">{tresorerie ? <DashboardTresorerie data={tresorerie} /> : <p className="text-sm text-slate-400">Chargement…</p>}</div>
+                <div className="mt-4" aria-busy={!tresorerie}>
+                  {tresorerie ? (
+                    <DashboardTresorerie data={tresorerie} />
+                  ) : (
+                    <div className="space-y-3" aria-label="Chargement de la trésorerie">
+                      <div className="h-3 w-1/3 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+                      <div className="h-2.5 w-full animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
+                      <div className="h-2.5 w-5/6 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.section>
 
               <motion.section {...sectionMotion(0.14)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
@@ -806,7 +820,20 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                     </span>
                   )}
                 </div>
-                <div className="mt-4">{benefice ? <DashboardBenefice data={benefice} /> : <p className="text-sm text-slate-400">Chargement…</p>}</div>
+                <div className="mt-4" aria-busy={!benefice}>
+                  {benefice ? (
+                    <DashboardBenefice data={benefice} />
+                  ) : (
+                    <div className="space-y-3" aria-label="Chargement du bénéfice">
+                      <div className="h-7 w-2/3 animate-pulse rounded-lg bg-slate-200 dark:bg-white/10" />
+                      <div className="h-2.5 w-full animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
+                      <div className="grid grid-cols-2 gap-3 pt-2">
+                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </motion.section>
 
               {funnel && funnel.length > 0 && (
@@ -1019,7 +1046,17 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                     </div>
                     {tresorerie && <span className={`client-chip ring-1 ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-500/12 text-emerald-700 ring-emerald-300/40" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-500/12 text-amber-700 ring-amber-300/40" : "bg-rose-500/12 text-rose-700 ring-rose-300/40"}`}>{tresorerie.tauxRecouvrement}% rec.</span>}
                   </div>
-                  <div className="mt-3">{tresorerie ? <DashboardTresorerie data={tresorerie} /> : <p className="text-sm text-slate-500">Chargement…</p>}</div>
+                  <div className="mt-3" aria-busy={!tresorerie}>
+                    {tresorerie ? (
+                      <DashboardTresorerie data={tresorerie} />
+                    ) : (
+                      <div className="space-y-2" aria-label="Chargement de la trésorerie">
+                        <div className="h-3 w-1/3 animate-pulse rounded-full bg-slate-200/80 dark:bg-white/8" />
+                        <div className="h-2 w-full animate-pulse rounded-full bg-slate-200/60 dark:bg-white/6" />
+                        <div className="h-2 w-5/6 animate-pulse rounded-full bg-slate-200/60 dark:bg-white/6" />
+                      </div>
+                    )}
+                  </div>
                 </motion.section>
 
                 {/* Bénéfice */}
@@ -1031,7 +1068,16 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                     </div>
                     {benefice && <span className={`rounded-full px-3 py-1.5 text-sm font-bold ${benefice.margePct >= 70 ? "bg-emerald-500/12 text-emerald-700" : benefice.margePct >= 40 ? "bg-amber-500/12 text-amber-700" : "bg-rose-500/12 text-rose-700"}`}>{benefice.margePct}% marge</span>}
                   </div>
-                  <div className="mt-3">{benefice ? <DashboardBenefice data={benefice} /> : <p className="text-sm text-slate-500">Chargement…</p>}</div>
+                  <div className="mt-3" aria-busy={!benefice}>
+                    {benefice ? (
+                      <DashboardBenefice data={benefice} />
+                    ) : (
+                      <div className="space-y-2" aria-label="Chargement du bénéfice">
+                        <div className="h-6 w-2/3 animate-pulse rounded-lg bg-slate-200/80 dark:bg-white/8" />
+                        <div className="h-2 w-full animate-pulse rounded-full bg-slate-200/60 dark:bg-white/6" />
+                      </div>
+                    )}
+                  </div>
                 </motion.section>
               </div>
 

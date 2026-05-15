@@ -5,7 +5,6 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft,
   BadgeCheck,
   BookOpen,
   Calendar,
@@ -19,12 +18,10 @@ import {
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
 import {
-  ClientMobileActionsMenu,
   ClientSectionCard,
   ClientSubpageShell,
   type ClientMobileAction,
@@ -287,12 +284,43 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
   if (loading) {
     return (
       <ClientSubpageShell
-        title="Facture"
-        description="Chargement..."
+        title="Chargement…"
+        description="Récupération de la facture"
         activeNav="factures"
         eyebrow="Facture"
+        backHref="/factures"
+        breadcrumbs={[{ label: "Factures", href: "/factures" }, { label: "Chargement…" }]}
       >
-        <div className="flex items-center justify-center py-20 text-slate-400">Chargement...</div>
+        <ClientSectionCard>
+          <div className="flex items-start gap-3">
+            <div className="h-14 w-14 shrink-0 animate-pulse rounded-2xl bg-slate-200 dark:bg-white/6" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-1/2 animate-pulse rounded-full bg-slate-200 dark:bg-white/6" />
+              <div className="h-3 w-1/3 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/5" />
+            </div>
+            <div className="h-6 w-16 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/5" />
+          </div>
+        </ClientSectionCard>
+        <ClientSectionCard>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-2 rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800/50">
+                <div className="h-3 w-12 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/5" />
+                <div className="h-6 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-white/6" />
+              </div>
+            ))}
+          </div>
+        </ClientSectionCard>
+        <ClientSectionCard>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <div key={i} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3 dark:bg-slate-800/50">
+                <div className="h-3 w-24 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/5" />
+                <div className="h-4 w-20 animate-pulse rounded-full bg-slate-200 dark:bg-white/6" />
+              </div>
+            ))}
+          </div>
+        </ClientSectionCard>
       </ClientSubpageShell>
     );
   }
