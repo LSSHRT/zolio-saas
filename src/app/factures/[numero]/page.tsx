@@ -27,6 +27,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { MetricTile } from "@/components/desktop";
 
 interface FactureDetail {
   id: string;
@@ -413,6 +414,8 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
       }
       mobileSecondaryActions={getMobileActions()}
     >
+      {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       {/* Header Card */}
       <motion.div {...sectionMotion}>
         <ClientSectionCard>
@@ -660,6 +663,244 @@ export default function FactureDetailPage({ params }: { params: Promise<{ numero
           </div>
         </ClientSectionCard>
       </motion.div>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 detail layout ───────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* Strip de KPIs */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          <MetricTile
+            label="Total HT"
+            value={formatCurrency(facture.totalHT)}
+            detail="Hors taxes"
+            icon={FileText}
+            tone="neutral"
+          />
+          <MetricTile
+            label="TVA"
+            value={`${facture.tva}%`}
+            detail="Taux appliqué"
+            tone="neutral"
+          />
+          <MetricTile
+            label="Total TTC"
+            value={formatCurrency(facture.totalTTC)}
+            detail={isPayee ? "Encaissé" : late ? "En attente — en retard" : "En attente de paiement"}
+            icon={BadgeCheck}
+            tone={isPayee ? "success" : late ? "danger" : "primary"}
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+          {/* Col gauche : Infos + Stripe + Relances + Notes */}
+          <div className="flex flex-col gap-6">
+            {/* Informations */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="lg-v2-eyebrow">Informations</h2>
+                <Clock size={14} className="lg-v2-text-subtle" aria-hidden />
+              </div>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-xs font-medium lg-v2-text-subtle">Client</dt>
+                  <dd className="mt-1 text-sm font-semibold lg-v2-text-strong truncate">
+                    {facture.nomClient}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium lg-v2-text-subtle">Email</dt>
+                  <dd className="mt-1 text-sm lg-v2-text-muted truncate">
+                    {facture.emailClient || "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium lg-v2-text-subtle">Date d&apos;émission</dt>
+                  <dd className="mt-1 text-sm font-medium lg-v2-text-strong">
+                    {formatDateFR(facture.date)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium lg-v2-text-subtle">Date d&apos;échéance</dt>
+                  <dd
+                    className={`mt-1 text-sm font-medium ${late && !isPayee ? "text-[var(--v2-danger)]" : "lg-v2-text-strong"}`}
+                  >
+                    {formatDateFR(facture.dateEcheance)}
+                  </dd>
+                </div>
+                {facture.devisStatut ? (
+                  <div className="col-span-2">
+                    <dt className="text-xs font-medium lg-v2-text-subtle">Devis associé</dt>
+                    <dd className="mt-1 text-sm lg-v2-text-muted">
+                      Statut devis :{" "}
+                      <span className="font-semibold lg-v2-text-strong">{facture.devisStatut}</span>
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+              {late && !isPayee ? (
+                <div className="mt-4 flex items-center gap-2 rounded-lg border border-transparent bg-[var(--v2-danger-soft)] px-3 py-2 text-xs font-medium text-[var(--v2-danger)]">
+                  <AlertTriangle size={14} aria-hidden />
+                  Échéance dépassée — lancez une relance pour débloquer la trésorerie.
+                </div>
+              ) : null}
+            </section>
+
+            {/* Stripe (conditionnel) */}
+            {facture.stripeSessionId ? (
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="lg-v2-eyebrow">Paiement Stripe</h2>
+                  <BadgeCheck size={14} className="text-[var(--v2-success)]" aria-hidden />
+                </div>
+                <div className="flex items-center justify-between gap-4 rounded-xl border border-transparent bg-[var(--v2-success-soft)] px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[var(--v2-success)]">Payé via Stripe</p>
+                    <p className="mt-0.5 truncate font-mono text-[11px] lg-v2-text-subtle">
+                      {facture.stripeSessionId}
+                    </p>
+                  </div>
+                  <a
+                    href={`https://dashboard.stripe.com/payments/${facture.stripeSessionId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="lg-v2-btn lg-v2-btn-secondary shrink-0"
+                  >
+                    Voir sur Stripe
+                  </a>
+                </div>
+              </section>
+            ) : null}
+
+            {/* Relances (conditionnel) */}
+            {facture.derniereRelanceNiveau > 0 ? (
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h2 className="lg-v2-eyebrow">Historique relances</h2>
+                  <Send size={14} className="lg-v2-text-subtle" aria-hidden />
+                </div>
+                <div className="flex items-center justify-between rounded-xl border border-transparent bg-[var(--v2-warning-soft)] px-4 py-3">
+                  <span className="text-sm font-medium text-[var(--v2-warning)]">
+                    Dernière relance :{" "}
+                    <strong>{REMINDER_LABELS[facture.derniereRelanceNiveau] || "Inconnue"}</strong>
+                  </span>
+                  <span className="text-xs lg-v2-text-subtle">
+                    {formatDateFR(facture.derniereRelanceDate)}
+                  </span>
+                </div>
+              </section>
+            ) : null}
+
+            {/* Notes internes */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="lg-v2-eyebrow flex items-center gap-1.5">
+                  <BookOpen size={12} aria-hidden /> Notes internes
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setEditNotes(!editNotes)}
+                  className="text-xs font-medium text-[var(--v2-primary)] transition hover:underline"
+                >
+                  {editNotes ? "Annuler" : facture.notes ? "Modifier" : "Ajouter"}
+                </button>
+              </div>
+              {editNotes ? (
+                <div className="space-y-3">
+                  <textarea
+                    value={notesDraft}
+                    onChange={(e) => setNotesDraft(e.target.value)}
+                    rows={4}
+                    placeholder="Ajouter une note interne…"
+                    className="w-full rounded-lg border lg-v2-divider bg-transparent p-3 text-sm lg-v2-text focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveNotes}
+                    disabled={savingNotes}
+                    className="lg-v2-btn lg-v2-btn-primary disabled:opacity-50"
+                  >
+                    {savingNotes ? "Enregistrement…" : "Enregistrer"}
+                  </button>
+                </div>
+              ) : facture.notes ? (
+                <p className="whitespace-pre-wrap text-sm lg-v2-text-muted">{facture.notes}</p>
+              ) : (
+                <p className="text-sm italic lg-v2-text-subtle">
+                  Aucune note pour cette facture.
+                </p>
+              )}
+            </section>
+          </div>
+
+          {/* Col droite : Actions panel */}
+          <aside className="lg-v2-panel sticky top-6 h-fit p-5">
+            <h2 className="lg-v2-eyebrow mb-4">Actions</h2>
+            <div className="flex flex-col gap-2">
+              {!isPayee ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleMarkAsPaid}
+                    disabled={markingPaid}
+                    className="lg-v2-btn lg-v2-btn-primary w-full justify-center disabled:opacity-50"
+                  >
+                    <BadgeCheck size={14} aria-hidden />
+                    {markingPaid ? "Mise à jour…" : "Marquer comme payée"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRelance}
+                    disabled={sendingRelance}
+                    className="lg-v2-btn lg-v2-btn-secondary w-full justify-center disabled:opacity-50"
+                  >
+                    <Send size={14} aria-hidden />
+                    {sendingRelance ? "Envoi…" : "Envoyer une relance"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handlePayLink}
+                    disabled={creatingPayLink}
+                    className="lg-v2-btn lg-v2-btn-secondary w-full justify-center disabled:opacity-50"
+                  >
+                    <Link2 size={14} aria-hidden />
+                    {creatingPayLink ? "Création…" : "Lien de paiement Stripe"}
+                  </button>
+                </>
+              ) : googleReviewLink ? (
+                <button
+                  type="button"
+                  onClick={handleReviewRequest}
+                  className="lg-v2-btn lg-v2-btn-primary w-full justify-center"
+                >
+                  <Mail size={14} aria-hidden />
+                  Demander un avis Google
+                </button>
+              ) : null}
+
+              <button
+                type="button"
+                onClick={handleDownloadPDF}
+                className="lg-v2-btn lg-v2-btn-secondary w-full justify-center"
+              >
+                <Download size={14} aria-hidden />
+                Télécharger PDF
+              </button>
+
+              <div className="my-2 border-t lg-v2-divider" />
+
+              <button
+                type="button"
+                onClick={() => setShowDeleteDialog(true)}
+                className="lg-v2-btn lg-v2-btn-ghost w-full justify-center !text-[var(--v2-danger)]"
+              >
+                <Trash2 size={14} aria-hidden />
+                Supprimer la facture
+              </button>
+            </div>
+          </aside>
+        </div>
+      </div>
 
       {/* Delete Dialog */}
       <MobileDialog
