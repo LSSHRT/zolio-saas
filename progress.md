@@ -24,18 +24,26 @@
 - `/clients/[id]` : 4 MetricTile + 2-col layout (contact dl + historique DataTable vs actions sticky)
 - Note : `/devis/[numero]` est un éditeur (formulaire) → reporté Phase 4e
 
-### Phase 4a — Onboarding (en cours)
+### Phase 4a — Onboarding
 - `/onboarding` : wizard 3 étapes wrap mobile lg:hidden + desktop v2 hidden lg:flex
   - Header + step indicator (numéros + labels + lignes)
   - lg-v2-panel card avec 5-col métier grid, 2-col form, dl résumé
   - Boutons v2 primary/ghost
+
+### Phase 4b — Nouvelle facture
+- `/nouvelle-facture` : wrap mobile wizard 4 étapes lg:hidden + desktop v2 single-page form hidden lg:grid
+  - 2 colonnes : main (col-span-8) + summary rail sticky (col-span-4)
+  - Section Client : recherche + liste 8 résultats + bouton "Nouveau client" (réutilise MobileDialog)
+  - Section Lignes : recherche catalogue avec dropdown + boutons IA / Ligne libre + table dense inline-edit (désignation/qté/unité/PU/TVA/total/supprimer)
+  - Section Options : grille 3-col TVA / Remise / Acompte
+  - Summary rail : KPI TTC + ventilation HT / Remise / HT net / TVA / Acompte / À régler + indicateur autosave
+  - Actions sticky : Créer la facture / Créer et envoyer / Annuler avec disabled state si client manquant ou aucune ligne
 
 ---
 
 ## 📋 Phases restantes
 
 ### Phase 4 — Formulaires (lourd)
-- [ ] 4b `/nouvelle-facture` (~680 lignes)
 - [ ] 4c `/nouveau-devis` (~1100 lignes) + sous-pages
 - [ ] 4d `/nouveau-devis/options`
 - [ ] 4e `DevisEditor` (1266 lignes, component partagé avec drawer)
@@ -93,4 +101,4 @@ lg-v2-btn / lg-v2-btn-*   : boutons primary/secondary/ghost/danger
 
 ---
 
-*Dernier commit : `b99a736` — feat(design-v2): /clients/[id] desktop detail layout v2*
+*Dernière phase complétée : Phase 4b — `/nouvelle-facture` desktop v2 single-page dense form*
