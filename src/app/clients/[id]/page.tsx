@@ -22,6 +22,8 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { EmptyState } from "@/components/empty-state";
+import { DataTable, MetricTile } from "@/components/desktop";
+import { CheckCircle, Plus, Receipt } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -195,6 +197,8 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </Link>
       }
     >
+      {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       {/* Contact */}
       <ClientSectionCard>
         <div className="flex items-center gap-4">
@@ -330,6 +334,238 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 detail layout ───────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Devis"
+            value={String(stats.nbDevis)}
+            detail={`${stats.acceptedCount} accepté${stats.acceptedCount > 1 ? "s" : ""}`}
+            icon={FileText}
+            tone="primary"
+          />
+          <MetricTile
+            label="Factures"
+            value={String(stats.nbFactures)}
+            detail="Documents émis"
+            icon={Receipt}
+            tone="neutral"
+          />
+          <MetricTile
+            label="Total facturé"
+            value={fc(stats.totalFactures)}
+            detail="Chiffre d'affaires"
+            icon={Euro}
+            tone="success"
+          />
+          <MetricTile
+            label="Acceptés"
+            value={String(stats.acceptedCount)}
+            detail="Devis signés / acceptés"
+            icon={CheckCircle}
+            tone={stats.acceptedCount > 0 ? "success" : "neutral"}
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+          {/* Col gauche : Contact + Historique */}
+          <div className="flex flex-col gap-6">
+            {/* Contact */}
+            <section className="lg-v2-panel p-5">
+              <h2 className="lg-v2-eyebrow mb-4">Contact</h2>
+              <div className="flex items-start gap-4">
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[var(--v2-primary-soft)] text-xl font-bold text-[var(--v2-primary)]">
+                  {client.nom.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-lg font-semibold lg-v2-text-strong">{client.nom}</p>
+                  {client.dateAjout ? (
+                    <p className="mt-0.5 text-xs lg-v2-text-subtle">
+                      Client depuis le {client.dateAjout}
+                    </p>
+                  ) : null}
+                  <dl className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {client.email ? (
+                      <div>
+                        <dt className="flex items-center gap-1.5 text-xs font-medium lg-v2-text-subtle">
+                          <Mail size={11} aria-hidden /> Email
+                        </dt>
+                        <dd className="mt-1">
+                          <a
+                            href={`mailto:${client.email}`}
+                            className="text-sm font-medium text-[var(--v2-primary)] transition hover:underline"
+                          >
+                            {client.email}
+                          </a>
+                        </dd>
+                      </div>
+                    ) : null}
+                    {client.telephone ? (
+                      <div>
+                        <dt className="flex items-center gap-1.5 text-xs font-medium lg-v2-text-subtle">
+                          <Phone size={11} aria-hidden /> Téléphone
+                        </dt>
+                        <dd className="mt-1">
+                          <a
+                            href={`tel:${client.telephone}`}
+                            className="text-sm font-medium lg-v2-text-strong transition hover:text-[var(--v2-primary)]"
+                          >
+                            {client.telephone}
+                          </a>
+                        </dd>
+                      </div>
+                    ) : null}
+                    {client.adresse ? (
+                      <div className="sm:col-span-2">
+                        <dt className="flex items-center gap-1.5 text-xs font-medium lg-v2-text-subtle">
+                          <MapPin size={11} aria-hidden /> Adresse
+                        </dt>
+                        <dd className="mt-1 text-sm lg-v2-text-muted">{client.adresse}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </div>
+              </div>
+            </section>
+
+            {/* Historique */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="lg-v2-eyebrow flex items-center gap-1.5">
+                  <TrendingUp size={12} aria-hidden /> Historique
+                </h2>
+                <span className="text-xs lg-v2-text-subtle">
+                  {historiques.length} document{historiques.length > 1 ? "s" : ""}
+                </span>
+              </div>
+              {historiques.length === 0 ? (
+                <EmptyState
+                  icon={Sparkles}
+                  tone="violet"
+                  size="sm"
+                  title="Aucun échange pour ce client"
+                  description="Créez son premier devis ou sa première facture pour démarrer la relation."
+                  actions={[
+                    { label: "Nouveau devis", href: "/nouveau-devis", variant: "primary", icon: FileText },
+                    { label: "Nouvelle facture", href: "/nouvelle-facture", variant: "secondary", icon: Receipt },
+                  ]}
+                />
+              ) : (
+                <DataTable
+                  ariaLabel={`Historique des documents de ${client.nom}`}
+                  data={historiques}
+                  getRowKey={(h) => `${h.type}-${h.id}`}
+                  rowHref={(h) => (h.type === "facture" ? `/factures/${h.id}` : `/devis/${h.id}`)}
+                  defaultSortKey="date"
+                  defaultSortDirection="desc"
+                  pageSize={1000}
+                  columns={[
+                    {
+                      key: "type",
+                      header: "Type",
+                      cell: (h) => (
+                        <span
+                          className={`lg-v2-pill ${h.type === "facture" ? "lg-v2-pill-success" : "lg-v2-pill-primary"}`}
+                        >
+                          <FileText size={11} aria-hidden />
+                          {h.type === "facture" ? "Facture" : "Devis"}
+                        </span>
+                      ),
+                      sortValue: (h) => h.type,
+                      width: "120px",
+                    },
+                    {
+                      key: "id",
+                      header: "N°",
+                      cell: (h) => (
+                        <span className="font-mono text-sm font-medium lg-v2-text">{h.id}</span>
+                      ),
+                      sortValue: (h) => h.id,
+                      width: "150px",
+                    },
+                    {
+                      key: "date",
+                      header: "Date",
+                      cell: (h) => <span className="text-sm lg-v2-text-muted">{h.date}</span>,
+                      sortValue: (h) => new Date(h.date).getTime(),
+                      width: "120px",
+                    },
+                    {
+                      key: "statut",
+                      header: "Statut",
+                      cell: (h) => {
+                        const tone =
+                          h.statut === "Accepté" || h.statut === "Signé" || h.statut === "Payée"
+                            ? "lg-v2-pill-success"
+                            : h.statut === "Refusé" || h.statut === "Annulée" || h.statut === "En retard"
+                              ? "lg-v2-pill-danger"
+                              : "lg-v2-pill-warning";
+                        return <span className={`lg-v2-pill ${tone}`}>{h.statut}</span>;
+                      },
+                      sortValue: (h) => h.statut,
+                      width: "120px",
+                    },
+                    {
+                      key: "totalTTC",
+                      header: "Total TTC",
+                      cell: (h) => (
+                        <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                          {fc(h.totalTTC)}
+                        </span>
+                      ),
+                      sortValue: (h) => h.totalTTC,
+                      align: "right",
+                    },
+                  ]}
+                />
+              )}
+            </section>
+          </div>
+
+          {/* Col droite : Actions panel */}
+          <aside className="lg-v2-panel sticky top-6 h-fit p-5">
+            <h2 className="lg-v2-eyebrow mb-4">Actions</h2>
+            <div className="flex flex-col gap-2">
+              <Link href="/nouveau-devis" className="lg-v2-btn lg-v2-btn-primary w-full justify-center">
+                <Plus size={14} aria-hidden /> Nouveau devis
+              </Link>
+              <Link
+                href="/nouvelle-facture"
+                className="lg-v2-btn lg-v2-btn-secondary w-full justify-center"
+              >
+                <Plus size={14} aria-hidden /> Nouvelle facture
+              </Link>
+
+              {client.email ? (
+                <a
+                  href={`mailto:${client.email}`}
+                  className="lg-v2-btn lg-v2-btn-secondary w-full justify-center"
+                >
+                  <Mail size={14} aria-hidden /> Envoyer un email
+                </a>
+              ) : null}
+              {client.telephone ? (
+                <a
+                  href={`tel:${client.telephone}`}
+                  className="lg-v2-btn lg-v2-btn-secondary w-full justify-center"
+                >
+                  <Phone size={14} aria-hidden /> Appeler
+                </a>
+              ) : null}
+
+              <div className="my-2 border-t lg-v2-divider" />
+
+              <Link href="/clients" className="lg-v2-btn lg-v2-btn-ghost w-full justify-center">
+                <ArrowLeft size={14} aria-hidden /> Retour à la liste
+              </Link>
+            </div>
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
   );
 }
