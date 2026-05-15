@@ -16,6 +16,8 @@ import {
   ClientSubpageShell,
 } from "@/components/client-shell";
 import { EmptyState } from "@/components/empty-state";
+import { Calendar, Layers, TrendingDown } from "lucide-react";
+import { DataTable, MetricTile, Toolbar } from "@/components/desktop";
 
 // recharts is ~150KB — lazy load it so it only ships when the chart is
 // actually rendered (desktop + non-empty expenses)
@@ -246,6 +248,8 @@ function DepensesContent() {
         />
       }
     >
+      {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -358,6 +362,212 @@ function DepensesContent() {
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense layout ───────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Total"
+            value={`${totalDepenses.toFixed(0)}€`}
+            detail="Montant filtré TTC"
+            icon={TrendingDown}
+            tone="primary"
+          />
+          <MetricTile
+            label="Ce mois"
+            value={String(thisMonthCount)}
+            detail="Dépenses enregistrées"
+            icon={Receipt}
+            tone="success"
+          />
+          <MetricTile
+            label="Catégories"
+            value={String(categoriesCount)}
+            detail="Répartitions actives"
+            icon={Layers}
+            tone="warning"
+          />
+          <MetricTile
+            label="Dernière"
+            value={latestExpenseLabel}
+            detail="Dernière date visible"
+            icon={Calendar}
+            tone="neutral"
+          />
+        </div>
+
+        {/* Toolbar + chart side */}
+        <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+          <div className="flex flex-col gap-6">
+            <Toolbar
+              searchValue={searchTerm}
+              onSearchChange={setSearchTerm}
+              searchPlaceholder="Rechercher une dépense…"
+              actions={
+                <>
+                  <button
+                    type="button"
+                    onClick={handleExportCSV}
+                    disabled={exporting}
+                    className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
+                  >
+                    <Download size={14} aria-hidden />
+                    {exporting ? "…" : "Export CSV"}
+                  </button>
+                  <Link href="/depenses/nouveau" className="lg-v2-btn lg-v2-btn-primary">
+                    <Plus size={14} aria-hidden /> Nouvelle dépense
+                  </Link>
+                </>
+              }
+            />
+
+            {!data ? (
+              <div className="lg-v2-panel p-6">
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div key={i} className="flex items-center gap-4">
+                      <div className="h-4 w-24 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                      <div className="h-4 flex-1 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                      <div className="h-4 w-20 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : filteredDepenses.length === 0 ? (
+              <EmptyState
+                icon={Receipt}
+                tone="amber"
+                title={searchTerm ? "Aucun résultat" : "Aucune dépense trouvée"}
+                description={
+                  searchTerm
+                    ? `Aucune dépense ne correspond à "${searchTerm}".`
+                    : "Ajoutez vos achats au fil du terrain pour garder un suivi propre."
+                }
+                actions={
+                  searchTerm
+                    ? undefined
+                    : [{ label: "Ajouter une dépense", href: "/depenses/nouveau", variant: "primary", icon: Plus }]
+                }
+              />
+            ) : (
+              <>
+                <DataTable
+                  ariaLabel="Liste des dépenses"
+                  data={filteredDepenses}
+                  getRowKey={(d) => d.id}
+                  defaultSortKey="date"
+                  defaultSortDirection="desc"
+                  pageSize={1000}
+                  columns={[
+                    {
+                      key: "date",
+                      header: "Date",
+                      cell: (d) => (
+                        <span className="text-sm tabular-nums lg-v2-text-muted">
+                          {new Date(d.date).toLocaleDateString("fr-FR")}
+                        </span>
+                      ),
+                      sortValue: (d) => new Date(d.date).getTime(),
+                      width: "120px",
+                    },
+                    {
+                      key: "categorie",
+                      header: "Catégorie",
+                      cell: (d) => (
+                        <span className="lg-v2-pill lg-v2-pill-neutral">
+                          <Tag size={11} aria-hidden /> {d.categorie || "Autre"}
+                        </span>
+                      ),
+                      sortValue: (d) => (d.categorie || "Autre").toLowerCase(),
+                      width: "180px",
+                    },
+                    {
+                      key: "description",
+                      header: "Description",
+                      cell: (d) => (
+                        <span className="block truncate text-sm font-medium lg-v2-text-strong">
+                          {d.description}
+                        </span>
+                      ),
+                      sortValue: (d) => (d.description || "").toLowerCase(),
+                    },
+                    {
+                      key: "montant",
+                      header: "Montant",
+                      cell: (d) => (
+                        <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                          {d.montant.toFixed(2)}€
+                        </span>
+                      ),
+                      sortValue: (d) => d.montant,
+                      align: "right",
+                      width: "140px",
+                    },
+                  ]}
+                  rowActions={(d) => (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        void handleDelete(d.id);
+                      }}
+                      disabled={deletingId === d.id}
+                      className="lg-v2-btn lg-v2-btn-ghost h-8 w-8 !p-0 hover:!text-[var(--v2-danger)] disabled:opacity-50"
+                      title="Supprimer"
+                      aria-label={`Supprimer la dépense ${d.description}`}
+                    >
+                      <Trash2 size={14} aria-hidden />
+                    </button>
+                  )}
+                />
+
+                {pagination && pagination.totalPages > 1 ? (
+                  <div className="flex items-center justify-between rounded-xl lg-v2-panel-muted px-4 py-3">
+                    <p className="text-xs lg-v2-text-muted">
+                      Page {pagination.page} sur {pagination.totalPages} · {pagination.total} dépense{pagination.total > 1 ? "s" : ""}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={pagination.page <= 1}
+                        className="lg-v2-btn lg-v2-btn-secondary !py-1.5 disabled:opacity-40"
+                      >
+                        <ChevronLeft size={14} aria-hidden /> Précédent
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
+                        disabled={pagination.page >= pagination.totalPages}
+                        className="lg-v2-btn lg-v2-btn-secondary !py-1.5 disabled:opacity-40"
+                      >
+                        Suivant <ChevronRight size={14} aria-hidden />
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+
+          {/* Chart panel side */}
+          <aside className="lg-v2-panel p-5">
+            <h2 className="lg-v2-eyebrow">Répartition par catégorie</h2>
+            {categorieBreakdown.length > 0 ? (
+              <div className="mt-3 h-[260px]">
+                <DepensesPieChart data={categorieBreakdown} />
+              </div>
+            ) : (
+              <p className="mt-3 rounded-lg border border-dashed lg-v2-divider px-3 py-8 text-center text-xs lg-v2-text-subtle">
+                Aucune donnée à afficher
+              </p>
+            )}
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
   );
 }
