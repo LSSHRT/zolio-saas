@@ -6,17 +6,22 @@ import useSWR from "swr";
 import { motion } from "framer-motion";
 import {
   ArrowLeft,
+  Calendar,
+  Euro,
   FileText,
   Mail,
   MapPin,
   Phone,
+  Sparkles,
   TrendingUp,
 } from "lucide-react";
 import {
   ClientSectionCard,
   ClientSubpageShell,
+  type ClientMetaPill,
   type ClientMobileAction,
 } from "@/components/client-shell";
+import { EmptyState } from "@/components/empty-state";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -116,18 +121,70 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
 
   if (!client) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-violet-500/20 border-t-violet-500" />
-      </div>
+      <ClientSubpageShell
+        title="Chargement…"
+        description="Récupération de la fiche client"
+        eyebrow="Client"
+        activeNav="clients"
+        backHref="/clients"
+        breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: "Chargement…" }]}
+      >
+        <ClientSectionCard>
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 shrink-0 animate-pulse rounded-2xl bg-slate-200 dark:bg-white/6" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-2/3 animate-pulse rounded-full bg-slate-200 dark:bg-white/6" />
+              <div className="h-3 w-1/3 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/5" />
+            </div>
+          </div>
+        </ClientSectionCard>
+        <ClientSectionCard>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2 text-center">
+                <div className="mx-auto h-3 w-12 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/5" />
+                <div className="mx-auto h-6 w-16 animate-pulse rounded-full bg-slate-200 dark:bg-white/6" />
+              </div>
+            ))}
+          </div>
+        </ClientSectionCard>
+      </ClientSubpageShell>
     );
   }
+
+  const lastInteraction = historiques[0];
+  const focusLine = lastInteraction ? (
+    <>
+      <span className="font-semibold text-slate-800 dark:text-slate-100">
+        {lastInteraction.type === "facture" ? "Dernière facture" : "Dernier devis"} #{lastInteraction.id}
+      </span>
+      {" "}· {lastInteraction.date} · {fc(lastInteraction.totalTTC)} · {lastInteraction.statut.toLowerCase()}
+    </>
+  ) : (
+    <>Aucun devis ni facture pour ce client — créez votre premier document pour démarrer la relation.</>
+  );
+
+  const metaPills: ClientMetaPill[] = [
+    { icon: FileText, label: `${stats.nbDevis} devis`, tone: "violet" },
+    { icon: FileText, label: `${stats.nbFactures} facture${stats.nbFactures > 1 ? "s" : ""}`, tone: "emerald" },
+    ...(stats.totalFactures > 0
+      ? [{ icon: Euro, label: `${fc(stats.totalFactures)} facturé`, tone: "emerald" as const }]
+      : []),
+    ...(client.dateAjout
+      ? [{ icon: Calendar, label: `Client depuis ${client.dateAjout}`, tone: "slate" as const }]
+      : []),
+  ];
 
   return (
     <ClientSubpageShell
       title={client.nom}
       description={`Fiche client · Créé le ${client.dateAjout}`}
-      eyebrow="Client"
+      eyebrow="Fiche client"
       activeNav="clients"
+      backHref="/clients"
+      breadcrumbs={[{ label: "Clients", href: "/clients" }, { label: client.nom }]}
+      metaPills={metaPills}
+      focusLine={focusLine}
       mobileSecondaryActions={mobileActions}
       mobilePrimaryAction={
         <Link
@@ -209,12 +266,17 @@ export default function ClientDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         {historiques.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center dark:border-white/10">
-            <FileText size={32} className="mx-auto text-slate-300 dark:text-slate-600" />
-            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
-              Aucun devis ou facture pour ce client.
-            </p>
-          </div>
+          <EmptyState
+            icon={Sparkles}
+            tone="violet"
+            size="sm"
+            title="Aucun échange pour ce client"
+            description="Créez son premier devis ou sa première facture pour démarrer la relation commerciale."
+            actions={[
+              { label: "Nouveau devis", href: "/nouveau-devis", variant: "primary", icon: FileText },
+              { label: "Nouvelle facture", href: "/nouvelle-facture", variant: "secondary", icon: FileText },
+            ]}
+          />
         ) : (
           <div className="space-y-2">
             {historiques.map((item, i) => (
