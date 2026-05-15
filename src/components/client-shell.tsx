@@ -385,16 +385,13 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
       <Link
         key={item.href}
         href={item.href}
-        className={`group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors ${
-          isActive
-            ? "bg-gradient-to-r from-violet-500/15 to-orange-400/10 font-semibold text-violet-700 dark:from-violet-600/20 dark:to-orange-500/10 dark:text-white"
-            : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-        }`}
+        className={`lg-v2-nav-link ${isActive ? "lg-v2-nav-link-active" : ""}`}
+        aria-current={isActive ? "page" : undefined}
       >
-        <Icon size={16} strokeWidth={isActive ? 2.2 : 1.7} className="shrink-0" />
+        <Icon size={16} strokeWidth={isActive ? 2.2 : 1.7} className="shrink-0" aria-hidden />
         <span className="flex-1 truncate">{item.label}</span>
         {options?.badge && options.badge > 0 ? (
-          <span className="ml-auto inline-flex min-w-[18px] items-center justify-center rounded-full bg-rose-500 px-1 py-0.5 text-[10px] font-bold leading-none text-white">
+          <span className="ml-auto inline-flex min-w-[18px] items-center justify-center rounded-full bg-[var(--v2-danger)] px-1 py-0.5 text-[10px] font-bold leading-none text-white">
             {options.badge > 99 ? "99+" : options.badge}
           </span>
         ) : null}
@@ -409,7 +406,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-[220px] flex-col border-r border-slate-200/80 bg-gradient-to-b from-white via-white to-slate-50/80 lg:flex dark:border-slate-800/80 dark:from-slate-950 dark:via-slate-950 dark:to-[#080611]">
+    <aside className="lg-v2-sidebar fixed inset-y-0 left-0 z-30 hidden w-[240px] flex-col lg:flex">
       <div className="h-[2px] bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400" />
 
       {/* ── TOP (fixe) : brand + search + CTA ───────────────── */}
@@ -422,11 +419,11 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           type="button"
           onClick={openCommandPalette}
           aria-label="Rechercher · Cmd+K"
-          className="flex h-9 w-full items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 text-[12.5px] text-slate-500 transition-colors hover:border-slate-300 hover:bg-white hover:text-slate-900 dark:border-white/8 dark:bg-white/[0.03] dark:text-slate-400 dark:hover:border-white/12 dark:hover:bg-white/[0.06] dark:hover:text-white"
+          className="lg-v2-input flex h-9 items-center gap-2 !py-0 !px-2.5 text-[12.5px] lg-v2-text-muted hover:lg-v2-text"
         >
-          <Search size={14} strokeWidth={1.8} className="shrink-0" />
+          <Search size={14} strokeWidth={1.8} className="shrink-0" aria-hidden />
           <span className="flex-1 text-left">Rechercher</span>
-          <kbd className="hidden items-center rounded border border-slate-200 bg-white px-1.5 py-0.5 font-mono text-[10px] text-slate-500 xl:inline-flex dark:border-white/10 dark:bg-white/5 dark:text-slate-500">
+          <kbd className="hidden items-center rounded border lg-v2-divider bg-[var(--v2-panel-muted)] px-1.5 py-0.5 font-mono text-[10px] lg-v2-text-subtle xl:inline-flex">
             ⌘K
           </kbd>
         </button>
@@ -435,7 +432,7 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           href="/nouveau-devis"
           className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-3 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:shadow-violet-600/30 hover:brightness-110"
         >
-          <Plus size={15} /> Nouveau devis
+          <Plus size={15} aria-hidden /> Nouveau devis
         </Link>
       </div>
 
@@ -445,13 +442,11 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           {mainItems.map((item) => navLink(item))}
         </nav>
 
-        <div className="my-3 border-t border-slate-200/70 dark:border-white/[0.06]" />
+        <div className="my-3 border-t lg-v2-divider" />
 
         {toolGroups.map((group) => (
           <div key={group.label} className="mb-3">
-            <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
-              {group.label}
-            </p>
+            <p className="mb-1.5 px-2.5 lg-v2-eyebrow">{group.label}</p>
             <nav className="flex flex-col gap-0.5">
               {group.items.map((item) =>
                 navLink(item, { badge: item.href === "/notifications" ? unreadCount : undefined }),
@@ -460,16 +455,16 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
           </div>
         ))}
 
-        <div className="mt-3 border-t border-slate-200/70 pt-3 dark:border-white/[0.06]">
+        <div className="mt-3 border-t lg-v2-divider pt-3">
           <nav className="flex flex-col gap-0.5">
             {footerItems.map((item) => navLink(item))}
             <a
               href={SUPPORT_HREF}
               target={SUPPORT_IS_EXTERNAL ? "_blank" : undefined}
               rel={SUPPORT_IS_EXTERNAL ? "noreferrer" : undefined}
-              className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+              className="lg-v2-nav-link"
             >
-              <LifeBuoy size={16} strokeWidth={1.7} className="shrink-0" />
+              <LifeBuoy size={16} strokeWidth={1.7} className="shrink-0" aria-hidden />
               <span className="flex-1">Support</span>
             </a>
           </nav>
@@ -477,10 +472,10 @@ export function ClientDesktopNav({ active }: { active: ClientNavKey }) {
       </div>
 
       {/* ── BOTTOM (fixe) : user + theme toggle ─────────────── */}
-      <div className="shrink-0 border-t border-slate-200/70 px-3 py-3 dark:border-white/[0.06]">
-        <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white/80 px-2 py-1.5 dark:border-white/[0.06] dark:bg-white/[0.02]">
+      <div className="shrink-0 border-t lg-v2-divider px-3 py-3">
+        <div className="flex items-center gap-2 rounded-lg border lg-v2-divider bg-[var(--v2-panel-muted)] px-2 py-1.5">
           <UserButton />
-          <span className="flex-1 truncate text-[12.5px] font-medium text-slate-700 dark:text-slate-200">Mon compte</span>
+          <span className="flex-1 truncate text-[12.5px] font-medium lg-v2-text">Mon compte</span>
           <div className="shrink-0 [&_button]:!h-8 [&_button]:!w-8">
             <ThemeToggle />
           </div>
@@ -756,17 +751,17 @@ export function ClientSubpageShell({
   };
   return (
     <div
-      className="client-workspace relative min-h-screen overflow-x-hidden text-slate-950 dark:text-white"
+      className="client-workspace lg-v2-workspace relative min-h-screen overflow-x-hidden text-slate-950 dark:text-white"
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 7rem)" }}
     >
-      <div className="client-grid-overlay pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)]" />
+      <div className="client-grid-overlay pointer-events-none absolute inset-0 lg:hidden" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)] lg:hidden" />
 
       {/* Fixed sidebar (desktop) */}
       <ClientDesktopNav active={activeNav} />
 
       <div
-        className="flex min-h-screen w-full flex-col px-4 pt-3 sm:px-6 sm:pt-4 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 xl:px-8"
+        className="flex min-h-screen w-full flex-col px-4 pt-3 sm:px-6 sm:pt-4 lg:ml-[240px] lg:max-w-[calc(100%-240px)] lg:px-8 xl:px-10"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 7rem)" }}
       >
         {/* Mobile header */}
@@ -795,9 +790,9 @@ export function ClientSubpageShell({
           </div>
         </header>
 
-        <main className="mt-4 flex-1 space-y-4 lg:mt-6 lg:space-y-6">
-          {/* Page header */}
-          <section className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 px-5 py-5 backdrop-blur-sm dark:border-white/8 dark:bg-white/[0.03] sm:px-6 sm:py-6">
+        <main className="mt-4 max-w-[1440px] flex-1 space-y-4 lg:mx-auto lg:mt-8 lg:w-full lg:space-y-8">
+          {/* ─── Mobile / tablet page header (≤md) ──────────────── */}
+          <section className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/80 px-5 py-5 backdrop-blur-sm dark:border-white/8 dark:bg-white/[0.03] sm:px-6 sm:py-6 lg:hidden">
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-violet-500/[0.04] via-fuchsia-500/[0.02] to-orange-400/[0.04] dark:from-violet-500/[0.06] dark:via-fuchsia-500/[0.03] dark:to-orange-400/[0.05]" />
             <div className="relative">
               {breadcrumbs && breadcrumbs.length > 0 && (
@@ -861,6 +856,57 @@ export function ClientSubpageShell({
               {mobileSummary ? <div className="mt-4 md:hidden">{mobileSummary}</div> : null}
               {summary ? <div className={`mt-4 ${mobileSummary ? "hidden md:block" : ""}`}>{summary}</div> : null}
             </div>
+          </section>
+
+          {/* ─── Desktop page header (lg+) v2 ───────────────────── */}
+          <section className="hidden lg:block">
+            {breadcrumbs && breadcrumbs.length > 0 && (
+              <nav aria-label="Fil d'Ariane" className="mb-3 flex items-center gap-1.5 text-xs lg-v2-text-subtle">
+                {breadcrumbs.map((crumb, i) => (
+                  <span key={`${crumb.label}-${i}`} className="flex items-center gap-1.5">
+                    {i > 0 && <ChevronRight size={12} className="shrink-0" aria-hidden />}
+                    {crumb.href ? (
+                      <Link href={crumb.href} className="transition hover:lg-v2-text-muted">
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span className="font-medium lg-v2-text-muted">{crumb.label}</span>
+                    )}
+                  </span>
+                ))}
+              </nav>
+            )}
+
+            <div className="flex flex-wrap items-end justify-between gap-6">
+              <div className="min-w-0 flex-1">
+                <p className="lg-v2-eyebrow">{eyebrow}</p>
+                <h1 className="mt-2 text-[28px] font-bold tracking-tight lg-v2-text-strong leading-tight xl:text-[32px]">
+                  {title}
+                </h1>
+                {description ? <p className="mt-1.5 text-sm lg-v2-text-muted">{description}</p> : null}
+                {metaPills && metaPills.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap items-center gap-2">
+                    {metaPills.map((pill, i) => {
+                      const Icon = pill.icon;
+                      return (
+                        <span
+                          key={`${pill.label}-${i}`}
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${pillToneClass[pill.tone ?? "slate"]}`}
+                        >
+                          {Icon ? <Icon size={12} aria-hidden /> : null}
+                          {pill.label}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : null}
+                {focusLine ? <p className="mt-3 text-sm lg-v2-text-muted">{focusLine}</p> : null}
+              </div>
+
+              <div className="flex shrink-0 items-center gap-2">{actions}</div>
+            </div>
+
+            {summary ? <div className="mt-6">{summary}</div> : null}
           </section>
 
           {children}

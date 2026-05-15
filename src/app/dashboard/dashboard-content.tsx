@@ -533,14 +533,14 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   // --- Render ------------------------------------------------------
 
   return (
-    <div className="tour-dashboard client-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white" data-testid="dashboard-page">
-      <div className="client-grid-overlay pointer-events-none absolute inset-0" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)]" />
+    <div className="tour-dashboard client-workspace lg-v2-workspace relative min-h-screen overflow-x-hidden pb-28 text-slate-950 dark:text-white" data-testid="dashboard-page">
+      <div className="client-grid-overlay pointer-events-none absolute inset-0 lg:hidden" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.15),rgba(251,146,60,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(124,58,237,0.22),rgba(251,146,60,0.08),transparent_60%)] lg:hidden" />
 
       {runTour && <Joyride steps={tourSteps} run={runTour} continuous showSkipButton showProgress callback={handleTourCallback} styles={{ options: { primaryColor: "#7c3aed", zIndex: 1000 } }} locale={{ back: "Précédent", close: "Fermer", last: "Terminer", next: "Suivant", skip: "Passer" }} />}
 
       <PullToRefresh onRefresh={async () => { await mutateDashboard(); }}>
-        <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[220px] lg:max-w-[calc(100%-220px)] lg:px-6 lg:pb-10">
+        <div className="flex min-h-screen w-full flex-col px-4 pb-28 pt-4 sm:px-6 lg:ml-[240px] lg:max-w-[calc(100%-240px)] lg:px-8 xl:px-10 lg:pb-10">
         {/* --- Header ---------------------------------------------- */}
         <header className="client-panel sticky top-3 z-40 rounded-2xl px-4 py-4 backdrop-blur-xl sm:px-6 lg:hidden">
           <div className="flex items-center justify-between gap-3">

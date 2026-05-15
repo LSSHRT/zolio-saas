@@ -972,3 +972,348 @@
 .client-sidebar-scroll::-webkit-scrollbar-thumb:hover {
   background-color: rgba(167, 139, 250, 0.55);
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Design System v2 — Desktop only (≥ 1024px)
+
+   Strictly additive. Mobile uses the legacy tokens above.
+   Apply these classes ONLY inside `lg:` Tailwind variants or
+   manually-gated desktop blocks. Never override mobile defaults.
+   ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Surfaces */
+  --v2-surface: #f7f8fb;
+  --v2-surface-elevated: #ffffff;
+  --v2-panel: #ffffff;
+  --v2-panel-muted: #f8fafc;
+
+  /* Borders */
+  --v2-border: rgba(15, 23, 42, 0.08);
+  --v2-border-strong: rgba(15, 23, 42, 0.14);
+  --v2-border-subtle: rgba(15, 23, 42, 0.05);
+
+  /* Text */
+  --v2-text: #0b1220;
+  --v2-text-strong: #04060b;
+  --v2-text-muted: #475569;
+  --v2-text-subtle: #94a3b8;
+
+  /* Primary */
+  --v2-primary: #6d28d9;
+  --v2-primary-hover: #5b21b6;
+  --v2-primary-soft: rgba(124, 58, 237, 0.08);
+  --v2-primary-soft-strong: rgba(124, 58, 237, 0.14);
+  --v2-primary-foreground: #f5f3ff;
+
+  /* Status (statuts uniquement) */
+  --v2-success: #059669;
+  --v2-success-soft: rgba(16, 185, 129, 0.10);
+  --v2-warning: #d97706;
+  --v2-warning-soft: rgba(245, 158, 11, 0.12);
+  --v2-danger: #dc2626;
+  --v2-danger-soft: rgba(239, 68, 68, 0.10);
+  --v2-info: #0284c7;
+  --v2-info-soft: rgba(14, 165, 233, 0.10);
+
+  /* Shadows */
+  --v2-shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --v2-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --v2-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+  --v2-shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.10), 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.dark {
+  --v2-surface: #06070d;
+  --v2-surface-elevated: #0c0f1a;
+  --v2-panel: #0d111c;
+  --v2-panel-muted: #0a0d16;
+
+  --v2-border: rgba(255, 255, 255, 0.07);
+  --v2-border-strong: rgba(255, 255, 255, 0.14);
+  --v2-border-subtle: rgba(255, 255, 255, 0.04);
+
+  --v2-text: #f1f5f9;
+  --v2-text-strong: #ffffff;
+  --v2-text-muted: #94a3b8;
+  --v2-text-subtle: #64748b;
+
+  --v2-primary: #a78bfa;
+  --v2-primary-hover: #c4b5fd;
+  --v2-primary-soft: rgba(167, 139, 250, 0.12);
+  --v2-primary-soft-strong: rgba(167, 139, 250, 0.20);
+  --v2-primary-foreground: #ffffff;
+
+  --v2-success: #34d399;
+  --v2-success-soft: rgba(52, 211, 153, 0.12);
+  --v2-warning: #fbbf24;
+  --v2-warning-soft: rgba(251, 191, 36, 0.14);
+  --v2-danger: #f87171;
+  --v2-danger-soft: rgba(248, 113, 113, 0.12);
+  --v2-info: #38bdf8;
+  --v2-info-soft: rgba(56, 189, 248, 0.12);
+
+  --v2-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --v2-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.40);
+  --v2-shadow-md: 0 6px 16px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.40);
+  --v2-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.60), 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+/* Surfaces & panels */
+.lg-v2-panel {
+  background-color: var(--v2-panel);
+  border: 1px solid var(--v2-border);
+  border-radius: 1rem;
+  box-shadow: var(--v2-shadow-sm);
+}
+
+.lg-v2-panel-muted {
+  background-color: var(--v2-panel-muted);
+  border: 1px solid var(--v2-border-subtle);
+  border-radius: 1rem;
+}
+
+.lg-v2-card {
+  background-color: var(--v2-panel);
+  border: 1px solid var(--v2-border);
+  border-radius: 0.875rem;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.lg-v2-card-interactive {
+  background-color: var(--v2-panel);
+  border: 1px solid var(--v2-border);
+  border-radius: 0.875rem;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.lg-v2-card-interactive:hover {
+  border-color: var(--v2-border-strong);
+  background-color: var(--v2-panel-muted);
+}
+
+/* Workspace background — calmer than the violet/orange radial of v1.
+   Scoped to ≥ 1024px to leave the mobile workspace background untouched. */
+@media (min-width: 1024px) {
+  .lg-v2-workspace {
+    background-color: var(--v2-surface) !important;
+    background-image: none !important;
+  }
+}
+
+/* Borders / dividers */
+.lg-v2-divider {
+  border-color: var(--v2-border);
+}
+
+.lg-v2-divider-strong {
+  border-color: var(--v2-border-strong);
+}
+
+/* Text helpers */
+.lg-v2-text {
+  color: var(--v2-text);
+}
+
+.lg-v2-text-strong {
+  color: var(--v2-text-strong);
+}
+
+.lg-v2-text-muted {
+  color: var(--v2-text-muted);
+}
+
+.lg-v2-text-subtle {
+  color: var(--v2-text-subtle);
+}
+
+/* KPI display: tabular nums + tight tracking */
+.lg-v2-kpi-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--v2-text-strong);
+}
+
+.lg-v2-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--v2-text-subtle);
+}
+
+/* Sidebar v2 */
+.lg-v2-sidebar {
+  background-color: var(--v2-panel);
+  border-right: 1px solid var(--v2-border);
+}
+
+.lg-v2-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--v2-text-muted);
+  border-left: 2px solid transparent;
+  transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.lg-v2-nav-link:hover {
+  background-color: var(--v2-panel-muted);
+  color: var(--v2-text);
+}
+
+.lg-v2-nav-link-active {
+  background-color: var(--v2-primary-soft);
+  color: var(--v2-primary);
+  border-left-color: var(--v2-primary);
+  font-weight: 600;
+}
+
+.dark .lg-v2-nav-link-active {
+  background-color: var(--v2-primary-soft);
+  color: var(--v2-primary-hover);
+}
+
+/* Status pills v2 (statut tokens only) */
+.lg-v2-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.lg-v2-pill-success {
+  background-color: var(--v2-success-soft);
+  color: var(--v2-success);
+}
+
+.lg-v2-pill-warning {
+  background-color: var(--v2-warning-soft);
+  color: var(--v2-warning);
+}
+
+.lg-v2-pill-danger {
+  background-color: var(--v2-danger-soft);
+  color: var(--v2-danger);
+}
+
+.lg-v2-pill-info {
+  background-color: var(--v2-info-soft);
+  color: var(--v2-info);
+}
+
+.lg-v2-pill-primary {
+  background-color: var(--v2-primary-soft);
+  color: var(--v2-primary);
+}
+
+.lg-v2-pill-neutral {
+  background-color: var(--v2-panel-muted);
+  color: var(--v2-text-muted);
+  border-color: var(--v2-border);
+}
+
+/* Button v2 */
+.lg-v2-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.625rem;
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.lg-v2-btn-primary {
+  background-color: var(--v2-primary);
+  color: var(--v2-primary-foreground);
+  box-shadow: var(--v2-shadow-sm);
+}
+
+.lg-v2-btn-primary:hover {
+  background-color: var(--v2-primary-hover);
+}
+
+.lg-v2-btn-secondary {
+  background-color: var(--v2-panel);
+  color: var(--v2-text);
+  border-color: var(--v2-border);
+}
+
+.lg-v2-btn-secondary:hover {
+  background-color: var(--v2-panel-muted);
+  border-color: var(--v2-border-strong);
+}
+
+.lg-v2-btn-ghost {
+  background-color: transparent;
+  color: var(--v2-text-muted);
+}
+
+.lg-v2-btn-ghost:hover {
+  background-color: var(--v2-panel-muted);
+  color: var(--v2-text);
+}
+
+/* Input v2 */
+.lg-v2-input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--v2-border);
+  background-color: var(--v2-panel);
+  color: var(--v2-text);
+  font-size: 14px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.lg-v2-input:focus {
+  outline: none;
+  border-color: var(--v2-primary);
+  box-shadow: 0 0 0 3px var(--v2-primary-soft);
+}
+
+.lg-v2-input::placeholder {
+  color: var(--v2-text-subtle);
+}
+
+/* Table v2 */
+.lg-v2-table-header {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--v2-text-subtle);
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid var(--v2-border);
+  text-align: left;
+}
+
+.lg-v2-table-cell {
+  padding: 0.875rem 1rem;
+  font-size: 14px;
+  color: var(--v2-text);
+  border-bottom: 1px solid var(--v2-border-subtle);
+}
+
+.lg-v2-table-row {
+  transition: background-color 150ms ease;
+}
+
+.lg-v2-table-row:hover {
+  background-color: var(--v2-panel-muted);
+}
