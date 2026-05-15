@@ -4,7 +4,22 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, FileText, Rocket, Save, Send } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  FileText,
+  Plus,
+  Rocket,
+  Save,
+  Search,
+  Send,
+  Sparkles,
+  Tag,
+  Trash2,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -14,6 +29,10 @@ import {
   CreationWizardShell,
   type CreationWizardStep,
 } from "@/components/client-creation-wizard";
+import {
+  ClientSubpageShell,
+  type ClientMetaPill,
+} from "@/components/client-shell";
 import {
   DEFAULT_TRADE,
   getStarterCatalogForTrade,
@@ -775,6 +794,38 @@ export default function NouveauDevisPage() {
 
   const canContinue = step === 0 ? hasClient : step === 1 ? hasLines : canSubmit;
 
+  // ─── Desktop v2 meta pills (header) ──────────────────────────────────
+  const desktopMetaPills: ClientMetaPill[] = [
+    ...(selectedClient
+      ? [{ icon: Users, label: selectedClient.nom, tone: "emerald" as const }]
+      : []),
+    ...(lignes.length > 0
+      ? [
+          {
+            label: `${lignes.length} ligne${lignes.length > 1 ? "s" : ""}`,
+            tone: "slate" as const,
+          },
+        ]
+      : []),
+    ...(totalTTC > 0
+      ? [{ label: `${totalTTC.toFixed(2)}€ TTC`, tone: "violet" as const }]
+      : []),
+    ...(draftSavedLabel
+      ? [
+          {
+            icon: Save,
+            label: `Brouillon · ${draftSavedLabel}`,
+            tone: "slate" as const,
+          },
+        ]
+      : []),
+  ];
+
+  const aReglerDesktop = Math.max(
+    0,
+    totalTTC - (Number.parseFloat(acompte) || 0),
+  );
+
   const handleNextStep = () => {
     if (step === 0 && !hasClient) {
       toast.error("Choisissez ou créez un client avant de continuer.");
@@ -790,6 +841,8 @@ export default function NouveauDevisPage() {
   };
 
   return (
+    <>
+    <div className="lg:hidden">
     <CreationWizardShell
       backHref="/devis"
       currentStep={step}
@@ -1096,14 +1149,733 @@ export default function NouveauDevisPage() {
         </AnimatePresence>
       </div>
 
-      <AIAssistant
-        isGenerating={isGeneratingAI}
-        onClose={() => setShowAIModal(false)}
-        onGenerate={() => void generateWithAI()}
-        onPromptChange={setAiPrompt}
-        open={showAIModal}
-        prompt={aiPrompt}
-      />
     </CreationWizardShell>
+    </div>
+
+    {/* ─── Desktop dense single-page form (hidden lg:block) ─── */}
+    <div className="hidden lg:block">
+      <ClientSubpageShell
+        title="Nouveau devis"
+        description="Création complète — client, chiffrage et options sur un seul écran."
+        eyebrow="Création"
+        activeNav="devis"
+        backHref="/devis"
+        breadcrumbs={[
+          { label: "Devis", href: "/devis" },
+          { label: "Nouveau devis" },
+        ]}
+        metaPills={desktopMetaPills}
+        showMobileDock={false}
+        mobilePrimaryAction={null}
+      >
+        <div className="lg:grid lg:grid-cols-12 lg:gap-6">
+          {/* LEFT 8/12 : Client + Chiffrage + Options */}
+          <form
+            className="lg:col-span-8 space-y-6"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            {trialLocked ? (
+              <section
+                className="lg-v2-panel border-l-4 p-5"
+                style={{ borderLeftColor: "var(--v2-danger)" }}
+              >
+                <div className="flex items-start gap-3">
+                  <Rocket
+                    size={18}
+                    className="mt-0.5 shrink-0"
+                    style={{ color: "var(--v2-danger)" }}
+                    aria-hidden
+                  />
+                  <div>
+                    <p className="text-sm font-semibold lg-v2-text-strong">
+                      Votre essai a atteint sa limite
+                    </p>
+                    <p className="mt-1 text-xs lg-v2-text-muted">
+                      Passez en Pro pour créer des devis illimités, ou attendez le mois prochain.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            ) : null}
+
+            {/* CLIENT */}
+            <section className="lg-v2-panel p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="lg-v2-eyebrow">Client</p>
+                  <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                    {selectedClient ? "Client sélectionné" : "Choisir un client"}
+                  </h2>
+                  <p className="mt-1 text-xs lg-v2-text-subtle">
+                    Sélectionnez un contact existant ou créez-en un nouveau.
+                  </p>
+                </div>
+                {!selectedClient ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowNewClient((value) => !value)}
+                    className="lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    <UserPlus size={14} aria-hidden />
+                    {showNewClient ? "Fermer" : "Nouveau client"}
+                  </button>
+                ) : null}
+              </div>
+
+              {selectedClient ? (
+                <div className="mt-4 flex items-center gap-3 rounded-lg border lg-v2-divider lg-v2-panel-muted px-4 py-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                    style={{ backgroundColor: "var(--v2-primary)" }}
+                    aria-hidden
+                  >
+                    {selectedClient.nom.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold lg-v2-text-strong">
+                      {selectedClient.nom}
+                    </p>
+                    <p className="truncate text-xs lg-v2-text-muted">
+                      {selectedClient.email || selectedClient.telephone || selectedClient.adresse || "—"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClientId("")}
+                    className="lg-v2-btn lg-v2-btn-ghost !px-2"
+                    aria-label="Retirer le client sélectionné"
+                  >
+                    <X size={14} aria-hidden />
+                  </button>
+                </div>
+              ) : showNewClient ? (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <label className="col-span-2 block">
+                    <span className="text-xs font-medium lg-v2-text-muted">
+                      Nom <span style={{ color: "var(--v2-danger)" }}>*</span>
+                    </span>
+                    <input
+                      value={newClient.nom}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, nom: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="Nom du client"
+                    />
+                    {errors.nom ? (
+                      <p
+                        className="mt-1 text-xs"
+                        style={{ color: "var(--v2-danger)" }}
+                      >
+                        {errors.nom}
+                      </p>
+                    ) : null}
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">Email</span>
+                    <input
+                      type="email"
+                      value={newClient.email}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, email: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="client@example.com"
+                    />
+                    {errors.email ? (
+                      <p
+                        className="mt-1 text-xs"
+                        style={{ color: "var(--v2-danger)" }}
+                      >
+                        {errors.email}
+                      </p>
+                    ) : null}
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">Téléphone</span>
+                    <input
+                      value={newClient.telephone}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, telephone: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="06 12 34 56 78"
+                    />
+                    {errors.telephone ? (
+                      <p
+                        className="mt-1 text-xs"
+                        style={{ color: "var(--v2-danger)" }}
+                      >
+                        {errors.telephone}
+                      </p>
+                    ) : null}
+                  </label>
+                  <label className="col-span-2 block">
+                    <span className="text-xs font-medium lg-v2-text-muted">Adresse</span>
+                    <input
+                      value={newClient.adresse}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, adresse: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="Adresse"
+                    />
+                  </label>
+                  <div className="col-span-2 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewClient(false);
+                        setErrors({});
+                        setNewClient(EMPTY_CLIENT_FORM);
+                      }}
+                      className="lg-v2-btn lg-v2-btn-ghost"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleCreateClient()}
+                      disabled={isAddingClient}
+                      className="lg-v2-btn lg-v2-btn-primary"
+                    >
+                      {isAddingClient ? "Ajout..." : "Ajouter le client"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="relative mt-4">
+                    <Search
+                      size={14}
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 lg-v2-text-subtle"
+                      aria-hidden
+                    />
+                    <input
+                      type="text"
+                      value={searchClient}
+                      onChange={(event) => setSearchClient(event.target.value)}
+                      placeholder="Rechercher un client par nom ou email…"
+                      className="lg-v2-input pl-9"
+                      aria-label="Rechercher un client"
+                    />
+                  </div>
+                  <div className="mt-3 max-h-64 overflow-y-auto rounded-lg border lg-v2-divider">
+                    {filteredClients.length === 0 ? (
+                      <p className="px-4 py-10 text-center text-sm lg-v2-text-subtle">
+                        {clients.length === 0
+                          ? "Vous n'avez pas encore de clients. Créez-en un pour démarrer."
+                          : "Aucun client ne correspond à cette recherche."}
+                      </p>
+                    ) : (
+                      <ul className="divide-y lg-v2-divider">
+                        {filteredClients.slice(0, 8).map((client) => (
+                          <li key={client.id}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedClientId(client.id)}
+                              className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-[var(--v2-panel-muted)]"
+                            >
+                              <div
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                                style={{
+                                  backgroundColor: "var(--v2-primary-soft)",
+                                  color: "var(--v2-primary)",
+                                }}
+                                aria-hidden
+                              >
+                                {client.nom.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium lg-v2-text-strong">
+                                  {client.nom}
+                                </p>
+                                <p className="truncate text-xs lg-v2-text-subtle">
+                                  {client.email || client.telephone || "—"}
+                                </p>
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* CHIFFRAGE / PRESTATIONS */}
+            <section className="lg-v2-panel p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="lg-v2-eyebrow">Chiffrage</p>
+                  <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                    Lignes{" "}
+                    <span className="font-normal lg-v2-text-subtle">
+                      ({lignes.length})
+                    </span>
+                  </h2>
+                  <p className="mt-1 text-xs lg-v2-text-subtle">
+                    Catalogue {activeTradeDefinition.label.toLowerCase()}, pack métier, génération IA ou ligne libre.
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAIModal(true)}
+                    disabled={!canEdit}
+                    className="lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    <Sparkles size={14} aria-hidden /> Générer avec l&apos;IA
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => addFreeLine()}
+                    disabled={!canEdit}
+                    className="lg-v2-btn lg-v2-btn-primary"
+                  >
+                    <Plus size={14} aria-hidden /> Ligne libre
+                  </button>
+                </div>
+              </div>
+
+              {tradeBundles.length > 0 ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {tradeBundles.map((bundle, index) => (
+                    <button
+                      key={`bundle-${index}`}
+                      type="button"
+                      onClick={() => applyBundle(bundle)}
+                      disabled={!canEdit}
+                      className="inline-flex items-center gap-1.5 rounded-lg border lg-v2-divider bg-transparent px-2.5 py-1 text-xs font-medium lg-v2-text-muted transition hover:bg-[var(--v2-panel-muted)] disabled:cursor-not-allowed disabled:opacity-50"
+                      title={bundle.description}
+                    >
+                      <Tag size={12} aria-hidden /> {bundle.nom}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              <div className="relative mt-4">
+                <Search
+                  size={14}
+                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 lg-v2-text-subtle"
+                  aria-hidden
+                />
+                <input
+                  type="text"
+                  value={searchPrestation}
+                  onChange={(event) => setSearchPrestation(event.target.value)}
+                  placeholder="Rechercher dans le catalogue…"
+                  className="lg-v2-input pl-9"
+                  aria-label="Rechercher une prestation"
+                  disabled={!canEdit}
+                />
+              </div>
+
+              {searchPrestation && filteredPrestations.length > 0 ? (
+                <div className="mt-2 max-h-48 overflow-y-auto rounded-lg border lg-v2-divider">
+                  <ul className="divide-y lg-v2-divider">
+                    {filteredPrestations.slice(0, 6).map((prestation) => (
+                      <li key={prestation.id}>
+                        <button
+                          type="button"
+                          onClick={() => addLineFromPrestation(prestation)}
+                          className="flex w-full items-center justify-between gap-3 px-4 py-2 text-left transition hover:bg-[var(--v2-panel-muted)]"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium lg-v2-text-strong">
+                              {prestation.nom}
+                            </p>
+                            <p className="truncate text-xs lg-v2-text-subtle">
+                              {prestation.categorie} · {prestation.unite}
+                            </p>
+                          </div>
+                          <span className="text-sm font-semibold tabular-nums lg-v2-text">
+                            {prestation.prix.toFixed(2)}€
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
+
+              {lignes.length > 0 ? (
+                <div className="mt-4 overflow-hidden rounded-lg border lg-v2-divider">
+                  <table
+                    className="w-full border-collapse text-left"
+                    aria-label="Lignes du devis"
+                  >
+                    <thead>
+                      <tr>
+                        <th className="lg-v2-table-header">Désignation</th>
+                        <th className="lg-v2-table-header w-20 !text-right">Qté</th>
+                        <th className="lg-v2-table-header w-16">Unité</th>
+                        <th className="lg-v2-table-header w-28 !text-right">P.U. €</th>
+                        <th className="lg-v2-table-header w-24">TVA</th>
+                        <th className="lg-v2-table-header w-28 !text-right">Total €</th>
+                        <th className="lg-v2-table-header w-12" aria-label="Optionnelle"></th>
+                        <th className="lg-v2-table-header w-10" aria-label="Supprimer"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {lignes.map((line, index) => (
+                        <tr
+                          key={`row-${index}`}
+                          className={
+                            line.isOptional
+                              ? "bg-[var(--v2-warning-soft)]/30"
+                              : index % 2 === 0
+                                ? "bg-[var(--v2-panel)]"
+                                : "bg-[var(--v2-panel-muted)]/40"
+                          }
+                        >
+                          <td className="px-2 py-2">
+                            <input
+                              type="text"
+                              value={line.nomPrestation}
+                              onChange={(event) =>
+                                updateLineName(index, event.target.value)
+                              }
+                              className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                              aria-label={`Désignation ligne ${index + 1}`}
+                              placeholder="Désignation"
+                            />
+                          </td>
+                          <td className="px-2 py-2 text-right">
+                            <input
+                              type="number"
+                              min={0}
+                              step="0.5"
+                              value={line.quantite}
+                              onChange={(event) =>
+                                updateLineQty(index, Number(event.target.value) || 0)
+                              }
+                              className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-right text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                              aria-label={`Quantité ligne ${index + 1}`}
+                            />
+                          </td>
+                          <td className="px-2 py-2 text-sm lg-v2-text-muted">{line.unite}</td>
+                          <td className="px-2 py-2 text-right">
+                            <input
+                              type="number"
+                              min={0}
+                              step="0.01"
+                              value={line.prixUnitaire}
+                              onChange={(event) =>
+                                updateLinePrice(index, Number(event.target.value) || 0)
+                              }
+                              className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-right text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                              aria-label={`Prix unitaire ligne ${index + 1}`}
+                            />
+                          </td>
+                          <td className="px-2 py-2">
+                            <select
+                              value={line.tva ?? tva}
+                              onChange={(event) =>
+                                updateLineTva(index, event.target.value)
+                              }
+                              className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                              aria-label={`TVA ligne ${index + 1}`}
+                            >
+                              <option value="0">0%</option>
+                              <option value="5.5">5,5%</option>
+                              <option value="10">10%</option>
+                              <option value="20">20%</option>
+                            </select>
+                          </td>
+                          <td className="px-2 py-2 text-right text-sm font-medium tabular-nums lg-v2-text-strong">
+                            {line.totalLigne.toFixed(2)}€
+                          </td>
+                          <td className="px-2 py-2 text-center">
+                            <button
+                              type="button"
+                              onClick={() => toggleLineOptional(index)}
+                              className="inline-flex h-6 items-center justify-center rounded px-1.5 text-[10px] font-semibold uppercase tracking-wide"
+                              style={
+                                line.isOptional
+                                  ? {
+                                      backgroundColor: "var(--v2-warning-soft)",
+                                      color: "var(--v2-warning)",
+                                    }
+                                  : {
+                                      backgroundColor: "var(--v2-panel-muted)",
+                                      color: "var(--v2-text-subtle)",
+                                    }
+                              }
+                              aria-pressed={line.isOptional}
+                              title={
+                                line.isOptional
+                                  ? "Ligne optionnelle (exclue du total)"
+                                  : "Marquer la ligne comme optionnelle"
+                              }
+                            >
+                              OPT
+                            </button>
+                          </td>
+                          <td className="px-2 py-2 text-right">
+                            <button
+                              type="button"
+                              onClick={() => removeLine(index)}
+                              className="lg-v2-btn lg-v2-btn-ghost !px-2"
+                              aria-label={`Supprimer la ligne ${index + 1}`}
+                            >
+                              <Trash2 size={14} aria-hidden />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="mt-4 rounded-lg border border-dashed lg-v2-divider px-4 py-8 text-center text-sm lg-v2-text-subtle">
+                  Aucune ligne pour le moment. Ajoutez-en via le catalogue, l&apos;IA, un pack métier ou en ligne libre.
+                </p>
+              )}
+            </section>
+
+            {/* OPTIONS */}
+            <section className="lg-v2-panel p-6">
+              <p className="lg-v2-eyebrow">Réglages globaux</p>
+              <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                TVA / Remise / Acompte / Photos
+              </h2>
+              <div className="mt-4 grid grid-cols-3 gap-4">
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">
+                    TVA par défaut
+                  </span>
+                  <select
+                    value={tva}
+                    onChange={(event) => setTva(event.target.value)}
+                    className="lg-v2-input mt-1.5"
+                  >
+                    <option value="0">0%</option>
+                    <option value="5.5">5,5%</option>
+                    <option value="10">10%</option>
+                    <option value="20">20%</option>
+                  </select>
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">
+                    Remise globale (%)
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step="0.1"
+                    value={remise}
+                    onChange={(event) => setRemise(event.target.value)}
+                    placeholder="0"
+                    className="lg-v2-input mt-1.5"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">
+                    Acompte versé (€)
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={acompte}
+                    onChange={(event) => setAcompte(event.target.value)}
+                    placeholder="0"
+                    className="lg-v2-input mt-1.5"
+                  />
+                </label>
+              </div>
+
+              <div className="mt-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium lg-v2-text-muted">
+                    Photos jointes ({photos.length})
+                  </p>
+                  <label className="lg-v2-btn lg-v2-btn-ghost cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(event) => void handleFileUpload(event)}
+                    />
+                    <Plus size={14} aria-hidden /> Ajouter
+                  </label>
+                </div>
+                {photos.length > 0 ? (
+                  <div className="mt-3 grid grid-cols-6 gap-2">
+                    {photos.map((src, index) => (
+                      <div key={`photo-${index}`} className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={src}
+                          alt={`Photo ${index + 1}`}
+                          className="aspect-square w-full rounded-lg border lg-v2-divider object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPhotos((current) =>
+                              current.filter((_, photoIndex) => photoIndex !== index),
+                            )
+                          }
+                          className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
+                          aria-label={`Supprimer la photo ${index + 1}`}
+                        >
+                          <X size={10} aria-hidden />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          </form>
+
+          {/* RIGHT 4/12 sticky summary rail */}
+          <aside className="self-start lg:col-span-4 lg:sticky lg:top-6 space-y-4">
+            <div className="lg-v2-panel p-6">
+              <p className="lg-v2-eyebrow">Total TTC</p>
+              <p className="mt-3 text-[32px] font-semibold leading-none lg-v2-text-strong tabular-nums">
+                {totalTTC.toFixed(2)}€
+              </p>
+              <p className="mt-2 text-xs lg-v2-text-muted">
+                {lignes.length} ligne{lignes.length !== 1 ? "s" : ""} · TVA {tva}% par défaut
+              </p>
+
+              <dl className="mt-5 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Sous-total HT</dt>
+                  <dd className="font-medium tabular-nums lg-v2-text">
+                    {totalHTBase.toFixed(2)}€
+                  </dd>
+                </div>
+                {discountAmount > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted">Remise ({remise}%)</dt>
+                    <dd
+                      className="font-medium tabular-nums"
+                      style={{ color: "var(--v2-warning)" }}
+                    >
+                      −{discountAmount.toFixed(2)}€
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">HT net</dt>
+                  <dd className="font-medium tabular-nums lg-v2-text">
+                    {totalHT.toFixed(2)}€
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">TVA</dt>
+                  <dd className="font-medium tabular-nums lg-v2-text">
+                    {totalTVA.toFixed(2)}€
+                  </dd>
+                </div>
+                {Number.parseFloat(acompte) > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted">Acompte versé</dt>
+                    <dd
+                      className="font-medium tabular-nums"
+                      style={{ color: "var(--v2-success)" }}
+                    >
+                      −{Number.parseFloat(acompte).toFixed(2)}€
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between border-t lg-v2-divider pt-2">
+                  <dt className="font-medium lg-v2-text-strong">À régler</dt>
+                  <dd
+                    className="font-semibold tabular-nums"
+                    style={{ color: "var(--v2-danger)" }}
+                  >
+                    {aReglerDesktop.toFixed(2)}€
+                  </dd>
+                </div>
+                {marginEstimate !== 0 ? (
+                  <div className="mt-3 flex items-center justify-between rounded-lg border lg-v2-divider lg-v2-panel-muted px-3 py-2">
+                    <dt className="text-xs uppercase tracking-wide lg-v2-text-subtle">
+                      Marge estimée
+                    </dt>
+                    <dd
+                      className="font-semibold tabular-nums"
+                      style={{
+                        color:
+                          marginEstimate >= 0
+                            ? "var(--v2-success)"
+                            : "var(--v2-danger)",
+                      }}
+                    >
+                      {marginEstimate >= 0 ? "+" : ""}
+                      {marginEstimate.toFixed(2)}€
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              {remainingTrialQuotes !== null ? (
+                <p
+                  className="mt-4 rounded-lg border px-3 py-2 text-xs"
+                  style={{
+                    borderColor: "var(--v2-warning-soft)",
+                    backgroundColor: "var(--v2-warning-soft)",
+                    color: "var(--v2-warning)",
+                  }}
+                >
+                  Essai : {remainingTrialQuotes} devis restant{remainingTrialQuotes > 1 ? "s" : ""}.
+                </p>
+              ) : null}
+
+              {emailHint ? (
+                <p className="mt-3 rounded-lg border lg-v2-divider lg-v2-panel-muted px-3 py-2 text-xs lg-v2-text-muted">
+                  {emailHint}
+                </p>
+              ) : null}
+
+              <div className="mt-6 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => void handleCreate("send")}
+                  disabled={!canSubmit || submitMode !== null}
+                  className="w-full lg-v2-btn lg-v2-btn-primary"
+                >
+                  <Send size={14} aria-hidden />
+                  {submitMode === "send" ? "Envoi en cours..." : "Créer et envoyer"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleCreate("save")}
+                  disabled={!canSubmit || submitMode !== null}
+                  className="w-full lg-v2-btn lg-v2-btn-secondary"
+                >
+                  <Save size={14} aria-hidden />
+                  {submitMode === "save" ? "Enregistrement..." : "Enregistrer le devis"}
+                </button>
+                <Link
+                  href="/devis"
+                  className="w-full lg-v2-btn lg-v2-btn-ghost block text-center"
+                >
+                  <ArrowLeft size={14} aria-hidden /> Retour aux devis
+                </Link>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </ClientSubpageShell>
+    </div>
+
+    <AIAssistant
+      isGenerating={isGeneratingAI}
+      onClose={() => setShowAIModal(false)}
+      onGenerate={() => void generateWithAI()}
+      onPromptChange={setAiPrompt}
+      open={showAIModal}
+      prompt={aiPrompt}
+    />
+    </>
   );
 }
