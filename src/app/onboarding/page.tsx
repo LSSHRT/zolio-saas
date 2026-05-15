@@ -108,7 +108,9 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950">
+    <>
+    {/* ─── Mobile / tablet view (≤ md) — strictly preserved ─── */}
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-violet-50 via-white to-fuchsia-50 p-4 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950 lg:hidden">
       <div className="w-full max-w-lg">
         {/* Progress */}
         <div className="mb-8 flex items-center justify-center gap-2">
@@ -279,5 +281,227 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
+
+    {/* ─── Desktop view (lg+) — v2 sober wizard ───────────────── */}
+    <div className="hidden min-h-screen lg:flex lg:items-center lg:justify-center" style={{ backgroundColor: "var(--v2-bg)" }}>
+      <div className="w-full max-w-2xl px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <p className="lg-v2-eyebrow">Configuration initiale</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight lg-v2-text-strong">
+            Bienvenue sur Zolio
+          </h1>
+          <p className="mt-1 text-sm lg-v2-text-muted">
+            Trois étapes rapides pour adapter Zolio à votre activité.
+          </p>
+        </div>
+
+        {/* Progress */}
+        <div className="mb-6 flex items-center gap-3">
+          {[
+            { n: 1, label: "Métier" },
+            { n: 2, label: "Entreprise" },
+            { n: 3, label: "Résumé" },
+          ].map((it, idx) => (
+            <div key={it.n} className="flex flex-1 items-center gap-3">
+              <div className="flex flex-1 items-center gap-3">
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                    it.n < step
+                      ? "bg-[var(--v2-success)] text-white"
+                      : it.n === step
+                        ? "bg-[var(--v2-primary)] text-white"
+                        : "lg-v2-panel-muted lg-v2-text-subtle"
+                  }`}
+                  aria-current={it.n === step ? "step" : undefined}
+                >
+                  {it.n < step ? <Check size={12} aria-hidden /> : it.n}
+                </span>
+                <span
+                  className={`text-xs font-medium ${
+                    it.n <= step ? "lg-v2-text-strong" : "lg-v2-text-subtle"
+                  }`}
+                >
+                  {it.label}
+                </span>
+              </div>
+              {idx < 2 ? (
+                <div
+                  className={`h-px flex-1 ${
+                    it.n < step ? "bg-[var(--v2-success)]" : "lg-v2-divider-bg"
+                  }`}
+                  style={{ backgroundColor: it.n < step ? undefined : "var(--v2-divider)" }}
+                />
+              ) : null}
+            </div>
+          ))}
+        </div>
+
+        {/* Card */}
+        <div className="lg-v2-panel p-8">
+          {/* Step 1: Métier */}
+          {step === 1 ? (
+            <>
+              <h2 className="text-xl font-semibold tracking-tight lg-v2-text-strong">
+                Quel est votre métier ?
+              </h2>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                Nous importerons automatiquement un catalogue de prestations adapté.
+              </p>
+              <div className="mt-6 grid grid-cols-5 gap-2">
+                {TRADES.map((t) => {
+                  const Icon = t.icon;
+                  const selected = trade === t.key;
+                  return (
+                    <button
+                      key={t.key}
+                      type="button"
+                      onClick={() => setTrade(t.key)}
+                      className={`flex flex-col items-center gap-2 rounded-lg border p-3 text-center transition ${
+                        selected
+                          ? "border-[var(--v2-primary)] bg-[var(--v2-primary-soft)] text-[var(--v2-primary)]"
+                          : "lg-v2-divider lg-v2-text-muted hover:bg-[var(--v2-panel-muted)] hover:lg-v2-text-strong"
+                      }`}
+                      aria-pressed={selected}
+                    >
+                      <Icon size={18} aria-hidden />
+                      <span className="text-xs font-medium">{t.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
+
+          {/* Step 2: Entreprise */}
+          {step === 2 ? (
+            <>
+              <h2 className="text-xl font-semibold tracking-tight lg-v2-text-strong">
+                Votre entreprise
+              </h2>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                Ces informations apparaîtront sur vos devis et factures.
+              </p>
+              <div className="mt-6 grid grid-cols-2 gap-4">
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">
+                    Nom de l&apos;entreprise <span className="text-[var(--v2-danger)]">*</span>
+                  </span>
+                  <input
+                    value={company.nom}
+                    onChange={(e) => setCompany({ ...company, nom: e.target.value })}
+                    placeholder="Entreprise Dupont SARL"
+                    className="mt-1.5 w-full rounded-lg border lg-v2-divider bg-transparent px-3 py-2 text-sm lg-v2-text focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">SIRET</span>
+                  <input
+                    value={company.siret}
+                    onChange={(e) => setCompany({ ...company, siret: e.target.value })}
+                    placeholder="123 456 789 00012"
+                    className="mt-1.5 w-full rounded-lg border lg-v2-divider bg-transparent px-3 py-2 text-sm lg-v2-text focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">Téléphone</span>
+                  <input
+                    value={company.telephone}
+                    onChange={(e) => setCompany({ ...company, telephone: e.target.value })}
+                    placeholder="06 12 34 56 78"
+                    className="mt-1.5 w-full rounded-lg border lg-v2-divider bg-transparent px-3 py-2 text-sm lg-v2-text focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-medium lg-v2-text-muted">Adresse</span>
+                  <input
+                    value={company.adresse}
+                    onChange={(e) => setCompany({ ...company, adresse: e.target.value })}
+                    placeholder="12 rue du Chantier, 75001 Paris"
+                    className="mt-1.5 w-full rounded-lg border lg-v2-divider bg-transparent px-3 py-2 text-sm lg-v2-text focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                  />
+                </label>
+              </div>
+            </>
+          ) : null}
+
+          {/* Step 3: Résumé */}
+          {step === 3 ? (
+            <>
+              <h2 className="text-xl font-semibold tracking-tight lg-v2-text-strong">
+                Tout est prêt
+              </h2>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                Voici le résumé de votre configuration. Un catalogue de prestations sera importé.
+              </p>
+              <dl className="mt-6 grid grid-cols-1 gap-3 rounded-lg lg-v2-panel-muted p-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-xs font-medium lg-v2-text-subtle">Métier</dt>
+                  <dd className="mt-1 text-sm font-semibold lg-v2-text-strong">
+                    {TRADES.find((t) => t.key === trade)?.label || "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium lg-v2-text-subtle">Entreprise</dt>
+                  <dd className="mt-1 text-sm font-semibold lg-v2-text-strong">
+                    {company.nom || "—"}
+                  </dd>
+                </div>
+                {company.siret ? (
+                  <div>
+                    <dt className="text-xs font-medium lg-v2-text-subtle">SIRET</dt>
+                    <dd className="mt-1 font-mono text-sm lg-v2-text">{company.siret}</dd>
+                  </div>
+                ) : null}
+                {company.telephone ? (
+                  <div>
+                    <dt className="text-xs font-medium lg-v2-text-subtle">Téléphone</dt>
+                    <dd className="mt-1 text-sm lg-v2-text-muted">{company.telephone}</dd>
+                  </div>
+                ) : null}
+                {company.adresse ? (
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs font-medium lg-v2-text-subtle">Adresse</dt>
+                    <dd className="mt-1 text-sm lg-v2-text-muted">{company.adresse}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </>
+          ) : null}
+        </div>
+
+        {/* Actions */}
+        <div className="mt-6 flex items-center justify-between">
+          {step > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              className="lg-v2-btn lg-v2-btn-ghost"
+            >
+              <ArrowLeft size={14} aria-hidden /> Retour
+            </button>
+          ) : (
+            <div />
+          )}
+
+          {step < 3 ? (
+            <button type="button" onClick={handleNext} className="lg-v2-btn lg-v2-btn-primary">
+              Suivant <ArrowRight size={14} aria-hidden />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleComplete}
+              disabled={loading}
+              className="lg-v2-btn lg-v2-btn-primary disabled:opacity-60"
+            >
+              {loading ? <Loader2 size={14} className="animate-spin" aria-hidden /> : <Check size={14} aria-hidden />}
+              {loading ? "Configuration…" : "Terminer la configuration"}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+    </>
   );
 }
