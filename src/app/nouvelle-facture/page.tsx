@@ -279,7 +279,8 @@ export default function NouvelleFacturePage() {
   ];
 
   const canNext = step === 1 ? (selectedClientId || newClient.nom.trim()) : step === 2 ? lignes.length > 0 : true;
-  const hasClient = Boolean(selectedClientId || newClient.nom.trim());
+  const clientName = selectedClient?.nom || newClient.nom.trim();
+  const hasClient = Boolean(clientName);
   const canSubmit = hasClient && lignes.length > 0;
   const totalHTBrut = useMemo(
     () => lignes.reduce((sum, l) => sum + l.totalLigne, 0),
@@ -299,7 +300,6 @@ export default function NouvelleFacturePage() {
     return null;
   })();
 
-  const clientName = selectedClient?.nom || newClient.nom.trim();
   const metaPills: ClientMetaPill[] = [
     { icon: FileText, label: `Étape ${step}/${steps.length} · ${steps[step - 1]?.title}`, tone: "violet" },
     ...(clientName
