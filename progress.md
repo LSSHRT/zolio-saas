@@ -44,7 +44,7 @@
 - [ ] `/parametres/*` (entreprise, compte, notifications, sécurité)
 - [ ] `/catalogue`
 - [ ] `/calepin`
-- [ ] `/modeles`
+- [x] `/modeles`
 - [ ] `/planning`
 - [ ] `/recurrentes`
 - [ ] `/rapports`
