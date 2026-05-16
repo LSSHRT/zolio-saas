@@ -542,20 +542,6 @@ export default function ParametresEntreprise() {
                 user.update({
                   unsafeMetadata: {
                     ...user.unsafeMetadata,
-                    companyName: formData.companyName,
-                    companyAddress: formData.companyAddress,
-                    companyPhone: formData.companyPhone,
-                    companySiret: formData.companySiret,
-                    companyLogo: formData.companyLogo,
-                    companyIban: formData.companyIban,
-                    companyBic: formData.companyBic,
-                    companyStatut: formData.companyStatut,
-                    companyAssurance: formData.companyAssurance,
-                    companyLegal: formData.companyLegal,
-                    companyCgv: formData.companyCgv,
-                    companyColor: brandColor,
-                    companyGoogleReview: formData.companyGoogleReview,
-                    referredBy: formData.referredBy,
                     reminderEnabled: newVal,
                   },
                 }).catch(() => setReminderEnabled(!newVal));
@@ -791,7 +777,7 @@ export default function ParametresEntreprise() {
         </button>
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:hidden">
           <ClientHeroStat
             label="Complétude"
             value={`${completionPercent}%`}
