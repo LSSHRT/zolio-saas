@@ -142,6 +142,25 @@ export default function RapportsPage() {
   const formatCurrency = (v: number) =>
     new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(v);
 
+  // Quand un trimestre est sélectionné, on ignore le fallback dashboard (annuel)
+  // pour rester cohérent avec les calculs locaux filtrés par trimestre.
+  const localBenefice = factureSummary.totalPayeTTC - depenseSummary.totalTTC;
+  const localMargePct = factureSummary.totalPayeTTC > 0
+    ? Math.round((localBenefice / factureSummary.totalPayeTTC) * 100)
+    : 0;
+  const caEncaisseDisplay = trimestre
+    ? factureSummary.totalPayeTTC
+    : (dashboard?.benefice?.caFacture ?? factureSummary.totalPayeTTC);
+  const depensesDisplay = trimestre
+    ? depenseSummary.totalTTC
+    : (dashboard?.benefice?.depenses ?? depenseSummary.totalTTC);
+  const beneficeDisplay = trimestre
+    ? localBenefice
+    : (dashboard?.benefice?.beneficeNet ?? localBenefice);
+  const margePctDisplay = trimestre
+    ? localMargePct
+    : (dashboard?.benefice?.margePct ?? localMargePct);
+
   const rapportCards: {
     id: string;
     title: string;
@@ -241,20 +260,20 @@ export default function RapportsPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:hidden">
           <ClientHeroStat
             label="CA encaissé"
-            value={formatCurrency(dashboard?.benefice?.caFacture ?? factureSummary.totalPayeTTC)}
+            value={formatCurrency(caEncaisseDisplay)}
             detail="Factures réglées"
             tone="emerald"
           />
           <ClientHeroStat
             label="Dépenses"
-            value={formatCurrency(dashboard?.benefice?.depenses ?? depenseSummary.totalTTC)}
+            value={formatCurrency(depensesDisplay)}
             detail={`${depenseSummary.total} opérations`}
             tone="rose"
           />
           <ClientHeroStat
             label="Bénéfice net"
-            value={formatCurrency(dashboard?.benefice?.beneficeNet ?? (factureSummary.totalPayeTTC - depenseSummary.totalTTC))}
-            detail={`Marge : ${dashboard?.benefice?.margePct ?? (factureSummary.totalPayeTTC > 0 ? Math.round(((factureSummary.totalPayeTTC - depenseSummary.totalTTC) / factureSummary.totalPayeTTC) * 100) : 0)}%`}
+            value={formatCurrency(beneficeDisplay)}
+            detail={`Marge : ${margePctDisplay}%`}
             tone="violet"
           />
           <ClientHeroStat
@@ -273,7 +292,7 @@ export default function RapportsPage() {
           items={[
             {
               label: "CA encaissé",
-              value: formatCurrency(dashboard?.benefice?.caFacture ?? factureSummary.totalPayeTTC),
+              value: formatCurrency(caEncaisseDisplay),
               detail: "Factures réglées",
               tone: "emerald",
             },
@@ -285,8 +304,8 @@ export default function RapportsPage() {
             },
             {
               label: "Bénéfice",
-              value: formatCurrency(dashboard?.benefice?.beneficeNet ?? (factureSummary.totalPayeTTC - depenseSummary.totalTTC)),
-              detail: `Marge ${dashboard?.benefice?.margePct ?? 0}%`,
+              value: formatCurrency(beneficeDisplay),
+              detail: `Marge ${margePctDisplay}%`,
               tone: "violet",
             },
             {
@@ -470,22 +489,22 @@ export default function RapportsPage() {
         <div className="grid gap-4 lg:grid-cols-4">
           <MetricTile
             label="CA encaissé"
-            value={formatCurrency(dashboard?.benefice?.caFacture ?? factureSummary.totalPayeTTC)}
+            value={formatCurrency(caEncaisseDisplay)}
             detail="Factures réglées"
             icon={TrendingUp}
             tone="success"
           />
           <MetricTile
             label="Dépenses"
-            value={formatCurrency(dashboard?.benefice?.depenses ?? depenseSummary.totalTTC)}
+            value={formatCurrency(depensesDisplay)}
             detail={`${depenseSummary.total} opération${depenseSummary.total > 1 ? "s" : ""}`}
             icon={TrendingDown}
             tone={depenseSummary.totalTTC > 0 ? "danger" : "neutral"}
           />
           <MetricTile
             label="Bénéfice net"
-            value={formatCurrency(dashboard?.benefice?.beneficeNet ?? (factureSummary.totalPayeTTC - depenseSummary.totalTTC))}
-            detail={`Marge : ${dashboard?.benefice?.margePct ?? (factureSummary.totalPayeTTC > 0 ? Math.round(((factureSummary.totalPayeTTC - depenseSummary.totalTTC) / factureSummary.totalPayeTTC) * 100) : 0)}%`}
+            value={formatCurrency(beneficeDisplay)}
+            detail={`Marge : ${margePctDisplay}%`}
             icon={Wallet}
             tone="primary"
           />
