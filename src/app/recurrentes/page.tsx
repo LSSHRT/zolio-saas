@@ -25,6 +25,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { MetricTile } from "@/components/desktop";
 
 interface Client {
   id: string;
@@ -301,6 +302,8 @@ export default function RecurrentesPage() {
         />
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard>
         <div className="relative">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -505,6 +508,233 @@ export default function RecurrentesPage() {
           </>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ─────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Actives"
+            value={String(actives)}
+            detail="Contrats en cours"
+            icon={CheckCircle}
+            tone={actives > 0 ? "success" : "neutral"}
+          />
+          <MetricTile
+            label="En pause"
+            value={String(enPause)}
+            detail="Contrats suspendus"
+            icon={Pause}
+            tone={enPause > 0 ? "warning" : "neutral"}
+          />
+          <MetricTile
+            label="CA mensuel estimé"
+            value={`${totalMensuel.toFixed(0)}€`}
+            detail="Revenu récurrent"
+            icon={TrendingUp}
+            tone="primary"
+          />
+          <MetricTile
+            label="Total"
+            value={String(recurrentes.length)}
+            detail="Contrats créés"
+            icon={RefreshCw}
+            tone="neutral"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Toolbar */}
+            <section className="lg-v2-panel p-4">
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--v2-text-subtle)]" aria-hidden />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un contrat ou un client..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="lg-v2-input w-full pl-8"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(true);
+                    loadClients();
+                  }}
+                  className="lg-v2-btn lg-v2-btn-primary shrink-0"
+                >
+                  <Plus size={14} aria-hidden /> Nouvelle récurrence
+                </button>
+              </div>
+            </section>
+
+            {/* Dense table */}
+            <section className="lg-v2-panel overflow-hidden">
+              <div className="flex items-end justify-between gap-4 border-b lg-v2-divider px-5 py-3">
+                <div>
+                  <p className="lg-v2-eyebrow">Contrats récurrents</p>
+                  <p className="mt-1 text-sm font-semibold lg-v2-text-strong">
+                    {filtered.length} récurrence{filtered.length > 1 ? "s" : ""}
+                  </p>
+                </div>
+                <p className="text-xs lg-v2-text-subtle">
+                  Activez, mettez en pause ou supprimez vos contrats.
+                </p>
+              </div>
+
+              {isLoading ? (
+                <div className="space-y-1.5 p-5">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-10 animate-pulse rounded-lg bg-slate-200/70 dark:bg-white/8" />
+                  ))}
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center lg-v2-text-subtle">
+                  <RefreshCw size={36} strokeWidth={1} aria-hidden />
+                  <p className="text-sm">
+                    {search ? "Aucun résultat" : "Aucune facture récurrente. Créez-en une pour automatiser votre facturation."}
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="lg-v2-table w-full">
+                    <thead>
+                      <tr>
+                        <th className="lg-v2-table-th">Contrat</th>
+                        <th className="lg-v2-table-th">Client</th>
+                        <th className="lg-v2-table-th">Fréquence</th>
+                        <th className="lg-v2-table-th">Prochaine</th>
+                        <th className="lg-v2-table-th text-right">TTC</th>
+                        <th className="lg-v2-table-th">Statut</th>
+                        <th className="lg-v2-table-th text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((item) => (
+                        <tr key={item.id} className="lg-v2-table-row">
+                          <td className="lg-v2-table-td">
+                            <div className="flex items-center gap-2">
+                              <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${item.actif ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300" : "bg-slate-500/15 text-slate-500"}`}>
+                                <RefreshCw size={12} aria-hidden />
+                              </div>
+                              <span className="text-sm font-semibold lg-v2-text-strong truncate">{item.nom}</span>
+                            </div>
+                          </td>
+                          <td className="lg-v2-table-td text-sm lg-v2-text-muted truncate">{item.client.nom}</td>
+                          <td className="lg-v2-table-td text-sm lg-v2-text-muted">
+                            {FREQUENCE_LABELS[item.frequence] || item.frequence}
+                            <span className="ml-1 text-xs lg-v2-text-subtle">· J{item.jourMois}</span>
+                          </td>
+                          <td className="lg-v2-table-td text-sm tabular-nums lg-v2-text-muted">
+                            {new Date(item.prochaineDate).toLocaleDateString("fr-FR")}
+                          </td>
+                          <td className="lg-v2-table-td text-right text-sm font-semibold tabular-nums lg-v2-text-strong">
+                            {item.montantTTC.toFixed(2)}€
+                          </td>
+                          <td className="lg-v2-table-td">
+                            <span className={`lg-v2-pill ${item.actif ? "lg-v2-pill-success" : "lg-v2-pill-neutral"}`}>
+                              {item.actif ? "Actif" : "Pause"}
+                            </span>
+                          </td>
+                          <td className="lg-v2-table-td">
+                            <div className="flex justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => toggleActif(item)}
+                                aria-label={item.actif ? "Mettre en pause" : "Réactiver"}
+                                className={`inline-flex h-7 w-7 items-center justify-center rounded-md border transition ${item.actif ? "border-amber-500/30 text-amber-600 hover:bg-amber-500/10 dark:text-amber-300" : "border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-300"}`}
+                              >
+                                {item.actif ? <Pause size={12} aria-hidden /> : <Play size={12} aria-hidden />}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPendingDelete(item)}
+                                disabled={deleting === item.id}
+                                aria-label="Supprimer"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-rose-500/30 text-rose-600 transition hover:bg-rose-500/10 disabled:opacity-50 dark:text-rose-300"
+                              >
+                                <Trash2 size={12} aria-hidden />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Actions</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(true);
+                  loadClients();
+                }}
+                className="lg-v2-btn lg-v2-btn-primary mt-3 w-full justify-center"
+              >
+                <Plus size={14} aria-hidden /> Nouvelle récurrence
+              </button>
+              <p className="mt-3 text-xs lg-v2-text-subtle">
+                Zolio génère et envoie automatiquement vos factures à la date programmée.
+              </p>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Bonnes pratiques</p>
+              <ul className="mt-3 space-y-2 text-xs lg-v2-text-muted">
+                <li className="flex gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" aria-hidden />
+                  Utilisez le jour 1 pour les abonnements en début de mois.
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden />
+                  Mettez en pause au lieu de supprimer pour conserver l&apos;historique.
+                </li>
+                <li className="flex gap-2">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500" aria-hidden />
+                  Précisez la nature dans la description (« Maintenance », « Hébergement »…).
+                </li>
+              </ul>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Revenu prévisible</p>
+              <p className="mt-2 text-2xl font-semibold tabular-nums lg-v2-text-strong">
+                {totalMensuel.toFixed(0)}€
+                <span className="ml-1 text-sm font-normal lg-v2-text-muted">/mois</span>
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="lg-v2-text-subtle">Annuel estimé</p>
+                  <p className="mt-1 text-sm font-semibold tabular-nums lg-v2-text-strong">
+                    {(totalMensuel * 12).toFixed(0)}€
+                  </p>
+                </div>
+                <div>
+                  <p className="lg-v2-text-subtle">Trimestriel</p>
+                  <p className="mt-1 text-sm font-semibold tabular-nums lg-v2-text-strong">
+                    {(totalMensuel * 3).toFixed(0)}€
+                  </p>
+                </div>
+              </div>
+              <p className="mt-3 text-xs lg-v2-text-subtle">
+                Basé sur {actives} contrat{actives > 1 ? "s" : ""} actif{actives > 1 ? "s" : ""}.
+              </p>
+            </section>
+          </aside>
+        </div>
+      </div>
 
       {/* Create dialog */}
       <MobileDialog
