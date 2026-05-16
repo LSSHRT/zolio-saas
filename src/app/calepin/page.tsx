@@ -15,6 +15,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { MetricTile } from "@/components/desktop";
 
 interface Note {
   id: string;
@@ -251,6 +252,8 @@ export default function CalepinPage() {
         />
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard className="space-y-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(0,1.3fr)_minmax(19rem,0.7fr)]">
           <div className="rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 sm:p-5">
@@ -430,6 +433,168 @@ export default function CalepinPage() {
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ──────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Notes"
+            value={String(noteList.length)}
+            detail="Annotations enregistrées"
+            icon={StickyNote}
+            tone="primary"
+          />
+          <MetricTile
+            label="Titrées"
+            value={String(titledNotes)}
+            detail="Avec titre exploitable"
+            icon={FileText}
+            tone={titledNotes > 0 ? "success" : "neutral"}
+          />
+          <MetricTile
+            label="Dernière activité"
+            value={noteList[0]?.date ? new Date(noteList[0].date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : "—"}
+            detail={noteList.length > 0 ? "Date de la plus récente" : "Aucune note"}
+            icon={Calendar}
+            tone="neutral"
+          />
+          <MetricTile
+            label="Caractères"
+            value={String(noteList.reduce((sum, n) => sum + (n.contenu?.length ?? 0), 0))}
+            detail="Volume total"
+            icon={ArrowUpRight}
+            tone="warning"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-4">
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="lg-v2-eyebrow">Liste</p>
+                  <p className="mt-1 text-sm lg-v2-text-muted">
+                    Cliquez une note pour la modifier en place.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openNote()}
+                  className="lg-v2-btn lg-v2-btn-primary"
+                >
+                  <Plus size={14} aria-hidden /> Nouvelle note
+                </button>
+              </div>
+
+              {error ? (
+                <div className="rounded-lg border border-[var(--v2-danger)]/30 bg-[var(--v2-danger-soft)] px-4 py-3 text-sm text-[var(--v2-danger)]">
+                  Erreur lors du chargement des notes.
+                </div>
+              ) : isLoading ? (
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="h-40 animate-pulse rounded-lg bg-slate-200/70 dark:bg-white/8" />
+                  ))}
+                </div>
+              ) : noteList.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center lg-v2-text-subtle">
+                  <StickyNote size={40} strokeWidth={1} aria-hidden />
+                  <p className="text-sm">Aucune note pour le moment.</p>
+                  <button
+                    type="button"
+                    onClick={() => openNote()}
+                    className="lg-v2-btn lg-v2-btn-primary"
+                  >
+                    <Plus size={14} aria-hidden /> Créer la première note
+                  </button>
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {noteList.map((note) => (
+                    <article
+                      key={note.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => openNote(note)}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") openNote(note); }}
+                      className="group relative cursor-pointer rounded-lg border lg-v2-divider bg-[var(--v2-panel)] p-4 transition hover:border-[var(--v2-primary)] hover:shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="text-sm font-semibold lg-v2-text-strong line-clamp-1">
+                          {note.titre?.trim() || "Sans titre"}
+                        </h3>
+                        <button
+                          type="button"
+                          onClick={(e) => requestDelete(note, e)}
+                          aria-label="Supprimer la note"
+                          className="opacity-0 transition group-hover:opacity-100 text-[var(--v2-text-subtle)] hover:text-[var(--v2-danger)]"
+                        >
+                          <Trash2 size={14} aria-hidden />
+                        </button>
+                      </div>
+                      <p className="mt-2 line-clamp-4 whitespace-pre-wrap text-xs leading-5 lg-v2-text-muted">
+                        {note.contenu || "—"}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between text-[11px] lg-v2-text-subtle tabular-nums">
+                        <span className="inline-flex items-center gap-1.5">
+                          <Calendar size={11} aria-hidden /> {note.date}
+                        </span>
+                        <span>{note.contenu?.length ?? 0} car.</span>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Capture rapide</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                Notez une dimension, une consigne ou une idée en quelques secondes.
+              </p>
+              <button
+                type="button"
+                onClick={() => openNote()}
+                className="lg-v2-btn lg-v2-btn-primary mt-4 w-full justify-center"
+              >
+                <Plus size={14} aria-hidden /> Nouvelle note
+              </button>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Aperçu</p>
+              <dl className="mt-3 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Total</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">{noteList.length}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Avec titre</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">{titledNotes}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Sans titre</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">{Math.max(noteList.length - titledNotes, 0)}</dd>
+                </div>
+              </dl>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Astuce</p>
+              <p className="mt-2 text-sm leading-5 lg-v2-text-muted">
+                Utilisez un titre court (ex. <span className="lg-v2-text-strong">Chantier Dupont – dim.</span>) pour
+                retrouver vos notes plus rapidement.
+              </p>
+            </section>
+          </aside>
+        </div>
+      </div>
 
       <MobileDialog
         open={isModalOpen}
