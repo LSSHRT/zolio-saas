@@ -49,7 +49,7 @@
 - [ ] `/recurrentes`
 - [ ] `/rapports`
 - [ ] `/tva`
-- [ ] `/notifications`
+- [x] `/notifications`
 - [ ] `/abonnement`
 
 ### Phase 6 — Dashboard
