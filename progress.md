@@ -47,7 +47,7 @@
 - [ ] `/modeles`
 - [ ] `/planning`
 - [ ] `/recurrentes`
-- [ ] `/rapports`
+- [x] `/rapports`
 - [ ] `/tva`
 - [ ] `/notifications`
 - [ ] `/abonnement`

@@ -21,6 +21,8 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { MetricTile } from "@/components/desktop";
+import { TrendingDown, TrendingUp, Wallet } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -298,6 +300,8 @@ export default function RapportsPage() {
         </div>
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       {/* Sélecteur année */}
       <ClientSectionCard>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -446,6 +450,280 @@ export default function RapportsPage() {
           })}
         </div>
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ─────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="CA encaissé"
+            value={formatCurrency(dashboard?.benefice?.caFacture ?? factureSummary.totalPayeTTC)}
+            detail="Factures réglées"
+            icon={TrendingUp}
+            tone="success"
+          />
+          <MetricTile
+            label="Dépenses"
+            value={formatCurrency(dashboard?.benefice?.depenses ?? depenseSummary.totalTTC)}
+            detail={`${depenseSummary.total} opération${depenseSummary.total > 1 ? "s" : ""}`}
+            icon={TrendingDown}
+            tone={depenseSummary.totalTTC > 0 ? "danger" : "neutral"}
+          />
+          <MetricTile
+            label="Bénéfice net"
+            value={formatCurrency(dashboard?.benefice?.beneficeNet ?? (factureSummary.totalPayeTTC - depenseSummary.totalTTC))}
+            detail={`Marge : ${dashboard?.benefice?.margePct ?? (factureSummary.totalPayeTTC > 0 ? Math.round(((factureSummary.totalPayeTTC - depenseSummary.totalTTC) / factureSummary.totalPayeTTC) * 100) : 0)}%`}
+            icon={Wallet}
+            tone="primary"
+          />
+          <MetricTile
+            label="TVA à reverser"
+            value={formatCurrency(Math.max(0, tvaCollectee - tvaDeductible))}
+            detail={`Collectée ${formatCurrency(tvaCollectee)}`}
+            icon={Calculator}
+            tone="warning"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Toolbar — année selector */}
+            <section className="lg-v2-panel p-4">
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="lg-v2-eyebrow shrink-0">Période</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {annees.map((a) => (
+                    <button
+                      key={a}
+                      type="button"
+                      onClick={() => setAnnee(a)}
+                      className={`rounded-md border px-3 py-1.5 text-xs font-semibold tabular-nums transition ${
+                        a === annee
+                          ? "border-[var(--v2-primary)] bg-[var(--v2-primary-soft)] text-[var(--v2-primary)]"
+                          : "lg-v2-divider lg-v2-text-muted hover:border-[var(--v2-primary)] hover:text-[var(--v2-primary)]"
+                      }`}
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex-1" />
+                <select
+                  value={trimestre}
+                  onChange={(e) => setTrimestre(e.target.value)}
+                  className="lg-v2-input shrink-0"
+                  aria-label="Trimestre"
+                >
+                  <option value="">Tous les trimestres</option>
+                  <option value="T1">T1 (Jan–Mar)</option>
+                  <option value="T2">T2 (Avr–Juin)</option>
+                  <option value="T3">T3 (Juil–Sep)</option>
+                  <option value="T4">T4 (Oct–Déc)</option>
+                </select>
+              </div>
+            </section>
+
+            {/* Revenus mensuels */}
+            {dashboard?.monthlyData && dashboard.monthlyData.some((m) => m.CA > 0) ? (
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <LineChart size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                  <h2 className="text-sm font-semibold lg-v2-text-strong">
+                    Revenus mensuels <span className="lg-v2-text-muted">· {annee}</span>
+                  </h2>
+                </div>
+                <div className="flex h-40 items-end gap-2">
+                  {dashboard.monthlyData.map((m, i) => {
+                    const maxCA = Math.max(...dashboard.monthlyData.map((x) => x.CA));
+                    const pct = maxCA > 0 ? (m.CA / maxCA) * 100 : 0;
+                    return (
+                      <div key={i} className="flex flex-1 flex-col items-center gap-1">
+                        <div className="relative w-full" style={{ height: "120px" }}>
+                          <motion.div
+                            initial={{ height: 0 }}
+                            animate={{ height: `${pct}%` }}
+                            transition={{ duration: 0.4, delay: i * 0.04 }}
+                            className={`absolute bottom-0 w-full rounded-sm ${
+                              pct > 0
+                                ? "bg-[var(--v2-primary)]"
+                                : "bg-[var(--v2-panel-muted)]"
+                            }`}
+                          />
+                        </div>
+                        <span className="text-[10px] lg-v2-text-subtle">{m.name}</span>
+                        {m.CA > 0 ? (
+                          <span className="text-[10px] tabular-nums lg-v2-text-muted">
+                            {Math.round(m.CA)}€
+                          </span>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            {/* Top clients + dépenses par catégorie — 2-col inside */}
+            <div className="grid gap-6 xl:grid-cols-2">
+              {dashboard?.topClients && dashboard.topClients.length > 0 ? (
+                <section className="lg-v2-panel p-5">
+                  <div className="mb-3 flex items-center gap-2">
+                    <Users size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                    <h2 className="text-sm font-semibold lg-v2-text-strong">Top clients</h2>
+                  </div>
+                  <div className="space-y-1">
+                    {dashboard.topClients.map((c, i) => (
+                      <div
+                        key={c.nom}
+                        className="flex items-center gap-3 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2"
+                      >
+                        <span className="w-5 text-center text-xs font-semibold tabular-nums lg-v2-text-subtle">
+                          {i + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold lg-v2-text-strong">{c.nom}</p>
+                          <p className="text-xs lg-v2-text-muted">
+                            {c.devisCount} devis
+                          </p>
+                        </div>
+                        <p className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-300">
+                          {formatCurrency(c.revenueHT)}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {depenseSummary.parCategorie.length > 0 ? (
+                <section className="lg-v2-panel p-5">
+                  <div className="mb-3 flex items-center gap-2">
+                    <BarChart3 size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                    <h2 className="text-sm font-semibold lg-v2-text-strong">Dépenses par catégorie</h2>
+                  </div>
+                  <div className="space-y-2">
+                    {depenseSummary.parCategorie.map((cat) => {
+                      const pct = depenseSummary.totalTTC > 0 ? (cat.total / depenseSummary.totalTTC) * 100 : 0;
+                      return (
+                        <div key={cat.categorie} className="rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="truncate text-sm font-semibold lg-v2-text-strong">
+                              {cat.categorie}
+                            </span>
+                            <span className="text-sm font-semibold tabular-nums text-rose-600 dark:text-rose-300">
+                              {formatCurrency(cat.total)}
+                            </span>
+                          </div>
+                          <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-slate-200/60 dark:bg-white/8">
+                            <div
+                              className="h-full rounded-full bg-rose-500"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                          <p className="mt-1 text-[10px] lg-v2-text-subtle">
+                            {cat.count} opération{cat.count > 1 ? "s" : ""} · {Math.round(pct)}%
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Exports comptables</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                Année {annee} · 4 formats officiels.
+              </p>
+              <div className="mt-3 space-y-1.5">
+                {rapportCards.map((card) => {
+                  const Icon = card.icon;
+                  return (
+                    <Link
+                      key={card.id}
+                      href={card.href}
+                      target={card.href.startsWith("/api") ? "_blank" : undefined}
+                      className="group flex items-center gap-3 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2.5 transition hover:border-[var(--v2-primary)] hover:bg-[var(--v2-panel)]"
+                    >
+                      <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${card.bg} ${card.color}`}>
+                        <Icon size={13} aria-hidden />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold lg-v2-text-strong">{card.title}</p>
+                        <p className="truncate text-[11px] lg-v2-text-muted">{card.description}</p>
+                      </div>
+                      <ChevronRight size={12} className="shrink-0 text-[var(--v2-text-subtle)] transition group-hover:text-[var(--v2-primary)]" aria-hidden />
+                    </Link>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Synthèse {annee}</p>
+              <dl className="mt-3 space-y-2 text-sm">
+                <div className="flex items-baseline justify-between">
+                  <dt className="lg-v2-text-muted">Factures</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">
+                    {factureSummary.total}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <dt className="lg-v2-text-muted">Payées</dt>
+                  <dd className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-300">
+                    {factureSummary.payees}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <dt className="lg-v2-text-muted">En attente</dt>
+                  <dd className="font-semibold tabular-nums text-amber-600 dark:text-amber-300">
+                    {factureSummary.enAttente}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <dt className="lg-v2-text-muted">En retard</dt>
+                  <dd className="font-semibold tabular-nums text-rose-600 dark:text-rose-300">
+                    {factureSummary.enRetard}
+                  </dd>
+                </div>
+                <div className="border-t lg-v2-divider pt-2" />
+                <div className="flex items-baseline justify-between">
+                  <dt className="lg-v2-text-muted">TVA collectée</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">
+                    {formatCurrency(tvaCollectee)}
+                  </dd>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <dt className="lg-v2-text-muted">TVA déductible</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">
+                    {formatCurrency(tvaDeductible)}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Pour votre comptable</p>
+              <p className="mt-2 text-xs lg-v2-text-muted">
+                Le format FEC est exigé en cas de contrôle URSSAF/DGFiP. Exportez-le chaque fin d&apos;exercice et conservez-le 10 ans.
+              </p>
+              <Link
+                href={`/api/export/fec?year=${annee}`}
+                target="_blank"
+                className="lg-v2-btn lg-v2-btn-secondary mt-3 w-full justify-center"
+              >
+                <FileDown size={14} aria-hidden /> Télécharger le FEC {annee}
+              </Link>
+            </section>
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
   );
 }
