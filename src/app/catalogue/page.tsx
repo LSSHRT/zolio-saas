@@ -515,7 +515,7 @@ function CatalogueContent() {
           },
         ]}
         summary={
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:hidden">
             <ClientHeroStat
               label="Catalogue"
               value={String(prestations.length)}
