@@ -5,6 +5,7 @@ import useSWR from "swr";
 import { motion } from "framer-motion";
 import {
   Calendar,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Clock,
@@ -21,6 +22,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { MetricTile } from "@/components/desktop";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -220,6 +222,8 @@ export default function PlanningPage() {
         </div>
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       {/* Calendrier */}
       <ClientSectionCard>
         <div className="mb-3 flex items-center justify-between sm:mb-4">
@@ -374,6 +378,289 @@ export default function PlanningPage() {
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ─────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Mois en cours"
+            value={MOIS_LABELS[viewMonth - 1]}
+            detail={String(viewYear)}
+            icon={CalendarDays}
+            tone="primary"
+          />
+          <MetricTile
+            label="Événements"
+            value={String(events.length)}
+            detail="Programmés ce mois-ci"
+            icon={TrendingUp}
+            tone={events.length > 0 ? "success" : "neutral"}
+          />
+          <MetricTile
+            label="Aujourd'hui"
+            value={String(eventsByDate[todayStr]?.length ?? 0)}
+            detail="À traiter dès maintenant"
+            icon={Clock}
+            tone={(eventsByDate[todayStr]?.length ?? 0) > 0 ? "warning" : "neutral"}
+          />
+          <MetricTile
+            label="Manuels"
+            value={String(manualData?.events?.length ?? 0)}
+            detail={`Auto : ${data?.events?.length ?? 0}`}
+            icon={Plus}
+            tone="neutral"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Toolbar */}
+            <section className="lg-v2-panel p-4">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  aria-label="Mois précédent"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border lg-v2-divider text-[var(--v2-text-subtle)] transition hover:border-[var(--v2-primary)] hover:text-[var(--v2-primary)]"
+                >
+                  <ChevronLeft size={14} aria-hidden />
+                </button>
+                <h2 className="text-sm font-semibold lg-v2-text-strong">
+                  {MOIS_LABELS[viewMonth - 1]} {viewYear}
+                </h2>
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                  aria-label="Mois suivant"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-md border lg-v2-divider text-[var(--v2-text-subtle)] transition hover:border-[var(--v2-primary)] hover:text-[var(--v2-primary)]"
+                >
+                  <ChevronRight size={14} aria-hidden />
+                </button>
+                <div className="flex-1" />
+                <button
+                  type="button"
+                  onClick={goToday}
+                  className="lg-v2-btn lg-v2-btn-secondary shrink-0"
+                >
+                  <Calendar size={14} aria-hidden /> Aujourd&apos;hui
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(true)}
+                  className="lg-v2-btn lg-v2-btn-primary shrink-0"
+                >
+                  <Plus size={14} aria-hidden /> Nouvel événement
+                </button>
+              </div>
+            </section>
+
+            {/* Calendar grid */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-3 grid grid-cols-7 gap-1">
+                {JOURS.map((j) => (
+                  <div key={j} className="lg-v2-eyebrow text-center">
+                    {j}
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: firstDay }).map((_, i) => (
+                  <div key={`empty-${i}`} />
+                ))}
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1;
+                  const dateStr = `${viewYear}-${String(viewMonth).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+                  const dayEvents = eventsByDate[dateStr] ?? [];
+                  const isToday = dateStr === todayStr;
+                  const isSelected = dateStr === selectedDate;
+
+                  return (
+                    <button
+                      key={dateStr}
+                      type="button"
+                      onClick={() => setSelectedDate(isSelected ? null : dateStr)}
+                      className={`relative flex aspect-square flex-col items-stretch justify-start rounded-md border p-1.5 text-xs transition ${
+                        isSelected
+                          ? "border-[var(--v2-primary)] bg-[var(--v2-primary-soft)]"
+                          : isToday
+                            ? "border-[var(--v2-primary)] bg-[var(--v2-panel)]"
+                            : "lg-v2-divider bg-[var(--v2-panel)] hover:border-[var(--v2-primary)]"
+                      }`}
+                    >
+                      <span className={`text-left text-[11px] font-semibold tabular-nums ${isToday ? "text-[var(--v2-primary)]" : "lg-v2-text-strong"}`}>
+                        {day}
+                      </span>
+                      {dayEvents.length > 0 ? (
+                        <div className="mt-auto flex items-center gap-0.5">
+                          {dayEvents.slice(0, 4).map((e) => (
+                            <div key={e.id} className={`h-1.5 w-1.5 rounded-full ${TONE_DOT[e.tone] || "bg-slate-400"}`} />
+                          ))}
+                          {dayEvents.length > 4 ? (
+                            <span className="ml-0.5 text-[9px] font-semibold lg-v2-text-muted tabular-nums">+{dayEvents.length - 4}</span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* Selected day details */}
+            {selectedDate ? (
+              <section className="lg-v2-panel p-5">
+                <div className="mb-3 flex items-end justify-between gap-3">
+                  <div>
+                    <p className="lg-v2-eyebrow">Sélection</p>
+                    <p className="mt-1 text-sm font-semibold lg-v2-text-strong">
+                      {new Date(selectedDate + "T00:00:00").toLocaleDateString("fr-FR", {
+                        weekday: "long",
+                        day: "numeric",
+                        month: "long",
+                      })}
+                    </p>
+                  </div>
+                  <span className="lg-v2-pill lg-v2-pill-neutral">
+                    {selectedEvents.length} événement{selectedEvents.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+                {selectedEvents.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-10 text-center lg-v2-text-subtle">
+                    <Calendar size={32} strokeWidth={1} aria-hidden />
+                    <p className="text-sm">Aucun événement ce jour.</p>
+                    <button
+                      type="button"
+                      onClick={() => setShowCreateModal(true)}
+                      className="lg-v2-btn lg-v2-btn-primary"
+                    >
+                      <Plus size={14} aria-hidden /> Ajouter
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedEvents.map((e) => {
+                      const Icon = e.type === "facture" ? FileText : e.type === "recurrente" ? RefreshCw : Clock;
+                      return (
+                        <Link
+                          key={e.id}
+                          href={e.href}
+                          className="flex items-center gap-3 rounded-lg border lg-v2-divider bg-[var(--v2-panel)] px-3 py-2.5 transition hover:border-[var(--v2-primary)]"
+                        >
+                          <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${TONE_DOT[e.tone] || "bg-slate-400"} text-white`}>
+                            <Icon size={12} aria-hidden />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold lg-v2-text-strong truncate">{e.title}</p>
+                            <p className="text-xs lg-v2-text-muted truncate">{e.subtitle}</p>
+                          </div>
+                          {e.amount !== null ? (
+                            <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                              {e.amount.toFixed(2)}€
+                            </span>
+                          ) : null}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            ) : null}
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Actions</p>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="lg-v2-btn lg-v2-btn-primary mt-3 w-full justify-center"
+              >
+                <Plus size={14} aria-hidden /> Nouvel événement
+              </button>
+              <button
+                type="button"
+                onClick={goToday}
+                className="lg-v2-btn lg-v2-btn-secondary mt-2 w-full justify-center"
+              >
+                <Calendar size={14} aria-hidden /> Revenir à aujourd&apos;hui
+              </button>
+              <p className="mt-3 text-xs lg-v2-text-subtle">
+                Les échéances de devis, factures et récurrentes apparaissent automatiquement.
+              </p>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Légende</p>
+              <ul className="mt-3 space-y-1.5 text-xs">
+                <li className="flex items-center gap-2 lg-v2-text-muted">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+                  Facture payée / récurrente OK
+                </li>
+                <li className="flex items-center gap-2 lg-v2-text-muted">
+                  <span className="h-2 w-2 rounded-full bg-amber-500" aria-hidden />
+                  Échéance proche / rappel
+                </li>
+                <li className="flex items-center gap-2 lg-v2-text-muted">
+                  <span className="h-2 w-2 rounded-full bg-rose-500" aria-hidden />
+                  En retard / urgent
+                </li>
+                <li className="flex items-center gap-2 lg-v2-text-muted">
+                  <span className="h-2 w-2 rounded-full bg-violet-500" aria-hidden />
+                  Événement manuel
+                </li>
+              </ul>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Tous les événements</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                {events.length} ce mois-ci.
+              </p>
+              {isLoading ? (
+                <div className="mt-3 space-y-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-10 animate-pulse rounded-lg bg-slate-200/70 dark:bg-white/8" />
+                  ))}
+                </div>
+              ) : events.length === 0 ? (
+                <p className="mt-3 text-xs lg-v2-text-subtle">Aucun événement à afficher pour ce mois.</p>
+              ) : (
+                <div className="mt-3 max-h-80 space-y-1.5 overflow-y-auto pr-1">
+                  {events.map((e) => {
+                    const Icon = e.type === "facture" ? FileText : e.type === "recurrente" ? RefreshCw : Clock;
+                    const eventDate = new Date(e.date);
+                    return (
+                      <Link
+                        key={e.id}
+                        href={e.href}
+                        className="flex items-center gap-2 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-2.5 py-1.5 transition hover:border-[var(--v2-primary)] hover:bg-[var(--v2-panel)]"
+                      >
+                        <div className={`h-2 w-2 shrink-0 rounded-full ${TONE_DOT[e.tone] || "bg-slate-400"}`} aria-hidden />
+                        <Icon size={11} className="shrink-0 text-[var(--v2-text-subtle)]" aria-hidden />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold lg-v2-text-strong">{e.title}</p>
+                          <p className="truncate text-[10px] lg-v2-text-muted">
+                            {eventDate.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })} · {e.subtitle}
+                          </p>
+                        </div>
+                        {e.amount !== null ? (
+                          <span className="shrink-0 text-[10px] font-semibold tabular-nums lg-v2-text-strong">
+                            {e.amount.toFixed(0)}€
+                          </span>
+                        ) : null}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          </aside>
+        </div>
+      </div>
 
       {/* Modal création événement */}
       {showCreateModal && (
