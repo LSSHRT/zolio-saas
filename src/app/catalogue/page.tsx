@@ -8,6 +8,7 @@ import {
   Copy,
   Download,
   Euro,
+  Layers,
   Loader2,
   Package,
   Pencil,
@@ -16,6 +17,7 @@ import {
   Tag,
   Trash2,
   Upload,
+  Wrench,
   X,
 } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
@@ -29,6 +31,7 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import { EmptyState } from "@/components/empty-state";
+import { MetricTile } from "@/components/desktop";
 import {
   DEFAULT_TRADE,
   STARTER_CATEGORIES,
@@ -573,6 +576,8 @@ function CatalogueContent() {
           />
         }
       >
+        {/* ─── Mobile view (< lg) ─────────────────────────── */}
+        <div className="space-y-4 sm:space-y-6 lg:hidden">
         <ClientSectionCard>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.12fr)_minmax(0,0.88fr)]">
             <section className="rounded-2xl border border-violet-200/70 bg-violet-50/80 p-5 dark:border-violet-500/20 dark:bg-violet-500/10">
@@ -925,6 +930,397 @@ function CatalogueContent() {
             </div>
           )}
         </ClientSectionCard>
+        </div>
+
+        {/* ─── Desktop view (lg+) — v2 dense ─────────────────────── */}
+        <div className="hidden lg:block lg:space-y-6">
+          {/* KPI strip */}
+          <div className="grid gap-4 lg:grid-cols-4">
+            <MetricTile
+              label="Catalogue"
+              value={String(prestations.length)}
+              detail="Prestations enregistrées"
+              icon={Package}
+              tone="primary"
+            />
+            <MetricTile
+              label="Visibles"
+              value={String(filteredPrestations.length)}
+              detail={search ? `Filtre : « ${search} »` : "Aucun filtre actif"}
+              icon={Search}
+              tone="neutral"
+            />
+            <MetricTile
+              label="Catégories"
+              value={String(categoriesCount)}
+              detail="Dans la vue actuelle"
+              icon={Tag}
+              tone={categoriesCount > 0 ? "success" : "neutral"}
+            />
+            <MetricTile
+              label="Prix moyen"
+              value={`${averagePrice}€`}
+              detail="Base HT par ligne"
+              icon={Euro}
+              tone={averagePrice > 0 ? "warning" : "neutral"}
+            />
+          </div>
+
+          {/* 2-col body */}
+          <div className="grid gap-6 lg:grid-cols-12">
+            <div className="lg:col-span-8 space-y-6">
+              {/* Toolbar */}
+              <section className="lg-v2-panel p-4">
+                <div className="flex items-center gap-3">
+                  <div className="relative flex-1">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--v2-text-subtle)]" size={14} aria-hidden />
+                    <input
+                      type="text"
+                      placeholder="Rechercher une prestation ou catégorie…"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="lg-v2-input w-full pl-9"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={openFilePicker}
+                    className="lg-v2-btn lg-v2-btn-secondary shrink-0"
+                  >
+                    <Upload size={14} aria-hidden /> Import CSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={showForm ? closeForm : openCreateForm}
+                    className="lg-v2-btn lg-v2-btn-primary shrink-0"
+                  >
+                    {showForm ? <X size={14} aria-hidden /> : <Plus size={14} aria-hidden />}
+                    {showForm ? "Fermer" : "Ajouter"}
+                  </button>
+                </div>
+              </section>
+
+              {/* Edit form */}
+              {showForm ? (
+                <section className="lg-v2-panel p-5">
+                  <div className="mb-4 flex items-end justify-between gap-3">
+                    <div>
+                      <p className="lg-v2-eyebrow">Édition rapide</p>
+                      <p className="mt-1 text-sm lg-v2-text-muted">
+                        {editingId ? "Modification d'une prestation existante." : "Création d'une nouvelle ligne catalogue."}
+                      </p>
+                    </div>
+                  </div>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <label className="flex flex-col gap-1.5 text-xs font-semibold lg-v2-text-muted">
+                        Catégorie
+                        <select
+                          value={form.categorie}
+                          onChange={(event) => setForm((current) => ({ ...current, categorie: event.target.value }))}
+                          className="lg-v2-input"
+                        >
+                          {STARTER_CATEGORIES.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label className="flex flex-col gap-1.5 text-xs font-semibold lg-v2-text-muted">
+                        Nom de la prestation
+                        <input
+                          required
+                          value={form.nom}
+                          onChange={(event) => setForm((current) => ({ ...current, nom: event.target.value }))}
+                          placeholder="Ex : Peinture mate blanche"
+                          className="lg-v2-input"
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1.5 text-xs font-semibold lg-v2-text-muted">
+                        Unité
+                        <select
+                          value={form.unite}
+                          onChange={(event) => setForm((current) => ({ ...current, unite: event.target.value }))}
+                          className="lg-v2-input"
+                        >
+                          <option value="m²">m²</option>
+                          <option value="ml">ml</option>
+                          <option value="heure">Heure</option>
+                          <option value="forfait">Forfait</option>
+                          <option value="unité">Unité</option>
+                        </select>
+                      </label>
+                      <label className="flex flex-col gap-1.5 text-xs font-semibold lg-v2-text-muted">
+                        Prix HT
+                        <input
+                          required
+                          type="number"
+                          step="any"
+                          inputMode="decimal"
+                          value={form.prix}
+                          onChange={(event) => setForm((current) => ({ ...current, prix: event.target.value }))}
+                          placeholder="0,00"
+                          className="lg-v2-input"
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1.5 text-xs font-semibold lg-v2-text-muted">
+                        Coût matière
+                        <input
+                          type="number"
+                          step="any"
+                          inputMode="decimal"
+                          value={form.cout}
+                          onChange={(event) => setForm((current) => ({ ...current, cout: event.target.value }))}
+                          placeholder="Optionnel"
+                          className="lg-v2-input"
+                        />
+                      </label>
+                      <label className="flex flex-col gap-1.5 text-xs font-semibold lg-v2-text-muted">
+                        Stock initial
+                        <input
+                          type="number"
+                          step="any"
+                          inputMode="decimal"
+                          value={form.stock}
+                          onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
+                          placeholder="Optionnel"
+                          className="lg-v2-input"
+                        />
+                      </label>
+                    </div>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={closeForm}
+                        className="lg-v2-btn lg-v2-btn-ghost"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="lg-v2-btn lg-v2-btn-primary"
+                      >
+                        {saving ? <Loader2 size={12} className="animate-spin" aria-hidden /> : null}
+                        {saving ? "Enregistrement…" : editingId ? "Enregistrer" : "Ajouter"}
+                      </button>
+                    </div>
+                  </form>
+                </section>
+              ) : null}
+
+              {/* Catalogue table */}
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-end justify-between gap-3">
+                  <div>
+                    <p className="lg-v2-eyebrow">Vos prestations</p>
+                    <p className="mt-1 text-sm lg-v2-text-muted">
+                      {filteredPrestations.length} affichée{filteredPrestations.length > 1 ? "s" : ""} sur {prestations.length}.
+                    </p>
+                  </div>
+                </div>
+
+                {loading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} className="h-12 animate-pulse rounded-lg bg-slate-200/70 dark:bg-white/8" />
+                    ))}
+                  </div>
+                ) : filteredPrestations.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center gap-3 py-14 text-center lg-v2-text-subtle">
+                    <Package size={40} strokeWidth={1} aria-hidden />
+                    <p className="text-sm">
+                      {search ? "Aucune prestation ne correspond à votre recherche." : "Catalogue vide pour le moment."}
+                    </p>
+                    {!search ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={openCreateForm}
+                          className="lg-v2-btn lg-v2-btn-primary"
+                        >
+                          <Plus size={14} aria-hidden /> Ajouter une ligne
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleImportStarterCatalog()}
+                          disabled={isImportingStarter}
+                          className="lg-v2-btn lg-v2-btn-secondary"
+                        >
+                          {isImportingStarter ? <Loader2 size={12} className="animate-spin" aria-hidden /> : <Download size={12} aria-hidden />}
+                          Starter {activeTradeDefinition?.shortLabel?.toLowerCase() || "métier"}
+                        </button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="overflow-hidden rounded-xl border lg-v2-divider">
+                    <table className="w-full">
+                      <thead>
+                        <tr>
+                          <th className="lg-v2-table-header">Prestation</th>
+                          <th className="lg-v2-table-header">Catégorie</th>
+                          <th className="lg-v2-table-header text-right">Prix HT</th>
+                          <th className="lg-v2-table-header text-right">Coût</th>
+                          <th className="lg-v2-table-header text-right">Stock</th>
+                          <th className="lg-v2-table-header text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredPrestations.map((prestation) => (
+                          <tr key={prestation.id} className="lg-v2-table-row">
+                            <td className="lg-v2-table-cell">
+                              <p className="text-sm font-semibold lg-v2-text-strong">{prestation.nom}</p>
+                              <p className="mt-0.5 text-xs lg-v2-text-muted">par {prestation.unite}</p>
+                            </td>
+                            <td className="lg-v2-table-cell">
+                              <span className="lg-v2-pill lg-v2-pill-neutral">{prestation.categorie || "Autre"}</span>
+                            </td>
+                            <td className="lg-v2-table-cell text-right text-sm font-semibold lg-v2-text-strong tabular-nums">
+                              {formatPrice(prestation.prix)}
+                            </td>
+                            <td className="lg-v2-table-cell text-right text-sm lg-v2-text-muted tabular-nums">
+                              {prestation.cout ? formatPrice(prestation.cout) : "—"}
+                            </td>
+                            <td className="lg-v2-table-cell text-right text-sm tabular-nums">
+                              {Number(prestation.stock ?? 0) > 0 ? (
+                                <span className="lg-v2-pill lg-v2-pill-success">{prestation.stock}</span>
+                              ) : (
+                                <span className="lg-v2-text-subtle">—</span>
+                              )}
+                            </td>
+                            <td className="lg-v2-table-cell text-right">
+                              <div className="inline-flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => handleEdit(prestation)}
+                                  aria-label={`Modifier ${prestation.nom}`}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-md border lg-v2-divider text-[var(--v2-text-subtle)] transition hover:border-[var(--v2-primary)] hover:text-[var(--v2-primary)]"
+                                >
+                                  <Pencil size={12} aria-hidden />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDuplicate(prestation)}
+                                  aria-label={`Dupliquer ${prestation.nom}`}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-md border lg-v2-divider text-[var(--v2-text-subtle)] transition hover:border-[var(--v2-primary)] hover:text-[var(--v2-primary)]"
+                                >
+                                  <Copy size={12} aria-hidden />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setPendingDelete(prestation)}
+                                  aria-label={`Supprimer ${prestation.nom}`}
+                                  className="inline-flex h-7 w-7 items-center justify-center rounded-md border lg-v2-divider text-[var(--v2-text-subtle)] transition hover:border-[var(--v2-danger)] hover:text-[var(--v2-danger)]"
+                                >
+                                  <Trash2 size={12} aria-hidden />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            </div>
+
+            {/* Right rail sticky */}
+            <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+              <section className="lg-v2-panel p-5">
+                <p className="lg-v2-eyebrow">Actions</p>
+                <button
+                  type="button"
+                  onClick={showForm ? closeForm : openCreateForm}
+                  className="lg-v2-btn lg-v2-btn-primary mt-3 w-full justify-center"
+                >
+                  {showForm ? <X size={14} aria-hidden /> : <Plus size={14} aria-hidden />}
+                  {showForm ? "Fermer le formulaire" : "Nouvelle prestation"}
+                </button>
+                <button
+                  type="button"
+                  onClick={openFilePicker}
+                  className="lg-v2-btn lg-v2-btn-secondary mt-2 w-full justify-center"
+                >
+                  <Upload size={14} aria-hidden /> Importer un CSV
+                </button>
+                <p className="mt-3 text-xs lg-v2-text-subtle">
+                  Astuce : un CSV `catégorie ; nom ; unité ; prix ; coût ; stock` suffit pour bootstrap toute votre bibliothèque.
+                </p>
+              </section>
+
+              <section className="lg-v2-panel p-5">
+                <p className="lg-v2-eyebrow">Starter métier</p>
+                <p className="mt-1 text-sm lg-v2-text-muted">
+                  Base {activeTradeDefinition?.label.toLowerCase()} prête à l&apos;emploi.
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {TRADE_OPTIONS.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => setSelectedTrade(option.key)}
+                      className={`rounded-md border px-2 py-1 text-[11px] font-semibold transition ${
+                        activeTrade === option.key
+                          ? "border-[var(--v2-primary)] bg-[var(--v2-primary-soft)] text-[var(--v2-primary)]"
+                          : "lg-v2-divider lg-v2-text-muted hover:border-[var(--v2-primary)] hover:text-[var(--v2-primary)]"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-3 rounded-lg border lg-v2-divider bg-[var(--v2-panel-muted)] p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold lg-v2-text-strong">
+                      <Wrench size={12} className="text-[var(--v2-primary)]" aria-hidden />
+                      {activeTradeDefinition?.label}
+                    </span>
+                    <span className="rounded-full bg-[var(--v2-primary-soft)] px-2 py-0.5 text-[10px] font-bold text-[var(--v2-primary)]">
+                      {starterCount}
+                    </span>
+                  </div>
+                  <p className="mt-1.5 text-xs lg-v2-text-muted">Lignes pré-remplies, modifiables une fois importées.</p>
+                  <button
+                    type="button"
+                    onClick={() => void handleImportStarterCatalog()}
+                    disabled={isImportingStarter}
+                    className="lg-v2-btn lg-v2-btn-primary mt-3 w-full justify-center text-xs"
+                  >
+                    {isImportingStarter ? <Loader2 size={12} className="animate-spin" aria-hidden /> : <Download size={12} aria-hidden />}
+                    {isImportingStarter ? "Import en cours…" : `Importer ${starterCount} lignes`}
+                  </button>
+                </div>
+              </section>
+
+              <section className="lg-v2-panel p-5">
+                <p className="lg-v2-eyebrow">Stats catalogue</p>
+                <dl className="mt-3 space-y-2 text-sm">
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted inline-flex items-center gap-1.5">
+                      <Layers size={11} aria-hidden /> Catégories
+                    </dt>
+                    <dd className="font-semibold tabular-nums lg-v2-text-strong">{categoriesCount}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted inline-flex items-center gap-1.5">
+                      <Boxes size={11} aria-hidden /> Avec stock
+                    </dt>
+                    <dd className="font-semibold tabular-nums lg-v2-text-strong">{stockedCount}</dd>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted inline-flex items-center gap-1.5">
+                      <Euro size={11} aria-hidden /> Prix moyen
+                    </dt>
+                    <dd className="font-semibold tabular-nums lg-v2-text-strong">{averagePrice}€</dd>
+                  </div>
+                </dl>
+              </section>
+            </aside>
+          </div>
+        </div>
       </ClientSubpageShell>
 
       <MobileDialog

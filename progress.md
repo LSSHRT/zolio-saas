@@ -42,7 +42,7 @@
 
 ### Phase 5 — Outils & paramètres (~10 pages)
 - [ ] `/parametres/*` (entreprise, compte, notifications, sécurité)
-- [ ] `/catalogue`
+- [x] `/catalogue`
 - [ ] `/calepin`
 - [ ] `/modeles`
 - [ ] `/planning`
