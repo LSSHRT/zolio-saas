@@ -35,9 +35,9 @@
 ## 📋 Phases restantes
 
 ### Phase 4 — Formulaires (lourd)
-- [ ] 4b `/nouvelle-facture` (~680 lignes)
-- [ ] 4c `/nouveau-devis` (~1100 lignes) + sous-pages
-- [ ] 4d `/nouveau-devis/options`
+- [x] 4b `/nouvelle-facture` (~680 lignes)
+- [x] 4c `/nouveau-devis` (~1100 lignes)
+- [x] 4d `/nouveau-devis/options` (~510 lignes, devis multi-options 2/3 versions)
 - [ ] 4e `DevisEditor` (1266 lignes, component partagé avec drawer)
 
 ### Phase 5 — Outils & paramètres (~10 pages)
@@ -93,4 +93,4 @@ lg-v2-btn / lg-v2-btn-*   : boutons primary/secondary/ghost/danger
 
 ---
 
-*Dernier commit : `b99a736` — feat(design-v2): /clients/[id] desktop detail layout v2*
+*Dernier commit : Phase 4d — feat(design-v2): /nouveau-devis/options desktop dense form v2*
