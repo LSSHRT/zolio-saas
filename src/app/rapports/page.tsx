@@ -67,10 +67,19 @@ export default function RapportsPage() {
   const factures = useMemo(() => facturesData?.data ?? [], [facturesData]);
   const depenses = useMemo(() => depensesData?.data ?? [], [depensesData]);
 
+  // Filtre commun : année + (option) trimestre
+  const matchesPeriode = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (d.getFullYear() !== annee) return false;
+    if (!trimestre) return true;
+    const month = d.getMonth(); // 0-11
+    const quarter = Math.floor(month / 3) + 1; // 1..4
+    return `T${quarter}` === trimestre;
+  };
+
   // Calcul des stats factures
   const factureSummary: FactureSummary = useMemo(() => {
-    const anneeFiltre = (d: string) => new Date(d).getFullYear() === annee;
-    const filtered = factures.filter((f) => anneeFiltre(f.date));
+    const filtered = factures.filter((f) => matchesPeriode(f.date));
 
     return {
       total: filtered.length,
@@ -81,12 +90,12 @@ export default function RapportsPage() {
       totalTTC: filtered.reduce((s, f) => s + (f.totalTTC || 0), 0),
       totalPayeTTC: filtered.filter((f) => f.statut === "Payée").reduce((s, f) => s + (f.totalTTC || 0), 0),
     };
-  }, [factures, annee]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [factures, annee, trimestre]);
 
   // Calcul des stats dépenses
   const depenseSummary: DepenseSummary = useMemo(() => {
-    const anneeFiltre = (d: string) => new Date(d).getFullYear() === annee;
-    const filtered = depenses.filter((d) => anneeFiltre(d.date));
+    const filtered = depenses.filter((d) => matchesPeriode(d.date));
     const catMap = new Map<string, { total: number; count: number }>();
 
     for (const d of filtered) {
@@ -104,12 +113,13 @@ export default function RapportsPage() {
         .map(([cat, { total, count }]) => ({ categorie: cat, total, count }))
         .sort((a, b) => b.total - a.total),
     };
-  }, [depenses, annee]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [depenses, annee, trimestre]);
 
   // TVA collectée (sur factures payées)
   const tvaCollectee = factureSummary.totalPayeTTC - factureSummary.payees
     ? factures
-        .filter((f) => f.statut === "Payée" && new Date(f.date).getFullYear() === annee)
+        .filter((f) => f.statut === "Payée" && matchesPeriode(f.date))
         .reduce((s, f) => {
           const ht = f.totalHT || 0;
           const ttc = f.totalTTC || 0;
@@ -157,7 +167,9 @@ export default function RapportsPage() {
       title: "Rapport TVA",
       description: `TVA collectée et déductible pour ${annee}.`,
       icon: Calculator,
-      href: `/api/export/tva?annee=${annee}&format=json`,
+      href: trimestre
+        ? `/api/export/tva?annee=${annee}&trimestre=${trimestre.replace("T", "")}&format=json`
+        : `/api/export/tva?annee=${annee}&format=json`,
       color: "text-amber-700 dark:text-amber-300",
       bg: "bg-amber-50 dark:bg-amber-500/10",
       ring: "ring-amber-300/40 dark:ring-amber-400/20",
@@ -192,7 +204,7 @@ export default function RapportsPage() {
       activeNav="tools"
       breadcrumbs={[{ label: "Outils" }, { label: "Rapports" }]}
       metaPills={[
-        { icon: Calculator, label: `Année ${annee}`, tone: "slate" },
+        { icon: Calculator, label: trimestre ? `${trimestre} ${annee}` : `Année ${annee}`, tone: "slate" },
         ...(factureSummary.totalPayeTTC > 0
           ? [{ icon: BarChart3, label: `${factureSummary.totalPayeTTC.toFixed(0)}€ encaissés`, tone: "emerald" as const }]
           : []),
@@ -206,7 +218,7 @@ export default function RapportsPage() {
       focusLine={
         factureSummary.total === 0 && depenseSummary.totalTTC === 0 ? (
           <>
-            <span className="font-semibold text-slate-800 dark:text-slate-100">Aucune donnée pour {annee}</span>
+            <span className="font-semibold text-slate-800 dark:text-slate-100">Aucune donnée pour {trimestre ? `${trimestre} ${annee}` : annee}</span>
             {" "}· Les rapports apparaîtront dès vos premières factures et dépenses enregistrées.
           </>
         ) : (factureSummary.totalPayeTTC - depenseSummary.totalTTC) > 0 ? (
@@ -214,19 +226,19 @@ export default function RapportsPage() {
             <span className="font-semibold text-slate-800 dark:text-slate-100">
               Bénéfice net : {(factureSummary.totalPayeTTC - depenseSummary.totalTTC).toFixed(0)}€
             </span>
-            {" "}· CA encaissé moins dépenses {annee}. Exportez en FEC ou CSV pour votre comptable.
+            {" "}· CA encaissé moins dépenses {trimestre ? `${trimestre} ${annee}` : annee}. Exportez en FEC ou CSV pour votre comptable.
           </>
         ) : (
           <>
             <span className="font-semibold text-slate-800 dark:text-slate-100">
               Marge négative : {(factureSummary.totalPayeTTC - depenseSummary.totalTTC).toFixed(0)}€
             </span>
-            {" "}· Vos dépenses dépassent vos encaissements sur {annee}. Vérifiez avec votre comptable.
+            {" "}· Vos dépenses dépassent vos encaissements sur {trimestre ? `${trimestre} ${annee}` : annee}. Vérifiez avec votre comptable.
           </>
         )
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:hidden">
           <ClientHeroStat
             label="CA encaissé"
             value={formatCurrency(dashboard?.benefice?.caFacture ?? factureSummary.totalPayeTTC)}
@@ -639,7 +651,7 @@ export default function RapportsPage() {
             <section className="lg-v2-panel p-5">
               <p className="lg-v2-eyebrow">Exports comptables</p>
               <p className="mt-1 text-sm lg-v2-text-muted">
-                Année {annee} · 4 formats officiels.
+                {trimestre ? `${trimestre} ${annee}` : `Année ${annee}`} · 4 formats officiels.
               </p>
               <div className="mt-3 space-y-1.5">
                 {rapportCards.map((card) => {
@@ -666,7 +678,7 @@ export default function RapportsPage() {
             </section>
 
             <section className="lg-v2-panel p-5">
-              <p className="lg-v2-eyebrow">Synthèse {annee}</p>
+              <p className="lg-v2-eyebrow">Synthèse {trimestre ? `${trimestre} ${annee}` : annee}</p>
               <dl className="mt-3 space-y-2 text-sm">
                 <div className="flex items-baseline justify-between">
                   <dt className="lg-v2-text-muted">Factures</dt>
