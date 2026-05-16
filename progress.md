@@ -48,7 +48,7 @@
 - [ ] `/planning`
 - [ ] `/recurrentes`
 - [ ] `/rapports`
-- [ ] `/tva`
+- [x] `/tva`
 - [ ] `/notifications`
 - [ ] `/abonnement`
 
