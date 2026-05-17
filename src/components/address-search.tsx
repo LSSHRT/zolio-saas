@@ -74,6 +74,8 @@ export default function AddressSearch({
 
     return () => {
       window.clearTimeout(timer);
+      abortRef.current?.abort();
+      abortRef.current = null;
     };
   }, [trimmed]);
 

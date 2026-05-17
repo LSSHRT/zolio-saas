@@ -4,6 +4,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { rateLimitResponse, internalServerError } from "@/lib/http";
 
 const NOMINATIM_API = "https://nominatim.openstreetmap.org/search";
+const NOMINATIM_TIMEOUT_MS = 5_000;
 // Nominatim TOS impose un User-Agent identifiant. Cf https://operations.osmfoundation.org/policies/nominatim/
 const USER_AGENT =
   process.env.NOMINATIM_USER_AGENT ??
@@ -131,13 +132,30 @@ export async function GET(request: Request) {
     url.searchParams.set("countrycodes", "fr");
     url.searchParams.set("accept-language", "fr");
 
-    const res = await fetch(url.toString(), {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": USER_AGENT,
-      },
-      next: { revalidate: 86_400 },
-    });
+    let res: Response;
+    try {
+      res = await fetch(url.toString(), {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": USER_AGENT,
+        },
+        next: { revalidate: 86_400 },
+        signal: AbortSignal.timeout(NOMINATIM_TIMEOUT_MS),
+      });
+    } catch (fetchError) {
+      const isTimeout =
+        fetchError instanceof Error &&
+        (fetchError.name === "TimeoutError" || fetchError.name === "AbortError");
+      return NextResponse.json(
+        {
+          results: [],
+          error: isTimeout
+            ? "Annuaire d'adresses lent — réessayez dans un instant."
+            : "Annuaire d'adresses injoignable",
+        },
+        { status: 200 },
+      );
+    }
 
     if (!res.ok) {
       return NextResponse.json(
