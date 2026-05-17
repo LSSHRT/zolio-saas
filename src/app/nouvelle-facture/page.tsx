@@ -28,6 +28,7 @@ import {
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
 import SiretSearch from "@/components/siret-search";
+import AddressSearch from "@/components/address-search";
 
 interface LigneEditable {
   id: string;
@@ -1138,12 +1139,24 @@ export default function NouvelleFacturePage() {
               </span>
             </div>
           </div>
-          {(["nom", "email", "telephone", "adresse"] as const).map((field) => (
+          {(["nom", "email", "telephone"] as const).map((field) => (
             <input key={field} value={newClient[field]}
               onChange={(e) => setNewClient({ ...newClient, [field]: e.target.value })}
               placeholder={field.charAt(0).toUpperCase() + field.slice(1)}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
           ))}
+          <AddressSearch
+            placeholder="Rechercher une adresse de chantier…"
+            helperText="Tape une adresse — rue, code postal et ville sont préremplis (OpenStreetMap)."
+            onSelect={(hit) =>
+              setNewClient((current) => ({ ...current, adresse: hit.label }))
+            }
+          />
+          <input
+            value={newClient.adresse}
+            onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
+            placeholder="Adresse / chantier (saisie manuelle)"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-slate-700 dark:bg-slate-900 dark:text-white" />
         </div>
       </MobileDialog>
 

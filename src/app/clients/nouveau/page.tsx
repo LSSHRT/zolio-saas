@@ -11,6 +11,7 @@ import {
   type CreationWizardStep,
 } from "@/components/client-creation-wizard";
 import SiretSearch, { type SiretSearchHit } from "@/components/siret-search";
+import AddressSearch, { type AddressSearchHit } from "@/components/address-search";
 
 const STEPS: CreationWizardStep[] = [
   {
@@ -45,6 +46,11 @@ export default function NouveauClientPage() {
       adresse: hit.adresse || current.adresse,
     }));
     toast.success(`Fiche préremplie depuis SIRENE (${hit.nom})`);
+  };
+
+  const applyAddressHit = (hit: AddressSearchHit) => {
+    setForm((current) => ({ ...current, adresse: hit.label }));
+    toast.success("Adresse préremplie depuis OpenStreetMap");
   };
 
   const handleNext = () => {
@@ -252,13 +258,26 @@ export default function NouveauClientPage() {
               placeholder="Téléphone"
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
-            <input
-              type="text"
-              value={form.adresse}
-              onChange={(event) => setForm((current) => ({ ...current, adresse: event.target.value }))}
-              placeholder="Adresse / chantier"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
-            />
+            <div className="lg:col-span-2 space-y-3">
+              <AddressSearch onSelect={applyAddressHit} />
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden>
+                  <span className="w-full border-t border-slate-200 dark:border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-[11px]">
+                  <span className="bg-white px-2 uppercase tracking-[0.24em] text-slate-400 dark:bg-slate-950 dark:text-slate-500">
+                    ou saisie manuelle
+                  </span>
+                </div>
+              </div>
+              <input
+                type="text"
+                value={form.adresse}
+                onChange={(event) => setForm((current) => ({ ...current, adresse: event.target.value }))}
+                placeholder="Adresse / chantier"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              />
+            </div>
           </div>
         </CreationWizardPanel>
       )}
