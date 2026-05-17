@@ -120,12 +120,17 @@ function findDate(text: string): ReceiptField<string> | null {
     !Number.isFinite(day) ||
     !Number.isFinite(month) ||
     !Number.isFinite(year) ||
-    day < 1 ||
-    day > 31 ||
-    month < 1 ||
-    month > 12 ||
     year < 2000 ||
     year > 2100
+  ) {
+    return null;
+  }
+  // Validate against the real calendar (rejects 31/02, 31/04, leap years, etc.)
+  const probe = new Date(Date.UTC(year, month - 1, day));
+  if (
+    probe.getUTCFullYear() !== year ||
+    probe.getUTCMonth() !== month - 1 ||
+    probe.getUTCDate() !== day
   ) {
     return null;
   }

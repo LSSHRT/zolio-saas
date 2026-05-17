@@ -109,8 +109,12 @@ export async function POST(request: Request) {
       return jsonError("Image trop volumineuse (max 6 Mo)", 413);
     }
 
-    if (file.type && !SUPPORTED_MIME.has(file.type.toLowerCase())) {
-      return jsonError(`Format non supporté (${file.type})`, 415);
+    const mime = (file.type ?? "").toLowerCase();
+    if (!mime || !SUPPORTED_MIME.has(mime)) {
+      return jsonError(
+        mime ? `Format non supporté (${mime})` : "Type d'image manquant",
+        415,
+      );
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
