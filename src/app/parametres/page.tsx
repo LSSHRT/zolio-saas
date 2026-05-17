@@ -542,20 +542,6 @@ export default function ParametresEntreprise() {
                 user.update({
                   unsafeMetadata: {
                     ...user.unsafeMetadata,
-                    companyName: formData.companyName,
-                    companyAddress: formData.companyAddress,
-                    companyPhone: formData.companyPhone,
-                    companySiret: formData.companySiret,
-                    companyLogo: formData.companyLogo,
-                    companyIban: formData.companyIban,
-                    companyBic: formData.companyBic,
-                    companyStatut: formData.companyStatut,
-                    companyAssurance: formData.companyAssurance,
-                    companyLegal: formData.companyLegal,
-                    companyCgv: formData.companyCgv,
-                    companyColor: brandColor,
-                    companyGoogleReview: formData.companyGoogleReview,
-                    referredBy: formData.referredBy,
                     reminderEnabled: newVal,
                   },
                 }).catch(() => setReminderEnabled(!newVal));
@@ -791,7 +777,7 @@ export default function ParametresEntreprise() {
         </button>
       }
       summary={
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4 lg:hidden">
           <ClientHeroStat
             label="Complétude"
             value={`${completionPercent}%`}
@@ -852,6 +838,8 @@ export default function ParametresEntreprise() {
         />
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       {messageCard}
 
       <div className="space-y-4 xl:hidden">
@@ -1215,6 +1203,607 @@ export default function ParametresEntreprise() {
         {referralCard}
         {legalLinksCard}
       </section>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ─────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {message.text ? (
+          <div
+            className={`rounded-md border px-4 py-3 text-sm font-medium ${
+              message.type === "success"
+                ? "border-emerald-300/30 bg-emerald-500/10 text-emerald-700 dark:border-emerald-400/20 dark:text-emerald-300"
+                : "border-rose-300/30 bg-rose-500/10 text-rose-700 dark:border-rose-400/20 dark:text-rose-300"
+            }`}
+          >
+            {message.text}
+          </div>
+        ) : null}
+
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <DesktopMetricTile
+            label="Complétude"
+            value={`${completionPercent}%`}
+            detail={`${completedCount}/${completionItems.length} blocs`}
+            icon={Sparkles}
+            tone={completionPercent === 100 ? "success" : completionPercent >= 60 ? "primary" : "warning"}
+          />
+          <DesktopMetricTile
+            label="Documents"
+            value={documentReady ? "Prêts" : "À finir"}
+            detail={documentReady ? "Identité complète" : "Nom / adresse / SIRET"}
+            icon={BadgeCheck}
+            tone={documentReady ? "success" : "warning"}
+          />
+          <DesktopMetricTile
+            label="Banque"
+            value={payoutReady ? "OK" : "Manque"}
+            detail={payoutReady ? "IBAN + BIC prêts" : "Coordonnées à saisir"}
+            icon={Landmark}
+            tone={payoutReady ? "success" : "neutral"}
+          />
+          <DesktopMetricTile
+            label="Avis"
+            value={reviewReady ? "Actifs" : "Off"}
+            detail={reviewReady ? "Lien Google branché" : "Lien à ajouter"}
+            icon={Star}
+            tone={reviewReady ? "primary" : "neutral"}
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Toolbar */}
+            <section className="lg-v2-panel flex flex-wrap items-center gap-3 p-4">
+              <p className="lg-v2-eyebrow shrink-0">Paramètres entreprise</p>
+              <p className="text-xs lg-v2-text-muted">
+                {completedCount}/{completionItems.length} blocs renseignés · {completionPercent}%
+              </p>
+              <div className="flex-1" />
+              <button
+                type="button"
+                onClick={() => void saveSettings()}
+                disabled={isSaving}
+                className="lg-v2-btn lg-v2-btn-primary"
+              >
+                {isSaving ? (
+                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                ) : (
+                  <Save size={13} aria-hidden />
+                )}
+                Enregistrer
+              </button>
+            </section>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Identité */}
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <Building2 size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                  <h2 className="text-sm font-semibold lg-v2-text-strong">Identité</h2>
+                  <span className="ml-auto text-[10px] uppercase tracking-[0.18em] lg-v2-text-subtle">
+                    Nom · adresse · SIRET · statut · assurance
+                  </span>
+                </div>
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <DesktopField label="Nom de l'entreprise" icon={Building2} className="lg:col-span-2">
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleChange}
+                      placeholder="Ex: Maçonnerie Dupont"
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="Adresse postale" icon={MapPin} className="lg:col-span-2">
+                    <textarea
+                      name="companyAddress"
+                      value={formData.companyAddress}
+                      onChange={handleChange}
+                      rows={2}
+                      placeholder={"123 rue de la République\n75001 Paris"}
+                      className="lg-v2-input w-full resize-none"
+                    />
+                  </DesktopField>
+                  <DesktopField label="Téléphone" icon={Phone}>
+                    <input
+                      type="tel"
+                      name="companyPhone"
+                      value={formData.companyPhone}
+                      onChange={handleChange}
+                      placeholder="06 12 34 56 78"
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="SIRET" icon={FileDigit}>
+                    <input
+                      type="text"
+                      name="companySiret"
+                      value={formData.companySiret}
+                      onChange={handleChange}
+                      placeholder="123 456 789 00012"
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="Statut juridique" icon={Scale}>
+                    <input
+                      type="text"
+                      name="companyStatut"
+                      value={formData.companyStatut}
+                      onChange={handleChange}
+                      placeholder="SARL au capital de 5 000€"
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="Assurance pro" icon={Shield}>
+                    <input
+                      type="text"
+                      name="companyAssurance"
+                      value={formData.companyAssurance}
+                      onChange={handleChange}
+                      placeholder="Décennale MMA N°12345678"
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                </div>
+              </section>
+
+              {/* Habillage */}
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <Palette size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                  <h2 className="text-sm font-semibold lg-v2-text-strong">Habillage & avis</h2>
+                  <span className="ml-auto text-[10px] uppercase tracking-[0.18em] lg-v2-text-subtle">
+                    Logo · couleur · Google
+                  </span>
+                </div>
+                <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_16rem]">
+                  <div className="space-y-3">
+                    <DesktopField label="Lien du logo (HTTPS)" icon={ImageIcon}>
+                      <input
+                        type="url"
+                        name="companyLogo"
+                        value={formData.companyLogo}
+                        onChange={handleChange}
+                        placeholder="https://mon-site.com/logo.png"
+                        className="lg-v2-input w-full"
+                      />
+                    </DesktopField>
+                    <DesktopField label="Lien avis Google" icon={Star}>
+                      <input
+                        type="url"
+                        name="companyGoogleReview"
+                        value={formData.companyGoogleReview}
+                        onChange={handleChange}
+                        placeholder="https://g.page/r/.../review"
+                        className="lg-v2-input w-full"
+                      />
+                    </DesktopField>
+                  </div>
+                  <div className="rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] p-4">
+                    <p className="lg-v2-eyebrow">Couleur principale</p>
+                    <div className="mt-3 flex items-center gap-3">
+                      <input
+                        type="color"
+                        name="companyColor"
+                        value={brandColor}
+                        onChange={handleChange}
+                        className="h-10 w-10 cursor-pointer rounded-md border-0 bg-transparent p-0"
+                      />
+                      <div>
+                        <p className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                          {brandColor.toUpperCase()}
+                        </p>
+                        <p className="text-[11px] lg-v2-text-muted">Bandeau & accents</p>
+                      </div>
+                    </div>
+                    <div
+                      className="mt-3 h-8 rounded-sm ring-1 ring-black/5 dark:ring-white/10"
+                      style={{ background: `linear-gradient(135deg, ${brandColor}, rgba(255,255,255,0.14))` }}
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Facturation */}
+              <section className="lg-v2-panel p-5">
+                <div className="mb-4 flex items-center gap-2">
+                  <Landmark size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                  <h2 className="text-sm font-semibold lg-v2-text-strong">Banque, pénalités & CGV</h2>
+                </div>
+                <div className="grid gap-3 lg:grid-cols-2">
+                  <DesktopField label="IBAN" icon={CreditCard}>
+                    <input
+                      type="text"
+                      name="companyIban"
+                      value={formData.companyIban}
+                      onChange={handleChange}
+                      placeholder="FR76 1234..."
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="BIC" icon={CreditCard}>
+                    <input
+                      type="text"
+                      name="companyBic"
+                      value={formData.companyBic}
+                      onChange={handleChange}
+                      placeholder="ABCDEF12"
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="Pénalités de retard & mentions légales" icon={Scale} className="lg:col-span-2">
+                    <textarea
+                      name="companyLegal"
+                      value={formData.companyLegal}
+                      onChange={handleChange}
+                      rows={2}
+                      placeholder="Ex: En cas de retard de paiement, pénalité de 10%."
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                  <DesktopField label="Conditions Générales de Vente (CGV)" icon={Scale} className="lg:col-span-2">
+                    <textarea
+                      name="companyCgv"
+                      value={formData.companyCgv}
+                      onChange={handleChange}
+                      rows={4}
+                      placeholder={"Article 1. Acceptation des conditions...\nArticle 2. Modalités de paiement..."}
+                      className="lg-v2-input w-full"
+                    />
+                  </DesktopField>
+                </div>
+              </section>
+
+              {/* Apparence */}
+              <section className="lg-v2-panel p-5">
+                <div className="flex items-center gap-3">
+                  <Palette size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-sm font-semibold lg-v2-text-strong">Apparence</h2>
+                    <p className="mt-0.5 text-xs lg-v2-text-muted">
+                      Mode clair, sombre ou automatique.
+                    </p>
+                  </div>
+                  <div className="w-[260px] shrink-0">
+                    <ThemeSelector />
+                  </div>
+                </div>
+              </section>
+
+              {/* Langue + actions */}
+              <section className="lg-v2-panel p-5">
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="min-w-0">
+                    <p className="lg-v2-eyebrow">Langue</p>
+                    <p className="mt-0.5 text-xs lg-v2-text-muted">Interface</p>
+                  </div>
+                  <LanguageSelector />
+                  <div className="flex-1" />
+                  <Link
+                    href="/dashboard"
+                    className="lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    Retour au cockpit
+                  </Link>
+                  <button
+                    type="submit"
+                    disabled={isSaving}
+                    className="lg-v2-btn lg-v2-btn-primary"
+                  >
+                    {isSaving ? (
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                    ) : (
+                      <Save size={13} aria-hidden />
+                    )}
+                    Enregistrer
+                  </button>
+                </div>
+              </section>
+            </form>
+
+            {/* Parrainage (full-width below form, denser version) */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Gift size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                <h2 className="text-sm font-semibold lg-v2-text-strong">Parrainage</h2>
+                <span className="ml-auto text-[10px] uppercase tracking-[0.18em] lg-v2-text-subtle">
+                  −50% pour vous & votre filleul
+                </span>
+              </div>
+              <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] p-3">
+                  <p className="lg-v2-eyebrow">Votre code</p>
+                  <code className="mt-1.5 block font-mono text-lg font-bold tracking-[0.18em] lg-v2-text-strong">
+                    {referralCode}
+                  </code>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyReferralMessage}
+                  className="lg-v2-btn lg-v2-btn-secondary"
+                >
+                  <Copy size={13} aria-hidden /> Copier le message
+                </button>
+              </div>
+              {!referralApplied ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <p className="text-xs lg-v2-text-muted">Vous avez été parrainé ?</p>
+                  <input
+                    type="text"
+                    name="referredBy"
+                    value={formData.referredBy}
+                    onChange={handleChange}
+                    placeholder="Code parrain"
+                    className="lg-v2-input"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void saveSettings()}
+                    disabled={isSaving || !formData.referredBy}
+                    className="lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    Valider
+                  </button>
+                </div>
+              ) : (
+                <p className="mt-3 inline-flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-300">
+                  <CheckCircle2 size={13} aria-hidden /> Code appliqué : <span className="font-mono">{referralApplied}</span>
+                </p>
+              )}
+            </section>
+
+            {/* Documents légaux — desktop dense */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Scale size={14} className="text-[var(--v2-text-subtle)]" aria-hidden />
+                <h2 className="text-sm font-semibold lg-v2-text-strong">Documents légaux Zolio</h2>
+              </div>
+              <div className="grid gap-1.5 lg:grid-cols-2">
+                {LEGAL_LINKS.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="group flex items-center justify-between gap-3 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2 text-sm font-semibold transition hover:border-[var(--v2-primary)] lg-v2-text-strong hover:text-[var(--v2-primary)]"
+                  >
+                    <span className="truncate">{item.label}</span>
+                    <ExternalLink size={12} className="shrink-0 text-[var(--v2-text-subtle)]" aria-hidden />
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            {/* Preview */}
+            <section className="lg-v2-panel overflow-hidden p-0">
+              <div className="flex items-center justify-between gap-2 border-b lg-v2-divider px-4 py-2.5">
+                <p className="lg-v2-eyebrow">Aperçu document</p>
+                <span className="text-[10px] uppercase tracking-[0.18em] lg-v2-text-subtle">PDF</span>
+              </div>
+              <div className="overflow-hidden bg-slate-950 text-white">
+                <div className="h-1.5" style={{ backgroundColor: brandColor }} />
+                <div className="space-y-3 p-4 text-xs">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-white/5">
+                        {formData.companyLogo && isAllowedLogoUrl(formData.companyLogo) ? (
+                          <div className="h-7 w-7 rounded-sm bg-contain bg-center bg-no-repeat" style={logoPreviewStyle} />
+                        ) : (
+                          <span className="text-xs font-semibold tracking-[0.14em] text-white/88">{companyInitials}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{formData.companyName || "Nom de l'entreprise"}</p>
+                        <p className="mt-0.5 truncate text-[10px] text-white/60">{primaryEmail || "email@entreprise.fr"}</p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-sm border border-white/10 bg-white/6 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/70">
+                      Devis
+                    </span>
+                  </div>
+                  <div className="rounded-md border border-white/8 bg-white/[0.04] p-2.5">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-white/40">Coordonnées</p>
+                    <div className="mt-1.5 space-y-0.5 text-[11px] text-white/80">
+                      <p>{addressLines[0] || "Adresse"}</p>
+                      {addressLines.slice(1).map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                      <p>{formData.companyPhone || "Téléphone"}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-white/8 bg-white/[0.04] p-2.5">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-white/40">Références</p>
+                    <div className="mt-1.5 space-y-0.5 text-[11px] text-white/80">
+                      <p>SIRET: {formData.companySiret || "à compléter"}</p>
+                      <p className="truncate">{formData.companyStatut || "Statut juridique"}</p>
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-white/8 bg-white/[0.04] p-2.5">
+                    <p className="text-[9px] uppercase tracking-[0.2em] text-white/40">Paiement</p>
+                    <div className="mt-1.5 space-y-0.5 text-[11px] text-white/80">
+                      <p className="truncate">{formData.companyIban ? `IBAN ${formData.companyIban}` : "IBAN à renseigner"}</p>
+                      <p className="truncate">{formData.companyBic ? `BIC ${formData.companyBic}` : "BIC à renseigner"}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* État du dossier — dense */}
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">État du dossier</p>
+              <ul className="mt-3 space-y-1.5">
+                <StatusRow ok={documentReady} icon={documentReady ? CheckCircle2 : Sparkles} label="Base entreprise" />
+                <StatusRow ok={payoutReady} icon={Landmark} label="Coordonnées bancaires" />
+                <StatusRow ok={reviewReady} icon={Star} label="Avis Google" tone="primary" />
+                <li className="flex items-center gap-2 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2 text-sm">
+                  <Clock size={13} className="shrink-0 text-amber-600 dark:text-amber-300" aria-hidden />
+                  <span className="flex-1 truncate font-semibold lg-v2-text-strong">Relances auto</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newVal = !reminderEnabled;
+                      setReminderEnabled(newVal);
+                      user.update({
+                        unsafeMetadata: {
+                          ...user.unsafeMetadata,
+                          reminderEnabled: newVal,
+                        },
+                      }).catch(() => setReminderEnabled(!newVal));
+                    }}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${reminderEnabled ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`}
+                    aria-pressed={reminderEnabled}
+                    aria-label="Relances automatiques"
+                  >
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition ${reminderEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </button>
+                </li>
+                <li className="flex items-center gap-2 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2 text-sm">
+                  <Mail size={13} className="shrink-0 text-[var(--v2-primary)]" aria-hidden />
+                  <span className="flex-1 truncate font-semibold lg-v2-text-strong">Récap hebdo</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newVal = !weeklyDigestEnabled;
+                      setWeeklyDigestEnabled(newVal);
+                      user.update({
+                        unsafeMetadata: {
+                          ...user.unsafeMetadata,
+                          weeklyDigestEnabled: newVal,
+                        },
+                      }).catch(() => setWeeklyDigestEnabled(!newVal));
+                    }}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${weeklyDigestEnabled ? 'bg-[var(--v2-primary)]' : 'bg-slate-300 dark:bg-slate-600'}`}
+                    aria-pressed={weeklyDigestEnabled}
+                    aria-label="Récap hebdomadaire"
+                  >
+                    <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition ${weeklyDigestEnabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </button>
+                </li>
+              </ul>
+            </section>
+
+            {/* Actions panel */}
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Actions</p>
+              <div className="mt-3 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => void saveSettings()}
+                  disabled={isSaving}
+                  className="lg-v2-btn lg-v2-btn-primary w-full justify-center"
+                >
+                  {isSaving ? (
+                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                  ) : (
+                    <Save size={13} aria-hidden />
+                  )}
+                  Enregistrer les paramètres
+                </button>
+                <Link
+                  href="/dashboard"
+                  className="lg-v2-btn lg-v2-btn-secondary w-full justify-center"
+                >
+                  Retour au cockpit
+                </Link>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
+  );
+}
+
+/* ─── Desktop v2 helpers (lg+ only) ─────────────────────── */
+
+type TileTone = "primary" | "success" | "warning" | "danger" | "neutral";
+
+function DesktopMetricTile({
+  label,
+  value,
+  detail,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  detail?: string;
+  icon: typeof Building2;
+  tone?: TileTone;
+}) {
+  const toneClasses: Record<TileTone, string> = {
+    primary: "bg-[var(--v2-primary-soft)] text-[var(--v2-primary)]",
+    success: "bg-emerald-500/12 text-emerald-700 dark:text-emerald-300",
+    warning: "bg-amber-500/12 text-amber-700 dark:text-amber-300",
+    danger: "bg-rose-500/12 text-rose-700 dark:text-rose-300",
+    neutral: "bg-slate-500/10 text-slate-600 dark:text-slate-300",
+  };
+  return (
+    <div className="lg-v2-panel flex items-start gap-3 p-4">
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-md ${toneClasses[tone]}`}>
+        <Icon size={15} aria-hidden />
+      </div>
+      <div className="min-w-0">
+        <p className="lg-v2-eyebrow">{label}</p>
+        <p className="mt-1 text-base font-semibold tabular-nums lg-v2-text-strong">{value}</p>
+        {detail ? <p className="mt-0.5 text-xs lg-v2-text-muted">{detail}</p> : null}
+      </div>
+    </div>
+  );
+}
+
+function DesktopField({
+  label,
+  icon: Icon,
+  children,
+  className = "",
+}: {
+  label: string;
+  icon: typeof Building2;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={`block ${className}`}>
+      <span className="mb-1 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] lg-v2-text-muted">
+        <Icon size={11} className="text-[var(--v2-text-subtle)]" aria-hidden />
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function StatusRow({
+  ok,
+  icon: Icon,
+  label,
+  tone = "success",
+}: {
+  ok: boolean;
+  icon: typeof Building2;
+  label: string;
+  tone?: "success" | "primary";
+}) {
+  const okColor = tone === "primary"
+    ? "text-[var(--v2-primary)]"
+    : "text-emerald-700 dark:text-emerald-300";
+  return (
+    <li className="flex items-center gap-2 rounded-md border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2 text-sm">
+      <Icon size={13} className={`shrink-0 ${ok ? okColor : "text-slate-500"}`} aria-hidden />
+      <span className="flex-1 truncate font-semibold lg-v2-text-strong">{label}</span>
+      <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] ${
+        ok
+          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+          : "bg-slate-500/12 lg-v2-text-muted"
+      }`}>
+        {ok ? "OK" : "À faire"}
+      </span>
+    </li>
   );
 }

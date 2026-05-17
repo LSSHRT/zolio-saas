@@ -20,6 +20,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { MetricTile } from "@/components/desktop";
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
 
 const PLAN_FEATURES = [
@@ -189,6 +190,8 @@ function AbonnementPageContent() {
         />
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard>
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <section className="rounded-2xl border border-violet-200/70 bg-gradient-to-br from-slate-950 via-violet-950 to-slate-900 p-5 text-white shadow-[0_28px_90px_-45px_rgba(76,29,149,0.75)] sm:p-6">
@@ -406,6 +409,239 @@ function AbonnementPageContent() {
           </div>
         </div>
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ──────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Tarif"
+            value={`${price}€`}
+            detail={isAnnual ? "Équivalent mensuel" : "Sans engagement annuel"}
+            icon={Sparkles}
+            tone="primary"
+          />
+          <MetricTile
+            label="Facturation"
+            value={billedLabel}
+            detail={isAnnual ? "Paiement annuel" : "Paiement mensuel"}
+            icon={Clock3}
+            tone="neutral"
+          />
+          <MetricTile
+            label="Économie"
+            value={isAnnual ? `${savings}€` : "0€"}
+            detail={isAnnual ? "Par an vs mensuel" : "Passez en annuel"}
+            icon={BadgeCheck}
+            tone={isAnnual ? "success" : "neutral"}
+          />
+          <MetricTile
+            label="Support"
+            value="Inclus"
+            detail="Premier devis accompagné"
+            icon={Shield}
+            tone="warning"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Plan card */}
+            <section className="lg-v2-panel p-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--v2-primary-soft)] px-2.5 py-1 text-[11px] font-semibold tracking-[0.16em] uppercase text-[var(--v2-primary)]">
+                  <Sparkles size={12} aria-hidden /> Zolio Pro
+                </span>
+                <span className="inline-flex rounded-full border lg-v2-divider bg-[var(--v2-panel-muted)] px-2.5 py-1 text-[11px] font-semibold lg-v2-text-muted">
+                  Sans engagement
+                </span>
+              </div>
+
+              <h2 className="mt-4 text-2xl font-semibold tracking-tight lg-v2-text-strong">
+                Passez en mode pro, pas en mode usine à gaz.
+              </h2>
+              <p className="mt-2 text-sm lg-v2-text-muted leading-6">
+                Débloquez les fonctions qui comptent vraiment sur le terrain : devis illimités,
+                signature, facturation, planning et accompagnement pour démarrer sans friction.
+              </p>
+
+              {/* Toggle */}
+              <div className="mt-5 inline-flex rounded-lg border lg-v2-divider bg-[var(--v2-panel-muted)] p-1">
+                <button
+                  type="button"
+                  onClick={() => setIsAnnual(false)}
+                  className={`rounded-md px-4 py-1.5 text-xs font-semibold transition ${
+                    !isAnnual
+                      ? "bg-[var(--v2-panel)] lg-v2-text-strong shadow-sm"
+                      : "lg-v2-text-muted hover:lg-v2-text-strong"
+                  }`}
+                >
+                  Mensuel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsAnnual(true)}
+                  className={`inline-flex items-center gap-2 rounded-md px-4 py-1.5 text-xs font-semibold transition ${
+                    isAnnual
+                      ? "bg-[var(--v2-panel)] lg-v2-text-strong shadow-sm"
+                      : "lg-v2-text-muted hover:lg-v2-text-strong"
+                  }`}
+                >
+                  Annuel
+                  <span className="rounded-full bg-[var(--v2-success-soft)] px-1.5 py-0.5 text-[10px] font-bold text-[var(--v2-success)]">
+                    -30%
+                  </span>
+                </button>
+              </div>
+
+              {/* Price */}
+              <div className="mt-6 flex items-end justify-between gap-6 border-t lg-v2-divider pt-5">
+                <div>
+                  <p className="lg-v2-eyebrow">Offre active</p>
+                  <div className="mt-2 flex items-end gap-2">
+                    <span className="text-5xl font-semibold tabular-nums lg-v2-text-strong">{price}€</span>
+                    <span className="pb-1 text-sm lg-v2-text-muted">/ mois</span>
+                  </div>
+                  <p className="mt-2 text-sm lg-v2-text-muted">
+                    {isAnnual ? `Facturé ${billedLabel} · ${savings}€ économisés / an` : `Facturé ${billedLabel}`}
+                  </p>
+                </div>
+                <div className="inline-flex items-center gap-2 rounded-full border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-1.5 text-xs font-semibold lg-v2-text-muted">
+                  <Zap size={13} className="text-[var(--v2-warning)]" aria-hidden />
+                  Activation rapide
+                </div>
+              </div>
+            </section>
+
+            {/* Features */}
+            <section className="lg-v2-panel p-6">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <p className="lg-v2-eyebrow">Ce qui est inclus</p>
+                  <h3 className="mt-1 text-lg font-semibold lg-v2-text-strong">Fonctions utiles au quotidien</h3>
+                </div>
+                <p className="max-w-xs text-xs lg-v2-text-muted">
+                  Toutes les briques activées dès le premier jour.
+                </p>
+              </div>
+              <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                {PLAN_FEATURES.map((feature) => (
+                  <div
+                    key={feature}
+                    className="flex items-start gap-2.5 rounded-lg border lg-v2-divider bg-[var(--v2-panel-muted)] px-3 py-2.5"
+                  >
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--v2-success)]" aria-hidden />
+                    <p className="text-sm leading-5 lg-v2-text">{feature}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 text-xs lg-v2-text-subtle">
+                Vous restez sur la version gratuite ? {FREE_FEATURES.length} fonctions incluses :
+                {" "}
+                {FREE_FEATURES.join(" · ")}.
+              </p>
+            </section>
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Actions</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">
+                Démarrez en un clic. Stripe sécurise le paiement.
+              </p>
+              <div className="mt-4 flex flex-col gap-2">
+                {isTrialEligible ? (
+                  <button
+                    type="button"
+                    onClick={() => void handleTrial()}
+                    disabled={trialLoading || loading}
+                    className="lg-v2-btn lg-v2-btn-primary justify-center disabled:opacity-50"
+                  >
+                    {trialLoading ? (
+                      <span className="inline-flex items-center gap-2">
+                        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                        Préparation…
+                      </span>
+                    ) : (
+                      <>
+                        <Sparkles size={14} aria-hidden /> Tester 7 jours gratuits
+                      </>
+                    )}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => void handleSubscribe()}
+                  disabled={loading || trialLoading}
+                  className={`lg-v2-btn ${isTrialEligible ? "lg-v2-btn-secondary" : "lg-v2-btn-primary"} justify-center disabled:opacity-50`}
+                >
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-700" />
+                      Redirection…
+                    </span>
+                  ) : (
+                    <>
+                      {isTrialEligible ? "S'abonner directement" : "S'abonner à Zolio Pro"}
+                      <ArrowRight size={14} aria-hidden />
+                    </>
+                  )}
+                </button>
+                <a
+                  href={supportHref}
+                  target={supportIsExternal ? "_blank" : undefined}
+                  rel={supportIsExternal ? "noreferrer" : undefined}
+                  className="lg-v2-btn lg-v2-btn-ghost justify-center"
+                >
+                  Être accompagné <ArrowRight size={14} aria-hidden />
+                </a>
+              </div>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow text-[var(--v2-success)]">Mise en route offerte</p>
+              <div className="mt-3 space-y-2.5">
+                {ACTIVATION_STEPS.map((step) => (
+                  <div key={step} className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--v2-success)]" aria-hidden />
+                    <p className="text-sm leading-5 lg-v2-text">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Réassurance</p>
+              <div className="mt-3 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <Shield size={14} className="mt-0.5 shrink-0 text-[var(--v2-primary)]" aria-hidden />
+                  <div>
+                    <p className="text-sm font-semibold lg-v2-text-strong">Stripe sécurisé</p>
+                    <p className="text-xs lg-v2-text-muted">Paiement protégé, checkout immédiat.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <Clock3 size={14} className="mt-0.5 shrink-0 text-[var(--v2-primary)]" aria-hidden />
+                  <div>
+                    <p className="text-sm font-semibold lg-v2-text-strong">Activation rapide</p>
+                    <p className="text-xs lg-v2-text-muted">Premier devis pro sans tunnel complexe.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <BadgeCheck size={14} className="mt-0.5 shrink-0 text-[var(--v2-primary)]" aria-hidden />
+                  <div>
+                    <p className="text-sm font-semibold lg-v2-text-strong">Accompagnement inclus</p>
+                    <p className="text-xs lg-v2-text-muted">Support pour activer et cadrer le 1ˢᵗ flux.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
   );
 }

@@ -13,6 +13,8 @@ import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
   ClientMobileActionsMenu,
+  ClientSubpageShell,
+  type ClientMetaPill,
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
@@ -545,7 +547,46 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
     );
   }
 
+  // ─── Desktop v2 helpers ─────────────────────────────────────────────────
+  const statutTone: ClientMetaPill["tone"] =
+    devisInfo?.statut === "Accepté" || devisInfo?.statut === "Signé"
+      ? "emerald"
+      : devisInfo?.statut === "Refusé"
+        ? "rose"
+        : devisInfo?.statut === "En attente"
+          ? "amber"
+          : "slate";
+
+  const desktopMetaPills: ClientMetaPill[] = [
+    ...(devisInfo?.statut
+      ? [{ label: devisInfo.statut, tone: statutTone }]
+      : []),
+    { label: `${totalTTC.toFixed(2)}€ TTC`, tone: "violet" as const },
+    ...(lignes.length > 0
+      ? [
+          {
+            icon: FileText,
+            label: `${lignes.length} ligne${lignes.length > 1 ? "s" : ""}`,
+            tone: "slate" as const,
+          },
+        ]
+      : []),
+    ...(devisInfo?.factures && devisInfo.factures.length > 0
+      ? [
+          {
+            icon: FileText,
+            label: `${devisInfo.factures.length} facture${devisInfo.factures.length > 1 ? "s" : ""} liée${devisInfo.factures.length > 1 ? "s" : ""}`,
+            tone: "emerald" as const,
+          },
+        ]
+      : []),
+  ];
+
+  const tvaMontant = totalTTC - totalHT;
+
   return (
+    <>
+    <div className={isDrawer ? undefined : "lg:hidden"}>
     <div className="flex flex-col min-h-screen pb-28 font-sans max-w-md md:max-w-3xl lg:max-w-5xl mx-auto w-full bg-white/80 dark:bg-[#0c0a1d]/95 sm:shadow-brand-lg sm:my-4 sm:rounded-[3rem] sm:min-h-[850px] overflow-hidden relative backdrop-blur-sm">
       {/* Header */}
       <header className="p-4 pt-8 sm:p-6 sm:pt-10">
@@ -1125,6 +1166,673 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
           </motion.button>
         </div>
       </div>
+    </div>
+    </div>
+
+    {!isDrawer && (
+      <div className="hidden lg:block">
+        <ClientSubpageShell
+          title={`Devis ${numero}`}
+          description={`Édition pour ${devisInfo?.nomClient || "—"}`}
+          eyebrow="Édition"
+          activeNav="devis"
+          backHref="/devis"
+          breadcrumbs={[
+            { label: "Devis", href: "/devis" },
+            { label: numero },
+          ]}
+          metaPills={desktopMetaPills}
+          showMobileDock={false}
+          mobilePrimaryAction={null}
+        >
+          <div className="lg:grid lg:grid-cols-12 lg:gap-6">
+            {/* LEFT 8/12 */}
+            <form
+              className="lg:col-span-8 space-y-6"
+              onSubmit={(event) => event.preventDefault()}
+            >
+              {/* CLIENT INFO */}
+              <section className="lg-v2-panel p-6">
+                <p className="lg-v2-eyebrow">Client</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                    style={{ backgroundColor: "var(--v2-primary)" }}
+                    aria-hidden
+                  >
+                    {(devisInfo?.nomClient || "?").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold lg-v2-text-strong">
+                      {devisInfo?.nomClient || "—"}
+                    </p>
+                    <p className="truncate text-xs lg-v2-text-muted">
+                      {devisInfo?.emailClient || "Aucun email renseigné"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* TRADE PACK */}
+              <section className="lg-v2-panel p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="lg-v2-eyebrow">Packs métier</p>
+                    <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                      {activeTradeMeta.label}
+                    </h2>
+                    <p className="mt-1 text-xs lg-v2-text-subtle">
+                      Réinjectez vos packs rapides métier ou importez votre starter catalogue.
+                    </p>
+                  </div>
+                  <span
+                    className="rounded-full px-2.5 py-1 text-xs font-medium"
+                    style={{
+                      backgroundColor: "var(--v2-primary-soft)",
+                      color: "var(--v2-primary)",
+                    }}
+                  >
+                    {starterCount} starter
+                  </span>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {TRADE_OPTIONS.map((option) => {
+                    const isActive = activeTrade === option.key;
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setSelectedTrade(option.key)}
+                        className="rounded-full px-3 py-1.5 text-xs font-semibold transition"
+                        style={
+                          isActive
+                            ? {
+                                backgroundColor: "var(--v2-primary)",
+                                color: "var(--v2-primary-foreground)",
+                              }
+                            : {
+                                backgroundColor: "var(--v2-panel-muted)",
+                                color: "var(--v2-text)",
+                              }
+                        }
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForfaits(true)}
+                    className="lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    <Plus size={14} aria-hidden />
+                    Ouvrir les packs {activeTradeMeta.shortLabel.toLowerCase()}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleImportStarterCatalog}
+                    disabled={isImportingStarter}
+                    className="lg-v2-btn lg-v2-btn-primary"
+                  >
+                    {isImportingStarter ? "Import..." : `Importer ${starterCount} lignes starter`}
+                  </button>
+                </div>
+              </section>
+
+              {/* PRESTATIONS TABLE */}
+              <section className="lg-v2-panel p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="lg-v2-eyebrow">Prestations</p>
+                    <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                      {lignes.length} ligne{lignes.length > 1 ? "s" : ""}
+                    </h2>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddPrestation((value) => !value)}
+                      className="lg-v2-btn lg-v2-btn-secondary"
+                    >
+                      <Plus size={14} aria-hidden />
+                      Catalogue
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAIModal(true)}
+                      className="lg-v2-btn lg-v2-btn-secondary"
+                    >
+                      <Sparkles size={14} aria-hidden />
+                      IA
+                    </button>
+                    <button
+                      type="button"
+                      onClick={addLigneLibre}
+                      className="lg-v2-btn lg-v2-btn-secondary"
+                    >
+                      <Plus size={14} aria-hidden />
+                      Ligne libre
+                    </button>
+                  </div>
+                </div>
+
+                {showAddPrestation ? (
+                  <div className="mt-4 rounded-lg border lg-v2-divider p-3">
+                    <div className="relative">
+                      <Search
+                        size={14}
+                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 lg-v2-text-subtle"
+                        aria-hidden
+                      />
+                      <input
+                        type="text"
+                        value={searchPrestation}
+                        onChange={(event) => setSearchPrestation(event.target.value)}
+                        placeholder="Rechercher dans le catalogue…"
+                        className="lg-v2-input pl-9"
+                      />
+                    </div>
+                    <div className="mt-3 max-h-56 overflow-y-auto">
+                      {filteredPrestations.length === 0 ? (
+                        <p className="px-2 py-6 text-center text-sm lg-v2-text-subtle">
+                          {prestations.length === 0
+                            ? "Aucune prestation dans votre catalogue."
+                            : "Aucun résultat."}
+                        </p>
+                      ) : (
+                        <ul className="space-y-1">
+                          {filteredPrestations.map((p) => (
+                            <li key={p.id}>
+                              <button
+                                type="button"
+                                onClick={() => addLigne(p)}
+                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition hover:bg-[var(--v2-panel-muted)]"
+                              >
+                                <Plus size={12} aria-hidden style={{ color: "var(--v2-primary)" }} />
+                                <span className="flex-1 truncate lg-v2-text-strong">
+                                  {p.nom}
+                                </span>
+                                <span className="text-xs lg-v2-text-subtle">
+                                  {p.prix}€/{p.unite}
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+
+                {lignes.length > 0 ? (
+                  <div className="mt-4 overflow-hidden rounded-lg border lg-v2-divider">
+                    <table className="w-full border-collapse text-left">
+                      <thead>
+                        <tr>
+                          <th className="lg-v2-table-header">Désignation</th>
+                          <th className="lg-v2-table-header w-20 !text-right">Qté</th>
+                          <th className="lg-v2-table-header w-16">Unité</th>
+                          <th className="lg-v2-table-header w-28 !text-right">P.U. €</th>
+                          <th className="lg-v2-table-header w-28 !text-right">Total €</th>
+                          <th className="lg-v2-table-header w-14" aria-label="Option" />
+                          <th className="lg-v2-table-header w-10" aria-label="Supprimer" />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {lignes.map((ligne, idx) => (
+                          <tr
+                            key={`desktop-row-${idx}`}
+                            className={
+                              ligne.isOptional
+                                ? "bg-[var(--v2-warning-soft)]/40"
+                                : idx % 2 === 0
+                                  ? "bg-[var(--v2-panel)]"
+                                  : "bg-[var(--v2-panel-muted)]/40"
+                            }
+                          >
+                            <td className="px-2 py-2">
+                              <input
+                                type="text"
+                                list="prestations-list-edit"
+                                value={ligne.nomPrestation}
+                                onChange={(event) => updateNom(idx, event.target.value)}
+                                className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                                placeholder="Nom de la prestation"
+                              />
+                            </td>
+                            <td className="px-2 py-2 text-right">
+                              <input
+                                type="number"
+                                min="0.1"
+                                step="any"
+                                value={ligne.quantite}
+                                onChange={(event) =>
+                                  updateQty(idx, parseFloat(event.target.value) || 1)
+                                }
+                                className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-right text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                              />
+                            </td>
+                            <td className="px-2 py-2 text-sm lg-v2-text">{ligne.unite}</td>
+                            <td className="px-2 py-2 text-right">
+                              <input
+                                type="number"
+                                min="0"
+                                step="any"
+                                value={ligne.prixUnitaire}
+                                onChange={(event) =>
+                                  updatePrice(idx, parseFloat(event.target.value) || 0)
+                                }
+                                className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-right text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                              />
+                            </td>
+                            <td className="px-2 py-2 text-right text-sm font-medium tabular-nums lg-v2-text-strong">
+                              {(ligne.totalLigne || 0).toFixed(2)}€
+                            </td>
+                            <td className="px-2 py-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => toggleOptional(idx)}
+                                className="rounded-full px-2 py-0.5 text-[10px] font-semibold transition"
+                                style={
+                                  ligne.isOptional
+                                    ? {
+                                        backgroundColor: "var(--v2-warning-soft)",
+                                        color: "var(--v2-warning)",
+                                      }
+                                    : {
+                                        backgroundColor: "var(--v2-panel-muted)",
+                                        color: "var(--v2-text-muted)",
+                                      }
+                                }
+                                aria-pressed={!!ligne.isOptional}
+                                aria-label={ligne.isOptional ? "Retirer l'option" : "Marquer comme option"}
+                              >
+                                OPT
+                              </button>
+                            </td>
+                            <td className="px-2 py-2 text-right">
+                              <button
+                                type="button"
+                                onClick={() => removeLigne(idx)}
+                                className="lg-v2-btn lg-v2-btn-ghost !px-2"
+                                aria-label={`Supprimer la ligne ${idx + 1}`}
+                              >
+                                <Trash2 size={14} aria-hidden />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded-lg border border-dashed lg-v2-divider px-4 py-6 text-center text-sm lg-v2-text-subtle">
+                    Aucune ligne. Importez un pack, ajoutez une prestation du catalogue ou créez une ligne libre.
+                  </p>
+                )}
+              </section>
+
+              {/* OPTIONS (TVA / Remise / Acompte) */}
+              <section className="lg-v2-panel p-6">
+                <p className="lg-v2-eyebrow">Options</p>
+                <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                  TVA, remise et acompte
+                </h2>
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">
+                      Taux TVA par défaut
+                    </span>
+                    <select
+                      value={tva}
+                      onChange={(event) => setTva(event.target.value)}
+                      className="lg-v2-input mt-1.5"
+                    >
+                      <option value="0">0%</option>
+                      <option value="5.5">5.5%</option>
+                      <option value="10">10%</option>
+                      <option value="20">20%</option>
+                    </select>
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">
+                      Remise globale (%)
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={100}
+                      step="any"
+                      value={remise}
+                      onChange={(event) => setRemise(event.target.value)}
+                      placeholder="0"
+                      className="lg-v2-input mt-1.5"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">
+                      Acompte à la signature (%)
+                    </span>
+                    <input
+                      type="number"
+                      min={0}
+                      step="any"
+                      value={acompte}
+                      onChange={(event) => setAcompte(event.target.value)}
+                      placeholder="0"
+                      className="lg-v2-input mt-1.5"
+                    />
+                  </label>
+                </div>
+              </section>
+
+              {/* PHOTOS */}
+              <section className="lg-v2-panel p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="lg-v2-eyebrow">Annexes</p>
+                    <h2 className="mt-1 flex items-center gap-2 text-base font-semibold lg-v2-text-strong">
+                      <Camera size={16} aria-hidden /> Photos du chantier
+                    </h2>
+                    <p className="mt-1 text-xs lg-v2-text-subtle">
+                      {photos.length} photo{photos.length > 1 ? "s" : ""} attachée{photos.length > 1 ? "s" : ""}
+                    </p>
+                  </div>
+                  <label className="lg-v2-btn lg-v2-btn-secondary cursor-pointer">
+                    <Plus size={14} aria-hidden /> Ajouter
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                    />
+                  </label>
+                </div>
+                {photos.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {photos.map((src, i) => (
+                      <div
+                        key={`desktop-photo-${i}`}
+                        className="relative h-24 w-24 overflow-hidden rounded-lg border lg-v2-divider"
+                      >
+                        <NextImage
+                          src={src}
+                          alt={`Photo ${i + 1}`}
+                          fill
+                          unoptimized
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPhotos(photos.filter((_, idx) => idx !== i))
+                          }
+                          className="absolute right-1 top-1 rounded-full p-1 text-white shadow"
+                          style={{ backgroundColor: "var(--v2-danger)" }}
+                          aria-label={`Supprimer photo ${i + 1}`}
+                        >
+                          <X size={10} aria-hidden />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-4 rounded-lg border border-dashed lg-v2-divider px-4 py-6 text-center text-sm lg-v2-text-subtle">
+                    Ajoutez les photos qui accompagneront ce devis.
+                  </p>
+                )}
+              </section>
+
+              {/* NOTES */}
+              <section className="lg-v2-panel p-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="lg-v2-eyebrow">Notes internes</p>
+                    <p className="mt-1 text-xs lg-v2-text-subtle">
+                      Visibles uniquement par vous.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditNotes((value) => !value)}
+                    className="lg-v2-btn lg-v2-btn-ghost"
+                  >
+                    {editNotes ? "Annuler" : "Modifier"}
+                  </button>
+                </div>
+                {editNotes ? (
+                  <div className="mt-3 space-y-2">
+                    <textarea
+                      value={notesDraft}
+                      onChange={(event) => setNotesDraft(event.target.value)}
+                      rows={4}
+                      className="lg-v2-input min-h-[96px] resize-y"
+                      placeholder="Ajouter une note interne…"
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleSaveNotes}
+                        disabled={savingNotes}
+                        className="lg-v2-btn lg-v2-btn-primary"
+                      >
+                        {savingNotes ? "Enregistrement…" : "Enregistrer"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-3 whitespace-pre-wrap rounded-lg border lg-v2-divider lg-v2-panel-muted px-4 py-3 text-sm lg-v2-text">
+                    {devisInfo?.notes || (
+                      <span className="italic lg-v2-text-subtle">
+                        Aucune note pour ce devis.
+                      </span>
+                    )}
+                  </p>
+                )}
+              </section>
+
+              {/* FACTURES LIÉES */}
+              {devisInfo?.factures && devisInfo.factures.length > 0 ? (
+                <section className="lg-v2-panel p-6">
+                  <p className="lg-v2-eyebrow">Factures liées</p>
+                  <ul className="mt-3 divide-y lg-v2-divider rounded-lg border lg-v2-divider">
+                    {devisInfo.factures.map((facture) => (
+                      <li key={facture.numero}>
+                        <Link
+                          href={`/factures/${facture.numero}`}
+                          className="flex items-center justify-between px-4 py-3 transition hover:bg-[var(--v2-panel-muted)]"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText
+                              size={16}
+                              aria-hidden
+                              style={{ color: "var(--v2-primary)" }}
+                            />
+                            <span className="text-sm font-semibold lg-v2-text-strong">
+                              {facture.numero}
+                            </span>
+                            <span
+                              className="rounded-full px-2 py-0.5 text-[10px] font-semibold"
+                              style={
+                                facture.statut === "Payée"
+                                  ? {
+                                      backgroundColor: "var(--v2-success-soft)",
+                                      color: "var(--v2-success)",
+                                    }
+                                  : facture.statut === "En retard"
+                                    ? {
+                                        backgroundColor: "var(--v2-danger-soft)",
+                                        color: "var(--v2-danger)",
+                                      }
+                                    : {
+                                        backgroundColor: "var(--v2-warning-soft)",
+                                        color: "var(--v2-warning)",
+                                      }
+                              }
+                            >
+                              {facture.statut}
+                            </span>
+                          </div>
+                          <span className="text-sm font-semibold tabular-nums lg-v2-text-strong">
+                            {Number(facture.totalTTC).toFixed(2)}€
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+            </form>
+
+            {/* RIGHT 4/12 sticky summary rail */}
+            <aside className="self-start lg:col-span-4 lg:sticky lg:top-6 space-y-4">
+              {/* KPI TTC */}
+              <div className="lg-v2-panel p-6">
+                <p className="lg-v2-eyebrow">Total TTC</p>
+                <p className="mt-1 text-3xl font-bold tabular-nums lg-v2-text-strong">
+                  {totalTTC.toFixed(2)}€
+                </p>
+                <dl className="mt-4 space-y-2 border-t lg-v2-divider pt-3 text-sm">
+                  <div className="flex justify-between">
+                    <dt className="lg-v2-text-muted">Total HT</dt>
+                    <dd className="font-medium tabular-nums lg-v2-text">
+                      {totalHT.toFixed(2)}€
+                    </dd>
+                  </div>
+                  <div className="flex justify-between">
+                    <dt className="lg-v2-text-muted">TVA ({tva}%)</dt>
+                    <dd className="font-medium tabular-nums lg-v2-text">
+                      {tvaMontant.toFixed(2)}€
+                    </dd>
+                  </div>
+                  <div className="flex justify-between border-t lg-v2-divider pt-2">
+                    <dt className="lg-v2-text-muted">Marge estimée</dt>
+                    <dd
+                      className="font-semibold tabular-nums"
+                      style={{
+                        color:
+                          margeEstimee >= 0
+                            ? "var(--v2-success)"
+                            : "var(--v2-danger)",
+                      }}
+                    >
+                      {margeEstimee.toFixed(2)}€
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+
+              {/* ACTIONS */}
+              <div className="lg-v2-panel p-6 space-y-2">
+                <button
+                  type="button"
+                  onClick={handleSaveAndResend}
+                  disabled={saving || lignes.length === 0}
+                  className="w-full lg-v2-btn lg-v2-btn-primary"
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" aria-hidden />
+                      Enregistrement…
+                    </>
+                  ) : (
+                    <>
+                      <Save size={14} aria-hidden />
+                      Sauvegarder et renvoyer
+                      <Send size={12} aria-hidden />
+                    </>
+                  )}
+                </button>
+                <a
+                  href={`/api/devis/${numero}/pdf`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full lg-v2-btn lg-v2-btn-secondary block text-center"
+                >
+                  <Eye size={14} aria-hidden /> Aperçu PDF
+                </a>
+
+                {devisInfo?.statut === "En attente" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowSignModal(true)}
+                      className="w-full lg-v2-btn lg-v2-btn-secondary"
+                    >
+                      <PenTool size={14} aria-hidden /> Signer sur place
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCopySignLink}
+                      className="w-full lg-v2-btn lg-v2-btn-secondary"
+                    >
+                      <PenTool size={14} aria-hidden /> Copier le lien
+                    </button>
+                  </>
+                ) : null}
+
+                {(devisInfo?.statut === "Accepté" ||
+                  devisInfo?.statut === "Signé") ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowAcompteModal(true)}
+                    className="w-full lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    <Banknote size={14} aria-hidden /> Facture d&apos;acompte
+                  </button>
+                ) : null}
+
+                {devisInfo?.statut === "Accepté" ? (
+                  <button
+                    type="button"
+                    onClick={handleCreateInvoice}
+                    disabled={isCreatingInvoice || saving}
+                    className="w-full lg-v2-btn lg-v2-btn-primary"
+                  >
+                    {isCreatingInvoice ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" aria-hidden />
+                        Création…
+                      </>
+                    ) : (
+                      <>
+                        <Check size={14} aria-hidden /> Transformer en facture
+                      </>
+                    )}
+                  </button>
+                ) : null}
+
+                {lignes.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={handleSaveAsTemplate}
+                    disabled={savingTemplate}
+                    className="w-full lg-v2-btn lg-v2-btn-ghost"
+                  >
+                    {savingTemplate ? (
+                      <Loader2 size={14} className="animate-spin" aria-hidden />
+                    ) : (
+                      <LayoutTemplate size={14} aria-hidden />
+                    )}
+                    {savingTemplate ? "Sauvegarde…" : "Sauvegarder comme modèle"}
+                  </button>
+                ) : null}
+
+                <Link
+                  href="/devis"
+                  className="w-full lg-v2-btn lg-v2-btn-ghost block text-center"
+                >
+                  <ArrowLeft size={14} aria-hidden /> Retour aux devis
+                </Link>
+              </div>
+            </aside>
+          </div>
+        </ClientSubpageShell>
+      </div>
+    )}
 
       <MobileDialog
         open={showSignModal}
@@ -1261,6 +1969,6 @@ export function DevisEditor({ numero, isDrawer, onClose }: { numero: string; isD
             });
         }}
       />
-    </div>
+    </>
   );
 }

@@ -13,7 +13,9 @@ import {
   Sparkles,
   Tag,
   Trash2,
+  UserPlus,
   Users,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -277,6 +279,18 @@ export default function NouvelleFacturePage() {
   ];
 
   const canNext = step === 1 ? (selectedClientId || newClient.nom.trim()) : step === 2 ? lignes.length > 0 : true;
+  const clientName = selectedClient?.nom || newClient.nom.trim();
+  const hasClient = Boolean(clientName);
+  const canSubmit = hasClient && lignes.length > 0;
+  const totalHTBrut = useMemo(
+    () => lignes.reduce((sum, l) => sum + l.totalLigne, 0),
+    [lignes],
+  );
+  const remisePct = parseFloat(remise) || 0;
+  const acompteEur = parseFloat(acompte) || 0;
+  const remiseEur = totalHTBrut * (remisePct / 100);
+  const tvaTotalEur = totalTTC - totalHT;
+  const aReglerEur = Math.max(0, totalTTC - acompteEur);
 
   const draftLabel = (() => {
     if (draftStatus === "saving") return "Enregistrement…";
@@ -286,7 +300,6 @@ export default function NouvelleFacturePage() {
     return null;
   })();
 
-  const clientName = selectedClient?.nom || newClient.nom.trim();
   const metaPills: ClientMetaPill[] = [
     { icon: FileText, label: `Étape ${step}/${steps.length} · ${steps[step - 1]?.title}`, tone: "violet" },
     ...(clientName
@@ -339,6 +352,8 @@ export default function NouvelleFacturePage() {
         </Link>
       }
     >
+      {/* ─── Mobile / tablet wizard (lg:hidden) — preserved 4-step flow ─── */}
+      <div className="space-y-4 lg:hidden">
       {/* Steps */}
       <ClientSectionCard className="!p-3">
         <ol
@@ -640,6 +655,457 @@ export default function NouvelleFacturePage() {
             )}
           </div>
         </div>
+      </div>
+
+      </div>
+
+      {/* ─── Desktop dense single-page form (hidden lg:block) ─── */}
+      <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
+        {/* LEFT : Client + Lignes + Options */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Client */}
+          <section className="lg-v2-panel p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="lg-v2-eyebrow">Client</p>
+                <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                  {selectedClient ? "Client sélectionné" : "Choisir un client"}
+                </h2>
+                <p className="mt-1 text-xs lg-v2-text-subtle">
+                  Sélectionnez un client existant ou créez-en un nouveau.
+                </p>
+              </div>
+              {!selectedClient ? (
+                <button
+                  type="button"
+                  onClick={() => setShowNewClient(true)}
+                  className="lg-v2-btn lg-v2-btn-secondary"
+                >
+                  <UserPlus size={14} aria-hidden /> Nouveau client
+                </button>
+              ) : null}
+            </div>
+
+            {selectedClient ? (
+              <div className="mt-4 flex items-center gap-3 rounded-lg border lg-v2-divider lg-v2-panel-muted px-4 py-3">
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                  style={{ backgroundColor: "var(--v2-primary)" }}
+                  aria-hidden
+                >
+                  {selectedClient.nom.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold lg-v2-text-strong">{selectedClient.nom}</p>
+                  <p className="truncate text-xs lg-v2-text-muted">
+                    {selectedClient.email || selectedClient.telephone || selectedClient.adresse || "—"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedClientId("")}
+                  className="lg-v2-btn lg-v2-btn-ghost !px-2"
+                  aria-label="Retirer le client sélectionné"
+                >
+                  <X size={14} aria-hidden />
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="relative mt-4">
+                  <Search
+                    size={14}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 lg-v2-text-subtle"
+                    aria-hidden
+                  />
+                  <input
+                    type="text"
+                    value={searchClient}
+                    onChange={(e) => setSearchClient(e.target.value)}
+                    placeholder="Rechercher un client par nom ou email…"
+                    className="lg-v2-input pl-9"
+                    aria-label="Rechercher un client"
+                  />
+                </div>
+                <div className="mt-3 max-h-64 overflow-y-auto rounded-lg border lg-v2-divider">
+                  {filteredClients.length === 0 ? (
+                    <p className="px-4 py-10 text-center text-sm lg-v2-text-subtle">
+                      {clients.length === 0
+                        ? "Vous n'avez pas encore de clients. Créez-en un pour démarrer."
+                        : "Aucun client ne correspond à cette recherche."}
+                    </p>
+                  ) : (
+                    <ul className="divide-y lg-v2-divider">
+                      {filteredClients.slice(0, 8).map((c) => (
+                        <li key={c.id}>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedClientId(c.id)}
+                            className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-[var(--v2-panel-muted)]"
+                          >
+                            <div
+                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                              style={{
+                                backgroundColor: "var(--v2-primary-soft-strong)",
+                                color: "var(--v2-primary)",
+                              }}
+                              aria-hidden
+                            >
+                              {c.nom.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium lg-v2-text-strong">{c.nom}</p>
+                              <p className="truncate text-xs lg-v2-text-subtle">
+                                {c.email || c.telephone || "—"}
+                              </p>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </>
+            )}
+          </section>
+
+          {/* Lignes */}
+          <section className="lg-v2-panel p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="lg-v2-eyebrow">Prestations</p>
+                <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                  Lignes <span className="lg-v2-text-subtle font-normal">({lignes.length})</span>
+                </h2>
+                <p className="mt-1 text-xs lg-v2-text-subtle">
+                  Ajoutez des prestations depuis le catalogue ou créez des lignes libres.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowShowAI(true)}
+                  className="lg-v2-btn lg-v2-btn-secondary"
+                >
+                  <Sparkles size={14} aria-hidden /> Générer avec l&apos;IA
+                </button>
+                <button
+                  type="button"
+                  onClick={addEmptyLine}
+                  className="lg-v2-btn lg-v2-btn-primary"
+                >
+                  <Plus size={14} aria-hidden /> Ligne libre
+                </button>
+              </div>
+            </div>
+
+            <div className="relative mt-4">
+              <Search
+                size={14}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 lg-v2-text-subtle"
+                aria-hidden
+              />
+              <input
+                type="text"
+                value={searchPrestation}
+                onChange={(e) => setSearchPrestation(e.target.value)}
+                placeholder="Ajouter depuis le catalogue (rechercher par nom ou catégorie)…"
+                className="lg-v2-input pl-9"
+                aria-label="Rechercher une prestation"
+              />
+              {searchPrestation.trim() && filteredPrestations.length > 0 ? (
+                <div
+                  className="absolute z-20 mt-1 max-h-64 w-full overflow-y-auto rounded-lg border lg-v2-divider shadow-md"
+                  style={{ backgroundColor: "var(--v2-panel)" }}
+                  role="listbox"
+                >
+                  {filteredPrestations.slice(0, 8).map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        addPrestation(p);
+                        setSearchPrestation("");
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-[var(--v2-panel-muted)]"
+                      role="option"
+                      aria-selected="false"
+                    >
+                      <Plus size={12} className="shrink-0 text-[var(--v2-primary)]" aria-hidden />
+                      <span className="flex-1 truncate lg-v2-text">{p.nom}</span>
+                      <span className="inline-flex items-center gap-1 text-xs lg-v2-text-subtle">
+                        <Tag size={10} aria-hidden />
+                        {p.categorie}
+                      </span>
+                      <span className="whitespace-nowrap text-xs font-semibold lg-v2-text-muted">
+                        {p.prix}€ / {p.unite}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+
+            {lignes.length === 0 ? (
+              <div className="mt-6 rounded-lg border border-dashed lg-v2-divider px-6 py-10 text-center">
+                <p className="text-sm font-medium lg-v2-text-muted">Aucune ligne pour le moment.</p>
+                <p className="mt-1 text-xs lg-v2-text-subtle">
+                  Ajoutez une ligne libre, choisissez depuis le catalogue ou générez avec l&apos;IA.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 overflow-hidden rounded-lg border lg-v2-divider">
+                <table className="w-full border-collapse text-left" aria-label="Lignes de la facture">
+                  <thead>
+                    <tr>
+                      <th className="lg-v2-table-header">Désignation</th>
+                      <th className="lg-v2-table-header w-20 !text-right">Qté</th>
+                      <th className="lg-v2-table-header w-20">Unité</th>
+                      <th className="lg-v2-table-header w-28 !text-right">P.U. €</th>
+                      <th className="lg-v2-table-header w-20">TVA</th>
+                      <th className="lg-v2-table-header w-28 !text-right">Total €</th>
+                      <th className="lg-v2-table-header w-10" aria-label="Actions"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lignes.map((l) => (
+                      <tr key={l.id} className="lg-v2-table-row">
+                        <td className="lg-v2-table-cell">
+                          <input
+                            type="text"
+                            value={l.nomPrestation}
+                            onChange={(e) => updateLine(l.id, { nomPrestation: e.target.value })}
+                            placeholder="Nom de la prestation"
+                            className="w-full bg-transparent text-sm lg-v2-text-strong placeholder:lg-v2-text-subtle focus:outline-none"
+                            aria-label="Désignation"
+                          />
+                        </td>
+                        <td className="lg-v2-table-cell text-right">
+                          <input
+                            type="number"
+                            value={l.quantite}
+                            min="0"
+                            step="any"
+                            onChange={(e) => updateLine(l.id, { quantite: parseFloat(e.target.value) || 0 })}
+                            className="w-full bg-transparent text-right text-sm tabular-nums lg-v2-text focus:outline-none"
+                            aria-label="Quantité"
+                          />
+                        </td>
+                        <td className="lg-v2-table-cell">
+                          <input
+                            type="text"
+                            value={l.unite}
+                            onChange={(e) => updateLine(l.id, { unite: e.target.value })}
+                            className="w-full bg-transparent text-sm lg-v2-text-muted focus:outline-none"
+                            aria-label="Unité"
+                          />
+                        </td>
+                        <td className="lg-v2-table-cell text-right">
+                          <input
+                            type="number"
+                            value={l.prixUnitaire}
+                            min="0"
+                            step="any"
+                            onChange={(e) => updateLine(l.id, { prixUnitaire: parseFloat(e.target.value) || 0 })}
+                            className="w-full bg-transparent text-right text-sm tabular-nums lg-v2-text focus:outline-none"
+                            aria-label="Prix unitaire"
+                          />
+                        </td>
+                        <td className="lg-v2-table-cell">
+                          <select
+                            value={l.tva}
+                            onChange={(e) => updateLine(l.id, { tva: e.target.value })}
+                            className="w-full bg-transparent text-sm lg-v2-text-muted focus:outline-none"
+                            aria-label="TVA"
+                          >
+                            <option value="0">0%</option>
+                            <option value="5.5">5.5%</option>
+                            <option value="10">10%</option>
+                            <option value="20">20%</option>
+                          </select>
+                        </td>
+                        <td className="lg-v2-table-cell text-right text-sm font-semibold tabular-nums lg-v2-text-strong">
+                          {l.totalLigne.toFixed(2)}
+                        </td>
+                        <td className="lg-v2-table-cell !p-2 text-right">
+                          <button
+                            type="button"
+                            onClick={() => removeLine(l.id)}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[var(--v2-danger-soft)]"
+                            aria-label={`Supprimer la ligne ${l.nomPrestation || "sans nom"}`}
+                          >
+                            <Trash2 size={14} className="text-[var(--v2-danger)]" aria-hidden />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+
+          {/* Options */}
+          <section className="lg-v2-panel p-6">
+            <p className="lg-v2-eyebrow">Options</p>
+            <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">Réglages globaux</h2>
+            <p className="mt-1 text-xs lg-v2-text-subtle">
+              TVA par défaut appliquée aux nouvelles lignes, remise globale et acompte versé.
+            </p>
+
+            <div className="mt-4 grid grid-cols-3 gap-4">
+              <label className="block">
+                <span className="text-xs font-medium lg-v2-text-muted">TVA par défaut</span>
+                <select
+                  value={tva}
+                  onChange={(e) => setTva(e.target.value)}
+                  className="lg-v2-input mt-1.5"
+                >
+                  <option value="0">0%</option>
+                  <option value="5.5">5.5%</option>
+                  <option value="10">10%</option>
+                  <option value="20">20%</option>
+                </select>
+              </label>
+              <label className="block">
+                <span className="text-xs font-medium lg-v2-text-muted">Remise globale (%)</span>
+                <input
+                  type="number"
+                  value={remise}
+                  onChange={(e) => setRemise(e.target.value)}
+                  placeholder="0"
+                  min="0"
+                  max="100"
+                  step="any"
+                  className="lg-v2-input mt-1.5 tabular-nums"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-medium lg-v2-text-muted">Acompte versé (€)</span>
+                <input
+                  type="number"
+                  value={acompte}
+                  onChange={(e) => setAcompte(e.target.value)}
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                  className="lg-v2-input mt-1.5 tabular-nums"
+                />
+              </label>
+            </div>
+          </section>
+        </div>
+
+        {/* RIGHT : Summary + Actions (sticky) */}
+        <aside className="self-start lg:col-span-4 lg:sticky lg:top-6">
+          <div className="space-y-4">
+            {/* Summary */}
+            <div className="lg-v2-panel p-6">
+              <p className="lg-v2-eyebrow">Total TTC</p>
+              <p className="lg-v2-kpi-value mt-3 text-[32px] leading-none">
+                {totalTTC.toFixed(2)}€
+              </p>
+              <p className="mt-1 text-xs lg-v2-text-subtle">
+                {lignes.length === 0
+                  ? "Aucune ligne ajoutée"
+                  : `${lignes.length} ligne${lignes.length > 1 ? "s" : ""} · TVA ${tva}% par défaut`}
+              </p>
+
+              <dl className="mt-5 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Sous-total HT</dt>
+                  <dd className="font-medium tabular-nums lg-v2-text">{totalHTBrut.toFixed(2)}€</dd>
+                </div>
+                {remisePct > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted">Remise ({remisePct}%)</dt>
+                    <dd className="font-medium tabular-nums text-[var(--v2-warning)]">
+                      −{remiseEur.toFixed(2)}€
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">HT net</dt>
+                  <dd className="font-medium tabular-nums lg-v2-text">{totalHT.toFixed(2)}€</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">TVA</dt>
+                  <dd className="font-medium tabular-nums lg-v2-text">{tvaTotalEur.toFixed(2)}€</dd>
+                </div>
+                {acompteEur > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="lg-v2-text-muted">Acompte versé</dt>
+                    <dd className="font-medium tabular-nums text-[var(--v2-success)]">
+                      −{acompteEur.toFixed(2)}€
+                    </dd>
+                  </div>
+                ) : null}
+                <div className="flex items-center justify-between border-t lg-v2-divider pt-2">
+                  <dt className="font-semibold lg-v2-text-strong">À régler</dt>
+                  <dd className="font-bold tabular-nums lg-v2-text-strong">
+                    {aReglerEur.toFixed(2)}€
+                  </dd>
+                </div>
+              </dl>
+
+              {draftLabel ? (
+                <p
+                  className="mt-5 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] lg-v2-text-subtle"
+                  style={{ backgroundColor: "var(--v2-panel-muted)" }}
+                >
+                  {draftStatus === "saving" ? (
+                    <Loader2 size={11} className="animate-spin" aria-hidden />
+                  ) : (
+                    <Save size={11} aria-hidden />
+                  )}
+                  {draftLabel}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Actions */}
+            <div className="lg-v2-panel space-y-2 p-5">
+              <button
+                type="button"
+                onClick={() => handleSubmit(false)}
+                disabled={sending || !canSubmit}
+                className="lg-v2-btn lg-v2-btn-primary w-full disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {sending ? (
+                  <Loader2 size={14} className="animate-spin" aria-hidden />
+                ) : (
+                  <Save size={14} aria-hidden />
+                )}
+                Créer la facture
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSubmit(true)}
+                disabled={sending || !canSubmit}
+                className="lg-v2-btn lg-v2-btn-secondary w-full disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {sending ? (
+                  <Loader2 size={14} className="animate-spin" aria-hidden />
+                ) : (
+                  <Send size={14} aria-hidden />
+                )}
+                Créer et envoyer par email
+              </button>
+              {!canSubmit ? (
+                <p className="px-1 pt-1 text-center text-xs lg-v2-text-subtle">
+                  {!hasClient ? "Sélectionnez un client pour activer." : "Ajoutez au moins une ligne."}
+                </p>
+              ) : null}
+              <Link
+                href="/factures"
+                className="lg-v2-btn lg-v2-btn-ghost w-full"
+              >
+                <ArrowLeft size={14} aria-hidden />
+                Annuler
+              </Link>
+            </div>
+          </div>
+        </aside>
       </div>
 
       {/* New client dialog */}
