@@ -53,7 +53,7 @@
 - [ ] `/catalogue`
 - [x] `/calepin`
 - [ ] `/modeles`
-- [ ] `/planning`
+- [x] `/planning`
 - [ ] `/recurrentes`
 - [ ] `/rapports`
 - [x] `/tva`
