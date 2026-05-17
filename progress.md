@@ -64,8 +64,17 @@
 ### Phase 6 — Dashboard
 - [ ] Refonte `/dashboard` en grid v2 dense (KPI strip + 2-col widgets)
 
-### Phase 7 — Pages publiques
-- [ ] Landing, `/signer`, `/espace-client`, auth pages, légales
+### Phase 7 — Pages publiques (sélective)
+- [x] 7a `/contact` — desktop dense layout v2 (form 8/12 + sticky info sidebar 4/12, tokens v2)
+- [x] 7b `/changelog` — timeline polish v2 (tokens, pill-primary/info/success/warning)
+- [x] 7c `/espace-client/[token]` — KPI strip 3 tiles + 2-col body (docs 8/12 + sticky aside 4/12)
+- Conservées (pas de refacto v2, design adapté au contexte public) :
+  - Landing (`/`) — utilise `LandingRouter`
+  - Pages légales (`/cgu`, `/cgv`, `/mentions-legales`, `/politique-confidentialite`) — `LegalPageShell` dark theme
+  - Auth (`/sign-in`, `/sign-up`) — `AuthHero` + widgets Clerk
+  - `/signer/[numero]` — pad de signature publique
+  - `/maintenance` — page admin
+  - `/unsubscribe` — page de confirmation
 
 ---
 
