@@ -58,7 +58,7 @@
 - [ ] `/rapports`
 - [x] `/tva`
 - [ ] `/notifications`
-- [ ] `/abonnement`
+- [x] `/abonnement`
 
 ### Phase 6 — Dashboard
 - [ ] Refonte `/dashboard` en grid v2 dense (KPI strip + 2-col widgets)
