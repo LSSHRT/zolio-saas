@@ -49,7 +49,8 @@
 - [ ] 4e `DevisEditor` (1266 lignes, component partagé avec drawer)
 
 ### Phase 5 — Outils & paramètres (~10 pages)
-- [ ] `/parametres/*` (entreprise, compte, notifications, sécurité)
+- [x] `/parametres` (page entreprise — `page.tsx` uniquement)
+- [ ] `/parametres/parrainage` (à faire dans une PR dédiée)
 - [ ] `/catalogue`
 - [x] `/calepin`
 - [ ] `/modeles`
