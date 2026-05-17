@@ -27,6 +27,7 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import SiretSearch from "@/components/siret-search";
 
 interface LigneEditable {
   id: string;
@@ -1118,6 +1119,25 @@ export default function NouvelleFacturePage() {
           </button>
         }>
         <div className="space-y-3">
+          <SiretSearch
+            onSelect={(hit) =>
+              setNewClient((current) => ({
+                ...current,
+                nom: hit.nom,
+                adresse: hit.adresse || current.adresse,
+              }))
+            }
+          />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center" aria-hidden>
+              <span className="w-full border-t border-slate-200 dark:border-slate-700" />
+            </div>
+            <div className="relative flex justify-center text-[11px]">
+              <span className="bg-white px-2 uppercase tracking-[0.24em] text-slate-400 dark:bg-slate-900 dark:text-slate-500">
+                ou saisie manuelle
+              </span>
+            </div>
+          </div>
           {(["nom", "email", "telephone", "adresse"] as const).map((field) => (
             <input key={field} value={newClient[field]}
               onChange={(e) => setNewClient({ ...newClient, [field]: e.target.value })}

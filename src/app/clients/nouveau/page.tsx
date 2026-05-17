@@ -10,6 +10,7 @@ import {
   CreationWizardShell,
   type CreationWizardStep,
 } from "@/components/client-creation-wizard";
+import SiretSearch, { type SiretSearchHit } from "@/components/siret-search";
 
 const STEPS: CreationWizardStep[] = [
   {
@@ -36,6 +37,15 @@ export default function NouveauClientPage() {
   const [form, setForm] = useState(EMPTY_FORM);
 
   const canContinue = form.nom.trim().length > 0;
+
+  const applySiretHit = (hit: SiretSearchHit) => {
+    setForm((current) => ({
+      ...current,
+      nom: hit.nom,
+      adresse: hit.adresse || current.adresse,
+    }));
+    toast.success(`Fiche préremplie depuis SIRENE (${hit.nom})`);
+  };
 
   const handleNext = () => {
     if (!canContinue) {
@@ -180,8 +190,21 @@ export default function NouveauClientPage() {
                 Commencez par le nom du client
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Le nom suffit pour créer la fiche. Les infos de contact peuvent être complétées juste après.
+                Tape le nom d&apos;une entreprise — l&apos;adresse et le SIRET sont préremplis depuis l&apos;annuaire SIRENE.
               </p>
+            </div>
+
+            <SiretSearch onSelect={applySiretHit} />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center" aria-hidden>
+                <span className="w-full border-t border-slate-200 dark:border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-[11px]">
+                <span className="bg-white px-2 uppercase tracking-[0.24em] text-slate-400 dark:bg-slate-950 dark:text-slate-500">
+                  ou saisie manuelle
+                </span>
+              </div>
             </div>
 
             <label className="block">
