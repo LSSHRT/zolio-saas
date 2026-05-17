@@ -7,69 +7,51 @@
 
 ## ✅ Phases terminées
 
-### Phase 1 — Fondations (3 commits)
+### Phase 1 — Fondations
 - `globals.css` : tokens v2 complets (bg, panels, divider, text, status colors, soft variants)
 - Composants desktop primitives : Card, MetricTile, Toolbar, DataTable, DetailHeader
 - Refonte `ClientDesktopNav` : 240px fixe, espacement aéré, active style v2
 - Refonte `ClientSubpageShell` : header desktop v2 (breadcrumb, eyebrow, title, pills, actions)
 
-### Phase 2 — Pages listes (4 commits)
-- `/factures` : 4 MetricTile + Toolbar (search + export + new + bulk delete) + DataTable sortable (n°/client/date/total/statut/actions) + pagination
-- `/devis` : 4 MetricTile + Toolbar + DataTable sortable (n°/client/date/total/statut/actions) + pagination
-- `/clients` : 4 MetricTile + Toolbar (import/export CSV + new + bulk delete) + DataTable sortable (client/email/téléphone/adresse/date/inline actions) + mobile cards préservées
+### Phase 2 — Pages listes
+- `/factures` : 4 MetricTile + Toolbar + DataTable sortable + pagination
+- `/devis` : 4 MetricTile + Toolbar + DataTable sortable + pagination
+- `/clients` : 4 MetricTile + Toolbar + DataTable sortable + mobile cards préservées
 - `/depenses` : 4 MetricTile + 2-col layout (table gauche, pie chart 360px droite) + pagination
 
-### Phase 3 — Pages détail (2 commits)
+### Phase 3 — Pages détail
 - `/factures/[numero]` : 3 MetricTile (HT/TVA/TTC tone adaptatif) + 2-col layout (infos/stripe/relances/notes vs actions sticky)
 - `/clients/[id]` : 4 MetricTile + 2-col layout (contact dl + historique DataTable vs actions sticky)
-- Note : `/devis/[numero]` est un éditeur (formulaire) → reporté Phase 4e
 
-### Phase 4a — Onboarding
-- `/onboarding` : wizard 3 étapes wrap mobile lg:hidden + desktop v2 hidden lg:flex
-  - Header + step indicator (numéros + labels + lignes)
-  - lg-v2-panel card avec 5-col métier grid, 2-col form, dl résumé
-  - Boutons v2 primary/ghost
+### Phase 4 — Onboarding & formulaires
+- **4a** `/onboarding` : wizard 3 étapes wrap mobile + desktop v2 (header + step indicator + lg-v2-panel card + 5-col métier grid + 2-col form + dl résumé)
+- **4b** `/nouvelle-facture` : desktop single-page dense form (2-col main 8/12 + summary rail sticky 4/12, recherche client, table inline-edit lignes, autosave)
+- **4c** `/nouveau-devis` : desktop dense form v2
+- **4d** `/nouveau-devis/options` : desktop dense form v2
+- **4e** `DevisEditor` : desktop dense layout v2 (component partagé avec drawer)
 
-### Phase 4b — Nouvelle facture
-- `/nouvelle-facture` : wrap mobile wizard 4 étapes lg:hidden + desktop v2 single-page form hidden lg:grid
-  - 2 colonnes : main (col-span-8) + summary rail sticky (col-span-4)
-  - Section Client : recherche + liste 8 résultats + bouton "Nouveau client" (réutilise MobileDialog)
-  - Section Lignes : recherche catalogue avec dropdown + boutons IA / Ligne libre + table dense inline-edit (désignation/qté/unité/PU/TVA/total/supprimer)
-  - Section Options : grille 3-col TVA / Remise / Acompte
-  - Summary rail : KPI TTC + ventilation HT / Remise / HT net / TVA / Acompte / À régler + indicateur autosave
-  - Actions sticky : Créer la facture / Créer et envoyer / Annuler avec disabled state si client manquant ou aucune ligne
-
----
-
-## 📋 Phases restantes
-
-### Phase 4 — Formulaires (lourd)
-- [ ] 4c `/nouveau-devis` (~1100 lignes) + sous-pages
-- [ ] 4d `/nouveau-devis/options`
-- [ ] 4e `DevisEditor` (1266 lignes, component partagé avec drawer)
-
-### Phase 5 — Outils & paramètres (~10 pages)
-- [x] `/parametres` (page entreprise — `page.tsx` uniquement)
-- [ ] `/parametres/parrainage` (à faire dans une PR dédiée)
-- [ ] `/catalogue`
-- [x] `/calepin`
-- [ ] `/modeles`
-- [x] `/planning`
-- [ ] `/recurrentes`
-- [ ] `/rapports`
-- [x] `/tva`
-- [ ] `/notifications`
-- [x] `/abonnement`
+### Phase 5 — Outils & paramètres
+- **5a** `/tva` : desktop dense layout v2
+- **5b** `/notifications` : desktop dense layout v2 (category filters, date grouping)
+- **5c** `/abonnement` : desktop dense layout v2 (KPI strip 4 tiles + 2-col plan/actions)
+- **5d** `/calepin` : desktop dense layout v2
+- **5e** `/modeles` : desktop dense layout v2
+- **5f** `/catalogue` : desktop dense layout v2
+- **5g** `/planning` : desktop dense layout v2
+- **5h** `/recurrentes` : desktop dense layout v2
+- **5i** `/rapports` : desktop dense layout v2 (trimestre filter wired)
+- **5j** `/parametres` : desktop dense layout v2 (entreprise)
+- **5k** `/parametres/parrainage` : desktop dense layout v2 (KPI strip 4 tiles + 2-col)
 
 ### Phase 6 — Dashboard
-- [ ] Refonte `/dashboard` en grid v2 dense (KPI strip + 2-col widgets)
+- `/dashboard` : refonte grid v2 dense (KPI strip 4 tiles + 2-col widgets 8/12 + 4/12 sticky)
 
 ### Phase 7 — Pages publiques (sélective)
-- [x] 7a `/contact` — desktop dense layout v2 (form 8/12 + sticky info sidebar 4/12, tokens v2)
-- [x] 7b `/changelog` — timeline polish v2 (tokens, pill-primary/info/success/warning)
-- [x] 7c `/espace-client/[token]` — KPI strip 3 tiles + 2-col body (docs 8/12 + sticky aside 4/12)
-- Conservées (pas de refacto v2, design adapté au contexte public) :
-  - Landing (`/`) — utilise `LandingRouter`
+- **7a** `/contact` : desktop dense layout v2 (form 8/12 + sticky info sidebar 4/12)
+- **7b** `/changelog` : timeline polish v2 (tokens, pills par type)
+- **7c** `/espace-client/[token]` : KPI strip 3 tiles + 2-col body (docs 8/12 + sticky aside 4/12)
+- Conservées (hors scope v2 par choix, design adapté au contexte public) :
+  - Landing (`/`) — `LandingRouter`
   - Pages légales (`/cgu`, `/cgv`, `/mentions-legales`, `/politique-confidentialite`) — `LegalPageShell` dark theme
   - Auth (`/sign-in`, `/sign-up`) — `AuthHero` + widgets Clerk
   - `/signer/[numero]` — pad de signature publique
@@ -111,4 +93,4 @@ lg-v2-btn / lg-v2-btn-*   : boutons primary/secondary/ghost/danger
 
 ---
 
-*Dernière phase complétée : Phase 4b — `/nouvelle-facture` desktop v2 single-page dense form*
+*Refonte design system v2 — Phases 1 à 7 terminées.*
