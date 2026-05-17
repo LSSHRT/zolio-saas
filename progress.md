@@ -24,36 +24,37 @@
 - `/clients/[id]` : 4 MetricTile + 2-col layout (contact dl + historique DataTable vs actions sticky)
 - Note : `/devis/[numero]` est un éditeur (formulaire) → reporté Phase 4e
 
-### Phase 4a — Onboarding (en cours)
+### Phase 4a — Onboarding
 - `/onboarding` : wizard 3 étapes wrap mobile lg:hidden + desktop v2 hidden lg:flex
   - Header + step indicator (numéros + labels + lignes)
   - lg-v2-panel card avec 5-col métier grid, 2-col form, dl résumé
   - Boutons v2 primary/ghost
 
+### Phase 4 — Formulaires
+- [x] 4b `/nouvelle-facture` — desktop dense form v2 (wizard 4 steps, sticky récap)
+- [x] 4c `/nouveau-devis` — desktop dense form v2 (wizard + builder lignes)
+- [x] 4d `/nouveau-devis/options` — desktop dense form v2 (réglages avancés)
+- [x] 4e `DevisEditor` — desktop dense form v2 (component partagé avec drawer)
+
+### Phase 5 — Outils & paramètres (11 PR, pattern KPI strip + 8/12 + 4/12 sticky)
+- [x] 5a `/tva` — KPI strip + table TVA + sidebar exports
+- [x] 5b `/notifications` — KPI strip + liste filtrable + sidebar actions
+- [x] 5c `/abonnement` — KPI strip + plans + sidebar facturation
+- [x] 5d `/calepin` — KPI strip + éditeur + sidebar
+- [x] 5e `/modeles` — KPI strip + table modèles + sidebar création
+- [x] 5f `/catalogue` — KPI strip + table catalogue + édition inline + sidebar starter
+- [x] 5g `/planning` — KPI strip + grille planning + sidebar filtre
+- [x] 5h `/recurrentes` — KPI strip + table contrats + sidebar pause/annule
+- [x] 5i `/rapports` — KPI strip + sections benefice/factures/dépenses + sidebar exports (trimestre wired)
+- [x] 5j `/parametres` — KPI strip + sections entreprise/notifications/sécurité + sidebar plan
+- [x] 5k `/parametres/parrainage` — KPI strip + lien partage + comment ça marche + sidebar actions/récompense
+
+### Phase 6 — Dashboard
+- [x] `/dashboard` — KPI strip 4 tiles + 2-col body (8/12 contenu + 4/12 sticky) avec actions/graphe/trésorerie/bénéfice/derniers devis à gauche, relances/échéances/top clients/funnel/objectif à droite
+
 ---
 
 ## 📋 Phases restantes
-
-### Phase 4 — Formulaires (lourd)
-- [ ] 4b `/nouvelle-facture` (~680 lignes)
-- [ ] 4c `/nouveau-devis` (~1100 lignes) + sous-pages
-- [ ] 4d `/nouveau-devis/options`
-- [ ] 4e `DevisEditor` (1266 lignes, component partagé avec drawer)
-
-### Phase 5 — Outils & paramètres (~10 pages)
-- [ ] `/parametres/*` (entreprise, compte, notifications, sécurité)
-- [ ] `/catalogue`
-- [ ] `/calepin`
-- [ ] `/modeles`
-- [ ] `/planning`
-- [ ] `/recurrentes`
-- [ ] `/rapports`
-- [ ] `/tva`
-- [ ] `/notifications`
-- [ ] `/abonnement`
-
-### Phase 6 — Dashboard
-- [ ] Refonte `/dashboard` en grid v2 dense (KPI strip + 2-col widgets)
 
 ### Phase 7 — Pages publiques
 - [ ] Landing, `/signer`, `/espace-client`, auth pages, légales
