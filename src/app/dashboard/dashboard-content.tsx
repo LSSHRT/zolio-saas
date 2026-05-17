@@ -101,6 +101,7 @@ import {
   DashboardTopClients,
   type QuoteListItem,
 } from "@/components/dashboard/lists";
+import { MetricTile } from "@/components/desktop";
 import {
   DEFAULT_TRADE,
   TRADE_OPTIONS,
@@ -576,51 +577,44 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
         <main className="mt-4 flex-1 lg:mt-6">
           {/* ═══════════════════════════════════════════════════════════ */}
-          {/* DESKTOP — page vierge, nouveau concept                        */}
+          {/* DESKTOP — v2 dense (KPI strip + 2-col body)                   */}
           {/* ═══════════════════════════════════════════════════════════ */}
-          <div className="hidden lg:flex lg:flex-col lg:gap-10">
+          <div className="hidden lg:flex lg:flex-col lg:gap-6">
 
-            {/* ─── TOP BAR ──────────────────────────────────────────── */}
-            <motion.header {...sectionMotion(0)} className="flex items-start justify-between gap-6">
+            {/* ─── TOP BAR (v2 typography) ──────────────────────────── */}
+            <header className="flex items-start justify-between gap-6">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-orange-500 dark:from-violet-400 dark:to-orange-400">
-                    Tableau de bord
-                  </p>
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[11px] font-medium capitalize text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                    <GreetingIcon size={12} className="text-violet-500" /> {todayLabel}
+                  <p className="lg-v2-eyebrow">Tableau de bord</p>
+                  <span className="lg-v2-pill capitalize">
+                    <GreetingIcon size={12} aria-hidden /> {todayLabel}
                   </span>
                   {starterTrade?.shortLabel && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/70 bg-white/80 px-2.5 py-1 text-[11px] font-medium text-slate-600 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
-                      <BriefcaseBusiness size={12} className="text-violet-500" /> {starterTrade.shortLabel}
+                    <span className="lg-v2-pill">
+                      <BriefcaseBusiness size={12} aria-hidden /> {starterTrade.shortLabel}
                     </span>
                   )}
                 </div>
-                <h1 className="mt-2 text-[28px] font-extrabold tracking-tight text-slate-900 dark:text-white">
+                <h1 className="mt-2 text-2xl font-bold tracking-tight lg-v2-text-strong">
                   {greetingText}{clerkUser?.firstName || initialUser.firstName ? `, ${clerkUser?.firstName || initialUser.firstName}` : ""}
                 </h1>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  <span className="font-semibold text-slate-700 dark:text-slate-200">{todayFocus.title}</span>
+                <p className="mt-1 text-sm lg-v2-text-muted">
+                  <span className="font-medium lg-v2-text-strong">{todayFocus.title}</span>
                   {todayFocus.description ? <span className="ml-1.5">· {todayFocus.description}</span> : null}
                 </p>
               </div>
               <div className="hidden shrink-0 items-center gap-2 lg:flex">
                 {canAccessAdmin && (
-                  <Link
-                    href="/admin"
-                    className="inline-flex items-center gap-2 rounded-full border border-violet-300/50 bg-violet-500/10 px-3.5 py-2 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/15 dark:border-violet-400/20 dark:text-violet-100"
-                  >
-                    <ShieldCheck size={14} /> Admin
+                  <Link href="/admin" className="lg-v2-btn lg-v2-btn-secondary">
+                    <ShieldCheck size={14} aria-hidden /> Admin
                   </Link>
                 )}
                 <DashboardNotificationsMenu dashboardSignals={signals} />
               </div>
-            </motion.header>
+            </header>
 
-            {/* ─── TRIAL BANNER (essai Pro 7 jours) ─────────────────── */}
+            {/* ─── TRIAL / QUOTA BANNERS ────────────────────────────── */}
             {isPro && trialEndsAt && <TrialBanner trialEndsAt={trialEndsAt} />}
-
-            {/* ─── QUOTA BANNER (conditionnel, dès 60% utilisation) ─── */}
             {quotaData && !quotaData.isPro && Number.isFinite(quotaData.limit) && (
               <QuotaBanner
                 used={quotaData.used}
@@ -629,224 +623,297 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
               />
             )}
 
-            {/* ─── ONBOARDING CHECKLIST (gamifiée) ──────────────────── */}
+            {/* ─── ONBOARDING CHECKLIST ─────────────────────────────── */}
             {showOnboardingChecklist && <OnboardingChecklist steps={onboardingSteps} />}
 
-            {/* ─── CHIFFRES CLÉS — les 3 nombres qui comptent ───────── */}
-            <motion.section {...sectionMotion(0.04)} className="grid grid-cols-3 gap-6">
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 p-6 text-white shadow-lg shadow-emerald-600/20">
-                <TrendingUp size={48} className="absolute -right-2 -top-2 rotate-12 text-white/10" />
-                <p className="text-sm font-medium text-emerald-100">CA validé</p>
-                <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight">{formatCurrency(acceptedRevenueHT)}</p>
-                <p className="mt-1 text-sm text-emerald-200">{acceptedCount} devis acceptés · {conversionRate}% conversion</p>
-              </div>
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 p-6 text-white shadow-lg shadow-amber-500/20">
-                <Clock3 size={48} className="absolute -right-2 -top-2 rotate-12 text-white/10" />
-                <p className="text-sm font-medium text-amber-100">Pipeline</p>
-                <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight">{formatCurrency(pipelineHT)}</p>
-                <p className="mt-1 text-sm text-amber-200">{pendingCount} devis en attente · ticket moy. {formatCurrency(averageTicket)}</p>
-              </div>
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 via-fuchsia-500 to-orange-400 p-6 text-white shadow-lg shadow-violet-600/25">
-                <Target size={48} className="absolute -right-2 -top-2 rotate-12 text-white/15" />
-                <p className="text-sm font-medium text-violet-100">Objectif du mois</p>
-                <p className="mt-2 text-4xl font-extrabold tabular-nums tracking-tight">{objectifProgress.toFixed(0)}%</p>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/25">
-                  <div className="h-full rounded-full bg-white transition-all duration-700" style={{ width: `${objectifProgress}%` }} />
-                </div>
-                <div className="mt-2 flex items-center justify-between text-sm text-white/85">
-                  <span>{formatCurrency(CA_TTC)} / {formatCurrency(objectifActif)}</span>
-                  <button type="button" onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }} className="text-white/70 transition hover:text-white">
-                    <Pencil size={12} className="inline -translate-y-px" />
-                  </button>
-                </div>
-              </div>
-            </motion.section>
+            {/* ─── KPI STRIP (4 MetricTile) ─────────────────────────── */}
+            <section className="grid gap-4 lg:grid-cols-4">
+              <MetricTile
+                label="CA validé"
+                value={formatCurrency(acceptedRevenueHT)}
+                detail={`${acceptedCount} acceptés · ${conversionRate}% conv.`}
+                icon={TrendingUp}
+                tone="success"
+              />
+              <MetricTile
+                label="Pipeline"
+                value={formatCurrency(pipelineHT)}
+                detail={`${pendingCount} en attente · ticket moy. ${formatCurrency(averageTicket)}`}
+                icon={Clock3}
+                tone="warning"
+              />
+              <MetricTile
+                label="Objectif du mois"
+                value={`${objectifProgress.toFixed(0)}%`}
+                detail={`${formatCurrency(CA_TTC)} / ${formatCurrency(objectifActif)}`}
+                icon={Target}
+                tone={objectifProgress >= 80 ? "success" : objectifProgress >= 40 ? "warning" : "neutral"}
+              />
+              <MetricTile
+                label="Recouvrement"
+                value={tresorerie ? `${tresorerie.tauxRecouvrement}%` : "—"}
+                detail={tresorerie ? `${formatCurrency(tresorerie.enRetard)} en retard` : "Chargement…"}
+                icon={Sparkles}
+                tone={
+                  tresorerie
+                    ? tresorerie.tauxRecouvrement >= 80
+                      ? "success"
+                      : tresorerie.tauxRecouvrement >= 50
+                        ? "warning"
+                        : "danger"
+                    : "neutral"
+                }
+              />
+            </section>
 
-            {/* ─── SETUP MÉTIER (conditionnel) ──────────────────────── */}
+            {/* ─── SETUP MÉTIER (conditionnel, full width) ──────────── */}
             {setupRequired && selectedTradeDef && (
-              <motion.section id="dashboard-setup-panel-desktop" {...sectionMotion(0.05)} className="rounded-2xl border-2 border-dashed border-violet-300 bg-violet-50/60 p-8 dark:border-violet-500/30 dark:bg-violet-500/5">
-                <div className="mx-auto max-w-2xl text-center">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-white">Configurez votre espace de travail</h2>
-                  <p className="mt-2 text-slate-600 dark:text-slate-400">Choisissez votre métier pour importer un catalogue de prestations prêt à l&apos;emploi.</p>
+              <section id="dashboard-setup-panel-desktop" className="lg-v2-panel p-6">
+                <div className="mb-4">
+                  <p className="lg-v2-eyebrow">Configuration</p>
+                  <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">Configurez votre espace de travail</h2>
+                  <p className="mt-1 text-sm lg-v2-text-muted">
+                    Choisissez votre métier pour importer un catalogue de prestations prêt à l&apos;emploi.
+                  </p>
                 </div>
-                <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                   {TRADE_OPTIONS.map((opt) => (
                     <TradeOptionCard key={opt.key} option={opt} active={selectedTrade === opt.key} onSelect={setSelectedTrade} />
                   ))}
                 </div>
-                <div className="mt-6 flex items-center justify-center gap-4">
-                  <button type="button" onClick={handleBootstrap} disabled={isBootstrapping} className="rounded-full bg-violet-600 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-700 disabled:opacity-60">
+                <div className="mt-4 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleBootstrap}
+                    disabled={isBootstrapping}
+                    className="lg-v2-btn lg-v2-btn-primary disabled:opacity-50"
+                  >
                     {isBootstrapping ? "Préparation..." : `Activer le starter ${selectedTradeDef.label}`}
                   </button>
-                  <Link href="/parametres" className="text-sm font-medium text-slate-500 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-700 dark:text-slate-400 dark:decoration-slate-600 dark:hover:text-slate-200">
+                  <Link href="/parametres" className="lg-v2-btn lg-v2-btn-ghost">
                     Configurer manuellement
                   </Link>
                 </div>
-              </motion.section>
+              </section>
             )}
 
-            {/* ─── ACTIONS À TRAITER — le plus important ────────────── */}
-            <motion.section {...sectionMotion(0.06)}>
-              <div className="mb-4 flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-rose-500 motion-safe:animate-pulse" aria-hidden="true" />
-                <h2 className="text-[15px] font-semibold text-slate-900 dark:text-white">À traiter</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-                {actionPlan.map((item) => <DashboardActionCard key={item.id} item={item} />)}
-              </div>
-            </motion.section>
-
-            {/* ─── GRAPHE CA — full width ────────────────────────────── */}
-            <motion.section
-              {...sectionMotion(0.08)}
-              className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-gradient-to-br from-white via-violet-50/40 to-fuchsia-50/30 p-6 shadow-sm dark:border-white/8 dark:from-slate-900 dark:via-slate-900 dark:to-violet-950/30"
-            >
-              <div className="pointer-events-none absolute -top-12 -right-10 h-40 w-40 rounded-full bg-gradient-to-br from-violet-400/15 to-fuchsia-400/15 blur-3xl dark:from-violet-500/20 dark:to-fuchsia-500/15" />
-              <div className="relative flex items-center justify-between">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
-                    Performance
-                  </p>
-                  <h2 className="mt-1 text-[15px] font-semibold text-slate-900 dark:text-white">Évolution du CA</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">6 derniers mois</p>
-                </div>
-                {semaine && (
-                  <div className="flex gap-6">
-                    <div className="text-right">
-                      <p className="text-2xl font-bold tabular-nums text-slate-900 dark:text-white">{semaine.nouveauxDevis}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">devis cette semaine</p>
+            {/* ─── BODY 2-COL (8/12 + 4/12 sticky) ──────────────────── */}
+            <div className="grid gap-6 lg:grid-cols-12">
+              <div className="lg:col-span-8 space-y-6">
+                {/* Actions à traiter */}
+                <section className="lg-v2-panel p-5">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="lg-v2-eyebrow">À traiter</p>
+                      <p className="mt-1 text-sm lg-v2-text-muted">Vos prochaines actions prioritaires.</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{formatCurrency(semaine.caEncaisse)}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">encaissé</p>
+                    <span className="lg-v2-pill">{actionPlan.length} actions</span>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {actionPlan.map((item) => <DashboardActionCard key={item.id} item={item} />)}
+                  </div>
+                </section>
+
+                {/* Graphe CA */}
+                <section className="lg-v2-panel p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="lg-v2-eyebrow">Performance</p>
+                      <p className="mt-1 text-sm lg-v2-text-muted">Évolution du CA · 6 derniers mois</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{semaine.facturesEmises}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">factures émises</p>
+                    {semaine && (
+                      <div className="flex gap-6">
+                        <div className="text-right">
+                          <p className="text-lg font-semibold tabular-nums lg-v2-text-strong">{semaine.nouveauxDevis}</p>
+                          <p className="text-xs lg-v2-text-subtle">devis cette semaine</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-semibold tabular-nums text-[var(--v2-success)]">{formatCurrency(semaine.caEncaisse)}</p>
+                          <p className="text-xs lg-v2-text-subtle">encaissé</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-lg font-semibold tabular-nums text-[var(--v2-warning)]">{semaine.facturesEmises}</p>
+                          <p className="text-xs lg-v2-text-subtle">factures émises</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="mt-4 h-[280px]">
+                    <DashboardChart monthlyData={monthlyData} />
+                  </div>
+                </section>
+
+                {/* Trésorerie + Bénéfice (2-col interne) */}
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <section className="lg-v2-panel p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="lg-v2-eyebrow">Trésorerie</p>
+                        <p className="mt-1 text-sm lg-v2-text-muted">État des factures</p>
+                      </div>
+                      {tresorerie && (
+                        <span
+                          className={`lg-v2-pill ${
+                            tresorerie.tauxRecouvrement >= 80
+                              ? "lg-v2-pill-success"
+                              : tresorerie.tauxRecouvrement >= 50
+                                ? "lg-v2-pill-warning"
+                                : "lg-v2-pill-danger"
+                          }`}
+                        >
+                          {tresorerie.tauxRecouvrement}% rec.
+                        </span>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
-              <div className="mt-6 h-[300px]">
-                <DashboardChart monthlyData={monthlyData} />
-              </div>
-            </motion.section>
+                    <div className="mt-4" aria-busy={!tresorerie}>
+                      {tresorerie ? (
+                        <DashboardTresorerie data={tresorerie} />
+                      ) : (
+                        <div className="space-y-3" aria-label="Chargement de la trésorerie">
+                          <div className="h-3 w-1/3 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
+                          <div className="h-2.5 w-full animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
+                          <div className="h-2.5 w-5/6 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
+                          <div className="grid grid-cols-2 gap-3 pt-2">
+                            <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                            <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
 
-            {/* ─── RELANCES + ÉCHÉANCES côte à côte ─────────────────── */}
-            <div className="grid grid-cols-2 gap-6">
-              <motion.section {...sectionMotion(0.1)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Bell size={16} className="text-rose-500" />
-                    <h2 className="font-semibold text-slate-900 dark:text-white">Relances urgentes</h2>
-                  </div>
-                  {devisARelancer.length > 0 && <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-bold text-rose-700 dark:bg-rose-500/15 dark:text-rose-300">{devisARelancer.length}</span>}
+                  <section className="lg-v2-panel p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="lg-v2-eyebrow">Bénéfice net</p>
+                        <p className="mt-1 text-sm lg-v2-text-muted">Votre résultat</p>
+                      </div>
+                      {benefice && (
+                        <span
+                          className={`lg-v2-pill ${
+                            benefice.margePct >= 70
+                              ? "lg-v2-pill-success"
+                              : benefice.margePct >= 40
+                                ? "lg-v2-pill-warning"
+                                : "lg-v2-pill-danger"
+                          }`}
+                        >
+                          {benefice.margePct}% marge
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-4" aria-busy={!benefice}>
+                      {benefice ? (
+                        <DashboardBenefice data={benefice} />
+                      ) : (
+                        <div className="space-y-3" aria-label="Chargement du bénéfice">
+                          <div className="h-7 w-2/3 animate-pulse rounded-lg bg-slate-200 dark:bg-white/10" />
+                          <div className="h-2.5 w-full animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
+                          <div className="grid grid-cols-2 gap-3 pt-2">
+                            <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                            <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
                 </div>
-                <div className="mt-4">
-                  <DesktopPriorityQuotes items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
-                </div>
-              </motion.section>
 
-              <motion.section {...sectionMotion(0.1)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock3 size={16} className="text-amber-500" />
-                    <h2 className="font-semibold text-slate-900 dark:text-white">Échéances proches</h2>
+                {/* Derniers devis */}
+                <section className="lg-v2-panel p-5">
+                  <div className="mb-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="lg-v2-eyebrow">Derniers devis</p>
+                      <p className="mt-1 text-sm lg-v2-text-muted">Affaires récentes</p>
+                    </div>
+                    <Link href="/devis" className="lg-v2-btn lg-v2-btn-ghost">
+                      Voir tout <ChevronRight size={12} aria-hidden />
+                    </Link>
                   </div>
-                  {echeances.length > 0 && <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">{echeances.length}</span>}
-                </div>
-                <div className="mt-4">
-                  <DesktopPaymentStack items={echeances} />
-                </div>
-              </motion.section>
-            </div>
-
-            {/* ─── DERNIERS DEVIS + TOP CLIENTS ─────────────────────── */}
-            <div className="grid grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)] gap-6">
-              <motion.section {...sectionMotion(0.12)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-slate-900 dark:text-white">Derniers devis</h2>
-                  <Link href="/devis" className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600 transition hover:bg-slate-200 dark:bg-white/8 dark:text-slate-300 dark:hover:bg-white/12">
-                    Voir tout <ChevronRight size={12} className="ml-0.5 inline" />
-                  </Link>
-                </div>
-                <div className="mt-4">
                   <DashboardRecentQuotes items={devisRecents} onSelectDevis={setSelectedDevisNumero} />
-                </div>
-              </motion.section>
+                </section>
+              </div>
 
-              <motion.section {...sectionMotion(0.12)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                <h2 className="font-semibold text-slate-900 dark:text-white">Top clients</h2>
-                <div className="mt-4">
-                  <DashboardTopClients items={topClients} />
-                </div>
-              </motion.section>
-            </div>
-
-            {/* ─── FINANCES (Trésorerie + Bénéfice + Funnel) ────────── */}
-            <div className={`grid gap-6 ${funnel && funnel.length > 0 ? "grid-cols-3" : "grid-cols-2"}`}>
-              <motion.section {...sectionMotion(0.14)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-slate-900 dark:text-white">Trésorerie</h2>
-                  {tresorerie && (
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums ${tresorerie.tauxRecouvrement >= 80 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : tresorerie.tauxRecouvrement >= 50 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>
-                      {tresorerie.tauxRecouvrement}% recouvrement
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4" aria-busy={!tresorerie}>
-                  {tresorerie ? (
-                    <DashboardTresorerie data={tresorerie} />
-                  ) : (
-                    <div className="space-y-3" aria-label="Chargement de la trésorerie">
-                      <div className="h-3 w-1/3 animate-pulse rounded-full bg-slate-200 dark:bg-white/10" />
-                      <div className="h-2.5 w-full animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
-                      <div className="h-2.5 w-5/6 animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
-                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
-                      </div>
+              {/* Right rail (sticky) */}
+              <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+                {/* Relances */}
+                <section className="lg-v2-panel p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Bell size={14} className="text-[var(--v2-danger)]" aria-hidden />
+                      <p className="lg-v2-eyebrow">Relances urgentes</p>
                     </div>
-                  )}
-                </div>
-              </motion.section>
+                    {devisARelancer.length > 0 && (
+                      <span className="lg-v2-pill lg-v2-pill-danger">{devisARelancer.length}</span>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <DesktopPriorityQuotes items={devisARelancer} onSelectDevis={setSelectedDevisNumero} />
+                  </div>
+                </section>
 
-              <motion.section {...sectionMotion(0.14)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-semibold text-slate-900 dark:text-white">Bénéfice net</h2>
-                  {benefice && (
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold tabular-nums ${benefice.margePct >= 70 ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300" : benefice.margePct >= 40 ? "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300" : "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300"}`}>
-                      {benefice.margePct}% marge
-                    </span>
-                  )}
-                </div>
-                <div className="mt-4" aria-busy={!benefice}>
-                  {benefice ? (
-                    <DashboardBenefice data={benefice} />
-                  ) : (
-                    <div className="space-y-3" aria-label="Chargement du bénéfice">
-                      <div className="h-7 w-2/3 animate-pulse rounded-lg bg-slate-200 dark:bg-white/10" />
-                      <div className="h-2.5 w-full animate-pulse rounded-full bg-slate-200/70 dark:bg-white/8" />
-                      <div className="grid grid-cols-2 gap-3 pt-2">
-                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
-                        <div className="h-12 animate-pulse rounded-xl bg-slate-100 dark:bg-white/5" />
-                      </div>
+                {/* Échéances */}
+                <section className="lg-v2-panel p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock3 size={14} className="text-[var(--v2-warning)]" aria-hidden />
+                      <p className="lg-v2-eyebrow">Échéances proches</p>
                     </div>
-                  )}
-                </div>
-              </motion.section>
+                    {echeances.length > 0 && (
+                      <span className="lg-v2-pill lg-v2-pill-warning">{echeances.length}</span>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <DesktopPaymentStack items={echeances} />
+                  </div>
+                </section>
 
-              {funnel && funnel.length > 0 && (
-                <motion.section {...sectionMotion(0.14)} className="rounded-2xl border border-slate-200/60 bg-white p-6 dark:border-white/8 dark:bg-white/[0.03]">
-                  <div className="flex items-center gap-2">
-                    <Target size={16} className="text-violet-500" />
-                    <h2 className="font-semibold text-slate-900 dark:text-white">Conversion</h2>
+                {/* Top clients */}
+                <section className="lg-v2-panel p-5">
+                  <p className="lg-v2-eyebrow">Top clients</p>
+                  <div className="mt-3">
+                    <DashboardTopClients items={topClients} />
                   </div>
-                  <div className="mt-4">
-                    <ConversionFunnel funnel={funnel} />
+                </section>
+
+                {/* Funnel (conditional) */}
+                {funnel && funnel.length > 0 && (
+                  <section className="lg-v2-panel p-5">
+                    <div className="flex items-center gap-2">
+                      <Target size={14} className="text-[var(--v2-primary)]" aria-hidden />
+                      <p className="lg-v2-eyebrow">Conversion</p>
+                    </div>
+                    <div className="mt-3">
+                      <ConversionFunnel funnel={funnel} />
+                    </div>
+                  </section>
+                )}
+
+                {/* Objectif */}
+                <section className="lg-v2-panel p-5">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="lg-v2-eyebrow">Objectif mensuel</p>
+                    <button
+                      type="button"
+                      onClick={() => { setObjectifDraft(objectifActif.toString()); setObjectifDialogOpen(true); }}
+                      className="lg-v2-text-subtle transition hover:text-[var(--v2-text-strong)]"
+                      aria-label="Modifier l'objectif"
+                    >
+                      <Pencil size={12} aria-hidden />
+                    </button>
                   </div>
-                </motion.section>
-              )}
+                  <p className="mt-2 text-2xl font-bold tabular-nums lg-v2-text-strong">{objectifProgress.toFixed(0)}%</p>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[var(--v2-panel-muted)]">
+                    <div
+                      className="h-full rounded-full bg-[var(--v2-primary)] transition-all duration-700"
+                      style={{ width: `${objectifProgress}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs lg-v2-text-subtle tabular-nums">
+                    {formatCurrency(CA_TTC)} / {formatCurrency(objectifActif)}
+                  </p>
+                </section>
+              </aside>
             </div>
 
           </div>
