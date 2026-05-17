@@ -1060,6 +1060,13 @@ export default function NouveauDevisPage() {
                 }
                 onSearchChange={setSearchClient}
                 onSelectClient={(client) => setSelectedClientId(client.id)}
+                onSiretPrefill={(hit) =>
+                  setNewClient((current) => ({
+                    ...current,
+                    nom: hit.nom,
+                    adresse: hit.adresse || current.adresse,
+                  }))
+                }
                 recentClients={recentClients}
                 onToggleNewClient={() => setShowNewClient((current) => !current)}
                 searchValue={searchClient}
