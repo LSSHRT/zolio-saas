@@ -3,7 +3,7 @@
 import { useCallback, useMemo, useState } from "react";
 import useSWR from "swr";
 import { motion } from "framer-motion";
-import { Calculator, Download, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { Calculator, Download, FileSpreadsheet, Sparkles, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import {
   ClientHeroStat,
@@ -11,6 +11,7 @@ import {
   ClientSectionCard,
   ClientSubpageShell,
 } from "@/components/client-shell";
+import { MetricTile } from "@/components/desktop";
 
 interface TvaData {
   periode: string;
@@ -211,6 +212,8 @@ export default function TvaPage() {
         />
       }
     >
+      {/* ─── Mobile view (< lg) — wizard préservé ────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
           <div className="flex-1">
@@ -360,6 +363,215 @@ export default function TvaPage() {
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ──────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Période"
+            value={trimestre ? `T${trimestre} ${annee}` : annee}
+            detail={trimestre ? "Trimestre sélectionné" : "Année complète"}
+            icon={Calculator}
+            tone="neutral"
+          />
+          <MetricTile
+            label="TVA collectée"
+            value={data ? formatMontant(data.tvaCollectee) : "—"}
+            detail="Factures payées dans la période"
+            icon={TrendingUp}
+            tone="success"
+          />
+          <MetricTile
+            label="TVA déductible"
+            value={data ? formatMontant(data.tvaDepenses) : "—"}
+            detail="Dépenses enregistrées (est. 20%)"
+            icon={TrendingDown}
+            tone="warning"
+          />
+          <MetricTile
+            label={data && data.solde < 0 ? "À récupérer" : "À reverser"}
+            value={data ? formatMontant(Math.abs(data.solde)) : "—"}
+            detail={data ? (data.solde >= 0 ? "Solde net positif" : "Crédit de TVA") : "—"}
+            icon={Wallet}
+            tone={data ? (data.solde >= 0 ? "danger" : "success") : "neutral"}
+          />
+        </div>
+
+        {/* Body 2-col */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Filtres période */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <p className="lg-v2-eyebrow">Période</p>
+                  <p className="mt-1 text-sm lg-v2-text-muted">Sélectionnez l&apos;année et, si besoin, le trimestre à analyser.</p>
+                </div>
+                {data ? (
+                  <span className="text-xs lg-v2-text-subtle tabular-nums">{data.periode}</span>
+                ) : null}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="v2-tva-annee" className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.08em] lg-v2-text-subtle">
+                    Année
+                  </label>
+                  <select
+                    id="v2-tva-annee"
+                    value={annee}
+                    onChange={(e) => setAnnee(e.target.value)}
+                    className="lg-v2-input"
+                  >
+                    {YEARS.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label htmlFor="v2-tva-trimestre" className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.08em] lg-v2-text-subtle">
+                    Trimestre (optionnel)
+                  </label>
+                  <select
+                    id="v2-tva-trimestre"
+                    value={trimestre}
+                    onChange={(e) => setTrimestre(e.target.value)}
+                    className="lg-v2-input"
+                  >
+                    <option value="">Année complète</option>
+                    <option value="1">T1 (Jan - Mar)</option>
+                    <option value="2">T2 (Avr - Juin)</option>
+                    <option value="3">T3 (Juil - Sep)</option>
+                    <option value="4">T4 (Oct - Déc)</option>
+                  </select>
+                </div>
+              </div>
+            </section>
+
+            {/* Détails période */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <p className="lg-v2-eyebrow">Détails</p>
+                  <p className="mt-1 text-sm lg-v2-text-muted">Ventilation de la TVA pour la période sélectionnée.</p>
+                </div>
+              </div>
+
+              {isLoading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="flex animate-pulse items-center justify-between rounded-xl border lg-v2-divider px-4 py-4"
+                    >
+                      <div className="h-4 w-32 rounded bg-slate-200/70 dark:bg-white/8" />
+                      <div className="h-5 w-24 rounded bg-slate-200/70 dark:bg-white/8" />
+                    </div>
+                  ))}
+                </div>
+              ) : data ? (
+                <div className="overflow-hidden rounded-xl border lg-v2-divider">
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th className="lg-v2-table-header">Poste</th>
+                        <th className="lg-v2-table-header">Base</th>
+                        <th className="lg-v2-table-header text-right">Montant TVA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="lg-v2-table-row">
+                        <td className="lg-v2-table-cell">
+                          <span className="inline-flex items-center gap-2 text-sm font-medium lg-v2-text-strong">
+                            <TrendingUp size={14} className="text-[var(--v2-success)]" aria-hidden />
+                            TVA collectée
+                          </span>
+                        </td>
+                        <td className="lg-v2-table-cell text-sm lg-v2-text-muted">Factures payées</td>
+                        <td className="lg-v2-table-cell text-right text-sm font-semibold tabular-nums text-[var(--v2-success)]">
+                          {formatMontant(data.tvaCollectee)}
+                        </td>
+                      </tr>
+                      <tr className="lg-v2-table-row">
+                        <td className="lg-v2-table-cell">
+                          <span className="inline-flex items-center gap-2 text-sm font-medium lg-v2-text-strong">
+                            <TrendingDown size={14} className="text-[var(--v2-warning)]" aria-hidden />
+                            TVA déductible
+                          </span>
+                        </td>
+                        <td className="lg-v2-table-cell text-sm lg-v2-text-muted">Dépenses (est. 20%)</td>
+                        <td className="lg-v2-table-cell text-right text-sm font-semibold tabular-nums text-[var(--v2-warning)]">
+                          -{formatMontant(data.tvaDepenses)}
+                        </td>
+                      </tr>
+                      <tr className="lg-v2-table-row bg-[var(--v2-panel-muted)]">
+                        <td className="lg-v2-table-cell">
+                          <span className="inline-flex items-center gap-2 text-sm font-semibold lg-v2-text-strong">
+                            <Wallet size={14} className={data.solde >= 0 ? "text-[var(--v2-danger)]" : "text-[var(--v2-success)]"} aria-hidden />
+                            {data.solde >= 0 ? "Solde à reverser" : "Solde à récupérer"}
+                          </span>
+                        </td>
+                        <td className="lg-v2-table-cell text-sm lg-v2-text-muted">Net période</td>
+                        <td
+                          className={`lg-v2-table-cell text-right text-base font-bold tabular-nums ${
+                            data.solde >= 0 ? "text-[var(--v2-danger)]" : "text-[var(--v2-success)]"
+                          }`}
+                        >
+                          {formatMontant(Math.abs(data.solde))}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center lg-v2-text-subtle">
+                  <Calculator size={48} strokeWidth={1} aria-hidden />
+                  <p className="text-sm">Aucune donnée disponible pour cette période.</p>
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* Right rail (sticky) */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Exports</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">Téléchargez le récapitulatif pour votre comptable.</p>
+              <div className="mt-4 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportPdf}
+                  disabled={!data}
+                  className="lg-v2-btn lg-v2-btn-primary justify-center disabled:opacity-50"
+                >
+                  <Download size={14} aria-hidden /> Exporter PDF
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportPennylane}
+                  disabled={!data}
+                  className="lg-v2-btn lg-v2-btn-secondary justify-center disabled:opacity-50"
+                >
+                  <FileSpreadsheet size={14} aria-hidden /> Export Pennylane
+                </button>
+              </div>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Conseil</p>
+              <p className="mt-2 inline-flex items-start gap-2 text-sm lg-v2-text-muted">
+                <Sparkles size={14} className="mt-0.5 shrink-0 text-[var(--v2-primary)]" aria-hidden />
+                <span>
+                  Provisionnez le solde à reverser dès chaque encaissement pour éviter la mauvaise surprise à l&apos;échéance fiscale.
+                </span>
+              </p>
+            </section>
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
   );
 }
