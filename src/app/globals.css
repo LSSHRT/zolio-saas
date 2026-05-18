@@ -636,6 +636,18 @@
     overflow: hidden;
   }
 
+  /* Subtle film grain over the entire landing for a premium "printed" feel. */
+  .landing-shell::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  }
+
   .landing-grid-overlay {
     background-image:
       linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
@@ -687,10 +699,119 @@
   }
 
   .landing-text-gradient {
-    background: linear-gradient(135deg, #ffffff 0%, #f5d7ff 45%, #f7a76b 100%);
+    background:
+      linear-gradient(
+        110deg,
+        #ffffff 0%,
+        #ede5ff 22%,
+        #f6c6f7 48%,
+        #fbb38c 78%,
+        #ffd9a3 100%
+      );
+    background-size: 220% 220%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: landing-text-shift 11s ease-in-out infinite;
+    filter: drop-shadow(0 0 28px rgba(192, 132, 252, 0.18));
+  }
+
+  @keyframes landing-text-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Aurora-style animated mesh blobs for the hero backdrop. */
+  .landing-aurora {
+    position: absolute;
+    inset: -8% -4% -12% -4%;
+    pointer-events: none;
+    z-index: 0;
+    filter: blur(64px);
+    opacity: 0.65;
+  }
+
+  .landing-aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    mix-blend-mode: screen;
+    will-change: transform, opacity;
+  }
+
+  .landing-aurora-blob-a {
+    top: -10%;
+    left: -8%;
+    width: 38rem;
+    height: 38rem;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.55), transparent 62%);
+    animation: aurora-drift-a 18s ease-in-out infinite;
+  }
+
+  .landing-aurora-blob-b {
+    top: 6%;
+    right: -10%;
+    width: 34rem;
+    height: 34rem;
+    background: radial-gradient(circle, rgba(217, 70, 239, 0.42), transparent 65%);
+    animation: aurora-drift-b 21s ease-in-out infinite;
+  }
+
+  .landing-aurora-blob-c {
+    bottom: -22%;
+    left: 28%;
+    width: 30rem;
+    height: 30rem;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.28), transparent 65%);
+    animation: aurora-drift-c 26s ease-in-out infinite;
+  }
+
+  @keyframes aurora-drift-a {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(40px, 30px, 0) scale(1.08); }
+  }
+
+  @keyframes aurora-drift-b {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(-30px, 40px, 0) scale(1.12); }
+  }
+
+  @keyframes aurora-drift-c {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+    50% { transform: translate3d(50px, -25px, 0) scale(0.94); }
+  }
+
+  /* Marquee strip used for the "artisan trades" loop under the hero. */
+  .landing-marquee {
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  }
+
+  .landing-marquee-track {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: landing-marquee 38s linear infinite;
+  }
+
+  @keyframes landing-marquee {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
+  }
+
+  /* Soft glow halo (used behind the closing CTA card). */
+  .landing-halo {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(135deg, rgba(167, 139, 250, 0.45), rgba(244, 114, 182, 0.25), rgba(251, 146, 60, 0.35));
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.7;
   }
 
   .landing-stage {
@@ -884,6 +1005,12 @@
     .landing-shell .landing-hero-floor,
     .landing-shell .landing-hero-data-card {
       transition: none !important;
+    }
+
+    .landing-shell .landing-aurora-blob,
+    .landing-shell .landing-marquee-track,
+    .landing-shell .landing-text-gradient {
+      animation: none !important;
     }
   }
 }
