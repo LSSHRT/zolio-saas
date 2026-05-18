@@ -32,6 +32,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 
 // Local minimal types — react-joyride uses `export = ReactJoyride` (CJS) which
 // breaks named ESM imports under moduleResolution: bundler.
@@ -268,7 +269,17 @@ function DesktopPaymentStack({ items }: { items: Array<{ numero: string; nomClie
 
 // --- Main Dashboard Content ---------------------------------------------
 
+const DASHBOARD_PREFETCH_ROUTES: readonly string[] = [
+  "/devis",
+  "/factures",
+  "/clients",
+  "/nouveau-devis",
+  "/nouvelle-facture",
+  "/notifications",
+];
+
 export default function DashboardContent({ initialUser, initialData, initialSummary }: DashboardContentProps) {
+  useRoutePrefetch(DASHBOARD_PREFETCH_ROUTES);
   const { user: clerkUser } = useUser();
   const { data: dashboardData, mutate: mutateDashboard } = useSWR<ClientDashboardSummary>(
     "/api/dashboard/summary",

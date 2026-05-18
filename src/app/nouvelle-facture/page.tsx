@@ -29,6 +29,7 @@ import {
 import { MobileDialog } from "@/components/mobile-dialog";
 import SiretSearch from "@/components/siret-search";
 import AddressSearch from "@/components/address-search";
+import { DraftRestoreBanner } from "@/components/draft-restore-banner";
 
 interface LigneEditable {
   id: string;
@@ -244,6 +245,26 @@ export default function NouvelleFacturePage() {
 
   const removeLine = (id: string) => setLignes(lignes.filter((l) => l.id !== id));
 
+  const discardDraft = () => {
+    // Pause autosave while we reset state, otherwise the autosave effect
+    // re-runs on each setter and immediately recreates a draft with the
+    // empty values we just wiped.
+    draftLoadedRef.current = false;
+    clearDraft();
+    setLignes([]);
+    setSelectedClientId("");
+    setTva("20");
+    setAcompte("");
+    setRemise("");
+    setStep(1);
+    setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
+    setDraftSavedAt(null);
+    setDraftStatus("idle");
+    window.setTimeout(() => {
+      draftLoadedRef.current = true;
+    }, 0);
+  };
+
   const generateWithAI = async () => {
     if (!aiPrompt.trim()) return;
     setAiGenerating(true);
@@ -356,6 +377,9 @@ export default function NouvelleFacturePage() {
     >
       {/* ─── Mobile / tablet wizard (lg:hidden) — preserved 4-step flow ─── */}
       <div className="space-y-4 lg:hidden">
+      {draftSavedAt ? (
+        <DraftRestoreBanner savedAt={draftSavedAt} onDiscard={discardDraft} />
+      ) : null}
       {/* Steps */}
       <ClientSectionCard className="!p-3">
         <ol
@@ -662,6 +686,11 @@ export default function NouvelleFacturePage() {
       </div>
 
       {/* ─── Desktop dense single-page form (hidden lg:block) ─── */}
+      {draftSavedAt ? (
+        <div className="hidden lg:block mb-4">
+          <DraftRestoreBanner savedAt={draftSavedAt} onDiscard={discardDraft} />
+        </div>
+      ) : null}
       <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
         {/* LEFT : Client + Lignes + Options */}
         <div className="lg:col-span-8 space-y-6">

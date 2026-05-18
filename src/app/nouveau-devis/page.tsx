@@ -43,6 +43,7 @@ import {
 import { AIAssistant } from "./components/AIAssistant";
 import { ClientSelector } from "@/components/document-form/ClientSelector";
 import { LineEditor } from "@/components/document-form/LineEditor";
+import { DraftRestoreBanner } from "@/components/draft-restore-banner";
 import { SummaryRail } from "./components/SummaryRail";
 import type {
   Client,
@@ -252,6 +253,11 @@ export default function NouveauDevisPage() {
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  // Separate signal for "this session was bootstrapped from a stored draft".
+  // We can't reuse `draftSavedAt` for the restore banner because that state is
+  // also refreshed on every autosave tick, which would mislabel any
+  // mid-session save as a restored draft.
+  const [draftRestoredAt, setDraftRestoredAt] = useState<string | null>(null);
   const draftReadyRef = useRef(false);
   const lastDraftFingerprintRef = useRef("");
 
@@ -301,6 +307,7 @@ export default function NouveauDevisPage() {
     setSelectedTrade(parsedDraft.selectedTrade);
     setStep(Math.min(parsedDraft.step, WIZARD_STEPS.length - 1));
     setDraftSavedAt(parsedDraft.savedAt);
+    setDraftRestoredAt(parsedDraft.savedAt);
     setDraftStatus("saved");
     lastDraftFingerprintRef.current = rawDraft;
     draftReadyRef.current = true;
@@ -826,6 +833,26 @@ export default function NouveauDevisPage() {
     totalTTC - (Number.parseFloat(acompte) || 0),
   );
 
+  const discardDraft = () => {
+    if (draftStorageKey && typeof window !== "undefined") {
+      window.localStorage.removeItem(draftStorageKey);
+    }
+    lastDraftFingerprintRef.current = "";
+    setSelectedClientId("");
+    setLignes([]);
+    setTva("10");
+    setAcompte("");
+    setRemise("");
+    setPhotos([]);
+    setSelectedTrade(companyTrade?.key ?? DEFAULT_TRADE);
+    setStep(0);
+    setDraftStatus("idle");
+    setDraftSavedAt(null);
+    setDraftRestoredAt(null);
+  };
+
+  const draftRestoredAtDate = draftRestoredAt ? new Date(draftRestoredAt) : null;
+
   const handleNextStep = () => {
     if (step === 0 && !hasClient) {
       toast.error("Choisissez ou créez un client avant de continuer.");
@@ -843,6 +870,11 @@ export default function NouveauDevisPage() {
   return (
     <>
     <div className="lg:hidden">
+    {draftRestoredAtDate ? (
+      <div className="px-4 pt-3 sm:px-6">
+        <DraftRestoreBanner savedAt={draftRestoredAtDate} onDiscard={discardDraft} />
+      </div>
+    ) : null}
     <CreationWizardShell
       backHref="/devis"
       currentStep={step}
@@ -1167,6 +1199,11 @@ export default function NouveauDevisPage() {
 
     {/* ─── Desktop dense single-page form (hidden lg:block) ─── */}
     <div className="hidden lg:block">
+      {draftRestoredAtDate ? (
+        <div className="px-4 pt-3 sm:px-6 lg:px-8 xl:px-10">
+          <DraftRestoreBanner savedAt={draftRestoredAtDate} onDiscard={discardDraft} />
+        </div>
+      ) : null}
       <ClientSubpageShell
         title="Nouveau devis"
         description="Création complète — client, chiffrage et options sur un seul écran."

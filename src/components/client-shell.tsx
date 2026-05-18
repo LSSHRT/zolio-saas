@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
 import { haptic } from "@/lib/haptics";
+import { useRoutePrefetch } from "@/hooks/use-route-prefetch";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -184,11 +185,20 @@ export function ClientBrandMark({ showLabel = true, className = "" }: { showLabe
   );
 }
 
+const DOCK_PREFETCH_ROUTES: readonly string[] = [
+  "/dashboard",
+  "/devis",
+  "/factures",
+  "/clients",
+  "/nouveau-devis",
+];
+
 export function ClientMobileDock({ active }: { active: ClientNavKey }) {
   const pathname = usePathname();
   const [toolsOpen, setToolsOpen] = useState(false);
   const unreadCount = useUnreadNotificationsCount();
 
+  useRoutePrefetch(DOCK_PREFETCH_ROUTES);
   useBodyScrollLock(toolsOpen);
   useOverlayCloseSignal(() => { setToolsOpen(false); });
 
