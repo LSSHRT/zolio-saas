@@ -267,6 +267,21 @@
     font-family: var(--font-mono), monospace;
   }
 
+  /*
+   * iOS PWA standalone status-bar offset.
+   * When the app is installed and launched in standalone mode the system
+   * status bar overlays the viewport. The sticky mobile header sits at
+   * `top: 0.5rem`, so it would render behind the notch. We bump the body
+   * padding-top by `env(safe-area-inset-top)` only in standalone display
+   * mode and only below the desktop breakpoint — the browser tab layout
+   * already has the URL bar above us so no offset is needed there.
+   */
+  @media (display-mode: standalone) and (max-width: 1023px) {
+    body {
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+
   .admin-cockpit {
     position: relative;
     background:

@@ -31,6 +31,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getSupportHref, getSupportLabel, isExternalSupportHref } from "@/lib/support";
+import { haptic } from "@/lib/haptics";
 import { UserButton } from "@clerk/nextjs";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -208,6 +209,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             <motion.div key={item.key} whileTap={{ scale: 0.9 }}>
               <Link
                 href={item.href}
+                onClick={() => haptic("selection")}
                 className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
               >
                 <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
@@ -221,6 +223,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         <motion.div whileTap={{ scale: 0.9 }}>
           <Link
             href="/nouveau-devis"
+            onClick={() => haptic("medium")}
             className="relative -mt-4 flex h-[48px] w-[48px] shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 text-white shadow-lg shadow-violet-500/25"
             data-testid="mobile-new-devis-btn"
           >
@@ -235,6 +238,7 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
             <motion.div key={item.key} whileTap={{ scale: 0.9 }}>
               <Link
                 href={item.href}
+                onClick={() => haptic("selection")}
                 className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
               >
                 <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
@@ -252,7 +256,10 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 20 }}
-        onClick={() => setToolsOpen(true)}
+        onClick={() => {
+          haptic("selection");
+          setToolsOpen(true);
+        }}
         className="fixed right-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/80 bg-white/95 text-slate-500 shadow-lg shadow-slate-900/5 backdrop-blur-sm transition hover:border-violet-300 hover:text-violet-600 dark:border-white/12 dark:bg-slate-900/90 dark:text-slate-400 dark:hover:border-violet-500/30 dark:hover:text-violet-300 lg:hidden"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 88px)" }}
         aria-label="Plus d'outils"
@@ -307,7 +314,10 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
                   <Link
                     key={item.href}
                     href={item.href}
-                    onClick={() => setToolsOpen(false)}
+                    onClick={() => {
+                      haptic("selection");
+                      setToolsOpen(false);
+                    }}
                     className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses(
                       pathname === item.href ? "accent" : "default",
                     )}`}
