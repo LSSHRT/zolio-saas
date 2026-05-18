@@ -43,6 +43,7 @@ import {
 import { AIAssistant } from "./components/AIAssistant";
 import { ClientSelector } from "@/components/document-form/ClientSelector";
 import { LineEditor } from "@/components/document-form/LineEditor";
+import { DraftRestoreBanner } from "@/components/draft-restore-banner";
 import { SummaryRail } from "./components/SummaryRail";
 import type {
   Client,
@@ -826,6 +827,25 @@ export default function NouveauDevisPage() {
     totalTTC - (Number.parseFloat(acompte) || 0),
   );
 
+  const discardDraft = () => {
+    if (draftStorageKey && typeof window !== "undefined") {
+      window.localStorage.removeItem(draftStorageKey);
+    }
+    lastDraftFingerprintRef.current = "";
+    setSelectedClientId("");
+    setLignes([]);
+    setTva("10");
+    setAcompte("");
+    setRemise("");
+    setPhotos([]);
+    setSelectedTrade(companyTrade?.key ?? DEFAULT_TRADE);
+    setStep(0);
+    setDraftStatus("idle");
+    setDraftSavedAt(null);
+  };
+
+  const draftRestoredAtDate = draftSavedAt ? new Date(draftSavedAt) : null;
+
   const handleNextStep = () => {
     if (step === 0 && !hasClient) {
       toast.error("Choisissez ou créez un client avant de continuer.");
@@ -843,6 +863,11 @@ export default function NouveauDevisPage() {
   return (
     <>
     <div className="lg:hidden">
+    {draftRestoredAtDate ? (
+      <div className="px-4 pt-3 sm:px-6">
+        <DraftRestoreBanner savedAt={draftRestoredAtDate} onDiscard={discardDraft} />
+      </div>
+    ) : null}
     <CreationWizardShell
       backHref="/devis"
       currentStep={step}
@@ -1167,6 +1192,11 @@ export default function NouveauDevisPage() {
 
     {/* ─── Desktop dense single-page form (hidden lg:block) ─── */}
     <div className="hidden lg:block">
+      {draftRestoredAtDate ? (
+        <div className="px-4 pt-3 sm:px-6 lg:px-8 xl:px-10">
+          <DraftRestoreBanner savedAt={draftRestoredAtDate} onDiscard={discardDraft} />
+        </div>
+      ) : null}
       <ClientSubpageShell
         title="Nouveau devis"
         description="Création complète — client, chiffrage et options sur un seul écran."
