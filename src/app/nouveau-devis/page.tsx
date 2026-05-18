@@ -1067,6 +1067,12 @@ export default function NouveauDevisPage() {
                     adresse: hit.adresse || current.adresse,
                   }))
                 }
+                onAddressPrefill={(hit) =>
+                  setNewClient((current) => ({
+                    ...current,
+                    adresse: hit.label,
+                  }))
+                }
                 recentClients={recentClients}
                 onToggleNewClient={() => setShowNewClient((current) => !current)}
                 searchValue={searchClient}
