@@ -56,7 +56,7 @@ function isClientDraftEmpty(draft: ClientDraft): boolean {
 
 export default function NouveauClientPage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isLoaded: userLoaded } = useUser();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -77,10 +77,14 @@ export default function NouveauClientPage() {
     clear: clearDraft,
   } = useDraftAutosave<ClientDraft>({
     namespace: "clients-nouveau",
-    scope: user?.id,
+    // Wait for Clerk to settle before deciding the scope, otherwise we'd
+    // briefly write under the "anon" key and orphan that draft when the real
+    // user id arrives a tick later.
+    scope: userLoaded ? user?.id : null,
     version: DRAFT_VERSION,
     data: draft,
     isEmpty: isClientDraftEmpty,
+    disabled: !userLoaded,
   });
 
   useEffect(() => {

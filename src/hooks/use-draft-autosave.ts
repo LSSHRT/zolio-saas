@@ -28,6 +28,11 @@ export type UseDraftAutosaveOptions<T> = {
   debounceMs?: number;
   /** Drafts older than this (ms) are dropped on read. */
   maxAgeMs?: number;
+  /** When true, the hook stays inert: no restore, no autosave, no clear. Use
+   *  this to wait for upstream identity hydration (e.g. Clerk's `isLoaded`)
+   *  so we don't write under an "anon" key and orphan the draft when the
+   *  real user id arrives a tick later. */
+  disabled?: boolean;
 };
 
 export type UseDraftAutosaveResult = {
@@ -54,6 +59,7 @@ export function useDraftAutosave<T>({
   isEmpty,
   debounceMs = 400,
   maxAgeMs,
+  disabled = false,
 }: UseDraftAutosaveOptions<T>): UseDraftAutosaveResult & { restored: T | null } {
   const key = buildDraftKey(namespace, scope);
   const [status, setStatus] = useState<DraftStatus>("idle");
@@ -61,23 +67,42 @@ export function useDraftAutosave<T>({
   const [hydrated, setHydrated] = useState(false);
   const [restored, setRestored] = useState<T | null>(null);
   const lastSerializedRef = useRef<string>("");
+  // Tracks whether `data` has ever been non-empty since hydration. We use this
+  // to avoid clearing a freshly-restored draft when the parent's form state
+  // hasn't applied the restored value yet (first render after hydration:
+  // `data` is still the empty initial state but `restored` is set).
+  const hasBeenDirtyRef = useRef(false);
 
   useEffect(() => {
+    if (disabled) return;
+
     const restoredDraft = readDraft<T>(key, { version, maxAgeMs });
     if (restoredDraft) {
       setRestored(restoredDraft.data);
       setSavedAt(restoredDraft.savedAt);
       setStatus("saved");
       lastSerializedRef.current = JSON.stringify(restoredDraft.data);
+    } else {
+      // No draft for this key: clear any stale state carried over from a
+      // previous scope (e.g. anon -> user.id switch on Clerk hydration).
+      setRestored(null);
+      setSavedAt(null);
+      setStatus("idle");
+      lastSerializedRef.current = "";
     }
+    hasBeenDirtyRef.current = false;
     setHydrated(true);
-  }, [key, version, maxAgeMs]);
+  }, [disabled, key, version, maxAgeMs]);
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (disabled || !hydrated) return;
 
     if (isEmpty(data)) {
-      if (lastSerializedRef.current !== "") {
+      // Only clear an existing draft if the form was previously non-empty
+      // (the user actively emptied it). Otherwise this fires on the first
+      // hydrated render after a restore and immediately wipes the draft we
+      // just loaded.
+      if (hasBeenDirtyRef.current && lastSerializedRef.current !== "") {
         clearDraftEntry(key);
         lastSerializedRef.current = "";
         setStatus("idle");
@@ -85,6 +110,8 @@ export function useDraftAutosave<T>({
       }
       return;
     }
+
+    hasBeenDirtyRef.current = true;
 
     const serialized = JSON.stringify(data);
     if (serialized === lastSerializedRef.current) return;
@@ -102,12 +129,13 @@ export function useDraftAutosave<T>({
     }, debounceMs);
 
     return () => window.clearTimeout(handle);
-  }, [data, debounceMs, hydrated, isEmpty, key, version]);
+  }, [data, debounceMs, disabled, hydrated, isEmpty, key, version]);
 
   const consumeRestored = () => setRestored(null);
   const clear = () => {
     clearDraftEntry(key);
     lastSerializedRef.current = "";
+    hasBeenDirtyRef.current = false;
     setSavedAt(null);
     setRestored(null);
     setStatus("idle");

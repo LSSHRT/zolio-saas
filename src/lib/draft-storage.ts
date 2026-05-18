@@ -59,7 +59,9 @@ export function readDraft<T>(
     !parsed ||
     typeof parsed !== "object" ||
     (parsed as DraftEnvelope<T>).version !== options.version ||
-    typeof (parsed as DraftEnvelope<T>).savedAt !== "string"
+    typeof (parsed as DraftEnvelope<T>).savedAt !== "string" ||
+    !("data" in (parsed as object)) ||
+    (parsed as DraftEnvelope<T>).data === undefined
   ) {
     safeRemove(key);
     return null;

@@ -246,6 +246,10 @@ export default function NouvelleFacturePage() {
   const removeLine = (id: string) => setLignes(lignes.filter((l) => l.id !== id));
 
   const discardDraft = () => {
+    // Pause autosave while we reset state, otherwise the autosave effect
+    // re-runs on each setter and immediately recreates a draft with the
+    // empty values we just wiped.
+    draftLoadedRef.current = false;
     clearDraft();
     setLignes([]);
     setSelectedClientId("");
@@ -256,6 +260,9 @@ export default function NouvelleFacturePage() {
     setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
     setDraftSavedAt(null);
     setDraftStatus("idle");
+    window.setTimeout(() => {
+      draftLoadedRef.current = true;
+    }, 0);
   };
 
   const generateWithAI = async () => {

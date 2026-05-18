@@ -253,6 +253,11 @@ export default function NouveauDevisPage() {
   const [isImportingStarter, setIsImportingStarter] = useState(false);
   const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  // Separate signal for "this session was bootstrapped from a stored draft".
+  // We can't reuse `draftSavedAt` for the restore banner because that state is
+  // also refreshed on every autosave tick, which would mislabel any
+  // mid-session save as a restored draft.
+  const [draftRestoredAt, setDraftRestoredAt] = useState<string | null>(null);
   const draftReadyRef = useRef(false);
   const lastDraftFingerprintRef = useRef("");
 
@@ -302,6 +307,7 @@ export default function NouveauDevisPage() {
     setSelectedTrade(parsedDraft.selectedTrade);
     setStep(Math.min(parsedDraft.step, WIZARD_STEPS.length - 1));
     setDraftSavedAt(parsedDraft.savedAt);
+    setDraftRestoredAt(parsedDraft.savedAt);
     setDraftStatus("saved");
     lastDraftFingerprintRef.current = rawDraft;
     draftReadyRef.current = true;
@@ -842,9 +848,10 @@ export default function NouveauDevisPage() {
     setStep(0);
     setDraftStatus("idle");
     setDraftSavedAt(null);
+    setDraftRestoredAt(null);
   };
 
-  const draftRestoredAtDate = draftSavedAt ? new Date(draftSavedAt) : null;
+  const draftRestoredAtDate = draftRestoredAt ? new Date(draftRestoredAt) : null;
 
   const handleNextStep = () => {
     if (step === 0 && !hasClient) {
