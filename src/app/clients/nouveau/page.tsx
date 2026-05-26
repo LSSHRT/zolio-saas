@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import { ArrowLeft, ArrowRight, Save, Users } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -10,6 +11,10 @@ import {
   CreationWizardShell,
   type CreationWizardStep,
 } from "@/components/client-creation-wizard";
+import SiretSearch, { type SiretSearchHit } from "@/components/siret-search";
+import AddressSearch, { type AddressSearchHit } from "@/components/address-search";
+import { DraftRestoreBanner } from "@/components/draft-restore-banner";
+import { useDraftAutosave } from "@/hooks/use-draft-autosave";
 
 const STEPS: CreationWizardStep[] = [
   {
@@ -22,6 +27,14 @@ const STEPS: CreationWizardStep[] = [
   },
 ];
 
+type ClientDraft = {
+  nom: string;
+  email: string;
+  telephone: string;
+  adresse: string;
+  step: number;
+};
+
 const EMPTY_FORM = {
   nom: "",
   email: "",
@@ -29,13 +42,84 @@ const EMPTY_FORM = {
   adresse: "",
 };
 
+const DRAFT_VERSION = 1;
+
+function isClientDraftEmpty(draft: ClientDraft): boolean {
+  return (
+    draft.nom.trim() === "" &&
+    draft.email.trim() === "" &&
+    draft.telephone.trim() === "" &&
+    draft.adresse.trim() === "" &&
+    draft.step === 0
+  );
+}
+
 export default function NouveauClientPage() {
   const router = useRouter();
+  const { user, isLoaded: userLoaded } = useUser();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
 
+  const draft: ClientDraft = {
+    nom: form.nom,
+    email: form.email,
+    telephone: form.telephone,
+    adresse: form.adresse,
+    step,
+  };
+
+  const {
+    savedAt: draftSavedAt,
+    hydrated: draftHydrated,
+    restored: restoredDraft,
+    consumeRestored,
+    clear: clearDraft,
+  } = useDraftAutosave<ClientDraft>({
+    namespace: "clients-nouveau",
+    // Wait for Clerk to settle before deciding the scope, otherwise we'd
+    // briefly write under the "anon" key and orphan that draft when the real
+    // user id arrives a tick later.
+    scope: userLoaded ? user?.id : null,
+    version: DRAFT_VERSION,
+    data: draft,
+    isEmpty: isClientDraftEmpty,
+    disabled: !userLoaded,
+  });
+
+  useEffect(() => {
+    if (!restoredDraft) return;
+    setForm({
+      nom: restoredDraft.nom,
+      email: restoredDraft.email,
+      telephone: restoredDraft.telephone,
+      adresse: restoredDraft.adresse,
+    });
+    setStep(Math.min(restoredDraft.step, STEPS.length - 1));
+    consumeRestored();
+  }, [restoredDraft, consumeRestored]);
+
+  const discardDraft = () => {
+    clearDraft();
+    setForm(EMPTY_FORM);
+    setStep(0);
+  };
+
   const canContinue = form.nom.trim().length > 0;
+
+  const applySiretHit = (hit: SiretSearchHit) => {
+    setForm((current) => ({
+      ...current,
+      nom: hit.nom,
+      adresse: hit.adresse || current.adresse,
+    }));
+    toast.success(`Fiche préremplie depuis SIRENE (${hit.nom})`);
+  };
+
+  const applyAddressHit = (hit: AddressSearchHit) => {
+    setForm((current) => ({ ...current, adresse: hit.label }));
+    toast.success("Adresse préremplie depuis OpenStreetMap");
+  };
 
   const handleNext = () => {
     if (!canContinue) {
@@ -65,6 +149,7 @@ export default function NouveauClientPage() {
         throw new Error(payload.error || "Impossible de créer le client");
       }
 
+      clearDraft();
       router.push("/clients?created=1");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Impossible de créer le client";
@@ -172,6 +257,10 @@ export default function NouveauClientPage() {
       {step === 0 ? (
         <CreationWizardPanel>
           <div className="max-w-2xl space-y-5">
+            {draftHydrated ? (
+              <DraftRestoreBanner savedAt={draftSavedAt} onDiscard={discardDraft} />
+            ) : null}
+
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
                 Identité
@@ -180,8 +269,21 @@ export default function NouveauClientPage() {
                 Commencez par le nom du client
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                Le nom suffit pour créer la fiche. Les infos de contact peuvent être complétées juste après.
+                Tape le nom d&apos;une entreprise — l&apos;adresse et le SIRET sont préremplis depuis l&apos;annuaire SIRENE.
               </p>
+            </div>
+
+            <SiretSearch onSelect={applySiretHit} />
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center" aria-hidden>
+                <span className="w-full border-t border-slate-200 dark:border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-[11px]">
+                <span className="bg-white px-2 uppercase tracking-[0.24em] text-slate-400 dark:bg-slate-950 dark:text-slate-500">
+                  ou saisie manuelle
+                </span>
+              </div>
             </div>
 
             <label className="block">
@@ -201,6 +303,12 @@ export default function NouveauClientPage() {
       ) : (
         <CreationWizardPanel>
           <div className="grid gap-4 lg:grid-cols-2">
+            {draftHydrated ? (
+              <div className="lg:col-span-2">
+                <DraftRestoreBanner savedAt={draftSavedAt} onDiscard={discardDraft} />
+              </div>
+            ) : null}
+
             <div className="lg:col-span-2">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">
                 Contact & adresse
@@ -229,13 +337,26 @@ export default function NouveauClientPage() {
               placeholder="Téléphone"
               className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
             />
-            <input
-              type="text"
-              value={form.adresse}
-              onChange={(event) => setForm((current) => ({ ...current, adresse: event.target.value }))}
-              placeholder="Adresse / chantier"
-              className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6 lg:col-span-2"
-            />
+            <div className="lg:col-span-2 space-y-3">
+              <AddressSearch onSelect={applyAddressHit} />
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden>
+                  <span className="w-full border-t border-slate-200 dark:border-white/10" />
+                </div>
+                <div className="relative flex justify-center text-[11px]">
+                  <span className="bg-white px-2 uppercase tracking-[0.24em] text-slate-400 dark:bg-slate-950 dark:text-slate-500">
+                    ou saisie manuelle
+                  </span>
+                </div>
+              </div>
+              <input
+                type="text"
+                value={form.adresse}
+                onChange={(event) => setForm((current) => ({ ...current, adresse: event.target.value }))}
+                placeholder="Adresse / chantier"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/6"
+              />
+            </div>
           </div>
         </CreationWizardPanel>
       )}

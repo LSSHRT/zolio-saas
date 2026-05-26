@@ -23,6 +23,7 @@ import {
   ClientSubpageShell,
 } from "@/components/client-shell";
 import { EmptyState } from "@/components/empty-state";
+import { MetricTile } from "@/components/desktop";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -203,6 +204,8 @@ export default function NotificationsPage() {
         ) : undefined
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       {/* Filters bar */}
       <ClientSectionCard>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -372,6 +375,203 @@ export default function NotificationsPage() {
           ))}
         </div>
       )}
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ──────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Total"
+            value={String(allNotifications.length)}
+            detail="Événements enregistrés"
+            icon={Bell}
+            tone="primary"
+          />
+          <MetricTile
+            label="Non lues"
+            value={String(data?.unreadCount ?? 0)}
+            detail={data?.unreadCount ? "À traiter en priorité" : "Tout est lu"}
+            icon={TriangleAlert}
+            tone={data?.unreadCount && data.unreadCount > 0 ? "warning" : "success"}
+          />
+          <MetricTile
+            label="Vue active"
+            value={String(notifications.length)}
+            detail={`${CATEGORY_LABELS[category].label} · ${filter === "unread" ? "non lues" : "toutes"}`}
+            icon={Filter}
+            tone="neutral"
+          />
+          <MetricTile
+            label="Catégories"
+            value={String(Object.values(categoryCounts).filter((c, i) => i > 0 && c > 0).length)}
+            detail="Répartitions actives"
+            icon={SettingsIcon}
+            tone="neutral"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-4">
+            {isLoading ? (
+              <div className="lg-v2-panel p-5 space-y-3">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="h-10 w-10 animate-pulse rounded-xl bg-slate-200/70 dark:bg-white/8" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 w-1/3 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                      <div className="h-3 w-2/3 animate-pulse rounded bg-slate-200/70 dark:bg-white/8" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="lg-v2-panel p-6">
+                <EmptyState
+                  icon={BellOff}
+                  title={
+                    filter === "unread"
+                      ? "Aucune notification non lue"
+                      : category !== "all"
+                        ? `Rien dans la catégorie ${CATEGORY_LABELS[category].label}`
+                        : "Vous êtes à jour"
+                  }
+                  description={
+                    filter === "unread"
+                      ? "Toutes vos notifications ont été lues. Repassez par ici quand un nouvel événement arrivera."
+                      : category !== "all"
+                        ? "Aucun événement récent dans cette catégorie. Changez de filtre pour voir d&apos;autres notifications."
+                        : "Les nouvelles notifications (devis signés, factures payées, relances) apparaîtront ici en temps réel."
+                  }
+                  tone={filter === "unread" ? "emerald" : "slate"}
+                  actions={
+                    filter === "unread"
+                      ? [{ label: "Voir toutes les notifications", onClick: () => setFilter("all"), variant: "primary" }]
+                      : category !== "all"
+                        ? [{ label: "Toutes les catégories", onClick: () => setCategory("all"), variant: "primary" }]
+                        : undefined
+                  }
+                />
+              </div>
+            ) : (
+              orderedBuckets.map((bucketKey) => (
+                <section key={bucketKey} className="lg-v2-panel p-5">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <p className="lg-v2-eyebrow">{BUCKET_LABEL[bucketKey]}</p>
+                    <span className="text-[11px] font-medium lg-v2-text-subtle tabular-nums">
+                      {grouped[bucketKey].length} événement{grouped[bucketKey].length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="space-y-1">
+                    {grouped[bucketKey].map((n) => {
+                      const tone = TONE_CLASSES[n.tone] || TONE_CLASSES.slate;
+                      const TypeIcon = TYPE_CONFIG[n.type] || tone.icon;
+                      const inner = (
+                        <div className="flex items-start gap-3 rounded-lg border border-transparent px-3 py-2.5 transition hover:bg-[var(--v2-panel-muted)] hover:border-[var(--v2-border)]">
+                          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone.bg} ${tone.color}`}>
+                            <TypeIcon size={16} aria-hidden />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline justify-between gap-3">
+                              <p className={`text-sm font-semibold ${n.read ? "lg-v2-text-muted" : "lg-v2-text-strong"}`}>
+                                {n.title}
+                                {!n.read && <span className="ml-2 inline-flex h-1.5 w-1.5 rounded-full bg-[var(--v2-primary)]" aria-hidden />}
+                              </p>
+                              <span className="shrink-0 text-[11px] lg-v2-text-subtle tabular-nums">{formatDate(n.createdAt)}</span>
+                            </div>
+                            <p className="mt-0.5 text-xs lg-v2-text-muted line-clamp-2">{n.description}</p>
+                          </div>
+                        </div>
+                      );
+                      if (n.href) {
+                        return (
+                          <Link key={n.id} href={n.href} onClick={() => { if (!n.read) markRead(n.id); }}>
+                            {inner}
+                          </Link>
+                        );
+                      }
+                      return (
+                        <div
+                          key={n.id}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => { if (!n.read) markRead(n.id); }}
+                          onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !n.read) markRead(n.id); }}
+                        >
+                          {inner}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))
+            )}
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Filtres</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">Affiner par catégorie et statut.</p>
+
+              <div className="mt-4 space-y-1.5">
+                {(Object.keys(CATEGORY_LABELS) as CategoryKey[]).map((key) => {
+                  const { label, icon: Icon } = CATEGORY_LABELS[key];
+                  const count = categoryCounts[key];
+                  const isActive = category === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setCategory(key)}
+                      className={`flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm transition ${
+                        isActive
+                          ? "border-[var(--v2-primary)] bg-[var(--v2-primary-soft)] text-[var(--v2-primary)]"
+                          : "border-transparent text-[var(--v2-text)] hover:bg-[var(--v2-panel-muted)]"
+                      }`}
+                    >
+                      <span className="inline-flex items-center gap-2 font-medium">
+                        <Icon size={14} aria-hidden /> {label}
+                      </span>
+                      <span className="text-xs tabular-nums lg-v2-text-subtle">{count}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 border-t lg-v2-divider pt-4">
+                <button
+                  type="button"
+                  onClick={() => setFilter(filter === "all" ? "unread" : "all")}
+                  className={`lg-v2-btn w-full justify-center ${
+                    filter === "unread" ? "lg-v2-btn-primary" : "lg-v2-btn-secondary"
+                  }`}
+                >
+                  <Filter size={14} aria-hidden />
+                  {filter === "unread" ? "Non lues uniquement" : "Voir toutes"}
+                </button>
+              </div>
+            </section>
+
+            {data?.unreadCount ? (
+              <section className="lg-v2-panel p-5">
+                <p className="lg-v2-eyebrow">Actions</p>
+                <p className="mt-1 text-sm lg-v2-text-muted">
+                  {data.unreadCount} événement{data.unreadCount > 1 ? "s" : ""} non lu{data.unreadCount > 1 ? "s" : ""}.
+                </p>
+                <button
+                  type="button"
+                  onClick={markAllRead}
+                  className="lg-v2-btn lg-v2-btn-primary mt-3 w-full justify-center"
+                >
+                  <CheckCircle size={14} aria-hidden /> Tout marquer lu
+                </button>
+              </section>
+            ) : null}
+          </aside>
+        </div>
+      </div>
     </ClientSubpageShell>
   );
 }

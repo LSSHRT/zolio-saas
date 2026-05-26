@@ -13,6 +13,7 @@ import {
   ClientSubpageShell,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
+import { MetricTile } from "@/components/desktop";
 import { getTradeBundlesForTrade, TRADE_OPTIONS } from "@/lib/trades";
 
 interface TemplateLigne {
@@ -338,6 +339,8 @@ export default function ModelesPage() {
         />
       }
     >
+      {/* ─── Mobile view (< lg) ─────────────────────────── */}
+      <div className="space-y-4 sm:space-y-6 lg:hidden">
       <ClientSectionCard>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative flex-1">
@@ -523,6 +526,224 @@ export default function ModelesPage() {
           </div>
         )}
       </ClientSectionCard>
+      </div>
+
+      {/* ─── Desktop view (lg+) — v2 dense ─────────────────────── */}
+      <div className="hidden lg:block lg:space-y-6">
+        {/* KPI strip */}
+        <div className="grid gap-4 lg:grid-cols-4">
+          <MetricTile
+            label="Modèles"
+            value={String(totalTemplates)}
+            detail="Enregistrés dans la bibliothèque"
+            icon={LayoutTemplate}
+            tone="primary"
+          />
+          <MetricTile
+            label="Lignes totales"
+            value={String(totalLignes)}
+            detail="Postes cumulés"
+            icon={FileText}
+            tone="neutral"
+          />
+          <MetricTile
+            label="Estimation"
+            value={`${estimatedTotal.toFixed(0)}€`}
+            detail="Montant total estimé"
+            icon={Calculator}
+            tone={estimatedTotal > 0 ? "success" : "neutral"}
+          />
+          <MetricTile
+            label="Métiers"
+            value={String(tradeBundles.length)}
+            detail="Packs pré-construits dispo"
+            icon={Wrench}
+            tone="warning"
+          />
+        </div>
+
+        {/* 2-col body */}
+        <div className="grid gap-6 lg:grid-cols-12">
+          <div className="lg:col-span-8 space-y-6">
+            {/* Toolbar */}
+            <section className="lg-v2-panel p-4">
+              <div className="flex items-center gap-3">
+                <div className="relative flex-1">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--v2-text-subtle)]" size={14} aria-hidden />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un modèle…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="lg-v2-input w-full pl-9"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="lg-v2-btn lg-v2-btn-primary shrink-0"
+                >
+                  <Plus size={14} aria-hidden /> Nouveau modèle
+                </button>
+              </div>
+            </section>
+
+            {/* Vos modèles */}
+            <section className="lg-v2-panel p-5">
+              <div className="mb-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="lg-v2-eyebrow">Vos modèles personnalisés</p>
+                  <p className="mt-1 text-sm lg-v2-text-muted">{filtered.length} affiché{filtered.length > 1 ? "s" : ""} sur {totalTemplates}.</p>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-16 animate-pulse rounded-lg bg-slate-200/70 dark:bg-white/8" />
+                  ))}
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-3 py-14 text-center lg-v2-text-subtle">
+                  <LayoutTemplate size={40} strokeWidth={1} aria-hidden />
+                  <p className="text-sm">Aucun modèle correspondant.</p>
+                  <button
+                    type="button"
+                    onClick={() => setCreateDialogOpen(true)}
+                    className="lg-v2-btn lg-v2-btn-primary"
+                  >
+                    <Plus size={14} aria-hidden /> Créer un modèle
+                  </button>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-xl border lg-v2-divider">
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th className="lg-v2-table-header">Nom</th>
+                        <th className="lg-v2-table-header text-right">Lignes</th>
+                        <th className="lg-v2-table-header text-right">Total</th>
+                        <th className="lg-v2-table-header text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.map((tpl) => (
+                        <tr key={tpl.id} className="lg-v2-table-row">
+                          <td className="lg-v2-table-cell">
+                            <p className="text-sm font-semibold lg-v2-text-strong">{tpl.nom}</p>
+                            {tpl.description ? (
+                              <p className="mt-0.5 text-xs lg-v2-text-muted line-clamp-1">{tpl.description}</p>
+                            ) : null}
+                          </td>
+                          <td className="lg-v2-table-cell text-right text-sm lg-v2-text-muted tabular-nums">
+                            {(tpl.lignes || []).length}
+                          </td>
+                          <td className="lg-v2-table-cell text-right text-sm font-semibold lg-v2-text-strong tabular-nums">
+                            {getTemplateTotal(tpl).toFixed(2)} €
+                          </td>
+                          <td className="lg-v2-table-cell text-right">
+                            <div className="inline-flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => { setUseDialogOpen(tpl); setSelectedClientId(""); }}
+                                className="lg-v2-btn lg-v2-btn-secondary"
+                              >
+                                <FileText size={12} aria-hidden /> Créer un devis
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setPendingDelete(tpl)}
+                                disabled={deletingId === tpl.id}
+                                aria-label={`Supprimer ${tpl.nom}`}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md border lg-v2-divider text-[var(--v2-text-subtle)] transition hover:border-[var(--v2-danger)] hover:text-[var(--v2-danger)] disabled:opacity-50"
+                              >
+                                <Trash2 size={12} aria-hidden />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          </div>
+
+          {/* Right rail sticky */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 self-start space-y-4">
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Actions</p>
+              <button
+                type="button"
+                onClick={() => setCreateDialogOpen(true)}
+                className="lg-v2-btn lg-v2-btn-primary mt-3 w-full justify-center"
+              >
+                <Plus size={14} aria-hidden /> Nouveau modèle
+              </button>
+              <p className="mt-3 text-xs lg-v2-text-subtle">
+                Astuce : utilisez l&apos;IA pour générer le squelette d&apos;un modèle à partir d&apos;un brief.
+              </p>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Packs métier</p>
+              <p className="mt-1 text-sm lg-v2-text-muted">Packs prêlts à personnaliser.</p>
+              <div className="mt-3 space-y-3">
+                {tradeBundles.map((trade) => (
+                  <details key={trade.key} className="group rounded-lg border lg-v2-divider bg-[var(--v2-panel-muted)] open:bg-[var(--v2-panel)]">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-2 px-3 py-2.5">
+                      <span className="inline-flex items-center gap-2 text-sm font-semibold lg-v2-text-strong">
+                        <Wrench size={13} className="text-[var(--v2-primary)]" aria-hidden />
+                        {trade.label}
+                      </span>
+                      <span className="rounded-full bg-[var(--v2-primary-soft)] px-2 py-0.5 text-[10px] font-bold text-[var(--v2-primary)]">
+                        {trade.bundles.length}
+                      </span>
+                    </summary>
+                    <div className="space-y-1.5 px-3 pb-3">
+                      {trade.bundles.map((bundle, bi) => {
+                        const total = bundle.lignes.reduce((s, l) => s + l.totalLigne, 0);
+                        return (
+                          <div key={bi} className="flex items-center justify-between gap-2 rounded border lg-v2-divider bg-[var(--v2-panel)] px-2.5 py-1.5">
+                            <span className="min-w-0 flex-1 truncate text-xs lg-v2-text">{bundle.nom}</span>
+                            <span className="shrink-0 text-[11px] font-semibold tabular-nums lg-v2-text-muted">{total.toFixed(0)}€</span>
+                            <button
+                              type="button"
+                              onClick={() => handleUseBundle(bundle)}
+                              className="inline-flex shrink-0 items-center gap-1 rounded-md bg-[var(--v2-primary)] px-2 py-1 text-[10px] font-semibold text-white transition hover:opacity-90"
+                            >
+                              <Plus size={10} aria-hidden /> Utiliser
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </details>
+                ))}
+              </div>
+            </section>
+
+            <section className="lg-v2-panel p-5">
+              <p className="lg-v2-eyebrow">Stats biblio</p>
+              <dl className="mt-3 space-y-2 text-sm">
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Lignes/modèle moy.</dt>
+                  <dd className="font-semibold tabular-nums lg-v2-text-strong">
+                    {totalTemplates > 0 ? (totalLignes / totalTemplates).toFixed(1) : "—"}
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="lg-v2-text-muted">Total clients</dt>
+                  <dd className="inline-flex items-center gap-1 font-semibold tabular-nums lg-v2-text-strong">
+                    <Users size={11} aria-hidden /> {clients.length}
+                  </dd>
+                </div>
+              </dl>
+            </section>
+          </aside>
+        </div>
+      </div>
 
       {/* Create dialog */}
       <MobileDialog

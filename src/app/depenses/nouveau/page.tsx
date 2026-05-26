@@ -10,6 +10,8 @@ import {
   CreationWizardShell,
   type CreationWizardStep,
 } from "@/components/client-creation-wizard";
+import ReceiptScanner from "@/components/receipt-scanner";
+import type { ParsedReceipt } from "@/lib/receipt-parser";
 
 const STEPS: CreationWizardStep[] = [
   {
@@ -51,6 +53,23 @@ export default function NouvelleDepensePage() {
 
   const canContinue = Boolean(form.date && form.categorie);
   const canSubmit = Boolean(form.description.trim() && form.montant.trim());
+
+  const applyReceipt = (parsed: ParsedReceipt) => {
+    setForm((current) => {
+      const next = { ...current };
+      if (parsed.date?.value) {
+        next.date = parsed.date.value;
+      }
+      if (parsed.fournisseur?.value && !current.description.trim()) {
+        next.description = parsed.fournisseur.value;
+      }
+      if (parsed.montantTTC?.value !== undefined && !current.montant.trim()) {
+        next.montant = parsed.montantTTC.value.toFixed(2);
+      }
+      return next;
+    });
+    toast.success("Ticket lu — vérifie les valeurs avant d'enregistrer.");
+  };
 
   const handleSubmit = async () => {
     if (!canSubmit) {
@@ -146,8 +165,12 @@ export default function NouvelleDepensePage() {
                 Datez et classez la dépense
               </h2>
               <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-                On garde le flux simple : d’abord le contexte comptable, ensuite le montant et le fournisseur.
+                Scanne le ticket pour préremplir la date, le fournisseur et le montant — ou saisis à la main.
               </p>
+            </div>
+
+            <div className="lg:col-span-2">
+              <ReceiptScanner onParsed={applyReceipt} />
             </div>
 
             <input

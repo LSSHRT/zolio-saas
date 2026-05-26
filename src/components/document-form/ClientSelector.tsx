@@ -1,5 +1,7 @@
 import { Mail, MapPin, Phone, Plus, Search, UserCircle2, X } from "lucide-react";
 import { ClientSectionCard } from "@/components/client-shell";
+import SiretSearch, { type SiretSearchHit } from "@/components/siret-search";
+import AddressSearch, { type AddressSearchHit } from "@/components/address-search";
 import type { Client, QuickClientForm } from "./types";
 
 type ClientSelectorProps = {
@@ -12,6 +14,8 @@ type ClientSelectorProps = {
   onNewClientChange: (field: keyof QuickClientForm, value: string) => void;
   onSearchChange: (value: string) => void;
   onSelectClient: (client: Client) => void;
+  onSiretPrefill?: (hit: SiretSearchHit) => void;
+  onAddressPrefill?: (hit: AddressSearchHit) => void;
   recentClients: Client[];
   searchValue: string;
   selectedClient: Client | null;
@@ -30,6 +34,8 @@ export function ClientSelector({
   onNewClientChange,
   onSearchChange,
   onSelectClient,
+  onSiretPrefill,
+  onAddressPrefill,
   recentClients,
   searchValue,
   selectedClient,
@@ -194,6 +200,21 @@ export function ClientSelector({
 
             {showNewClient ? (
               <div className="grid gap-3 rounded-2xl border border-slate-200/70 bg-slate-50/80 p-4 dark:border-white/8 dark:bg-white/4 lg:grid-cols-2">
+                {onSiretPrefill ? (
+                  <div className="lg:col-span-2">
+                    <SiretSearch onSelect={onSiretPrefill} />
+                    <div className="relative my-3">
+                      <div className="absolute inset-0 flex items-center" aria-hidden>
+                        <span className="w-full border-t border-slate-200 dark:border-white/10" />
+                      </div>
+                      <div className="relative flex justify-center text-[11px]">
+                        <span className="bg-slate-50/80 px-2 uppercase tracking-[0.24em] text-slate-400 dark:bg-[#0f172a] dark:text-slate-500">
+                          ou saisie manuelle
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
                 <input
                   type="text"
                   value={newClient.nom}
@@ -215,13 +236,30 @@ export function ClientSelector({
                   placeholder="Téléphone"
                   className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
                 />
-                <input
-                  type="text"
-                  value={newClient.adresse}
-                  onChange={(event) => onNewClientChange("adresse", event.target.value)}
-                  placeholder="Adresse / chantier"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
-                />
+                {onAddressPrefill ? (
+                  <div className="lg:col-span-2 space-y-3">
+                    <AddressSearch
+                      placeholder="Rechercher une adresse de chantier…"
+                      helperText="Tape une adresse — rue, code postal et ville sont préremplis (OpenStreetMap)."
+                      onSelect={onAddressPrefill}
+                    />
+                    <input
+                      type="text"
+                      value={newClient.adresse}
+                      onChange={(event) => onNewClientChange("adresse", event.target.value)}
+                      placeholder="Adresse / chantier (saisie manuelle)"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                    />
+                  </div>
+                ) : (
+                  <input
+                    type="text"
+                    value={newClient.adresse}
+                    onChange={(event) => onNewClientChange("adresse", event.target.value)}
+                    placeholder="Adresse / chantier"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-base focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/8"
+                  />
+                )}
                 <div className="lg:col-span-2 flex flex-col items-start gap-3 rounded-xl border border-dashed border-slate-300/70 bg-white/70 px-4 py-3 text-sm text-slate-500 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
                   <span>
                     Le nom suffit pour créer la fiche. L’email accélère ensuite le bouton “Créer et envoyer”.

@@ -26,15 +26,20 @@ import {
   BookOpen,
   Bell,
   Plus,
+  Minus,
   TrendingUp,
   Clock,
   AlertCircle,
   MoreHorizontal,
   CheckCircle2,
-  Shield,
   Sparkles,
   ReceiptText,
-  HardHat
+  HardHat,
+  PaintRoller,
+  Wrench,
+  Hammer,
+  Plug,
+  Quote
 } from "lucide-react";
 import Image from "next/image";
 import { getSupportHref, isExternalSupportHref } from "@/lib/support";
@@ -52,8 +57,10 @@ const NOUVEAUTES = [
 const KineticText = ({ text, className = "" }: { text: string; className?: string }) => {
   const shouldReduceMotion = useReducedMotion();
   const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 420], [0, 28]);
-  const stretch = useTransform(scrollY, [0, 260], [1, 1.06]);
+  // Gentle parallax only — no horizontal stretch (which used to make the
+  // heading wobble awkwardly on scroll).
+  const y = useTransform(scrollY, [0, 600], [0, 36]);
+  const opacity = useTransform(scrollY, [0, 320, 700], [1, 0.95, 0.8]);
 
   if (shouldReduceMotion) {
     return (
@@ -65,7 +72,7 @@ const KineticText = ({ text, className = "" }: { text: string; className?: strin
 
   return (
     <motion.h1
-      style={{ y, scaleX: stretch, transformOrigin: "left center" }}
+      style={{ y, opacity, transformOrigin: "left center" }}
       className={`font-extrabold tracking-tighter ${className}`}
     >
       {text}
@@ -73,28 +80,41 @@ const KineticText = ({ text, className = "" }: { text: string; className?: strin
   );
 };
 
+const ELECTRICAL_SPECIALTIES = [
+  { label: "Courant Fort", icon: Zap },
+  { label: "Courant Faible", icon: Smartphone },
+  { label: "Domotique", icon: Sparkles },
+  { label: "Bornes IRVE", icon: ShieldCheck },
+  { label: "Norme NF C 15-100", icon: FileCheck2 },
+  { label: "Attestations Consuel", icon: CheckCircle2 },
+  { label: "Tableaux Électriques", icon: Wrench },
+  { label: "Chauffage Électrique", icon: Zap },
+  { label: "Rénovation Électrique", icon: Hammer },
+  { label: "Réseaux VDI", icon: Smartphone },
+] as const;
+
 const heroPillars = [
   {
-    icon: Smartphone,
-    title: "Mobile-first chantier",
-    description: "Devis, signature et facture depuis le terrain, sans attendre le soir.",
+    icon: Clock,
+    title: "Devis en 24h",
+    description: "Modèles de devis adaptés à vos besoins et conformes aux normes NF C 15-100.",
   },
   {
     icon: CheckCircle2,
-    title: "Cycle complet",
-    description: "Du devis signé à la facture, sans rupture ni ressaisie inutile.",
+    title: "Factures automatiques",
+    description: "Suivi des paiements après chaque chantier et relances sans lever le petit doigt.",
   },
   {
-    icon: TrendingUp,
-    title: "Pilotage immédiat",
-    description: "Marge, activité et relances visibles dans une interface nette et exploitable.",
+    icon: ShieldCheck,
+    title: "Attestations obligatoires",
+    description: "Prise en charge du Consuel, de vos assurances décennales et de l'URSSAF.",
   },
 ] as const;
 
 const heroSignals = [
-  { label: "Pensé pour", value: "Artisans BTP", detail: "peintres, plaquistes, plombiers, électriciens" },
-  { label: "Expérience", value: "2026", detail: "premium, lisible, rapide et orientée terrain" },
-  { label: "Flux", value: "3 gestes", detail: "devis, signature, facture" },
+  { label: "Pensé pour", value: "Électriciens", detail: "indépendants et TPE de 1 à 5 salariés" },
+  { label: "Économie", value: "-10h / sem", detail: "sur votre gestion de devis, factures & Consuel" },
+  { label: "Tarif", value: "199 €/mo", detail: "standard tout inclus, premier mois gratuit" },
 ] as const;
 
 const trustWidgetCards = [
@@ -337,24 +357,40 @@ const HorizontalScrollCarousel = () => {
 const FAQItem = ({ question, answer }: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border-b border-neutral-800">
+    <div
+      className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
+        isOpen
+          ? "border-violet-500/40 bg-gradient-to-br from-violet-500/[0.08] via-white/[0.04] to-fuchsia-500/[0.06] shadow-[0_18px_60px_-30px_rgba(139,92,246,0.55)]"
+          : "border-white/8 bg-white/[0.025] hover:border-white/16 hover:bg-white/[0.045]"
+      }`}
+    >
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-6 flex justify-between items-center text-left focus:outline-none"
+        aria-expanded={isOpen}
+        className="flex w-full items-center justify-between gap-6 px-5 py-5 text-left focus:outline-none sm:px-6 sm:py-6"
       >
-        <span className="text-lg font-medium text-white">{question}</span>
-        <ChevronDown className={`w-5 h-5 text-neutral-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />
+        <span className="text-base font-semibold text-white sm:text-lg">{question}</span>
+        <span
+          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-all duration-300 ${
+            isOpen
+              ? "border-violet-300/50 bg-violet-500/20 text-violet-100"
+              : "border-white/10 bg-white/[0.04] text-neutral-300 group-hover:border-white/25 group-hover:text-white"
+          }`}
+        >
+          {isOpen ? <Minus className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+        </span>
       </button>
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.28, ease: [0.32, 0.72, 0, 1] }}
             className="overflow-hidden"
           >
-            <p className="pb-6 text-neutral-400">{answer}</p>
+            <p className="px-5 pb-6 text-[15px] leading-7 text-neutral-300 sm:px-6">{answer}</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -407,9 +443,9 @@ export default function LandingPage() {
     };
   }, []);
   const supportHref = getSupportHref({
-    subject: "Démo accompagnée Zolio",
+    subject: "Zolio pour Électriciens - Demande d'appel 15 min",
     message:
-      "Bonjour, je souhaite une démo rapide de Zolio et être accompagné pour configurer mon premier devis.",
+      "Bonjour, je m'appelle [Votre Nom] et je suis électricien. Je souhaite réserver un appel gratuit de 15 min pour en savoir plus sur votre offre d'assistant administratif et le premier mois d'essai offert.",
   });
   const supportIsExternal = isExternalSupportHref(supportHref);
 
@@ -439,22 +475,22 @@ export default function LandingPage() {
                   <span className="bg-gradient-to-r from-white to-neutral-300 bg-clip-text text-2xl font-bold text-transparent">
                     Zolio
                   </span>
-                  <span className="hidden text-[10px] uppercase tracking-[0.28em] text-white/40 sm:block">
-                    Chantier OS
+                  <span className="hidden text-[10px] uppercase tracking-[0.28em] text-white/45 sm:block">
+                    Spécialisé Électriciens BTP
                   </span>
                 </div>
               </div>
               
               <div className="hidden md:flex items-center space-x-8">
-                <a href="#features" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">Fonctionnalités</a>
+                <a href="#features" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">Services</a>
                 <a href="#pricing" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">Tarifs</a>
                 <a href="#faq" className="text-sm font-medium text-neutral-300 hover:text-white transition-colors">FAQ</a>
                 <Link href="/sign-in?redirect_url=/dashboard" className="text-sm font-medium text-white hover:text-violet-300 transition-colors">Se connecter</Link>
                 <Link 
-                  href="/sign-up?redirect_url=/dashboard"
+                  href={supportHref}
                   className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black transition-transform hover:scale-105 hover:bg-neutral-200"
                 >
-                  Essayer Zolio
+                  Réserver un appel (15 min)
                 </Link>
               </div>
 
@@ -484,12 +520,12 @@ export default function LandingPage() {
               >
                 <div className="landing-panel rounded-2xl px-4 pb-6 pt-4">
                   <div className="space-y-4 flex flex-col">
-                  <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Fonctionnalités</a>
+                  <a href="#features" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Services</a>
                   <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Tarifs</a>
                   <a href="#faq" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">FAQ</a>
                   <Link href="/sign-in?redirect_url=/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="block text-base font-medium text-neutral-300 hover:text-white">Se connecter</Link>
-                  <Link href="/sign-up?redirect_url=/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="inline-block px-5 py-3 rounded-xl bg-white text-black text-base font-semibold text-center w-full mt-4">
-                    Essayer Zolio
+                  <Link href={supportHref} onClick={() => setIsMobileMenuOpen(false)} className="inline-block px-5 py-3 rounded-xl bg-white text-black text-base font-semibold text-center w-full mt-4">
+                    Réserver un appel (15 min)
                   </Link>
                 </div>
                 </div>
@@ -501,58 +537,61 @@ export default function LandingPage() {
         {/* Hero Section */}
         <section className="relative overflow-hidden pb-24 pt-[8.5rem] sm:pt-[9.5rem] lg:pb-32 lg:pt-[11rem]">
           <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_64%_52%_at_50%_0%,rgba(99,102,241,0.16),rgba(4,6,18,0))]" />
-            <div className="absolute left-[-8%] top-[-2%] h-[24rem] w-[24rem] rounded-full bg-violet-600/14 blur-[72px]" />
-            <div className="absolute right-[-6%] top-[12%] h-[20rem] w-[20rem] rounded-full bg-fuchsia-600/10 blur-[68px]" />
+            <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_64%_52%_at_50%_0%,rgba(99,102,241,0.22),rgba(4,6,18,0))]" />
+            <div className="landing-aurora">
+              <div className="landing-aurora-blob landing-aurora-blob-a" />
+              <div className="landing-aurora-blob landing-aurora-blob-b" />
+              <div className="landing-aurora-blob landing-aurora-blob-c" />
+            </div>
             <div className="absolute inset-x-[10%] bottom-[11%] h-[26%] rounded-[999px] border border-white/5 opacity-35" />
           </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="grid gap-10 xl:grid-cols-[1.04fr_0.96fr] xl:items-center">
               <div className="text-center xl:text-left">
                 <div className="flex justify-center xl:justify-start">
-                  <SectionEyebrow>Zolio 2026 • l&apos;OS métier pour le bâtiment</SectionEyebrow>
+                  <SectionEyebrow>Zolio • Secrétariat & Administratif pour Électriciens</SectionEyebrow>
                 </div>
 
                 <KineticText
-                  text="Gérez vos chantiers. Pas la paperasse."
+                  text="Je gère vos devis, factures et administratif"
                   className="landing-text-gradient mx-auto mt-8 max-w-5xl text-3xl sm:text-5xl md:text-6xl lg:text-7xl xl:mx-0 xl:text-[5.5rem]"
                 />
 
                 <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-neutral-300 sm:text-xl xl:mx-0">
-                  Le logiciel de devis et factures conçu spécifiquement pour les artisans du bâtiment.
-                  Une interface fluide, moderne et accessible partout, même sur le chantier.
+                  Électriciens du BTP : Gagnez <span className="text-white font-semibold">10h par semaine</span> d&apos;administratif et ne perdez plus aucun client.
+                  À partir de <span className="text-violet-400 font-bold">150 €/mois, sans engagement</span>. Premier mois 100% gratuit.
                 </p>
 
                 <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row xl:items-start">
                   <Link
-                    href="/sign-up?redirect_url=/dashboard"
+                    href={supportHref}
                     className="group relative flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-8 py-4 text-lg font-semibold text-white shadow-[0_0_48px_rgba(139,92,246,0.4)] transition-all hover:scale-[1.02] hover:shadow-[0_0_64px_rgba(139,92,246,0.6)] animate-pulse-subtle"
                   >
                     <span className="relative z-10 flex items-center">
-                      Créer mon compte — 1 devis gratuit offert
+                      Réserver mon appel de 15 min
                       <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                     </span>
                   </Link>
                   <a
-                    href="#demo"
+                    href="#pricing"
                     className="flex items-center justify-center rounded-full border border-white/12 bg-white/[0.04] px-8 py-4 text-lg font-semibold text-white transition-all hover:bg-white/[0.08]"
                   >
-                    Voir la démo
+                    Voir nos offres
                   </a>
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center justify-center gap-3 xl:justify-start">
                   <span className="landing-chip">
                     <CheckCircle2 className="h-4 w-4 text-emerald-300" />
-                    Gratuit sans CB
+                    1er mois d&apos;essai gratuit
                   </span>
                   <span className="landing-chip">
                     <Sparkles className="h-4 w-4 text-fuchsia-300" />
-                    Premier devis accompagné
+                    Normes NF C 15-100
                   </span>
                   <span className="landing-chip">
                     <Clock className="h-4 w-4 text-orange-300" />
-                    Prêt en 3 min
+                    Zéro engagement
                   </span>
                 </div>
 
@@ -563,7 +602,7 @@ export default function LandingPage() {
                       <Users className="h-4 w-4" />
                     </div>
                     <p className="text-sm text-neutral-400">
-                      <span className="font-bold text-white">250+</span> artisans inscrits
+                      <span className="font-bold text-white">45+</span> électriciens partenaires
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -571,7 +610,7 @@ export default function LandingPage() {
                       <FileCheck2 className="h-4 w-4" />
                     </div>
                     <p className="text-sm text-neutral-400">
-                      <span className="font-bold text-white">3 000+</span> devis créés
+                      <span className="font-bold text-white">1 500+</span> devis & attestations gérés
                     </p>
                   </div>
                 </div>
@@ -903,43 +942,113 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Comment ça marche */}
-        <LandingStage className="relative z-10 py-24 sm:py-32" tone="neutral">
+        {/* Electrical Specialties marquee — social proof strip */}
+        <section aria-label="Spécialités électricité" className="relative z-10 -mt-12 pb-10 pt-2 sm:-mt-16 sm:pb-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="relative rounded-3xl border border-white/8 bg-white/[0.02] py-5 backdrop-blur-md">
+              <p className="absolute -top-3 left-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#06070f] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 motion-safe:animate-pulse" />
+                Spécialités & Normes prises en charge
+              </p>
+              <div className="landing-marquee">
+                <div className="landing-marquee-track py-2">
+                  {[...ELECTRICAL_SPECIALTIES, ...ELECTRICAL_SPECIALTIES].map((spec, i) => {
+                    const Icon = spec.icon;
+                    return (
+                      <div
+                        key={`${spec.label}-${i}`}
+                        className="flex shrink-0 items-center gap-3 text-sm font-medium text-neutral-300/90"
+                      >
+                        <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] text-violet-200">
+                          <Icon className="h-4 w-4" strokeWidth={1.75} />
+                        </span>
+                        <span className="tracking-wide">{spec.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Services Section */}
+        <LandingStage id="features" className="relative z-10 py-24 sm:py-32" tone="neutral">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-300 backdrop-blur-md">
                 <span className="h-2 w-2 rounded-full bg-violet-500 motion-safe:animate-pulse"></span>
-                Simple comme 1, 2, 3
+                VOTRE SECRÉTARIAT DÉDIÉ
               </div>
               <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
-                Prêt en <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">5 minutes</span>
+                Une gestion administrative <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">complète et sur-mesure</span>
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400">
-                Pas de configuration complexe. Choisissez votre métier, c&apos;est prêt.
+                Plus besoin d&apos;attendre le soir pour rédiger vos devis ou relancer vos clients. Nous prenons tout en charge.
               </p>
             </div>
 
-            <div className="grid gap-8 sm:grid-cols-3">
+            <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {[
-                { step: "01", title: "Choisissez votre métier", desc: "On importe automatiquement un catalogue de prestations types adaptées à votre activité.", gradient: "from-violet-600 to-violet-500" },
-                { step: "02", title: "Créez votre premier devis", desc: "Sélectionnez un client, ajoutez des prestations, envoyez. C'est fait en 3 minutes.", gradient: "from-fuchsia-600 to-fuchsia-500" },
-                { step: "03", title: "Encaissez vos paiements", desc: "Vos clients paient en ligne. Vous suivez votre trésorerie en temps réel.", gradient: "from-orange-500 to-amber-500" },
-              ].map((item, i) => (
-                <motion.div
-                  key={item.step}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="group relative rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition hover:bg-white/[0.06]"
-                >
-                  <div className={`mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} text-2xl font-black text-white shadow-lg`}>
-                    {item.step}
-                  </div>
-                  <h3 className="text-xl font-bold text-white">{item.title}</h3>
-                  <p className="mt-3 leading-relaxed text-neutral-400">{item.desc}</p>
-                </motion.div>
-              ))}
+                { 
+                  title: "Devis personnalisés sous 24h", 
+                  desc: "Nous rédigeons vos devis sous 24h ouvrées. Modèles optimisés et conformes aux normes électriques NF C 15-100 pour rassurer vos clients et remporter plus de chantiers.", 
+                  icon: FileText, 
+                  gradient: "from-violet-600 to-violet-500", 
+                  glow: "rgba(139,92,246,0.45)" 
+                },
+                { 
+                  title: "Factures & Relances automatiques", 
+                  desc: "Émission immédiate de vos factures de situation et de solde après vos chantiers. Nous assurons un suivi rigoureux des paiements et relançons de manière courtoise mais ferme les factures en retard.", 
+                  icon: CheckCircle2, 
+                  gradient: "from-fuchsia-600 to-fuchsia-500", 
+                  glow: "rgba(217,70,239,0.45)" 
+                },
+                { 
+                  title: "Attestations obligatoires & Consuel", 
+                  desc: "Gestion complète de vos demandes de certificats de conformité Consuel. Centralisation et tenue à jour de vos attestations d&apos;assurance décennale, responsabilité civile et documents URSSAF.", 
+                  icon: ShieldCheck, 
+                  gradient: "from-orange-500 to-amber-500", 
+                  glow: "rgba(249,115,22,0.45)" 
+                },
+                { 
+                  title: "Gestion de vos Sous-Traitants", 
+                  desc: "Nous vérifions l&apos;ensemble des documents obligatoires de vos sous-traitants (attestations de vigilance, kbis, décennale) pour vous assurer une parfaite conformité légale face aux contrôles.", 
+                  icon: Users, 
+                  gradient: "from-emerald-600 to-teal-500", 
+                  glow: "rgba(16,185,129,0.45)" 
+                },
+                { 
+                  title: "Support Téléphonique & Email", 
+                  desc: "Réponse professionnelle à vos clients et partenaires par email ou téléphone. Nous gérons votre planning d&apos;appels pour que vous restiez concentré sur vos installations électriques sans coupure.", 
+                  icon: Smartphone, 
+                  gradient: "from-cyan-600 to-blue-500", 
+                  glow: "rgba(6,182,212,0.45)" 
+                },
+              ].map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.title}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.12 }}
+                    whileHover={{ y: -5 }}
+                    className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-40px_var(--glow)]"
+                    style={{ "--glow": item.glow } as React.CSSProperties}
+                  >
+                    <div
+                      className={`relative mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} text-white shadow-lg`}
+                    >
+                      <span aria-hidden="true" className="absolute inset-0 rounded-2xl bg-white/15 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      <Icon className="h-7 w-7 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                    <p className="mt-3 leading-relaxed text-neutral-400 text-sm sm:text-base">{item.desc}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         </LandingStage>
@@ -985,34 +1094,70 @@ export default function LandingPage() {
         {/* Comparatif Section */}
         <LandingStage className="relative z-10 py-24 sm:py-32" tone="violet">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-12 text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                Pourquoi les artisans quittent Excel</h2>
-              <p className="mx-auto mt-3 max-w-xl text-neutral-400">Une comparaison honnête entre votre méthode actuelle et Zolio.</p>
+            <div className="mb-12 flex flex-col items-center text-center">
+              <SectionEyebrow>Comparatif honnête</SectionEyebrow>
+              <h2 className="mt-8 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
+                Pourquoi les artisans quittent Excel
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-neutral-400">
+                Comparez votre méthode actuelle à Zolio. Sans bullshit.
+              </p>
             </div>
 
-            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
-              <div className="grid grid-cols-3 border-b border-white/10">
-                {["Fonctionnalité", "Excel / Papier", "Zolio"].map((h, i) => (
-                  <div key={h} className={`px-4 py-4 text-center text-xs font-semibold uppercase tracking-wider sm:px-6 ${i === 2 ? "bg-violet-600/20 text-violet-300" : i === 1 ? "text-neutral-500" : "text-neutral-400"}`}>
-                    {h}
+            <div className="relative overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.025] shadow-[0_30px_80px_-50px_rgba(139,92,246,0.55)] backdrop-blur-sm">
+              <div className="grid grid-cols-[1.4fr_0.8fr_1fr] border-b border-white/10 sm:grid-cols-3">
+                {[
+                  { label: "Fonctionnalité", className: "text-neutral-400" },
+                  { label: "Excel / Papier", className: "text-neutral-500" },
+                  { label: "Zolio", className: "bg-gradient-to-b from-violet-600/30 to-violet-600/10 text-violet-200" },
+                ].map((h, i) => (
+                  <div
+                    key={h.label}
+                    className={`px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.18em] sm:px-6 sm:text-xs ${h.className} ${
+                      i === 0 ? "text-left" : ""
+                    }`}
+                  >
+                    {h.label}
                   </div>
                 ))}
               </div>
-              {[
-                ["Devis sur le chantier", "❌", "✅"],
-                ["Relances automatiques", "❌", "✅"],
-                ["Paiement en ligne", "❌", "✅"],
-                ["Suivi trésorerie", "🟡 Manuel", "✅ Temps réel"],
-                ["Export comptable", "🟡 Complexe", "✅ 1 clic"],
-                ["Accessible mobile", "🟡 Galère", "✅ Natif"],
-                ["Notes internes", "❌", "✅"],
-                ["Calendrier échéances", "❌", "✅"],
-              ].map((row, i) => (
-                <div key={i} className={`grid grid-cols-3 border-b border-white/5 last:border-0 ${i % 2 === 0 ? "bg-white/[0.02]" : ""}`}>
-                  <div className="px-4 py-3 text-sm text-neutral-300 sm:px-6">{row[0]}</div>
-                  <div className="px-4 py-3 text-center text-sm text-neutral-500 sm:px-6">{row[1]}</div>
-                  <div className="px-4 py-3 text-center text-sm text-emerald-400 sm:px-6">{row[2]}</div>
+              {([
+                { feature: "Devis sur le chantier", excelKind: "no" as const, zolioLabel: "Inclus" },
+                { feature: "Relances automatiques", excelKind: "no" as const, zolioLabel: "Inclus" },
+                { feature: "Paiement en ligne", excelKind: "no" as const, zolioLabel: "Inclus" },
+                { feature: "Suivi trésorerie", excelKind: "partial" as const, excelLabel: "Manuel", zolioLabel: "Temps réel" },
+                { feature: "Export comptable", excelKind: "partial" as const, excelLabel: "Complexe", zolioLabel: "1 clic" },
+                { feature: "Accessible mobile", excelKind: "partial" as const, excelLabel: "Galère", zolioLabel: "Natif" },
+                { feature: "Notes internes", excelKind: "no" as const, zolioLabel: "Inclus" },
+                { feature: "Calendrier échéances", excelKind: "no" as const, zolioLabel: "Inclus" },
+              ]).map((row, i) => (
+                <div
+                  key={row.feature}
+                  className={`grid grid-cols-[1.4fr_0.8fr_1fr] border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.03] sm:grid-cols-3 ${
+                    i % 2 === 0 ? "bg-white/[0.018]" : ""
+                  }`}
+                >
+                  <div className="px-4 py-4 text-sm font-medium text-neutral-200 sm:px-6">{row.feature}</div>
+                  <div className="flex items-center justify-center gap-2 px-4 py-4 text-sm text-neutral-500 sm:px-6">
+                    {row.excelKind === "no" ? (
+                      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-red-500/12 text-red-300 ring-1 ring-red-500/25">
+                        <X className="h-3.5 w-3.5" />
+                      </span>
+                    ) : (
+                      <>
+                        <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/12 text-amber-300 ring-1 ring-amber-500/25">
+                          <AlertCircle className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="text-neutral-400">{row.excelLabel}</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-center gap-2 bg-violet-500/[0.06] px-4 py-4 text-sm font-medium text-emerald-300 sm:px-6">
+                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                    </span>
+                    <span>{row.zolioLabel}</span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1177,27 +1322,27 @@ export default function LandingPage() {
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[
                 {
-                  name: "Karim D.",
-                  role: "Peintre en bâtiment — Nantes",
-                  text: "Avant, je passais mes soirées à refaire mes devis. Maintenant, je le fais entre deux chantiers depuis mon téléphone. Je gagne 4h par semaine, minimum.",
+                  name: "Jean-Marc P.",
+                  role: "Électricien indépendant — Angers",
+                  text: "Déléguer mes devis et mes relances à Zolio m'a changé la vie. Mes chantiers sont facturés à temps et mes attestations Consuel partent sans aucun retard.",
                   rating: 5,
-                  initial: "K",
+                  initial: "J",
                   gradient: "from-violet-500 to-indigo-500",
                 },
                 {
-                  name: "Laurent B.",
-                  role: "Plombier — Lyon",
-                  text: "Ce qui m&apos;a convaincu, c&apos;est la signature digitale. Mon client signe direct sur l&apos;écran, plus besoin de repasser le lendemain. C&apos;est simple, rapide, et pro.",
+                  name: "Sébastien L.",
+                  role: "Électricité Générale (3 sal.) — Nantes",
+                  text: "Mes devis partent désormais sous 24h ouvrées aux normes NF C 15-100. Les clients apprécient la réactivité et je ne perds plus de temps sur l'administratif.",
                   rating: 5,
-                  initial: "L",
+                  initial: "S",
                   gradient: "from-cyan-500 to-blue-500",
                 },
                 {
-                  name: "Julie M.",
-                  role: "Électricienne — Bordeaux",
-                  text: "J&apos;ai testé des dizaines de logiciels, toujours trop compliqués. Zolio, je l&apos;ai pris en main en 10 minutes. Même mon stagiaire l&apos;utilise sans problème.",
+                  name: "Damien T.",
+                  role: "Électricien (2 sal.) — Le Mans",
+                  text: "Le premier mois gratuit m'a convaincu. Le service à 199€/mois est très largement amorti par le temps gagné sur mes déclarations URSSAF et les relances de factures.",
                   rating: 5,
-                  initial: "J",
+                  initial: "D",
                   gradient: "from-fuchsia-500 to-rose-500",
                 }
               ].map((review, i) => (
@@ -1207,25 +1352,35 @@ export default function LandingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.15 }}
+                  whileHover={{ y: -6, rotate: 0 }}
                   className="group relative"
+                  style={{ rotate: i === 0 ? "-1.2deg" : i === 2 ? "1.2deg" : "0deg" }}
                 >
-                  <div className={`absolute -inset-px bg-gradient-to-br ${review.gradient} rounded-3xl opacity-20 blur-sm group-hover:opacity-40 transition-opacity duration-500`}></div>
-                  <div className="relative bg-[#0a0a0c] border border-neutral-800 rounded-3xl p-8 h-full flex flex-col">
-                    <div className="flex gap-1 mb-5">
+                  <div className={`absolute -inset-px bg-gradient-to-br ${review.gradient} rounded-3xl opacity-25 blur-md transition-opacity duration-500 group-hover:opacity-60`}></div>
+                  <div className="relative flex h-full flex-col rounded-3xl border border-white/10 bg-gradient-to-br from-[#0c0c14] via-[#09090f] to-[#0a0a0c] p-8 shadow-[0_25px_80px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+                    <Quote
+                      aria-hidden="true"
+                      className="absolute right-6 top-6 h-12 w-12 text-white/[0.06]"
+                      strokeWidth={1}
+                    />
+                    <div className="relative flex gap-1 mb-5">
                       {Array.from({ length: review.rating }).map((_, si) => (
-                        <Star key={si} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                        <Star key={si} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
-                    <p className="text-neutral-300 text-base leading-relaxed flex-grow mb-6">
+                    <p className="relative flex-grow text-base leading-relaxed text-neutral-200 mb-6">
                       &ldquo;{review.text}&rdquo;
                     </p>
-                    <div className="flex items-center gap-3 mt-auto">
-                      <div className={`w-11 h-11 rounded-full bg-gradient-to-br ${review.gradient} flex items-center justify-center text-white font-bold text-sm`}>
-                        {review.initial}
+                    <div className="relative mt-auto flex items-center gap-3">
+                      <div className="relative">
+                        <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-br ${review.gradient} opacity-70 blur-[2px]`} />
+                        <div className={`relative flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${review.gradient} text-sm font-bold text-white`}>
+                          {review.initial}
+                        </div>
                       </div>
                       <div>
-                        <p className="text-white font-semibold text-sm">{review.name}</p>
-                        <p className="text-neutral-500 text-xs">{review.role}</p>
+                        <p className="text-sm font-semibold text-white">{review.name}</p>
+                        <p className="text-xs text-neutral-500">{review.role}</p>
                       </div>
                     </div>
                   </div>
@@ -1433,28 +1588,27 @@ export default function LandingPage() {
           </div>
         </LandingStage>
 
-
         {/* Pricing Section - 2026 Design */}
         <LandingStage id="pricing" className="relative py-32" tone="warm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-20">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/20 backdrop-blur-md mb-6"
               >
-                <div className="w-2 h-2 rounded-full bg-violet-500 motion-safe:animate-pulse"></div>
-                <span className="text-sm font-medium text-white/80 tracking-wide uppercase">SANS ENGAGEMENT</span>
+                <div className="w-2 h-2 rounded-full bg-yellow-500 motion-safe:animate-pulse"></div>
+                <span className="text-sm font-semibold text-yellow-400 tracking-wide uppercase">OFFRE DE LANCEMENT LIMITÉE</span>
               </motion.div>
               <motion.h2 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                className="text-4xl md:text-6xl font-bold mb-6 tracking-tight"
+                className="text-4xl md:text-6xl font-bold mb-6 tracking-tight text-white"
               >
-                Un tarif <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient bg-300%">clair et unique</span>
+                Des tarifs <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-fuchsia-400 to-orange-400 animate-gradient bg-300%">clairs et sans surprise</span>
               </motion.h2>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -1463,120 +1617,213 @@ export default function LandingPage() {
                 transition={{ delay: 0.2 }}
                 className="text-xl text-neutral-400 max-w-2xl mx-auto"
               >
-                Comparez le plan gratuit et le Pro. Passez à la vitesse quand vous êtes prêt.
+                Choisissez le forfait adapté à votre activité. Externalisez votre paperasse à un assistant dédié à votre métier d&apos;électricien.
               </motion.p>
+              
+              {/* Promotional Ribbon */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3 }}
+                className="mt-8 inline-block rounded-2xl bg-gradient-to-r from-violet-600/20 via-fuchsia-600/20 to-orange-600/20 border border-violet-500/30 px-6 py-4 backdrop-blur-md max-w-3xl mx-auto"
+              >
+                <p className="text-base text-violet-200">
+                  🎁 <span className="font-bold text-white">Exclusivité de lancement :</span> Le <span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">1er mois est 100% offert</span> pour les 5 premiers électriciens partenaires !
+                </p>
+              </motion.div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto mb-12">
-              {/* Plan Gratuit */}
+            <div className="grid gap-8 md:grid-cols-3 max-w-6xl mx-auto mb-16">
+              {/* Plan Découverte */}
               <motion.div 
-                initial={{ opacity: 0, x: -30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="relative group perspective"
+              >
+                <div className="relative overflow-hidden rounded-3xl bg-neutral-900/80 border border-neutral-800 p-8 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-baseline mb-6">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-1">Découverte</h3>
+                        <p className="text-neutral-400 text-sm">Idéal 1 à 3 chantiers / mois</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-4xl font-extrabold text-white">150€</span>
+                        <span className="text-neutral-500 block mt-1 text-sm">/mois HT</span>
+                      </div>
+                    </div>
+                    
+                    <div className="h-px bg-white/5 my-6" />
+
+                    <ul className="space-y-4 mb-8">
+                      {[
+                        'Devis & Factures (jusqu\'à 3 chantiers)',
+                        'Modèles NF C 15-100 conformes',
+                        'Relances clients automatiques',
+                        'Signature électronique certifiée',
+                        'Support par email sous 24h',
+                        'Garantie décennale mentionnée'
+                      ].map((f, i) => (
+                        <li key={i} className="flex items-start text-neutral-300">
+                          <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0 text-neutral-500 mt-0.5" />
+                          <span className="text-sm">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <Link 
+                    href={supportHref}
+                    className="block w-full py-3.5 rounded-xl font-bold text-center border border-white/20 text-white transition-all hover:bg-white/5"
+                  >
+                    Démarrer mon essai gratuit
+                  </Link>
+                </div>
+              </motion.div>
+
+              {/* Plan Standard (Populaire) */}
+              <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
                 className="relative group perspective"
               >
-                <div className="relative overflow-hidden rounded-3xl bg-neutral-900/80 border border-neutral-800 p-8 h-full flex flex-col">
-                  <div className="flex justify-between items-baseline mb-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white mb-1">Gratuit</h3>
-                      <p className="text-neutral-400 text-sm">Pour découvrir</p>
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700"></div>
+                <div className="relative overflow-hidden rounded-3xl bg-neutral-950/90 border border-violet-500/30 p-8 h-full flex flex-col justify-between shadow-[inset_0_0_60px_rgba(139,92,246,0.08)]">
+                  <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-full text-[10px] font-bold text-white tracking-wider border border-white/10">POPULAIRE</div>
+                  
+                  <div>
+                    <div className="flex justify-between items-baseline mb-6">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-1">Standard</h3>
+                        <p className="text-violet-300 text-sm">Idéal 4 à 10 chantiers / mois</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/70">199€</span>
+                        <span className="text-neutral-400 block mt-1 text-sm">/mois HT</span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-5xl font-extrabold text-white">0€</span>
-                      <span className="text-neutral-500 block mt-1 text-sm">/mois</span>
-                    </div>
+
+                    <div className="h-px bg-violet-500/10 my-6" />
+
+                    <ul className="space-y-4 mb-8">
+                      {[
+                        'Devis & Factures (jusqu\'à 10 chantiers)',
+                        'Tout le plan Découverte inclus',
+                        'Dossier de Consuel pré-rempli',
+                        'Gestion de 2 sous-traitants max',
+                        'Relances téléphoniques incluses',
+                        'Support WhatsApp & Téléphone dédié',
+                        'Relances de paiements personnalisées'
+                      ].map((f, i) => (
+                        <li key={i} className="flex items-start text-neutral-200">
+                          <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0 text-violet-400 mt-0.5" />
+                          <span className="text-sm font-medium text-white">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-4 mb-8 flex-grow">
-                    {[
-                      '1 devis pour tester',
-                      'Devis illimités après passage au Pro',
-                      'Signature électronique',
-                      'Relances automatiques',
-                      'Catalogue de prix intégré'
-                    ].map((f, i) => (
-                      <li key={i} className="flex items-center text-neutral-200">
-                        <CheckCircle className={`w-5 h-5 mr-3 flex-shrink-0 ${i === 0 ? 'text-emerald-400' : 'text-neutral-600'}`} />
-                        <span className={i === 0 ? 'text-white font-medium' : 'text-neutral-400'}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
+
                   <Link 
-                    href="/sign-up?redirect_url=/dashboard"
-                    className="block w-full py-3.5 rounded-xl font-bold text-center border border-white/20 text-white transition-all hover:bg-white/5"
+                    href={supportHref}
+                    className="block w-full py-3.5 rounded-xl font-bold text-center bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] hover:scale-[1.02]"
                   >
-                    Tester gratuitement
+                    Réserver mon appel (1er mois gratuit)
                   </Link>
                 </div>
               </motion.div>
 
               {/* Plan Pro */}
               <motion.div 
-                initial={{ opacity: 0, x: 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.4 }}
                 className="relative group perspective"
               >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600 via-fuchsia-600 to-orange-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-700"></div>
-                <div className="relative overflow-hidden rounded-3xl bg-neutral-950/90 border border-violet-500/30 p-8 h-full flex flex-col shadow-[inset_0_0_60px_rgba(139,92,246,0.08)]">
-                  <div className="absolute top-4 right-4 px-3 py-1 bg-violet-500/20 rounded-full text-xs font-bold text-violet-300 border border-violet-500/30">POPULAIRE</div>
-                  <div className="flex justify-between items-baseline mb-6">
-                    <div>
-                      <h3 className="text-2xl font-bold text-white mb-1">Zolio Pro</h3>
-                      <p className="text-violet-300 text-sm">Tout inclus</p>
+                <div className="relative overflow-hidden rounded-3xl bg-neutral-900/80 border border-neutral-800 p-8 h-full flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-baseline mb-6">
+                      <div>
+                        <h3 className="text-2xl font-bold text-white mb-1">Pro</h3>
+                        <p className="text-neutral-400 text-sm">Plus de 10 chantiers / mois</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-4xl font-extrabold text-white">299€</span>
+                        <span className="text-neutral-500 block mt-1 text-sm">/mois HT</span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-white/60">29€</span>
-                      <span className="text-neutral-400 block mt-1 text-sm">/mois</span>
-                    </div>
+
+                    <div className="h-px bg-white/5 my-6" />
+
+                    <ul className="space-y-4 mb-8">
+                      {[
+                        'Devis & Factures illimités',
+                        'Tout le plan Standard inclus',
+                        'Dossiers Consuel prioritaires (24h)',
+                        'Gestion sous-traitants illimitée',
+                        'Export comptable automatisé',
+                        'Conseiller dédié 6 jours sur 7',
+                        'Ajustements devis en temps réel'
+                      ].map((f, i) => (
+                        <li key={i} className="flex items-start text-neutral-300">
+                          <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0 text-neutral-500 mt-0.5" />
+                          <span className="text-sm">{f}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <ul className="space-y-4 mb-8 flex-grow">
-                    {['Devis illimités', 'Factures illimitées', 'Signature électronique', 'Catalogue de prix intégré', 'Relances automatiques', 'Export comptable', 'Premier devis accompagné'].map((f, i) => (
-                      <li key={i} className="flex items-center text-neutral-200">
-                        <CheckCircle className="w-5 h-5 mr-3 flex-shrink-0 text-violet-400" />
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
+
                   <Link 
-                    href="/sign-up?redirect_url=/dashboard"
-                    className="block w-full py-3.5 rounded-xl font-bold text-center bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white transition-all hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] hover:scale-[1.02]"
+                    href={supportHref}
+                    className="block w-full py-3.5 rounded-xl font-bold text-center border border-white/20 text-white transition-all hover:bg-white/5"
                   >
-                    Passer au Pro
+                    Contacter notre équipe
                   </Link>
                 </div>
               </motion.div>
             </div>
+            
+            <p className="text-center text-sm text-neutral-500 font-light">
+              Tous nos forfaits sont sans aucun engagement. Vous pouvez changer de formule ou résilier sur simple message WhatsApp.
+            </p>
           </div>
         </LandingStage>
 
         {/* FAQ Section */}
         <LandingStage id="faq" className="relative py-32" tone="neutral">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <div className="flex justify-center">
-                <SectionEyebrow>Questions fréquentes</SectionEyebrow>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">Questions fréquentes</h2>
-              <p className="text-xl text-neutral-400">Tout ce que vous devez savoir avant de vous lancer.</p>
+            <div className="text-center mb-16 flex flex-col items-center">
+              <SectionEyebrow>FAQ</SectionEyebrow>
+              <h2 className="mt-8 text-4xl md:text-5xl font-bold text-white">Des réponses claires</h2>
+              <p className="mt-4 text-lg text-neutral-400 max-w-xl">
+                Tout ce que vous devez savoir avant de nous confier votre administratif. Pas de jargon, pas de surprises.
+              </p>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <FAQItem 
-                question="L'application fonctionne-t-elle sur téléphone sans internet ?" 
-                answer="Zolio est optimisé pour les mobiles. Si vous perdez la connexion sur un chantier, vous pouvez continuer à préparer votre devis, il se synchronisera automatiquement dès que vous retrouverez du réseau." 
+                question="Comment se passe la transition vers votre service ?" 
+                answer="C&apos;est ultra simple. Nous récupérons vos anciens devis, vos tarifs habituels et votre liste de clients. En 48h, nous configurons tout votre espace de suivi pour que vous n&apos;ayez qu&apos;à nous envoyer vos instructions par SMS, WhatsApp ou mémo vocal." 
               />
               <FAQItem 
-                question="Puis-je importer ma liste de clients existante ?" 
-                answer="Oui ! Vous pouvez très prochainement importer vos clients et votre catalogue de prix au format Excel/CSV en quelques clics." 
+                question="Comment garantissez-vous la conformité aux normes NF C 15-100 ?" 
+                answer="Chaque devis et facture émis mentionne précisément les normes de sécurité requises, les spécifications techniques du matériel d&apos;électricité générale et respecte à la lettre la réglementation française. Nos assistants sont formés aux exigences techniques du métier." 
               />
               <FAQItem 
-                question="Que se passe-t-il après mon devis d&apos;essai ?" 
-                answer="Une fois votre devis d&apos;essai utilisé, vous pourrez passer à la version Pro pour débloquer les devis et factures illimités, sans aucun engagement de durée." 
+                question="Comment gérez-vous les attestations de conformité Consuel ?" 
+                answer="Nous préparons l&apos;ensemble de vos dossiers techniques de demande d&apos;attestation Consuel (Jaune pour le résidentiel, Vert pour le tertiaire, Bleu pour le photovoltaïque). Nous complétons les formulaires et les suivons pour vous auprès de l&apos;organisme." 
               />
               <FAQItem 
-                question="Mes données sont-elles sécurisées ?" 
-                answer="Absolument. Vos données sont hébergées sur des serveurs sécurisés en Europe et sauvegardées quotidiennement. Vous êtes le seul propriétaire de vos informations." 
+                question="Comment fonctionne l&apos;offre du premier mois gratuit ?" 
+                answer="Pour les 5 premiers électriciens qui rejoignent Zolio, nous offrons 30 jours de gestion administrative complète (devis, factures, relances et Consuel) sans facturation et sans aucun engagement. C&apos;est l&apos;occasion de tester sans risque l&apos;efficacité du service." 
+              />
+              <FAQItem 
+                question="Est-ce une application ou un service d&apos;assistant humain ?" 
+                answer="Le meilleur des deux mondes. Vous bénéficiez d&apos;un espace client sécurisé pour suivre vos devis, paiements et chantiers en temps réel. Mais toute la saisie administrative complexe et les relances sont assurées par des assistants experts dédiés à votre entreprise." 
               />
             </div>
           </div>
@@ -1585,27 +1832,28 @@ export default function LandingPage() {
         <LandingStage className="pb-24 pt-8" tone="warm">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="landing-panel-strong relative overflow-hidden rounded-[38px] p-8 sm:p-10 lg:p-14">
-              <div className="absolute right-[-10%] top-[-8%] h-44 w-44 rounded-full bg-violet-500/18 blur-[90px]" />
-              <div className="absolute bottom-[-20%] left-[8%] h-36 w-36 rounded-full bg-orange-500/12 blur-[84px]" />
+              <div className="landing-halo" />
+              <div className="absolute right-[-10%] top-[-8%] h-56 w-56 rounded-full bg-violet-500/22 blur-[100px]" />
+              <div className="absolute bottom-[-22%] left-[8%] h-44 w-44 rounded-full bg-orange-500/16 blur-[90px]" />
+              <div className="absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-fuchsia-500/8 blur-[110px]" />
 
               <div className="relative grid gap-10 lg:grid-cols-[1fr_0.82fr] lg:items-end">
                 <div>
-                  <SectionEyebrow>Prêt à passer en version chantier</SectionEyebrow>
+                  <SectionEyebrow>PRÊT À VOUS ALLÉGER L'ADMINISTRATIF</SectionEyebrow>
                   <h2 className="mt-8 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
-                    Garde ton contenu. Monte juste le niveau visuel et l&apos;efficacité.
+                    Reprenez le contrôle de vos soirées et de vos week-ends.
                   </h2>
                   <p className="mt-5 max-w-2xl text-lg leading-8 text-neutral-300">
-                    Zolio garde l&apos;essentiel de ton flux métier, mais le présente enfin comme un produit
-                    premium 2026, lisible sur mobile et rassurant sur desktop.
+                    Ne perdez plus un seul chantier à cause d&apos;un devis envoyé en retard. Laissez nos spécialistes de l&apos;électricité s&apos;occuper de votre gestion pendant que vous êtes sur le terrain.
                   </p>
                 </div>
 
                 <div className="space-y-4">
                   {closingHighlights.map((item) => (
-                    <div key={item} className="landing-panel rounded-2xl px-5 py-4">
+                    <div key={item} className="landing-panel rounded-2xl px-5 py-4 transition-all duration-300 hover:translate-x-1 hover:border-white/20">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/8">
-                          <CheckCircle className="h-5 w-5 text-violet-300" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-fuchsia-500/10 ring-1 ring-white/10">
+                          <CheckCircle className="h-5 w-5 text-violet-200" />
                         </div>
                         <p className="text-sm font-semibold text-white">{item}</p>
                       </div>
@@ -1613,10 +1861,11 @@ export default function LandingPage() {
                   ))}
 
                   <Link
-                    href="/sign-up?redirect_url=/dashboard"
-                    className="group flex w-full items-center justify-center rounded-full bg-white px-7 py-4 text-base font-semibold text-black transition-all hover:scale-[1.01] hover:bg-neutral-100"
+                    href={supportHref}
+                    className="group relative flex w-full items-center justify-center rounded-full bg-white px-7 py-4 text-base font-semibold text-black shadow-[0_18px_60px_-18px_rgba(255,255,255,0.55)] transition-all hover:scale-[1.02] hover:bg-neutral-100"
                   >
-                    Créer mon compte
+                    <span aria-hidden="true" className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-500 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-60" />
+                    Démarrer mon 1er mois gratuit
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
@@ -1635,16 +1884,16 @@ export default function LandingPage() {
                   <span className="text-xl font-bold text-white">Zolio</span>
                 </div>
                 <p className="text-neutral-400 max-w-sm">
-                  Le partenaire chantier nouvelle génération pour les artisans du bâtiment. 
-                  Gérez tout depuis votre poche.
+                  Le partenaire de gestion administrative nouvelle génération dédié aux artisans électriciens.
+                  Libérez-vous des devis, factures et attestations Consuel.
                 </p>
               </div>
               <div>
-                <h4 className="text-white font-semibold mb-6">Produit</h4>
+                <h4 className="text-white font-semibold mb-6">Service</h4>
                 <ul className="space-y-4">
-                  <li><a href="#features" className="text-neutral-400 hover:text-white transition-colors">Fonctionnalités</a></li>
+                  <li><a href="#features" className="text-neutral-400 hover:text-white transition-colors">Prestations</a></li>
                   <li><a href="#pricing" className="text-neutral-400 hover:text-white transition-colors">Tarifs</a></li>
-                  <li><Link href="/sign-in?redirect_url=/dashboard" className="text-neutral-400 hover:text-white transition-colors">Connexion</Link></li>
+                  <li><Link href={supportHref} className="text-neutral-400 hover:text-white transition-colors">Nous contacter</Link></li>
                 </ul>
               </div>
               <div>
@@ -1678,15 +1927,15 @@ export default function LandingPage() {
             >
               <div className="rounded-2xl border border-white/10 bg-[#05050A]/85 p-2 pb-3 shadow-[0_20px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                 <Link
-                  href="/sign-up?redirect_url=/dashboard"
+                  href={supportHref}
                   className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 via-fuchsia-500 to-orange-400 px-5 text-[15px] font-semibold text-white shadow-[0_8px_28px_rgba(139,92,246,0.45)] active:scale-[0.98]"
                 >
-                  Créer mon compte — 1 devis offert
+                  Démarrer mon 1er mois gratuit
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </Link>
                 <p className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-neutral-400">
                   <CheckCircle2 className="h-3 w-3 text-emerald-400" />
-                  Sans carte bancaire · Annulable à tout moment
+                  100% gratuit le premier mois · Sans engagement
                 </p>
               </div>
             </motion.div>

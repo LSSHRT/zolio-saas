@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -10,9 +11,13 @@ import {
   FileText,
   Layers,
   Plus,
+  Search,
   Send,
   Sparkles,
   Trash2,
+  UserPlus,
+  Users,
+  X,
 } from "lucide-react";
 import {
   CreationWizardFooter,
@@ -20,6 +25,10 @@ import {
   CreationWizardShell,
   type CreationWizardStep,
 } from "@/components/client-creation-wizard";
+import {
+  ClientSubpageShell,
+  type ClientMetaPill,
+} from "@/components/client-shell";
 import { ClientSelector } from "../components/ClientSelector";
 import type { Client, LigneDevis, QuickClientForm } from "../types";
 
@@ -212,7 +221,56 @@ export default function NouveauDevisOptionsPage() {
 
   const canContinue = step === 0 ? selectedClient !== null : true;
 
+  // ─── Desktop v2 helpers ────────────────────────────────────────────
+  const totalTTCGlobal = optionTotals.reduce((sum, t) => sum + t.totalTTC, 0);
+
+  const desktopMetaPills: ClientMetaPill[] = [
+    ...(selectedClient
+      ? [{ icon: Users, label: selectedClient.nom, tone: "emerald" as const }]
+      : []),
+    {
+      icon: Layers,
+      label: `${optionCount} option${optionCount > 1 ? "s" : ""}`,
+      tone: "violet" as const,
+    },
+    ...(allOptionsHaveLines
+      ? [{ label: `${totalTTCGlobal.toFixed(0)}€ cumul TTC`, tone: "slate" as const }]
+      : []),
+  ];
+
+  // Desktop option color tokens (mapped to v2 status soft colors)
+  const desktopOptionTone: Array<"slate" | "primary" | "warning"> = [
+    "slate",
+    "primary",
+    "warning",
+  ];
+  const toneColors: Record<
+    "slate" | "primary" | "warning",
+    { dot: string; text: string; border: string; softBg: string }
+  > = {
+    slate: {
+      dot: "var(--v2-text-subtle)",
+      text: "var(--v2-text)",
+      border: "var(--v2-border)",
+      softBg: "var(--v2-panel-muted)",
+    },
+    primary: {
+      dot: "var(--v2-primary)",
+      text: "var(--v2-primary)",
+      border: "var(--v2-primary)",
+      softBg: "var(--v2-primary-soft)",
+    },
+    warning: {
+      dot: "var(--v2-warning)",
+      text: "var(--v2-warning)",
+      border: "var(--v2-warning)",
+      softBg: "var(--v2-warning-soft)",
+    },
+  };
+
   return (
+    <>
+    <div className="lg:hidden">
     <CreationWizardShell
       backHref="/devis"
       currentStep={step}
@@ -228,7 +286,7 @@ export default function NouveauDevisOptionsPage() {
               Multi-options
             </div>
             <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              Proposez 2 ou 3 versions au même client pour augmenter vos chances d'acceptation.
+              Proposez 2 ou 3 versions au même client pour augmenter vos chances d&apos;acceptation.
             </p>
             <div className="mt-4 space-y-2">
               {OPTION_LABELS.slice(0, optionCount).map((opt, i) => (
@@ -331,7 +389,7 @@ export default function NouveauDevisOptionsPage() {
         <div className="space-y-4">
           {/* Option count toggle */}
           <div className="flex items-center justify-between rounded-xl border border-slate-200/60 bg-white/60 p-4 dark:border-white/8 dark:bg-white/5">
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Nombre d'options</span>
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200">Nombre d&apos;options</span>
             <div className="flex rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800">
               <button
                 onClick={() => setOptionCount(2)}
@@ -507,5 +565,616 @@ export default function NouveauDevisOptionsPage() {
         </div>
       </CreationWizardPanel>
     </CreationWizardShell>
+    </div>
+
+    {/* ─── Desktop dense single-page form (hidden lg:block) ─── */}
+    <div className="hidden lg:block">
+      <ClientSubpageShell
+        title="Devis multi-options"
+        description="Proposez 2 ou 3 versions du devis au même client."
+        eyebrow="Création"
+        activeNav="devis"
+        backHref="/devis"
+        breadcrumbs={[
+          { label: "Devis", href: "/devis" },
+          { label: "Devis multi-options" },
+        ]}
+        metaPills={desktopMetaPills}
+        showMobileDock={false}
+        mobilePrimaryAction={null}
+      >
+        <div className="lg:grid lg:grid-cols-12 lg:gap-6">
+          {/* LEFT 8/12 : Client + Configuration + Options */}
+          <form
+            className="lg:col-span-8 space-y-6"
+            onSubmit={(event) => event.preventDefault()}
+          >
+            {/* CLIENT */}
+            <section className="lg-v2-panel p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="lg-v2-eyebrow">Client</p>
+                  <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                    {selectedClient ? "Client sélectionné" : "Choisir un client"}
+                  </h2>
+                  <p className="mt-1 text-xs lg-v2-text-subtle">
+                    Les {optionCount} versions du devis seront envoyées au même client.
+                  </p>
+                </div>
+                {!selectedClient ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowNewClient((value) => !value)}
+                    className="lg-v2-btn lg-v2-btn-secondary"
+                  >
+                    <UserPlus size={14} aria-hidden />
+                    {showNewClient ? "Fermer" : "Nouveau client"}
+                  </button>
+                ) : null}
+              </div>
+
+              {selectedClient ? (
+                <div className="mt-4 flex items-center gap-3 rounded-lg border lg-v2-divider lg-v2-panel-muted px-4 py-3">
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
+                    style={{ backgroundColor: "var(--v2-primary)" }}
+                    aria-hidden
+                  >
+                    {selectedClient.nom.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold lg-v2-text-strong">
+                      {selectedClient.nom}
+                    </p>
+                    <p className="truncate text-xs lg-v2-text-muted">
+                      {selectedClient.email || selectedClient.telephone || selectedClient.adresse || "—"}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedClient(null)}
+                    className="lg-v2-btn lg-v2-btn-ghost !px-2"
+                    aria-label="Retirer le client sélectionné"
+                  >
+                    <X size={14} aria-hidden />
+                  </button>
+                </div>
+              ) : showNewClient ? (
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <label className="col-span-2 block">
+                    <span className="text-xs font-medium lg-v2-text-muted">
+                      Nom <span style={{ color: "var(--v2-danger)" }}>*</span>
+                    </span>
+                    <input
+                      value={newClient.nom}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, nom: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="Nom du client"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">Email</span>
+                    <input
+                      type="email"
+                      value={newClient.email}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, email: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="client@example.com"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs font-medium lg-v2-text-muted">Téléphone</span>
+                    <input
+                      value={newClient.telephone}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, telephone: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="06 12 34 56 78"
+                    />
+                  </label>
+                  <label className="col-span-2 block">
+                    <span className="text-xs font-medium lg-v2-text-muted">Adresse</span>
+                    <input
+                      value={newClient.adresse}
+                      onChange={(event) =>
+                        setNewClient((current) => ({ ...current, adresse: event.target.value }))
+                      }
+                      className="lg-v2-input mt-1.5"
+                      placeholder="Adresse"
+                    />
+                  </label>
+                  <div className="col-span-2 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewClient(false);
+                        setNewClient({ nom: "", email: "", telephone: "", adresse: "" });
+                      }}
+                      className="lg-v2-btn lg-v2-btn-ghost"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void handleCreateClient()}
+                      disabled={isCreatingClient}
+                      className="lg-v2-btn lg-v2-btn-primary"
+                    >
+                      {isCreatingClient ? "Ajout..." : "Ajouter le client"}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="relative mt-4">
+                    <Search
+                      size={14}
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 lg-v2-text-subtle"
+                      aria-hidden
+                    />
+                    <input
+                      type="text"
+                      value={searchClient}
+                      onChange={(event) => setSearchClient(event.target.value)}
+                      placeholder="Rechercher un client par nom ou email…"
+                      className="lg-v2-input pl-9"
+                      aria-label="Rechercher un client"
+                    />
+                  </div>
+                  <div className="mt-3 max-h-64 overflow-y-auto rounded-lg border lg-v2-divider">
+                    {clientsLoading ? (
+                      <p className="px-4 py-10 text-center text-sm lg-v2-text-subtle">
+                        Chargement…
+                      </p>
+                    ) : filteredClients.length === 0 ? (
+                      <p className="px-4 py-10 text-center text-sm lg-v2-text-subtle">
+                        {clients.length === 0
+                          ? "Vous n'avez pas encore de clients. Créez-en un pour démarrer."
+                          : "Aucun client ne correspond à cette recherche."}
+                      </p>
+                    ) : (
+                      <ul className="divide-y lg-v2-divider">
+                        {filteredClients.slice(0, 8).map((client) => (
+                          <li key={client.id}>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedClient(client)}
+                              className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-[var(--v2-panel-muted)]"
+                            >
+                              <div
+                                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
+                                style={{
+                                  backgroundColor: "var(--v2-primary-soft)",
+                                  color: "var(--v2-primary)",
+                                }}
+                                aria-hidden
+                              >
+                                {client.nom.charAt(0).toUpperCase()}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium lg-v2-text-strong">
+                                  {client.nom}
+                                </p>
+                                <p className="truncate text-xs lg-v2-text-subtle">
+                                  {client.email || client.telephone || "—"}
+                                </p>
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* CONFIGURATION (option count) */}
+            <section className="lg-v2-panel p-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="lg-v2-eyebrow">Configuration</p>
+                  <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                    Nombre d&apos;options
+                  </h2>
+                  <p className="mt-1 text-xs lg-v2-text-subtle">
+                    Le client recevra {optionCount} devis distincts à la même adresse.
+                  </p>
+                </div>
+                <div
+                  className="inline-flex rounded-lg border lg-v2-divider p-0.5"
+                  role="radiogroup"
+                  aria-label="Nombre d'options"
+                >
+                  {([2, 3] as const).map((count) => {
+                    const isActive = optionCount === count;
+                    return (
+                      <button
+                        key={count}
+                        type="button"
+                        role="radio"
+                        aria-checked={isActive}
+                        onClick={() => setOptionCount(count)}
+                        className="rounded-md px-3 py-1.5 text-xs font-semibold transition"
+                        style={
+                          isActive
+                            ? {
+                                backgroundColor: "var(--v2-primary)",
+                                color: "var(--v2-primary-foreground)",
+                              }
+                            : { color: "var(--v2-text-muted)" }
+                        }
+                      >
+                        {count} options
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+
+            {/* OPTIONS */}
+            {options.slice(0, optionCount).map((opt, optIdx) => {
+              const cfg = OPTION_LABELS[optIdx];
+              const tone = desktopOptionTone[optIdx];
+              const colors = toneColors[tone];
+              const totals = optionTotals[optIdx];
+              return (
+                <section
+                  key={`opt-${optIdx}`}
+                  className="lg-v2-panel p-6"
+                  style={{ borderLeft: `3px solid ${colors.border}` }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p
+                        className="lg-v2-eyebrow"
+                        style={{ color: colors.text }}
+                      >
+                        Option {optIdx + 1}
+                      </p>
+                      <h2 className="mt-1 flex items-center gap-2 text-base font-semibold lg-v2-text-strong">
+                        <span
+                          className="inline-block h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: colors.dot }}
+                          aria-hidden
+                        />
+                        {cfg.label}
+                      </h2>
+                    </div>
+                    <div className="text-right">
+                      <p className="lg-v2-eyebrow">Total TTC</p>
+                      <p
+                        className="mt-0.5 text-xl font-semibold tabular-nums"
+                        style={{ color: colors.text }}
+                      >
+                        {totals.totalTTC.toFixed(2)}€
+                      </p>
+                    </div>
+                  </div>
+
+                  {opt.lignes.length > 0 ? (
+                    <div className="mt-4 overflow-hidden rounded-lg border lg-v2-divider">
+                      <table
+                        className="w-full border-collapse text-left"
+                        aria-label={`Lignes de l'option ${cfg.label}`}
+                      >
+                        <thead>
+                          <tr>
+                            <th className="lg-v2-table-header">Désignation</th>
+                            <th className="lg-v2-table-header w-20 !text-right">Qté</th>
+                            <th className="lg-v2-table-header w-16">Unité</th>
+                            <th className="lg-v2-table-header w-28 !text-right">P.U. €</th>
+                            <th className="lg-v2-table-header w-28 !text-right">Total €</th>
+                            <th
+                              className="lg-v2-table-header w-10"
+                              aria-label="Supprimer"
+                            ></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {opt.lignes.map((ligne, ligneIdx) => (
+                            <tr
+                              key={`row-${optIdx}-${ligneIdx}`}
+                              className={
+                                ligneIdx % 2 === 0
+                                  ? "bg-[var(--v2-panel)]"
+                                  : "bg-[var(--v2-panel-muted)]/40"
+                              }
+                            >
+                              <td className="px-2 py-2">
+                                <input
+                                  type="text"
+                                  value={ligne.nomPrestation}
+                                  onChange={(event) =>
+                                    updateLigne(
+                                      optIdx,
+                                      ligneIdx,
+                                      "nomPrestation",
+                                      event.target.value,
+                                    )
+                                  }
+                                  className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                                  aria-label={`Désignation ligne ${ligneIdx + 1} de l'option ${cfg.label}`}
+                                  placeholder="Désignation"
+                                />
+                              </td>
+                              <td className="px-2 py-2 text-right">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step="0.5"
+                                  value={ligne.quantite || ""}
+                                  onChange={(event) =>
+                                    updateLigne(
+                                      optIdx,
+                                      ligneIdx,
+                                      "quantite",
+                                      parseFloat(event.target.value) || 0,
+                                    )
+                                  }
+                                  className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-right text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                                  aria-label={`Quantité ligne ${ligneIdx + 1} de l'option ${cfg.label}`}
+                                  placeholder="0"
+                                />
+                              </td>
+                              <td className="px-2 py-2">
+                                <input
+                                  type="text"
+                                  value={ligne.unite}
+                                  onChange={(event) =>
+                                    updateLigne(
+                                      optIdx,
+                                      ligneIdx,
+                                      "unite",
+                                      event.target.value,
+                                    )
+                                  }
+                                  className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                                  aria-label={`Unité ligne ${ligneIdx + 1} de l'option ${cfg.label}`}
+                                />
+                              </td>
+                              <td className="px-2 py-2 text-right">
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step="0.01"
+                                  value={ligne.prixUnitaire || ""}
+                                  onChange={(event) =>
+                                    updateLigne(
+                                      optIdx,
+                                      ligneIdx,
+                                      "prixUnitaire",
+                                      parseFloat(event.target.value) || 0,
+                                    )
+                                  }
+                                  className="w-full rounded border lg-v2-divider bg-transparent px-2 py-1 text-right text-sm focus:border-[var(--v2-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--v2-primary-soft)]"
+                                  aria-label={`Prix unitaire ligne ${ligneIdx + 1} de l'option ${cfg.label}`}
+                                  placeholder="0"
+                                />
+                              </td>
+                              <td className="px-2 py-2 text-right text-sm font-medium tabular-nums lg-v2-text-strong">
+                                {(ligne.totalLigne || ligne.quantite * ligne.prixUnitaire).toFixed(2)}€
+                              </td>
+                              <td className="px-2 py-2 text-right">
+                                <button
+                                  type="button"
+                                  onClick={() => removeLigne(optIdx, ligneIdx)}
+                                  className="lg-v2-btn lg-v2-btn-ghost !px-2"
+                                  aria-label={`Supprimer la ligne ${ligneIdx + 1}`}
+                                >
+                                  <Trash2 size={14} aria-hidden />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="mt-4 rounded-lg border border-dashed lg-v2-divider px-4 py-6 text-center text-sm lg-v2-text-subtle">
+                      Ajoutez au moins une ligne pour cette option.
+                    </p>
+                  )}
+
+                  <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+                    <button
+                      type="button"
+                      onClick={() => addLigne(optIdx)}
+                      className="lg-v2-btn lg-v2-btn-secondary"
+                    >
+                      <Plus size={14} aria-hidden /> Ajouter une ligne
+                    </button>
+                    <div className="flex flex-wrap items-end gap-3">
+                      <label className="block">
+                        <span className="text-xs font-medium lg-v2-text-muted">
+                          Remise %
+                        </span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          step="0.1"
+                          value={opt.remise}
+                          onChange={(event) => {
+                            const next = event.target.value;
+                            setOptions((prev) => {
+                              const copy = [...prev];
+                              copy[optIdx] = { ...copy[optIdx], remise: next };
+                              return copy;
+                            });
+                          }}
+                          placeholder="0"
+                          className="lg-v2-input mt-1.5 w-24"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-xs font-medium lg-v2-text-muted">
+                          TVA
+                        </span>
+                        <select
+                          value={opt.tva}
+                          onChange={(event) => {
+                            const next = event.target.value;
+                            setOptions((prev) => {
+                              const copy = [...prev];
+                              copy[optIdx] = { ...copy[optIdx], tva: next };
+                              return copy;
+                            });
+                          }}
+                          className="lg-v2-input mt-1.5 w-28"
+                        >
+                          {TVA_OPTIONS.map((t) => (
+                            <option key={t.value} value={t.value}>
+                              {t.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+                  </div>
+
+                  {totals.totalHT > 0 ? (
+                    <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-1 border-t lg-v2-divider pt-3 text-xs">
+                      <div className="flex items-center gap-1.5">
+                        <dt className="lg-v2-text-muted">HT</dt>
+                        <dd className="font-medium tabular-nums lg-v2-text">
+                          {totals.totalHT.toFixed(2)}€
+                        </dd>
+                      </div>
+                      {totals.remise > 0 ? (
+                        <div className="flex items-center gap-1.5">
+                          <dt className="lg-v2-text-muted">Remise</dt>
+                          <dd
+                            className="font-medium tabular-nums"
+                            style={{ color: "var(--v2-warning)" }}
+                          >
+                            −{totals.remise}%
+                          </dd>
+                        </div>
+                      ) : null}
+                      <div className="flex items-center gap-1.5">
+                        <dt className="lg-v2-text-muted">TVA</dt>
+                        <dd className="font-medium tabular-nums lg-v2-text">
+                          {totals.tva}%
+                        </dd>
+                      </div>
+                      <div className="ml-auto flex items-center gap-1.5">
+                        <dt className="lg-v2-text-muted">Total TTC</dt>
+                        <dd
+                          className="font-semibold tabular-nums"
+                          style={{ color: colors.text }}
+                        >
+                          {totals.totalTTC.toFixed(2)}€
+                        </dd>
+                      </div>
+                    </dl>
+                  ) : null}
+                </section>
+              );
+            })}
+          </form>
+
+          {/* RIGHT 4/12 sticky summary rail */}
+          <aside className="self-start lg:col-span-4 lg:sticky lg:top-6 space-y-4">
+            <div className="lg-v2-panel p-6">
+              <p className="lg-v2-eyebrow">Récapitulatif</p>
+              <h3 className="mt-1 text-base font-semibold lg-v2-text-strong">
+                {selectedClient ? selectedClient.nom : "Aucun client sélectionné"}
+              </h3>
+              <p className="mt-1 text-xs lg-v2-text-subtle">
+                {optionCount} version{optionCount > 1 ? "s" : ""} du devis seront créées.
+              </p>
+
+              <div className="mt-5 space-y-2">
+                {optionTotals.map((totals, idx) => {
+                  const cfg = OPTION_LABELS[idx];
+                  const tone = desktopOptionTone[idx];
+                  const colors = toneColors[tone];
+                  const hasLines = options[idx].lignes.length > 0;
+                  return (
+                    <div
+                      key={`rail-${idx}`}
+                      className="flex items-center justify-between rounded-lg border px-3 py-2.5"
+                      style={{
+                        borderColor: colors.border,
+                        backgroundColor: hasLines ? colors.softBg : "transparent",
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className="inline-block h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: colors.dot }}
+                          aria-hidden
+                        />
+                        <span
+                          className="text-sm font-medium"
+                          style={{ color: colors.text }}
+                        >
+                          {cfg.label}
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <span
+                          className="text-sm font-semibold tabular-nums"
+                          style={{ color: colors.text }}
+                        >
+                          {totals.totalTTC.toFixed(2)}€
+                        </span>
+                        {!hasLines ? (
+                          <p className="text-[10px] uppercase tracking-wide lg-v2-text-subtle">
+                            — vide
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {!allOptionsHaveLines ? (
+                <p
+                  className="mt-4 flex items-start gap-2 rounded-lg border px-3 py-2 text-xs"
+                  style={{
+                    borderColor: "var(--v2-warning-soft)",
+                    backgroundColor: "var(--v2-warning-soft)",
+                    color: "var(--v2-warning)",
+                  }}
+                >
+                  <Sparkles size={14} aria-hidden className="mt-0.5 shrink-0" />
+                  <span>Chaque option doit contenir au moins une ligne.</span>
+                </p>
+              ) : null}
+
+              <div className="mt-6 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => void handleSubmit()}
+                  disabled={!selectedClient || !allOptionsHaveLines || submitting}
+                  className="w-full lg-v2-btn lg-v2-btn-primary"
+                >
+                  <Send size={14} aria-hidden />
+                  {submitting
+                    ? "Création..."
+                    : `Créer les ${optionCount} devis`}
+                </button>
+                <Link
+                  href="/devis"
+                  className="w-full lg-v2-btn lg-v2-btn-ghost block text-center"
+                >
+                  <ArrowLeft size={14} aria-hidden /> Retour aux devis
+                </Link>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </ClientSubpageShell>
+    </div>
+    </>
   );
 }
