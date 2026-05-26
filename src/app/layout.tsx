@@ -67,6 +67,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                function reloadOnChunkError(msg) {
+                  if (/ChunkLoadError|Loading chunk|Failed to fetch|Loading CSS chunk/i.test(msg)) {
+                    console.warn("ChunkLoadError detected. Forcing hard reload.");
+                    window.location.reload();
+                  }
+                }
+                window.addEventListener('error', function(e) {
+                  var msg = e.message || (e.error && e.error.message) || "";
+                  reloadOnChunkError(msg);
+                }, true);
+                window.addEventListener('unhandledrejection', function(e) {
+                  var msg = (e.reason && (e.reason.message || e.reason.description)) || "";
+                  reloadOnChunkError(msg);
+                });
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className={`${outfit.variable} font-sans antialiased`}>
           <ThemeProvider
             attribute="class"
