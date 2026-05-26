@@ -23,16 +23,10 @@ import {
 } from "lucide-react";
 
 const TRADES = [
-  { key: "macon", label: "Maçon", icon: HardHat },
-  { key: "electricien", label: "Électricien", icon: Zap },
-  { key: "plombier", label: "Plombier", icon: Wrench },
-  { key: "peintre", label: "Peintre", icon: Brush },
-  { key: "menuisier", label: "Menuisier", icon: Home },
-  { key: "paysagiste", label: "Paysagiste", icon: TreePine },
-  { key: "couvreur", label: "Couvreur", icon: Shield },
-  { key: "carreleur", label: "Carreleur", icon: Palette },
-  { key: "garage", label: "Garagiste", icon: Car },
-  { key: "autre", label: "Autre", icon: Sparkles },
+  { key: "residentiel", label: "Électricité Résidentielle", icon: Home },
+  { key: "tertiaire", label: "Électricité Tertiaire", icon: HardHat },
+  { key: "irve", label: "Bornes & IRVE", icon: Car },
+  { key: "securite", label: "Mises aux normes / Sécurité", icon: Shield },
 ];
 
 export default function OnboardingPage() {

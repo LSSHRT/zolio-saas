@@ -1,4 +1,4 @@
-export type TradeKey = "peintre" | "plaquiste" | "plombier" | "electricien";
+export type TradeKey = "residentiel" | "tertiaire" | "irve" | "securite";
 
 export type TradeDefinition = {
   key: TradeKey;
@@ -32,159 +32,115 @@ export type TradeBundle = {
   lignes: TradeBundleLine[];
 };
 
-export const DEFAULT_TRADE: TradeKey = "peintre";
+export const DEFAULT_TRADE: TradeKey = "residentiel";
 
 export const TRADE_OPTIONS: readonly TradeDefinition[] = [
   {
-    key: "peintre",
-    label: "Peintre",
-    shortLabel: "Peinture",
-    pitch: "Starter prêt pour devis rapides intérieurs et rafraîchissements.",
-    summary: "Préparation, peinture murs/plafonds, boiseries et finitions courantes.",
+    key: "residentiel",
+    label: "Élec Résidentielle",
+    shortLabel: "Résidentiel",
+    pitch: "Starter rénovation logement, prises, éclairage et pieuvre.",
+    summary: "Idéal pour vos chantiers de maisons individuelles et appartements.",
   },
   {
-    key: "plaquiste",
-    label: "Plaquiste",
-    shortLabel: "Placo",
-    pitch: "Base BA13 prête pour cloisons, doublages et plafonds.",
-    summary: "Cloisons, isolation, bandes, faux plafonds et reprises standard.",
+    key: "tertiaire",
+    label: "Élec Tertiaire",
+    shortLabel: "Tertiaire",
+    pitch: "Base pour chantiers de bureaux, commerces et réseaux.",
+    summary: "Chemins de câbles, armoires tertiaires, prises RJ45 et goulottes.",
   },
   {
-    key: "plombier",
-    label: "Plombier",
-    shortLabel: "Plomberie",
-    pitch: "Services fréquents de dépannage, pose et rénovation.",
-    summary: "Sanitaires, chauffe-eau, alimentation/évacuation et recherche de fuite.",
+    key: "irve",
+    label: "Bornes & IRVE",
+    shortLabel: "IRVE",
+    pitch: "Services d'installation de bornes de recharge.",
+    summary: "Bornes de recharge résidentielles, monophasées, triphasées et protections.",
   },
   {
-    key: "electricien",
-    label: "Électricien",
-    shortLabel: "Électricité",
-    pitch: "Starter rénovation logement et mises aux normes.",
-    summary: "Tableau, prises, éclairage, tirage de lignes et rénovation partielle.",
+    key: "securite",
+    label: "Sécurité & Normes",
+    shortLabel: "Mises aux normes",
+    pitch: "Mises en sécurité et conformité NF C 15-100.",
+    summary: "Tableaux électriques, prises de terre, diagnostics et Consuel.",
   },
 ] as const;
 
 const TRADE_STARTERS: Record<TradeKey, StarterCatalogItem[]> = {
-  peintre: [
-    { categorie: "Préparation", nom: "Protection des sols et meubles", unite: "forfait", prix: 150, cout: 20 },
-    { categorie: "Préparation", nom: "Rebouchage et ponçage", unite: "m²", prix: 14, cout: 2 },
-    { categorie: "Préparation", nom: "Sous-couche d'impression", unite: "m²", prix: 8, cout: 1.8 },
-    { categorie: "Peinture", nom: "Peinture murs 2 couches", unite: "m²", prix: 24, cout: 5 },
-    { categorie: "Peinture", nom: "Peinture plafond sans traces", unite: "m²", prix: 20, cout: 4 },
-    { categorie: "Peinture", nom: "Peinture boiseries satinée", unite: "ml", prix: 18, cout: 3.5 },
-    { categorie: "Finition", nom: "Peinture porte intérieure", unite: "unité", prix: 65, cout: 10 },
-    { categorie: "Déplacement", nom: "Déplacement chantier", unite: "forfait", prix: 45, cout: 5 },
+  residentiel: [
+    { categorie: "Rénovation", nom: "Création prise de courant encastrée", unite: "unité", prix: 95, cout: 15 },
+    { categorie: "Rénovation", nom: "Création point lumineux simple allumage", unite: "unité", prix: 85, cout: 12 },
+    { categorie: "Réseau", nom: "Tirage de ligne électrique sous gaine", unite: "ml", prix: 14, cout: 3 },
+    { categorie: "Éclairage", nom: "Pose de spot LED encastré", unite: "unité", prix: 48, cout: 5 },
+    { categorie: "Chauffage", nom: "Remplacement radiateur électrique", unite: "unité", prix: 150, cout: 30 },
+    { categorie: "VMC", nom: "Pose de kit VMC simple flux auto", unite: "forfait", prix: 350, cout: 80 },
+    { categorie: "Déplacement", nom: "Déplacement chantier résidentiel", unite: "forfait", prix: 55, cout: 5 },
   ],
-  plaquiste: [
-    { categorie: "Cloison", nom: "Montage cloison BA13 sur ossature", unite: "m²", prix: 42, cout: 14 },
-    { categorie: "Isolation", nom: "Isolation laine de verre 100 mm", unite: "m²", prix: 19, cout: 8 },
-    { categorie: "Doublage", nom: "Doublage collé BA13", unite: "m²", prix: 35, cout: 11 },
-    { categorie: "Plafond", nom: "Faux plafond BA13 suspendu", unite: "m²", prix: 49, cout: 17 },
-    { categorie: "Finition", nom: "Bandes et joints 3 passes", unite: "m²", prix: 14, cout: 2.5 },
-    { categorie: "Finition", nom: "Ponçage et finition placo", unite: "m²", prix: 8, cout: 1 },
-    { categorie: "Dépose", nom: "Dépose ancienne cloison légère", unite: "m²", prix: 16, cout: 0 },
-    { categorie: "Déplacement", nom: "Déplacement chantier", unite: "forfait", prix: 45, cout: 5 },
+  tertiaire: [
+    { categorie: "Cheminement", nom: "Pose de goulotte PVC 80x50", unite: "ml", prix: 35, cout: 8 },
+    { categorie: "Réseau", nom: "Câblage RJ45 Cat 6", unite: "unité", prix: 110, cout: 18 },
+    { categorie: "Armoire", nom: "Pose de coffret électrique tertiaire", unite: "unité", prix: 650, cout: 180 },
+    { categorie: "Éclairage", nom: "Pose de dalle LED 600x600", unite: "unité", prix: 90, cout: 22 },
+    { categorie: "Réseau", nom: "Tirage de câble RJ45 Cat 6 FTP", unite: "ml", prix: 4.5, cout: 0.9 },
+    { categorie: "Déplacement", nom: "Déplacement chantier tertiaire", unite: "forfait", prix: 75, cout: 10 },
   ],
-  plombier: [
-    { categorie: "Dépannage", nom: "Recherche de fuite", unite: "forfait", prix: 150, cout: 0 },
-    { categorie: "Sanitaire", nom: "Remplacement mitigeur", unite: "unité", prix: 95, cout: 12 },
-    { categorie: "Sanitaire", nom: "Pose WC suspendu", unite: "unité", prix: 380, cout: 30 },
-    { categorie: "Réseau", nom: "Création alimentation EF/EC", unite: "forfait", prix: 220, cout: 35 },
-    { categorie: "Réseau", nom: "Création évacuation PVC", unite: "forfait", prix: 180, cout: 25 },
-    { categorie: "Chauffe-eau", nom: "Pose chauffe-eau électrique", unite: "unité", prix: 320, cout: 45 },
-    { categorie: "Dépannage", nom: "Débouchage canalisation", unite: "forfait", prix: 130, cout: 0 },
-    { categorie: "Déplacement", nom: "Déplacement chantier", unite: "forfait", prix: 55, cout: 5 },
+  irve: [
+    { categorie: "Borne", nom: "Installation Borne Recharge 7.4 kW Monophasée", unite: "unité", prix: 1250, cout: 450 },
+    { categorie: "Borne", nom: "Installation Borne Recharge 22 kW Triphasée", unite: "unité", prix: 1950, cout: 750 },
+    { categorie: "Sécurité", nom: "Interrupteur différentiel Type B 40A", unite: "unité", prix: 280, cout: 95 },
+    { categorie: "Câblage", nom: "Tirage de câble 3G10 (borne IRVE)", unite: "ml", prix: 25, cout: 8 },
+    { categorie: "Mise en service", nom: "Paramétrage de la borne et test de charge", unite: "forfait", prix: 180, cout: 20 },
+    { categorie: "Déplacement", nom: "Déplacement spécialiste IRVE", unite: "forfait", prix: 65, cout: 10 },
   ],
-  electricien: [
-    { categorie: "Rénovation", nom: "Création prise de courant", unite: "unité", prix: 95, cout: 15 },
-    { categorie: "Rénovation", nom: "Création point lumineux", unite: "unité", prix: 85, cout: 12 },
-    { categorie: "Tableau", nom: "Remplacement tableau électrique", unite: "forfait", prix: 850, cout: 320 },
-    { categorie: "Réseau", nom: "Tirage de ligne électrique", unite: "ml", prix: 14, cout: 3 },
-    { categorie: "Sécurité", nom: "Mise aux normes partielle", unite: "forfait", prix: 480, cout: 90 },
-    { categorie: "Éclairage", nom: "Pose de spot ou luminaire", unite: "unité", prix: 48, cout: 5 },
-    { categorie: "Diagnostic", nom: "Recherche de panne", unite: "heure", prix: 78, cout: 0 },
-    { categorie: "Déplacement", nom: "Déplacement chantier", unite: "forfait", prix: 55, cout: 5 },
+  securite: [
+    { categorie: "Tableau", nom: "Remplacement tableau électrique résidentiel 2 rangées", unite: "forfait", prix: 850, cout: 320 },
+    { categorie: "Tableau", nom: "Remplacement tableau électrique résidentiel 3 rangées", unite: "forfait", prix: 1150, cout: 410 },
+    { categorie: "Sécurité", nom: "Mise en conformité de la prise de terre", unite: "forfait", prix: 380, cout: 90 },
+    { categorie: "Sécurité", nom: "Mise en sécurité partielle NF C 15-100", unite: "forfait", prix: 480, cout: 90 },
+    { categorie: "Diagnostic", nom: "Recherche de panne et dépannage d'urgence", unite: "heure", prix: 78, cout: 0 },
+    { categorie: "Déplacement", nom: "Déplacement d'urgence / dépannage", unite: "forfait", prix: 65, cout: 5 },
   ],
 };
 
 const TRADE_BUNDLES: Record<TradeKey, TradeBundle[]> = {
-  peintre: [
+  residentiel: [
     {
-      nom: "Rafraîchissement pièce 15m²",
-      description: "Préparation légère, murs et plafond compris.",
+      nom: "Pack prises & éclairage",
+      description: "Installation standard pour une pièce à vivre.",
       lignes: [
-        { nomPrestation: "Protection des sols et meubles", quantite: 1, unite: "forfait", prixUnitaire: 150, totalLigne: 150 },
-        { nomPrestation: "Rebouchage et ponçage", quantite: 40, unite: "m²", prixUnitaire: 14, totalLigne: 560 },
-        { nomPrestation: "Peinture murs 2 couches", quantite: 40, unite: "m²", prixUnitaire: 24, totalLigne: 960 },
-        { nomPrestation: "Peinture plafond sans traces", quantite: 15, unite: "m²", prixUnitaire: 20, totalLigne: 300 },
-      ],
-    },
-    {
-      nom: "Pack boiseries et portes",
-      description: "Finition rapide pour rénovation intérieure.",
-      lignes: [
-        { nomPrestation: "Peinture boiseries satinée", quantite: 18, unite: "ml", prixUnitaire: 18, totalLigne: 324 },
-        { nomPrestation: "Peinture porte intérieure", quantite: 3, unite: "unité", prixUnitaire: 65, totalLigne: 195 },
+        { nomPrestation: "Création prise de courant encastrée", quantite: 6, unite: "unité", prixUnitaire: 95, totalLigne: 570 },
+        { nomPrestation: "Création point lumineux simple allumage", quantite: 2, unite: "unité", prixUnitaire: 85, totalLigne: 170 },
+        { nomPrestation: "Tirage de ligne électrique sous gaine", quantite: 35, unite: "ml", prixUnitaire: 14, totalLigne: 490 },
       ],
     },
   ],
-  plaquiste: [
+  tertiaire: [
     {
-      nom: "Cloison BA13 standard",
-      description: "Ossature, plaques, bandes et finition.",
+      nom: "Équipement poste de travail",
+      description: "Prises de courant et RJ45 pour bureau.",
       lignes: [
-        { nomPrestation: "Montage cloison BA13 sur ossature", quantite: 18, unite: "m²", prixUnitaire: 42, totalLigne: 756 },
-        { nomPrestation: "Isolation laine de verre 100 mm", quantite: 18, unite: "m²", prixUnitaire: 19, totalLigne: 342 },
-        { nomPrestation: "Bandes et joints 3 passes", quantite: 18, unite: "m²", prixUnitaire: 14, totalLigne: 252 },
-      ],
-    },
-    {
-      nom: "Plafond suspendu isolé",
-      description: "Plafond BA13 avec finition prête à peindre.",
-      lignes: [
-        { nomPrestation: "Faux plafond BA13 suspendu", quantite: 22, unite: "m²", prixUnitaire: 49, totalLigne: 1078 },
-        { nomPrestation: "Isolation laine de verre 100 mm", quantite: 22, unite: "m²", prixUnitaire: 19, totalLigne: 418 },
-        { nomPrestation: "Ponçage et finition placo", quantite: 22, unite: "m²", prixUnitaire: 8, totalLigne: 176 },
+        { nomPrestation: "Câblage RJ45 Cat 6", quantite: 4, unite: "unité", prixUnitaire: 110, totalLigne: 440 },
+        { nomPrestation: "Pose de goulotte PVC 80x50", quantite: 10, unite: "ml", prixUnitaire: 35, totalLigne: 350 },
       ],
     },
   ],
-  plombier: [
+  irve: [
     {
-      nom: "Remplacement chauffe-eau",
-      description: "Dépose, pose et remise en service.",
+      nom: "Installation Borne standard",
+      description: "Pose complète de borne 7.4 kW with protection.",
       lignes: [
-        { nomPrestation: "Pose chauffe-eau électrique", quantite: 1, unite: "unité", prixUnitaire: 320, totalLigne: 320 },
-        { nomPrestation: "Création alimentation EF/EC", quantite: 1, unite: "forfait", prixUnitaire: 220, totalLigne: 220 },
-        { nomPrestation: "Déplacement chantier", quantite: 1, unite: "forfait", prixUnitaire: 55, totalLigne: 55 },
-      ],
-    },
-    {
-      nom: "Salle d'eau rénovation légère",
-      description: "Sanitaires et raccordements principaux.",
-      lignes: [
-        { nomPrestation: "Pose WC suspendu", quantite: 1, unite: "unité", prixUnitaire: 380, totalLigne: 380 },
-        { nomPrestation: "Remplacement mitigeur", quantite: 1, unite: "unité", prixUnitaire: 95, totalLigne: 95 },
-        { nomPrestation: "Création évacuation PVC", quantite: 1, unite: "forfait", prixUnitaire: 180, totalLigne: 180 },
+        { nomPrestation: "Installation Borne Recharge 7.4 kW Monophasée", quantite: 1, unite: "unité", prixUnitaire: 1250, totalLigne: 1250 },
+        { nomPrestation: "Interrupteur différentiel Type B 40A", quantite: 1, unite: "unité", prixUnitaire: 280, totalLigne: 280 },
+        { nomPrestation: "Tirage de câble 3G10 (borne IRVE)", quantite: 15, unite: "ml", prixUnitaire: 25, totalLigne: 375 },
       ],
     },
   ],
-  electricien: [
+  securite: [
     {
-      nom: "Mise à niveau pièce complète",
-      description: "Prises, éclairage et ligne dédiée.",
+      nom: "Remplacement Tableau complet",
+      description: "Tableau 3 rangées conforme Consuel.",
       lignes: [
-        { nomPrestation: "Création prise de courant", quantite: 4, unite: "unité", prixUnitaire: 95, totalLigne: 380 },
-        { nomPrestation: "Création point lumineux", quantite: 2, unite: "unité", prixUnitaire: 85, totalLigne: 170 },
-        { nomPrestation: "Tirage de ligne électrique", quantite: 25, unite: "ml", prixUnitaire: 14, totalLigne: 350 },
-      ],
-    },
-    {
-      nom: "Tableau et sécurité",
-      description: "Pack rénovation tableau + mise aux normes.",
-      lignes: [
-        { nomPrestation: "Remplacement tableau électrique", quantite: 1, unite: "forfait", prixUnitaire: 850, totalLigne: 850 },
-        { nomPrestation: "Mise aux normes partielle", quantite: 1, unite: "forfait", prixUnitaire: 480, totalLigne: 480 },
+        { nomPrestation: "Remplacement tableau électrique résidentiel 3 rangées", quantite: 1, unite: "forfait", prixUnitaire: 1150, totalLigne: 1150 },
+        { nomPrestation: "Mise en conformité de la prise de terre", quantite: 1, unite: "forfait", prixUnitaire: 380, totalLigne: 380 },
       ],
     },
   ],
@@ -209,7 +165,7 @@ export function getTradeDefinition(value: unknown): TradeDefinition | null {
 }
 
 export function getTradeLabel(value: unknown) {
-  return getTradeDefinition(value)?.label ?? getTradeDefinition(DEFAULT_TRADE)?.label ?? "Métier";
+  return getTradeDefinition(value)?.label ?? getTradeDefinition(DEFAULT_TRADE)?.label ?? "Spécialité";
 }
 
 export function getStarterCatalogForTrade(value: unknown) {

@@ -437,7 +437,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
   const signals = useMemo<DashboardSignal[]>(() => {
     const s: DashboardSignal[] = [];
-    if (setupRequired) s.push({ id: "setup", title: "Starter métier à activer", description: "Choisissez votre métier et importez le catalogue.", tone: "violet" });
+    if (setupRequired) s.push({ id: "setup", title: "Starter électricien à activer", description: "Choisissez votre spécialité et importez le catalogue.", tone: "violet" });
     if (totalQuotes === 0) s.push({ id: "empty", title: "Premier devis à lancer", description: "Créez votre premier devis.", href: "/nouveau-devis", tone: "violet" });
     if (devisARelancer.length > 0) s.push({ id: "followups", title: `${devisARelancer.length} devis à relancer`, description: "Des clients attendent un rappel.", href: "/devis", tone: "rose" });
     if (pendingCount > 0) s.push({ id: "pipeline", title: `${pendingCount} devis dans le pipe`, description: `${formatCurrency(pipelineHT)} HT en attente.`, href: "/devis", tone: "amber" });
@@ -446,7 +446,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   }, [totalQuotes, devisARelancer.length, pendingCount, pipelineHT, setupRequired, tresorerie]);
 
   const todayFocus = useMemo<DashboardSignal>(() => {
-    if (setupRequired) return { id: "f-setup", title: "Activer le starter métier", description: "Configurez votre activité.", tone: "violet" as Tone };
+    if (setupRequired) return { id: "f-setup", title: "Activer le starter électricien", description: "Configurez votre activité.", tone: "violet" as Tone };
     if (totalQuotes === 0) return { id: "f-empty", title: "Créer le premier devis", description: "Lancez votre première affaire.", href: "/nouveau-devis", tone: "violet" as Tone };
     if (devisARelancer.length > 0) return { id: "f-follow", title: `${relanceCountLabel} à faire`, description: "Traitez-les en priorité.", href: "/devis", tone: "rose" as Tone };
     if (pendingCount > 0) return { id: "f-pipe", title: "Pipeline chaud", description: `${formatCurrency(pipelineHT)} HT en attente.`, href: "/devis", tone: "amber" as Tone };
@@ -486,8 +486,8 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   const onboardingSteps = useMemo<OnboardingStep[]>(() => [
     {
       id: "trade",
-      title: "Choisir mon métier",
-      description: "Active votre catalogue starter (peintre, plombier, électricien, etc.).",
+      title: "Choisir ma spécialité",
+      description: "Active votre catalogue de prestations électricien.",
       icon: BriefcaseBusiness,
       done: Boolean(companyTrade) && catalogImported,
       href: "/dashboard#dashboard-setup-panel-desktop",
@@ -684,7 +684,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                   <p className="lg-v2-eyebrow">Configuration</p>
                   <h2 className="mt-1 text-base font-semibold lg-v2-text-strong">Configurez votre espace de travail</h2>
                   <p className="mt-1 text-sm lg-v2-text-muted">
-                    Choisissez votre métier pour importer un catalogue de prestations prêt à l&apos;emploi.
+                    Choisissez votre spécialité d&apos;électricien pour importer un catalogue de prestations d&apos;électricité prêt à l&apos;emploi.
                   </p>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -1236,7 +1236,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
                 <motion.section id="dashboard-setup-panel" {...sectionMotion(0.24)} className="client-panel rounded-2xl p-4 sm:p-5 xl:p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Starter métier</p>
+                      <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Starter électricien</p>
                       <h2 className="mt-1 text-lg xl:text-base font-semibold text-slate-950 dark:text-white">Préparez votre activité</h2>
                     </div>
                     <span className="client-chip bg-violet-500/12 text-violet-700 ring-violet-300/40">{starterCatalogCount} en base</span>
