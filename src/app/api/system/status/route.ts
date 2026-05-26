@@ -6,16 +6,34 @@ import { internalServerError } from "@/lib/http";
 
 export async function GET() {
   try {
-    const [runtimeState, user] = await Promise.all([getAdminRuntimeState(), currentUser()]);
+    let runtimeState = { systemBanner: "", maintenanceEnabled: false, maintenanceMessage: "" };
+    try {
+      runtimeState = await getAdminRuntimeState();
+    } catch (err) {
+      // Ignore or log database/runtime settings retrieval error
+    }
+
+    let user = null;
+    try {
+      user = await currentUser();
+    } catch (err) {
+      // Gracefully handle Clerk being unreachable or offline
+    }
+
     let systemBanner = runtimeState.systemBanner;
 
     if (!systemBanner) {
       const adminEmail = getAdminEmail();
       if (adminEmail) {
-        const client = await clerkClient();
-        const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
-        const legacyBanner = adminUsers.data[0]?.publicMetadata?.systemBanner;
-        systemBanner = typeof legacyBanner === "string" ? legacyBanner : "";
+        try {
+          const client = await clerkClient();
+          const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
+          const legacyBanner = adminUsers.data[0]?.publicMetadata?.systemBanner;
+          systemBanner = typeof legacyBanner === "string" ? legacyBanner : "";
+        } catch (clerkErr) {
+          // Fallback if Clerk API fails
+          systemBanner = "";
+        }
       }
     }
 
@@ -26,6 +44,12 @@ export async function GET() {
       canBypassMaintenance: isAdminUser(user),
     });
   } catch (error) {
-    return internalServerError("system-status-get", error, "Impossible de récupérer l'état système");
+    // Return a safe fallback rather than crashing with an internal 500 error
+    return NextResponse.json({
+      systemBanner: "",
+      maintenanceEnabled: false,
+      maintenanceMessage: "",
+      canBypassMaintenance: false,
+    });
   }
 }
