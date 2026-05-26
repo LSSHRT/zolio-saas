@@ -73,9 +73,46 @@ export default function CalepinPage() {
   const handleSave = async () => {
     if (!currentNote.titre && !currentNote.contenu) return;
 
-    setIsSaving(true);
+    const previousData = data;
+    const isEdit = Boolean(currentNote.id);
+
+    // Optimistically update SWR cache
+    if (data) {
+      if (isEdit) {
+        const updatedNote = {
+          id: currentNote.id!,
+          titre: currentNote.titre || "",
+          contenu: currentNote.contenu || "",
+          date: new Date().toISOString(),
+        };
+        mutate({
+          ...data,
+          data: data.data.map((n) => (n.id === currentNote.id ? updatedNote : n)),
+        }, false);
+      } else {
+        const tempNote = {
+          id: `temp-${Date.now()}`,
+          titre: currentNote.titre || "",
+          contenu: currentNote.contenu || "",
+          date: new Date().toISOString(),
+        };
+        mutate({
+          ...data,
+          data: [tempNote, ...data.data],
+          pagination: {
+            ...data.pagination,
+            total: data.pagination.total + 1,
+          },
+        }, false);
+      }
+    }
+
+    setIsModalOpen(false);
+    setCurrentNote({});
+    toast.success(isEdit ? "Note mise à jour." : "Note enregistrée.");
+
     try {
-      if (currentNote.id) {
+      if (isEdit) {
         await fetch(`/api/notes/${currentNote.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -89,14 +126,11 @@ export default function CalepinPage() {
         });
       }
       await mutate();
-      setIsModalOpen(false);
-      setCurrentNote({});
-      toast.success(currentNote.id ? "Note mise à jour." : "Note enregistrée.");
     } catch (err) {
       logError("calepin-save", err);
       toast.error("Impossible d'enregistrer la note.");
-    } finally {
-      setIsSaving(false);
+      // Rollback to previous state on error
+      mutate(previousData, false);
     }
   };
 
@@ -108,27 +142,40 @@ export default function CalepinPage() {
   const handleDelete = async () => {
     if (!noteToDelete) return;
 
-    setIsDeleting(true);
+    const noteId = noteToDelete.id;
+    const previousData = data;
+
+    // Optimistically update SWR cache
+    if (data) {
+      mutate({
+        ...data,
+        data: data.data.filter((n) => n.id !== noteId),
+        pagination: {
+          ...data.pagination,
+          total: Math.max(0, data.pagination.total - 1),
+        },
+      }, false);
+    }
+
+    if (currentNote.id === noteId) {
+      setIsModalOpen(false);
+      setCurrentNote({});
+    }
+
+    setNoteToDelete(null);
+    toast.success("Note supprimée.");
+
     try {
-      const response = await fetch(`/api/notes/${noteToDelete.id}`, { method: "DELETE" });
+      const response = await fetch(`/api/notes/${noteId}`, { method: "DELETE" });
       if (!response.ok) {
         throw new Error("Erreur de suppression");
       }
-
       await mutate();
-
-      if (currentNote.id === noteToDelete.id) {
-        setIsModalOpen(false);
-        setCurrentNote({});
-      }
-
-      setNoteToDelete(null);
-      toast.success("Note supprimée.");
     } catch (err) {
       logError("calepin-delete", err);
       toast.error("Impossible de supprimer la note.");
-    } finally {
-      setIsDeleting(false);
+      // Rollback to previous state on error
+      mutate(previousData, false);
     }
   };
 

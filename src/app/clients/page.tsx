@@ -144,47 +144,68 @@ function ClientsContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
+    const previousClients = clients;
+    const isEdit = Boolean(editingId);
+
+    // Optimistically update SWR cache
+    if (isEdit) {
+      const updatedClient = {
+        id: editingId!,
+        nom: form.nom,
+        email: form.email,
+        telephone: form.telephone,
+        adresse: form.adresse,
+        dateAjout: clients.find((c: Client) => c.id === editingId)?.dateAjout || new Date().toISOString(),
+      };
+      mutate(clients.map((client: Client) => (client.id === editingId ? updatedClient : client)), false);
+      toast.success("Fiche client mise à jour.");
+    } else {
+      const tempClient = {
+        id: `temp-${Date.now()}`,
+        nom: form.nom,
+        email: form.email,
+        telephone: form.telephone,
+        adresse: form.adresse,
+        dateAjout: new Date().toISOString(),
+      };
+      mutate([...clients, tempClient], false);
+      toast.success("Client ajouté.");
+    }
+
+    const currentForm = { ...form };
+    const targetEditingId = editingId;
+    resetForm();
 
     try {
-      if (editingId) {
-        const response = await fetch(`/api/clients/${editingId}`, {
+      if (isEdit) {
+        const response = await fetch(`/api/clients/${targetEditingId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify(currentForm),
         });
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
           throw new Error(errData.error || "Erreur serveur");
         }
-
-        const updatedClient = await response.json();
-        mutate(clients.map((client: Client) => (client.id === editingId ? updatedClient : client)), false);
-        toast.success("Fiche client mise à jour.");
       } else {
         const response = await fetch("/api/clients", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
+          body: JSON.stringify(currentForm),
         });
 
         if (!response.ok) {
           const errData = await response.json().catch(() => ({}));
           throw new Error(errData.error || "Erreur serveur");
         }
-
-        const newClient = await response.json();
-        mutate([...clients, newClient], false);
-        toast.success("Client ajouté.");
       }
-
-      resetForm();
+      await mutate();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Erreur lors de l'enregistrement";
       toast.error(message);
-    } finally {
-      setSaving(false);
+      // Rollback to previous state on error
+      mutate(previousClients, false);
     }
   };
 
@@ -203,29 +224,30 @@ function ClientsContent() {
     if (!pendingDeleteClient) return;
 
     const clientToDelete = pendingDeleteClient;
+    const previousClients = clients;
     setPendingDeleteClient(null);
-    setDeletingId(clientToDelete.id);
+
+    // Optimistically update SWR cache
+    mutate(clients.filter((client: Client) => client.id !== clientToDelete.id), false);
+    setSelectedIds((currentIds) => {
+      if (!currentIds.has(clientToDelete.id)) {
+        return currentIds;
+      }
+      const nextIds = new Set(currentIds);
+      nextIds.delete(clientToDelete.id);
+      return nextIds;
+    });
+    toast.success("Client supprimé.");
 
     try {
       const response = await fetch(`/api/clients/${clientToDelete.id}`, { method: "DELETE" });
-      if (response.ok) {
-        mutate(clients.filter((client: Client) => client.id !== clientToDelete.id), false);
-        setSelectedIds((currentIds) => {
-          if (!currentIds.has(clientToDelete.id)) {
-            return currentIds;
-          }
-          const nextIds = new Set(currentIds);
-          nextIds.delete(clientToDelete.id);
-          return nextIds;
-        });
-        toast.success("Client supprimé.");
-      } else {
-        toast.error("Erreur lors de la suppression");
+      if (!response.ok) {
+        throw new Error("Erreur de suppression");
       }
+      await mutate();
     } catch {
       toast.error("Erreur lors de la suppression");
-    } finally {
-      setDeletingId(null);
+      mutate(previousClients, false);
     }
   };
 
