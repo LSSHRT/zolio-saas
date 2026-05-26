@@ -22,6 +22,9 @@ self.addEventListener("fetch", (event) => {
   
   const url = new URL(event.request.url);
   
+  // Do NOT intercept external domains (e.g. Clerk, Stripe, external CDNs)
+  if (url.origin !== self.location.origin) return;
+  
   // Network-first for API calls
   if (url.pathname.startsWith("/api/")) {
     event.respondWith(
