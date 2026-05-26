@@ -81,16 +81,15 @@ const KineticText = ({ text, className = "" }: { text: string; className?: strin
 };
 
 const ARTISAN_TRADES = [
-  { label: "Peintres", icon: PaintRoller },
-  { label: "Plombiers", icon: Wrench },
-  { label: "Électriciens", icon: Plug },
-  { label: "Plaquistes", icon: HardHat },
-  { label: "Maçons", icon: Hammer },
-  { label: "Carreleurs", icon: HardHat },
-  { label: "Menuisiers", icon: Hammer },
-  { label: "Couvreurs", icon: HardHat },
-  { label: "Chauffagistes", icon: Wrench },
-  { label: "Façadiers", icon: PaintRoller },
+  { label: "Électricité Générale", icon: Plug },
+  { label: "Norme NF C 15-100", icon: ShieldCheck },
+  { label: "Dossiers Consuel", icon: FileCheck2 },
+  { label: "Rénovation Résidentielle", icon: HardHat },
+  { label: "IRVE & Bornes de Recharge", icon: Zap },
+  { label: "Domotique & Courants Faibles", icon: Smartphone },
+  { label: "Chantiers Tertiaires", icon: FileText },
+  { label: "Dépannages d'Urgence", icon: Clock },
+  { label: "Remise en Conformité", icon: Wrench },
 ] as const;
 
 const heroPillars = [
@@ -948,7 +947,7 @@ export default function LandingPage() {
             <div className="relative rounded-3xl border border-white/8 bg-white/[0.02] py-5 backdrop-blur-md">
               <p className="absolute -top-3 left-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#06070f] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 motion-safe:animate-pulse" />
-                Conçu pour tous les corps de métier
+                Dédié à toutes vos spécialités électriques
               </p>
               <div className="landing-marquee">
                 <div className="landing-marquee-track py-2">
@@ -1002,7 +1001,7 @@ export default function LandingPage() {
                 }}
               />
               {[
-                { step: "01", title: "Choisissez votre métier", desc: "On importe automatiquement un catalogue de prestations types adaptées à votre activité.", gradient: "from-violet-600 to-violet-500", glow: "rgba(139,92,246,0.45)" },
+                { step: "01", title: "Activez votre profil", desc: "Nous importons automatiquement votre catalogue de prestations et tarifs d'électricité habituels.", gradient: "from-violet-600 to-violet-500", glow: "rgba(139,92,246,0.45)" },
                 { step: "02", title: "Créez votre premier devis", desc: "Sélectionnez un client, ajoutez des prestations, envoyez. C'est fait en 3 minutes.", gradient: "from-fuchsia-600 to-fuchsia-500", glow: "rgba(217,70,239,0.45)" },
                 { step: "03", title: "Encaissez vos paiements", desc: "Vos clients paient en ligne. Vous suivez votre trésorerie en temps réel.", gradient: "from-orange-500 to-amber-500", glow: "rgba(249,115,22,0.45)" },
               ].map((item, i) => (
