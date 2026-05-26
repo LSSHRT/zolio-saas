@@ -76,9 +76,21 @@ export default function RootLayout({
                   if (/ChunkLoadError|Loading chunk|Failed to fetch|Loading CSS chunk/i.test(msg)) {
                     console.warn("ChunkLoadError detected. Forcing hard reload.");
                     window.location.reload();
+                    return true;
                   }
+                  return false;
                 }
                 window.addEventListener('error', function(e) {
+                  // Capture resource (script/link) load failures (e.target.src or e.target.href)
+                  var target = e.target;
+                  if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
+                    var url = target.src || target.href || "";
+                    if (url.indexOf('_next/static') > -1 || url.indexOf('/chunks/') > -1) {
+                      console.warn("Static resource chunk failed to load: " + url + ". Forcing hard reload.");
+                      window.location.reload();
+                      return;
+                    }
+                  }
                   var msg = e.message || (e.error && e.error.message) || "";
                   reloadOnChunkError(msg);
                 }, true);
