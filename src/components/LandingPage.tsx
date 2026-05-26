@@ -80,17 +80,17 @@ const KineticText = ({ text, className = "" }: { text: string; className?: strin
   );
 };
 
-const ELECTRICAL_SPECIALTIES = [
-  { label: "Courant Fort", icon: Zap },
-  { label: "Courant Faible", icon: Smartphone },
-  { label: "Domotique", icon: Sparkles },
-  { label: "Bornes IRVE", icon: ShieldCheck },
-  { label: "Norme NF C 15-100", icon: FileCheck2 },
-  { label: "Attestations Consuel", icon: CheckCircle2 },
-  { label: "Tableaux Électriques", icon: Wrench },
-  { label: "Chauffage Électrique", icon: Zap },
-  { label: "Rénovation Électrique", icon: Hammer },
-  { label: "Réseaux VDI", icon: Smartphone },
+const ARTISAN_TRADES = [
+  { label: "Peintres", icon: PaintRoller },
+  { label: "Plombiers", icon: Wrench },
+  { label: "Électriciens", icon: Plug },
+  { label: "Plaquistes", icon: HardHat },
+  { label: "Maçons", icon: Hammer },
+  { label: "Carreleurs", icon: HardHat },
+  { label: "Menuisiers", icon: Hammer },
+  { label: "Couvreurs", icon: HardHat },
+  { label: "Chauffagistes", icon: Wrench },
+  { label: "Façadiers", icon: PaintRoller },
 ] as const;
 
 const heroPillars = [
@@ -942,27 +942,27 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Electrical Specialties marquee — social proof strip */}
-        <section aria-label="Spécialités électricité" className="relative z-10 -mt-12 pb-10 pt-2 sm:-mt-16 sm:pb-14">
+        {/* Trades marquee — social proof strip */}
+        <section aria-label="Métiers desservis" className="relative z-10 -mt-12 pb-10 pt-2 sm:-mt-16 sm:pb-14">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="relative rounded-3xl border border-white/8 bg-white/[0.02] py-5 backdrop-blur-md">
               <p className="absolute -top-3 left-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-[#06070f] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 motion-safe:animate-pulse" />
-                Spécialités & Normes prises en charge
+                Conçu pour tous les corps de métier
               </p>
               <div className="landing-marquee">
                 <div className="landing-marquee-track py-2">
-                  {[...ELECTRICAL_SPECIALTIES, ...ELECTRICAL_SPECIALTIES].map((spec, i) => {
-                    const Icon = spec.icon;
+                  {[...ARTISAN_TRADES, ...ARTISAN_TRADES].map((trade, i) => {
+                    const Icon = trade.icon;
                     return (
                       <div
-                        key={`${spec.label}-${i}`}
+                        key={`${trade.label}-${i}`}
                         className="flex shrink-0 items-center gap-3 text-sm font-medium text-neutral-300/90"
                       >
                         <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/8 bg-white/[0.03] text-violet-200">
                           <Icon className="h-4 w-4" strokeWidth={1.75} />
                         </span>
-                        <span className="tracking-wide">{spec.label}</span>
+                        <span className="tracking-wide">{trade.label}</span>
                       </div>
                     );
                   })}
@@ -972,8 +972,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Services Section */}
-        <LandingStage id="features" className="relative z-10 py-24 sm:py-32" tone="neutral">
+        {/* Comment ça marche */}
+        <LandingStage className="relative z-10 py-24 sm:py-32" tone="neutral">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-16 text-center">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-neutral-300 backdrop-blur-md">
@@ -988,67 +988,44 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="relative grid gap-8 sm:grid-cols-3">
+              {/* Dotted connector line between the 3 steps (desktop only) */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-12 top-[3.25rem] hidden h-px sm:block"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, rgba(167,139,250,0.45) 0, rgba(167,139,250,0.45) 6px, transparent 6px, transparent 14px)",
+                  backgroundSize: "14px 1px",
+                  backgroundRepeat: "repeat-x",
+                  maskImage: "linear-gradient(to right, transparent, black 10%, black 90%, transparent)",
+                }}
+              />
               {[
-                { 
-                  title: "Devis personnalisés sous 24h", 
-                  desc: "Nous rédigeons vos devis sous 24h ouvrées. Modèles optimisés et conformes aux normes électriques NF C 15-100 pour rassurer vos clients et remporter plus de chantiers.", 
-                  icon: FileText, 
-                  gradient: "from-violet-600 to-violet-500", 
-                  glow: "rgba(139,92,246,0.45)" 
-                },
-                { 
-                  title: "Factures & Relances automatiques", 
-                  desc: "Émission immédiate de vos factures de situation et de solde après vos chantiers. Nous assurons un suivi rigoureux des paiements et relançons de manière courtoise mais ferme les factures en retard.", 
-                  icon: CheckCircle2, 
-                  gradient: "from-fuchsia-600 to-fuchsia-500", 
-                  glow: "rgba(217,70,239,0.45)" 
-                },
-                { 
-                  title: "Attestations obligatoires & Consuel", 
-                  desc: "Gestion complète de vos demandes de certificats de conformité Consuel. Centralisation et tenue à jour de vos attestations d&apos;assurance décennale, responsabilité civile et documents URSSAF.", 
-                  icon: ShieldCheck, 
-                  gradient: "from-orange-500 to-amber-500", 
-                  glow: "rgba(249,115,22,0.45)" 
-                },
-                { 
-                  title: "Gestion de vos Sous-Traitants", 
-                  desc: "Nous vérifions l&apos;ensemble des documents obligatoires de vos sous-traitants (attestations de vigilance, kbis, décennale) pour vous assurer une parfaite conformité légale face aux contrôles.", 
-                  icon: Users, 
-                  gradient: "from-emerald-600 to-teal-500", 
-                  glow: "rgba(16,185,129,0.45)" 
-                },
-                { 
-                  title: "Support Téléphonique & Email", 
-                  desc: "Réponse professionnelle à vos clients et partenaires par email ou téléphone. Nous gérons votre planning d&apos;appels pour que vous restiez concentré sur vos installations électriques sans coupure.", 
-                  icon: Smartphone, 
-                  gradient: "from-cyan-600 to-blue-500", 
-                  glow: "rgba(6,182,212,0.45)" 
-                },
-              ].map((item, i) => {
-                const Icon = item.icon;
-                return (
-                  <motion.div
-                    key={item.title}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.12 }}
-                    whileHover={{ y: -5 }}
-                    className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-40px_var(--glow)]"
-                    style={{ "--glow": item.glow } as React.CSSProperties}
+                { step: "01", title: "Choisissez votre métier", desc: "On importe automatiquement un catalogue de prestations types adaptées à votre activité.", gradient: "from-violet-600 to-violet-500", glow: "rgba(139,92,246,0.45)" },
+                { step: "02", title: "Créez votre premier devis", desc: "Sélectionnez un client, ajoutez des prestations, envoyez. C'est fait en 3 minutes.", gradient: "from-fuchsia-600 to-fuchsia-500", glow: "rgba(217,70,239,0.45)" },
+                { step: "03", title: "Encaissez vos paiements", desc: "Vos clients paient en ligne. Vous suivez votre trésorerie en temps réel.", gradient: "from-orange-500 to-amber-500", glow: "rgba(249,115,22,0.45)" },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 }}
+                  whileHover={{ y: -4 }}
+                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_30px_80px_-40px_var(--glow)]"
+                  style={{ "--glow": item.glow } as React.CSSProperties}
+                >
+                  <div
+                    className={`relative mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} text-2xl font-black text-white shadow-lg`}
                   >
-                    <div
-                      className={`relative mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${item.gradient} text-white shadow-lg`}
-                    >
-                      <span aria-hidden="true" className="absolute inset-0 rounded-2xl bg-white/15 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                      <Icon className="h-7 w-7 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white">{item.title}</h3>
-                    <p className="mt-3 leading-relaxed text-neutral-400 text-sm sm:text-base">{item.desc}</p>
-                  </motion.div>
-                );
-              })}
+                    <span aria-hidden="true" className="absolute inset-0 rounded-2xl bg-white/15 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                    <span className="relative">{item.step}</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-white">{item.title}</h3>
+                  <p className="mt-3 leading-relaxed text-neutral-400">{item.desc}</p>
+                </motion.div>
+              ))}
             </div>
           </div>
         </LandingStage>
@@ -1330,17 +1307,17 @@ export default function LandingPage() {
                   gradient: "from-violet-500 to-indigo-500",
                 },
                 {
-                  name: "Sébastien L.",
-                  role: "Électricité Générale (3 sal.) — Nantes",
-                  text: "Mes devis partent désormais sous 24h ouvrées aux normes NF C 15-100. Les clients apprécient la réactivité et je ne perds plus de temps sur l'administratif.",
+                  name: "Laurent B.",
+                  role: "Plombier — Lyon",
+                  text: "Ce qui m'a convaincu, c'est la signature digitale. Mon client signe direct sur l'écran, plus besoin de repasser le lendemain. C'est simple, rapide, et pro.",
                   rating: 5,
                   initial: "S",
                   gradient: "from-cyan-500 to-blue-500",
                 },
                 {
-                  name: "Damien T.",
-                  role: "Électricien (2 sal.) — Le Mans",
-                  text: "Le premier mois gratuit m'a convaincu. Le service à 199€/mois est très largement amorti par le temps gagné sur mes déclarations URSSAF et les relances de factures.",
+                  name: "Julie M.",
+                  role: "Électricienne — Bordeaux",
+                  text: "J'ai testé des dizaines de logiciels, toujours trop compliqués. Zolio, je l'ai pris en main en 10 minutes. Même mon stagiaire l'utilise sans problème.",
                   rating: 5,
                   initial: "D",
                   gradient: "from-fuchsia-500 to-rose-500",
@@ -1799,9 +1776,9 @@ export default function LandingPage() {
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 flex flex-col items-center">
               <SectionEyebrow>FAQ</SectionEyebrow>
-              <h2 className="mt-8 text-4xl md:text-5xl font-bold text-white">Des réponses claires</h2>
+              <h2 className="mt-8 text-4xl md:text-5xl font-bold text-white">Questions fréquentes</h2>
               <p className="mt-4 text-lg text-neutral-400 max-w-xl">
-                Tout ce que vous devez savoir avant de nous confier votre administratif. Pas de jargon, pas de surprises.
+                Tout ce que vous devez savoir avant de vous lancer. Pas de jargon, pas de surprises.
               </p>
             </div>
             <div className="space-y-4">
@@ -1861,11 +1838,11 @@ export default function LandingPage() {
                   ))}
 
                   <Link
-                    href={supportHref}
+                    href="/sign-up?redirect_url=/dashboard"
                     className="group relative flex w-full items-center justify-center rounded-full bg-white px-7 py-4 text-base font-semibold text-black shadow-[0_18px_60px_-18px_rgba(255,255,255,0.55)] transition-all hover:scale-[1.02] hover:bg-neutral-100"
                   >
                     <span aria-hidden="true" className="absolute inset-0 -z-10 rounded-full bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-500 opacity-0 blur-xl transition-opacity duration-500 group-hover:opacity-60" />
-                    Démarrer mon 1er mois gratuit
+                    Créer mon compte
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </div>
