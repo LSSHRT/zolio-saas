@@ -21,7 +21,7 @@ export default function Page() {
           quote:
             "Je faisais mes devis sur Excel. Avec Zolio, j'en sors 3 de plus par semaine — et ils sont signés avant que je rentre chez moi.",
           authorName: "Marc D.",
-          authorRole: "Plombier · Bordeaux",
+          authorRole: "Électricien · Bordeaux",
           authorInitials: "MD",
           avatarTone: "fuchsia",
         }}
