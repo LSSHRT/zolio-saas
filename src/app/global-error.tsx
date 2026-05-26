@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 
 export default function GlobalError({
@@ -9,6 +10,18 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // Automatically reload the page when a chunk loading or fetch error is detected
+    // (this happens when a new deployment has taken place and old chunk files are requested).
+    const isChunkError =
+      error?.name === "ChunkLoadError" ||
+      /ChunkLoadError|Loading chunk|Failed to fetch|Loading CSS chunk/i.test(error?.message || "");
+
+    if (isChunkError) {
+      window.location.reload();
+    }
+  }, [error]);
+
   return (
     <html lang="fr">
       <body style={{
