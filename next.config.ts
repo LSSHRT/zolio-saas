@@ -33,10 +33,6 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=31536000; includeSubDomains; preload",
   },
-  // Cross-Origin protections (anti-Spectre)
-  { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-  { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
-  { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
   // CORS restreint — uniquement zolio.site
   { key: "Access-Control-Allow-Origin", value: ALLOWED_ORIGINS[0] },
   { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, PATCH, OPTIONS" },

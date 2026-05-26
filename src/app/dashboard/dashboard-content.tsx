@@ -336,6 +336,7 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
   const [selectedTrade, setSelectedTrade] = useState<TradeKey>(DEFAULT_TRADE);
   const [isBootstrapping, setIsBootstrapping] = useState(false);
+  const [optimisticSetupDone, setOptimisticSetupDone] = useState(false);
   const [objectifDialogOpen, setObjectifDialogOpen] = useState(false);
   const [objectifDraft, setObjectifDraft] = useState("5000");
   const [runTour, setRunTour] = useState(() => typeof window !== "undefined" && !localStorage.getItem("zolio_has_seen_tour"));
@@ -350,11 +351,12 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
 
   const selectedTradeDef = getTradeDefinition(selectedTrade) ?? getTradeDefinition(DEFAULT_TRADE);
   const selectedStarterCount = getStarterCatalogForTrade(selectedTrade).length;
-  const setupRequired = !companyTrade || !catalogImported || !onboardingDone || starterCatalogCount === 0;
+  const setupRequired = (!companyTrade || !catalogImported || !onboardingDone || starterCatalogCount === 0) && !optimisticSetupDone;
 
   const objectifMensuel = Number((clerkUser?.unsafeMetadata as Record<string, unknown>)?.objectifMensuel || 0);
   const objectifInitial = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : 5000;
   const [objectif, setObjectif] = useState(objectifInitial);
+  const [objectifDraftValue, setObjectifDraftValue] = useState(objectifDraft); // Rename conflict resolved if any
   const objectifActif = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;
 
   useEffect(() => { setObjectifDraft(objectifActif.toString()); }, [objectifActif]);
@@ -364,15 +366,18 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   const handleBootstrap = async () => {
     if (!clerkUser || !selectedTradeDef) return;
     setIsBootstrapping(true);
+    setOptimisticSetupDone(true);
+    toast.success("Importation du catalogue électricien lancée...");
     try {
       const res = await fetch("/api/onboarding/bootstrap", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ trade: selectedTradeDef.key }) });
       const payload = await res.json();
       if (!res.ok) throw new Error(payload.error || "Erreur");
       await clerkUser.update({ unsafeMetadata: { ...clerkUser.unsafeMetadata, companyTrade: selectedTradeDef.key, onboardingCompleted: true, starterCatalogImported: true } });
       await mutateDashboard();
-      toast.success(payload.imported > 0 ? `${payload.imported} prestation(s) importée(s)` : `Starter déjà en place`);
+      toast.success(payload.imported > 0 ? `${payload.imported} prestations électricien importées avec succès !` : `Starter déjà en place`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Impossible d'importer");
+      setOptimisticSetupDone(false);
     } finally {
       setIsBootstrapping(false);
     }
@@ -381,12 +386,16 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   const handleUpdateObjectif = async () => {
     const parsed = Number(objectifDraft.replace(',', '.').trim());
     if (Number.isNaN(parsed) || parsed <= 0) { toast.error("Objectif invalide."); return; }
+    const previousObjectif = objectif;
     setObjectif(parsed);
+    setObjectifDialogOpen(false);
+    toast.success("Objectif mis à jour.");
     try {
       if (clerkUser) await clerkUser.update({ unsafeMetadata: { ...clerkUser.unsafeMetadata, objectifMensuel: parsed } });
-      setObjectifDialogOpen(false);
-      toast.success("Objectif mis à jour.");
-    } catch { toast.error("Erreur de sauvegarde."); }
+    } catch { 
+      toast.error("Erreur de sauvegarde."); 
+      setObjectif(previousObjectif);
+    }
   };
 
   const handleTourCallback = (data: JoyrideCallBackProps) => {

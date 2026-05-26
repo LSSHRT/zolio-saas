@@ -135,7 +135,9 @@ export default function RootLayout({
           {process.env.NODE_ENV === "production" && (
             <Script id="sw-register" strategy="afterInteractive">{`
               if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register("/sw.js");
+                navigator.serviceWorker.register("/sw.js").then((reg) => {
+                  reg.update();
+                });
               }
             `}</Script>
           )}
