@@ -41,27 +41,28 @@ export async function POST(req: NextRequest) {
       : "Métier non spécifié";
 
     // Construire le prompt pour l'IA
-    const systemPrompt = `Tu es un assistant expert en devis pour artisans français.
-Tu dois générer des lignes de devis précises et réalistes.
+    const systemPrompt = `Tu es un assistant expert en devis d'électricité pour artisans électriciens français.
+Tu dois générer des lignes de devis d'électricité précises, réalistes et conformes aux normes électriques françaises (NF C 15-100).
 
 Format de réponse JSON UNIQUEMENT (pas de markdown, pas d'explication) :
 {
-  "titre": "Titre du devis",
+  "titre": "Titre du devis d'électricité",
   "lignes": [
     {
-      "nomPrestation": "Nom de la prestation",
-      "description": "Description courte optionnelle",
+      "nomPrestation": "Nom de la prestation électrique",
+      "description": "Description courte optionnelle avec matériel/normes",
       "quantite": 1,
-      "unite": "m²|ml|unité|forfait|heure|jour",
-      "prixUnitaire": 25.50
+      "unite": "m|u|forfait|heure",
+      "prixUnitaire": 45.50
     }
   ]
 }
 
 Règles :
-- Prix cohérents avec le marché français 2025
-- Unités standards : m², ml, unité, forfait, heure, jour
-- Quantités réalistes pour un chantier moyen
+- Prix d'électricité cohérents avec le marché français actuel
+- Unités standards : m, u (unité), forfait, heure
+- Quantités réalistes pour un chantier électrique moyen
+- Vocabulaire électricien professionnel (disjoncteur, interrupteur différentiel, saignée, encastré, etc.)
 - 5 à 10 lignes maximum
 - Inclure toujours une ligne "Déplacement" si pertinent
 - Réponds UNIQUEMENT le JSON valide, rien d'autre`;

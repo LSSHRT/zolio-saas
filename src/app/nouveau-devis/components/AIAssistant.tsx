@@ -10,9 +10,9 @@ type AIAssistantProps = {
 };
 
 const QUICK_PROMPTS = [
-  "Rénovation salle de bain avec douche italienne",
-  "Rafraîchissement complet d’un T2 avant location",
-  "Création d’une cloison BA13 avec isolation",
+  "Installation tableau électrique et mise aux normes NF C 15-100",
+  "Pose de 6 prises, 4 interrupteurs et câblage salon",
+  "Raccordement d'une borne de recharge voiture (IRVE)",
 ];
 
 export function AIAssistant({
@@ -69,7 +69,7 @@ export function AIAssistant({
           <textarea
             value={prompt}
             onChange={(event) => onPromptChange(event.target.value)}
-            placeholder="Ex: Refaire une salle de bain de 10m² avec dépose, plomberie, faïence murale, meuble vasque et peinture plafond."
+            placeholder="Ex: Remplacement d'un tableau électrique secondaire, pose de 4 prises étanches et raccordement de 2 points lumineux extérieurs."
             className="h-40 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-base leading-6 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20 dark:border-white/10 dark:bg-white/4 sm:h-44"
           />
 

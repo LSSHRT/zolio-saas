@@ -209,13 +209,14 @@ export async function POST(req: NextRequest) {
       return jsonError("Clé API Gemini non configurée", 500);
     }
 
-    const prompt = `Tu es un assistant expert pour les artisans du bâtiment.
-Génère une liste de prestations pour un devis basé sur la description suivante : ${JSON.stringify(description)}.
+    const prompt = `Tu es un assistant expert pour les électriciens professionnels.
+Tout le contenu généré doit respecter strictement les normes électriques françaises (comme la NF C 15-100) et utiliser le vocabulaire technique des électriciens (ex: tableau électrique, disjoncteur divisionnaire, interrupteur différentiel, pieuvre, tirage de câbles, appareillages, goulotte, appareillage encastré/saillant, etc.).
+Génère une liste de prestations pour un devis d'électricité basé sur la description suivante : ${JSON.stringify(description)}.
 Réponds UNIQUEMENT au format JSON avec soit un tableau d'objets, soit un objet de la forme {"lignes": [...]}, sans aucun texte autour et sans bloc markdown.
 Chaque ligne doit avoir ces propriétés exactes :
-- "designation" (string, description claire et professionnelle de la tâche)
+- "designation" (string, description claire et professionnelle de la tâche d'électricité)
 - "quantite" (number strictement positif)
-- "unite" (string, ex: "m2", "h", "u", "forfait")
+- "unite" (string, ex: "m", "u", "forfait", "h")
 - "prixUnitaire" (number strictement positif, estimation réaliste du prix en euros)
 Limite la réponse à ${MAX_GENERATED_LINES} lignes maximum.`;
 
