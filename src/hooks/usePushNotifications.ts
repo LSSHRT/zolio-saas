@@ -47,7 +47,7 @@ export function usePushNotifications() {
 
     try {
       // Enregistrer le service worker
-      const registration = await navigator.serviceWorker.register("/sw.js");
+      const registration = await navigator.serviceWorker.register("/sw.js?v=2");
       await navigator.serviceWorker.ready;
 
       // Demander la permission
