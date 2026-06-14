@@ -35,14 +35,12 @@ import {
   Sparkles,
   ReceiptText,
   HardHat,
-  PaintRoller,
   Wrench,
-  Hammer,
   Plug,
   Quote
 } from "lucide-react";
 import Image from "next/image";
-import { getSupportHref, isExternalSupportHref } from "@/lib/support";
+import { getSupportHref } from "@/lib/support";
 
 const NOUVEAUTES = [
   { badge: "Nouveau", title: "Planning mensuel", desc: "Calendrier interactif avec vos échéances, fins de devis et factures récurrentes en un coup d'œil.", icon: Zap, tone: "violet" as const },
@@ -114,21 +112,6 @@ const heroSignals = [
   { label: "Pensé pour", value: "Électriciens", detail: "indépendants et TPE de 1 à 5 salariés" },
   { label: "Économie", value: "-10h / sem", detail: "sur votre gestion de devis, factures & Consuel" },
   { label: "Tarif", value: "199 €/mo", detail: "standard tout inclus, premier mois gratuit" },
-] as const;
-
-const trustWidgetCards = [
-  {
-    title: "Widget officiel prêt",
-    description: "La zone peut accueillir Trustpilot proprement, sans casser la direction artistique.",
-  },
-  {
-    title: "Preuve sociale premium",
-    description: "Le bloc reste crédible et élégant même avant le branchement des avis live.",
-  },
-  {
-    title: "Responsive natif",
-    description: "La section reste forte visuellement sur iPhone, tablette et desktop large.",
-  },
 ] as const;
 
 const closingHighlights = [
@@ -403,7 +386,7 @@ const jsonLd = {
   "@type": "SoftwareApplication",
   "name": "Zolio",
   "url": "https://www.zolio.site",
-  "description": "Logiciel de devis et factures conçu pour les artisans du bâtiment. Devis en 3 min, signature digitale, facturation automatique.",
+  "description": "Logiciel de devis et factures conçu pour les électriciens. Devis d'électricité en 3 min, conformité NF C 15-100, signature digitale, facturation automatique.",
   "applicationCategory": "BusinessApplication",
   "operatingSystem": "Web",
   "offers": {
@@ -446,7 +429,6 @@ export default function LandingPage() {
     message:
       "Bonjour, je m'appelle [Votre Nom] et je suis électricien. Je souhaite réserver un appel gratuit de 15 min pour en savoir plus sur votre offre d'assistant administratif et le premier mois d'essai offert.",
   });
-  const supportIsExternal = isExternalSupportHref(supportHref);
 
   return (
     <>
@@ -711,7 +693,7 @@ export default function LandingPage() {
             <div className="mb-8 flex flex-col items-center gap-4 text-center">
               <SectionEyebrow>Démo visuelle</SectionEyebrow>
               <h2 className="max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
-                Une interface qui ressemble enfin au vrai quotidien d&apos;un artisan.
+                Une interface qui ressemble enfin au vrai quotidien d&apos;un électricien.
               </h2>
               <p className="max-w-2xl text-base leading-7 text-neutral-400 sm:text-lg">
                 Pas une vitrine générique. Un cockpit métier qui montre l&apos;activité, les relances,
@@ -763,7 +745,7 @@ export default function LandingPage() {
                     <div className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-white/5 transition-colors">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-400 to-rose-400 flex items-center justify-center text-white font-bold text-xs">A</div>
                       <div className="flex flex-col">
-                        <span className="text-white text-xs font-medium">Artisan Pro</span>
+                        <span className="text-white text-xs font-medium">Électricien Pro</span>
                         <span className="text-neutral-500 text-[10px]">Plan Premium</span>
                       </div>
                     </div>
@@ -775,7 +757,7 @@ export default function LandingPage() {
                   {/* Header */}
                   <div className="flex justify-between items-center px-2">
                      <div>
-                       <h2 className="text-xl font-bold text-white mb-1">Bonjour, Artisan 👋</h2>
+                       <h2 className="text-xl font-bold text-white mb-1">Bonjour, Électricien 👋</h2>
                        <p className="text-xs text-neutral-400 hidden sm:block">Voici le résumé de votre activité aujourd&apos;hui.</p>
                      </div>
                      <div className="flex items-center gap-3">
@@ -914,7 +896,7 @@ export default function LandingPage() {
                             </div>
                             <div className="flex flex-col">
                               <span className="text-white text-xs font-medium group-hover:text-violet-300 transition-colors">Relance auto</span>
-                              <span className="text-neutral-500 text-[10px]">SARL Bâtiment - Fact. 45</span>
+                              <span className="text-neutral-500 text-[10px]">SARL Élec Pro - Fact. 45</span>
                             </div>
                           </div>
                           <span className="text-neutral-400 text-[10px]">Hier</span>
@@ -1041,7 +1023,7 @@ export default function LandingPage() {
                 Un produit qui évolue <span className="bg-gradient-to-r from-emerald-400 to-violet-400 bg-clip-text text-transparent">chaque semaine</span>
               </h2>
               <p className="mx-auto mt-4 max-w-2xl text-lg text-neutral-400">
-                On écoute les artisans, on livre vite. Voici les dernières fonctionnalités ajoutées.
+                On écoute les électriciens, on livre vite. Voici les dernières fonctionnalités ajoutées.
               </p>
             </div>
 
@@ -1073,7 +1055,7 @@ export default function LandingPage() {
             <div className="mb-12 flex flex-col items-center text-center">
               <SectionEyebrow>Comparatif honnête</SectionEyebrow>
               <h2 className="mt-8 text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-                Pourquoi les artisans quittent Excel
+                Pourquoi les électriciens quittent Excel
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-neutral-400">
                 Comparez votre méthode actuelle à Zolio. Sans bullshit.
@@ -1289,9 +1271,9 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-16 flex flex-col items-center text-center">
               <SectionEyebrow>Ils l&apos;utilisent</SectionEyebrow>
-              <h2 className="mt-8 text-4xl md:text-5xl font-bold mb-6 text-white">Les artisans qui ont changé leur quotidien</h2>
+              <h2 className="mt-8 text-4xl md:text-5xl font-bold mb-6 text-white">Les électriciens qui ont changé leur quotidien</h2>
               <p className="text-xl text-neutral-400 max-w-2xl">
-                Ce ne sont pas des influenceurs. Ce sont des pros du bâtiment, comme vous.
+                Ce ne sont pas des influenceurs. Ce sont des électriciens, comme vous.
               </p>
             </div>
             
@@ -1383,7 +1365,7 @@ export default function LandingPage() {
               </div>
               <div className="hidden h-6 w-px bg-white/10 sm:block" />
               <div className="text-sm text-neutral-400">
-                <span className="font-bold text-white">+250</span> artisans actifs
+                <span className="font-bold text-white">+250</span> électriciens actifs
               </div>
               <div className="hidden h-6 w-px bg-white/10 sm:block" />
               <div className="text-sm text-neutral-400">
@@ -1396,7 +1378,7 @@ export default function LandingPage() {
                 href="/sign-up?redirect_url=/dashboard"
                 className="group inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-600 to-fuchsia-500 px-7 py-3.5 text-base font-semibold text-white shadow-[0_0_36px_rgba(139,92,246,0.35)] transition hover:scale-[1.02] hover:shadow-[0_0_56px_rgba(139,92,246,0.55)]"
               >
-                Rejoindre les 250+ artisans
+                Rejoindre les 250+ électriciens
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
               </Link>
               <p className="text-xs text-neutral-500">Sans CB · 3 devis gratuits par mois · Annulable à tout moment</p>
@@ -1815,7 +1797,7 @@ export default function LandingPage() {
 
               <div className="relative grid gap-10 lg:grid-cols-[1fr_0.82fr] lg:items-end">
                 <div>
-                  <SectionEyebrow>PRÊT À VOUS ALLÉGER L'ADMINISTRATIF</SectionEyebrow>
+                  <SectionEyebrow>PRÊT À VOUS ALLÉGER L&apos;ADMINISTRATIF</SectionEyebrow>
                   <h2 className="mt-8 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
                     Reprenez le contrôle de vos soirées et de vos week-ends.
                   </h2>

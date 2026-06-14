@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import useSWR from "swr";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Layers, X } from "lucide-react";
@@ -38,19 +38,7 @@ const OPTION_BG: Record<string, string> = {
 export default function CompareOptions({ parentId }: CompareOptionsProps) {
   const [open, setOpen] = useState(false);
 
-  // Fetch all devis to find children of this parent
-  const { data } = useSWR<DevisOption[]>("/api/devis", fetcher);
-
-  const options = useMemo(() => {
-    if (!data) return [];
-    return data.filter((d) => {
-      // The API might not return devisParentId directly, so we check if there's a way to identify
-      // For now, we'll use a different approach: fetch the parent devis details which should include options
-      return false; // placeholder
-    });
-  }, [data]);
-
-  // Alternative: fetch parent details
+  // Fetch parent details to retrieve the option variants
   const { data: parentData } = useSWR<{ devisOptions?: DevisOption[] }>(
     open ? `/api/devis/parent/${parentId}` : null,
     fetcher,

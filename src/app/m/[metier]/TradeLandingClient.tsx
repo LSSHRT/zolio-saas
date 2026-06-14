@@ -9,11 +9,10 @@ import {
   Phone,
   Rocket,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { TRADE_OPTIONS, getStarterCatalogForTrade, getTradeBundlesForTrade, getTradeDefinition, type TradeKey } from "@/lib/trades";
+import { getStarterCatalogForTrade, getTradeBundlesForTrade, getTradeDefinition, type TradeKey } from "@/lib/trades";
 
 interface Props {
   tradeKey: TradeKey;

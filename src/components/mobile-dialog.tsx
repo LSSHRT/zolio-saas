@@ -40,6 +40,13 @@ export function MobileDialog({
     return () => { document.body.style.overflow = ""; };
   }, []);
 
+  const toneEyebrow: Record<MobileDialogTone, { label: string; className: string }> = {
+    default: { label: "Action rapide", className: "text-slate-400" },
+    accent: { label: "Action rapide", className: "text-violet-500 dark:text-violet-300" },
+    danger: { label: "Attention", className: "text-rose-500 dark:text-rose-400" },
+  };
+  const eyebrow = toneEyebrow[tone];
+
   return (
     <AnimatePresence>
       {open && (
@@ -78,7 +85,7 @@ export function MobileDialog({
 
             <div className="flex items-center justify-between gap-3 border-b px-5 py-3 sm:py-4">
               <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">Action rapide</p>
+                <p className={`text-[11px] font-semibold uppercase tracking-[0.2em] ${eyebrow.className}`}>{eyebrow.label}</p>
                 <h2 className="mt-1 text-lg font-semibold text-slate-950 dark:text-white">{title}</h2>
               </div>
               <button

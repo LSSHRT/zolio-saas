@@ -49,6 +49,6 @@ Zolio est une application SaaS de gestion commerciale pour artisans et independa
 
 ## Backlog
 - P1 : Verification sur environnement de production avec Clerk actif
-- P2 : Animations dock mobile
-- P2 : Swipe-to-dismiss MobileDialog
-- P3 : PWA / mode offline
+- ~~P2 : Animations dock mobile~~ ✅ (indicateur d'onglet actif animé, juin 2026)
+- ~~P2 : Swipe-to-dismiss MobileDialog~~ ✅ (drag-to-dismiss + bottom sheet Outils, juin 2026)
+- ~~P3 : PWA / mode offline~~ ✅ (service worker network-first + page de repli hors ligne, juin 2026)

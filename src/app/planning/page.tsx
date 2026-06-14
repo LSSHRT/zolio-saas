@@ -12,7 +12,6 @@ import {
   FileText,
   Plus,
   RefreshCw,
-  Trash2,
   TrendingUp,
   X,
 } from "lucide-react";

@@ -262,47 +262,33 @@ type ProspectEmailContext = {
   city?: string;
 };
 
-// Exemples de devis par métier pour la personnalisation
+// Exemples de devis par spécialité électricien pour la personnalisation.
+// Les clés sont recherchées par inclusion dans le libellé de la cible :
+// les segments les plus spécifiques doivent rester avant "electricien".
 const TRADE_EXAMPLES: Record<string, { example: string; pain: string }> = {
-  peintre: {
-    example: "Peinture murs 2 couches — 40m² × 24€ = 960€",
-    pain: "calculer les m², les prix au m², les couches...",
+  irve: {
+    example: "Pose borne de recharge 7,4 kW — 1 × 1 250€ = 1 250€",
+    pain: "chiffrer les bornes, le câblage 3G et les protections différentielles Type B...",
   },
-  plaquiste: {
-    example: "Cloison BA13 + isolation — 18m² × 42€ = 756€",
-    pain: "calculer les m² de placo, les ossatures, les bandes...",
+  tertiaire: {
+    example: "Câblage RJ45 Cat 6 + goulottes — 12 × 110€ = 1 320€",
+    pain: "chiffrer les chemins de câbles, les armoires et les prises réseau...",
   },
-  plombier: {
-    example: "Remplacement chauffe-eau — 1 × 320€ = 320€",
-    pain: "faire les devis sur le coin de la table après le chantier...",
+  renovation: {
+    example: "Rénovation électrique appartement — 1 × 4 500€ = 4 500€",
+    pain: "recompter les prises, les points lumineux et les mètres de gaine...",
+  },
+  depann: {
+    example: "Recherche de panne + dépannage — 2h × 78€ = 156€",
+    pain: "faire les devis sur le coin de la table après l'intervention...",
+  },
+  normes: {
+    example: "Mise en sécurité tableau NF C 15-100 — 1 × 850€ = 850€",
+    pain: "tout recalculer à chaque mise aux normes, prise de terre, Consuel...",
   },
   electricien: {
     example: "Mise aux normes tableau — 1 × 850€ = 850€",
-    pain: "tout recalculer à chaque fois, les prises, les lignes...",
-  },
-  chauffagiste: {
-    example: "Pompe à chaleur air/eau — 1 × 4500€ = 4500€",
-    pain: "les devis complexes avec main d'œuvre et matériel...",
-  },
-  menuisier: {
-    example: "Pose parquet chêne — 25m² × 65€ = 1625€",
-    pain: "les métrages, les finitions, les seuils...",
-  },
-  carreleur: {
-    example: "Pose carrelage grand format — 20m² × 35€ = 700€",
-    pain: "les découpes, les angles, la colle, les joints...",
-  },
-  macon: {
-    example: "Mur porteur + hourdis — 12m² × 85€ = 1020€",
-    pain: "les devis qui changent à chaque chantier...",
-  },
-  couvreur: {
-    example: "Réfection toiture tuiles — 80m² × 55€ = 4400€",
-    pain: "les devis longs avec matériaux et main d'œuvre...",
-  },
-  facadier: {
-    example: "Ravalement façade — 120m² × 35€ = 4200€",
-    pain: "les devis avec échafaudage, produits, finitions...",
+    pain: "tout recalculer à chaque fois, les prises, les lignes, les circuits...",
   },
 };
 
@@ -325,7 +311,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
     headers["List-Unsubscribe"] = unsubscribeHeader;
   }
 
-  const tradeLabel = context?.tradeLabel?.toLowerCase() || "artisan";
+  const tradeLabel = context?.tradeLabel?.toLowerCase() || "électriciens";
   const city = context?.city || "";
   const tradeKey = Object.keys(TRADE_EXAMPLES).find(k => tradeLabel.includes(k));
   const tradeExample = tradeKey ? TRADE_EXAMPLES[tradeKey] : null;
@@ -383,7 +369,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
       "- Transformer le devis en facture en un clic",
       "",
       "Pas de logiciel à installer. Ça marche sur téléphone et ordinateur.",
-      "500+ artisans l'utilisent déjà.",
+      "500+ électriciens l'utilisent déjà.",
       "",
       "Testez gratuitement ici : https://zolio.site",
       "",
@@ -431,7 +417,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
             📱 Ça marche sur téléphone et ordinateur. Rien à installer.
           </p>
           <p style="color:#64748b;font-size:14px;line-height:1.5;margin:0 0 24px;">
-            👷 <strong>500+ artisans</strong> l'utilisent déjà.
+            👷 <strong>500+ électriciens</strong> l'utilisent déjà.
           </p>
           <div style="text-align:center;margin:0 0 24px;">
             <a href="https://zolio.site" style="background:linear-gradient(135deg,#8b5cf6,#f43f5e);color:white;padding:14px 36px;border-radius:12px;font-weight:bold;font-size:15px;text-decoration:none;display:inline-block;box-shadow:0 4px 12px -2px rgba(139,92,246,0.35);">
@@ -446,7 +432,7 @@ export async function sendProspectEmail(toEmail: string, context?: ProspectEmail
           </p>
         </div>
         <p style="color:#94a3b8;font-size:11px;text-align:center;margin:16px 0 0;line-height:1.5;">
-          Cet email vous a été envoyé car nous accompagnons des entreprises du bâtiment.<br/>
+          Cet email vous a été envoyé car nous accompagnons des électriciens.<br/>
           Pour vous désinscrire, <a href="${runtime.unsubscribeUrl || `mailto:${runtime.replyToEmail}?subject=STOP`}" style="color:#94a3b8;">cliquez ici</a> ou répondez STOP.
         </p>
         ${trackingPixel}

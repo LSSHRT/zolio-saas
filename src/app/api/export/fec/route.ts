@@ -30,10 +30,6 @@ function padNumber(n: number, decimals = 2): string {
   return n.toFixed(decimals).replace(".", ",");
 }
 
-function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10).split("-").reverse().join(""); // YYYYMMDD
-}
-
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
@@ -88,7 +84,7 @@ export async function GET(req: NextRequest) {
   // + TVA collectée (44571)
 
   // Regroupement par mois pour éviter trop de lignes (écriture globale mensuelle)
-  const byMonth: Record<string, { ht: number; tva: any; ttc: number; invoices: string[] }> = {};
+  const byMonth: Record<string, { ht: number; tva: number; ttc: number; invoices: string[] }> = {};
 
   for (const inv of invoices) {
     const monthKey = `${inv.date.getFullYear()}-${String(inv.date.getMonth() + 1).padStart(2, "0")}`;

@@ -3,17 +3,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-type IdleDeadline = { didTimeout: boolean; timeRemaining(): number };
-type IdleCallback = (deadline: IdleDeadline) => void;
-type IdleHandle = number;
-
-declare global {
-  interface Window {
-    requestIdleCallback?: (cb: IdleCallback, opts?: { timeout?: number }) => IdleHandle;
-    cancelIdleCallback?: (handle: IdleHandle) => void;
-  }
-}
-
 /**
  * Warm the Next.js router cache for a list of likely-next routes once the
  * browser is idle. Safari does not implement `requestIdleCallback` so we fall

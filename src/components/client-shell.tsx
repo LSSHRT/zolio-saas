@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import useSWR from "swr";
 import {
   ArrowLeft,
@@ -215,15 +215,24 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         {/* 2 liens gauche */}
         {CLIENT_NAV_ITEMS.slice(0, 2).map((item) => {
           const Icon = item.icon;
+          const isActive = active === item.key;
           return (
             <motion.div key={item.key} whileTap={{ scale: 0.9 }}>
               <Link
                 href={item.href}
                 onClick={() => haptic("selection")}
-                className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
+                className={`client-nav-link ${isActive ? "client-nav-link-active" : ""}`}
               >
-                <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
-                <span className="text-[11px] font-medium leading-tight">{item.label}</span>
+                {isActive && (
+                  <motion.span
+                    layoutId="dock-active-indicator"
+                    aria-hidden
+                    className="client-nav-indicator"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} className="relative z-[1]" />
+                <span className="relative z-[1] text-[11px] font-medium leading-tight">{item.label}</span>
               </Link>
             </motion.div>
           );
@@ -244,15 +253,24 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         {/* 2 liens droite */}
         {CLIENT_NAV_ITEMS.slice(2).map((item) => {
           const Icon = item.icon;
+          const isActive = active === item.key;
           return (
             <motion.div key={item.key} whileTap={{ scale: 0.9 }}>
               <Link
                 href={item.href}
                 onClick={() => haptic("selection")}
-                className={`client-nav-link ${active === item.key ? "client-nav-link-active" : ""}`}
+                className={`client-nav-link ${isActive ? "client-nav-link-active" : ""}`}
               >
-                <Icon size={20} strokeWidth={active === item.key ? 2.4 : 1.8} />
-                <span className="text-[11px] font-medium leading-tight">{item.label}</span>
+                {isActive && (
+                  <motion.span
+                    layoutId="dock-active-indicator"
+                    aria-hidden
+                    className="client-nav-indicator"
+                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} className="relative z-[1]" />
+                <span className="relative z-[1] text-[11px] font-medium leading-tight">{item.label}</span>
               </Link>
             </motion.div>
           );
@@ -283,69 +301,103 @@ export function ClientMobileDock({ active }: { active: ClientNavKey }) {
         )}
       </motion.button>
 
-      {toolsOpen ? (
-        <div className="fixed inset-0 z-[70] lg:hidden">
-          <button
-            type="button"
-            onClick={() => setToolsOpen(false)}
-            className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]"
-            aria-label="Fermer le menu outils"
-          />
+      <AnimatePresence>
+        {toolsOpen && (
+          <div className="fixed inset-0 z-[70] lg:hidden">
+            <motion.button
+              type="button"
+              onClick={() => setToolsOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-950/50 backdrop-blur-[3px]"
+              aria-label="Fermer le menu outils"
+            />
 
-          <div className={bottomSheetBaseClasses()}>
-            <div className="mb-3 flex justify-center sm:hidden">
-              <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
-            </div>
-
-            <div className="mb-3 flex items-center justify-between gap-3 px-1">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
-                  Outils
-                </p>
-                <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
-                  Accès rapide aux modules secondaires
-                </p>
+            <motion.div
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.y > 100 || info.velocity.y > 500) {
+                  setToolsOpen(false);
+                }
+              }}
+              initial={{ y: "110%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "110%" }}
+              transition={{ type: "spring", stiffness: 240, damping: 26 }}
+              className={bottomSheetBaseClasses()}
+            >
+              <div className="mb-3 flex justify-center sm:hidden touch-none">
+                <span className="h-1.5 w-12 rounded-full bg-slate-300/80 dark:bg-white/12" />
               </div>
-              <button
-                type="button"
-                onClick={() => setToolsOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:border-violet-400/20 dark:hover:text-white"
-                aria-label="Fermer"
-              >
-                <X size={16} />
-              </button>
-            </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              {CLIENT_TOOL_ITEMS.map((item) => {
-                const Icon = item.icon;
-                const isNotif = item.href === "/notifications";
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => {
-                      haptic("selection");
-                      setToolsOpen(false);
-                    }}
-                    className={`relative inline-flex min-h-[88px] flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses(
-                      pathname === item.href ? "accent" : "default",
-                    )}`}
-                  >
-                    <Icon size={18} />
-                    <span className="leading-5">{item.label}</span>
-                    {isNotif && unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-lg">
-                        {unreadCount > 99 ? "99+" : unreadCount}
-                      </span>
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
+              <div className="mb-3 flex items-center justify-between gap-3 px-1">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-200">
+                    Outils
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-950 dark:text-white">
+                    Accès rapide aux modules secondaires
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setToolsOpen(false)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200/80 bg-white/85 text-slate-500 transition hover:border-violet-300 hover:text-violet-700 dark:border-white/10 dark:bg-white/6 dark:text-slate-300 dark:hover:border-violet-400/20 dark:hover:text-white"
+                  aria-label="Fermer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <motion.div
+                className="grid grid-cols-2 gap-2.5"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } },
+                }}
+              >
+                {CLIENT_TOOL_ITEMS.map((item) => {
+                  const Icon = item.icon;
+                  const isNotif = item.href === "/notifications";
+                  return (
+                    <motion.div
+                      key={item.href}
+                      variants={{
+                        hidden: { opacity: 0, y: 12 },
+                        visible: { opacity: 1, y: 0 },
+                      }}
+                    >
+                      <Link
+                        href={item.href}
+                        onClick={() => {
+                          haptic("selection");
+                          setToolsOpen(false);
+                        }}
+                        className={`relative inline-flex min-h-[88px] w-full flex-col items-start justify-between rounded-xl border px-3 py-3 text-left text-sm font-semibold transition-all duration-200 hover:scale-[1.02] hover:translate-x-1 ${mobileActionToneClasses(
+                          pathname === item.href ? "accent" : "default",
+                        )}`}
+                      >
+                        <Icon size={18} />
+                        <span className="leading-5">{item.label}</span>
+                        {isNotif && unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-lg">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </span>
+                        )}
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
-      ) : null}
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -62,16 +62,12 @@ const SEARCH_RESULT_BLOCKLIST = [
   "leboncoin",
 ];
 const BUILDING_TRADES = [
-  { key: "peintre", label: "peintres", searchTerms: ["peintre batiment", "entreprise peinture"] },
-  { key: "plaquiste", label: "plaquistes", searchTerms: ["plaquiste", "placo isolation"] },
-  { key: "plombier", label: "plombiers", searchTerms: ["plombier", "depannage plomberie"] },
   { key: "electricien", label: "electriciens", searchTerms: ["electricien", "installation electrique"] },
-  { key: "chauffagiste", label: "chauffagistes", searchTerms: ["chauffagiste", "pompe a chaleur"] },
-  { key: "menuisier", label: "menuisiers", searchTerms: ["menuisier", "menuiserie"] },
-  { key: "carreleur", label: "carreleurs", searchTerms: ["carreleur", "pose carrelage"] },
-  { key: "macon", label: "macons", searchTerms: ["macon", "maconnerie"] },
-  { key: "couvreur", label: "couvreurs", searchTerms: ["couvreur", "couverture toiture"] },
-  { key: "facadier", label: "facadiers", searchTerms: ["facadier", "ravalement facade"] },
+  { key: "electricien-renovation", label: "electriciens renovation", searchTerms: ["electricien renovation", "renovation electrique appartement"] },
+  { key: "irve", label: "installateurs IRVE", searchTerms: ["installateur borne de recharge", "installation borne IRVE"] },
+  { key: "electricien-tertiaire", label: "electriciens tertiaire", searchTerms: ["electricien tertiaire", "entreprise electricite tertiaire"] },
+  { key: "depannage-electrique", label: "electriciens depanneurs", searchTerms: ["depannage electrique", "electricien urgence"] },
+  { key: "mise-aux-normes", label: "electriciens mise aux normes", searchTerms: ["mise aux normes electrique", "renovation tableau electrique"] },
 ] as const;
 const TARGET_CITIES = [
   "Paris", "Lyon", "Marseille", "Toulouse", "Bordeaux",
@@ -200,9 +196,9 @@ async function discoverDomainsForTarget(target: ProspectSearchTarget): Promise<D
   const exclusions = "-pagesjaunes -facebook -instagram -linkedin -societe -youtube -google -yelp -tripadvisor";
 
   const queries = [
-    `${target.searchTerms[0]} ${target.city} artisan site:.fr ${exclusions}`,
-    `${target.searchTerms[1] || target.searchTerms[0]} ${target.city} entreprise batiment site:.fr ${exclusions}`,
-    `${target.searchTerms[0]} ${target.city} devis travaux site:.fr ${exclusions}`,
+    `${target.searchTerms[0]} ${target.city} electricien site:.fr ${exclusions}`,
+    `${target.searchTerms[1] || target.searchTerms[0]} ${target.city} entreprise electricite site:.fr ${exclusions}`,
+    `${target.searchTerms[0]} ${target.city} devis electricite site:.fr ${exclusions}`,
   ].slice(0, QUERIES_PER_TARGET);
 
   for (const query of queries) {
@@ -324,7 +320,7 @@ async function findCandidates(poolSize: number): Promise<{
         candidates.push({
           email: scored.email,
           source: `Robot (DB+Hunter • ${dbDomain.domain})`,
-          tradeLabel: dbDomain.trade || "Artisan BTP",
+          tradeLabel: dbDomain.trade || "Électricien",
           city: dbDomain.city || "",
           domain: dbDomain.domain,
           companyName: dbDomain.company || dbDomain.domain,

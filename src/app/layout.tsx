@@ -31,14 +31,14 @@ export const metadata: Metadata = {
     title: "Zolio",
   },
   title: {
-    default: "Zolio — Gérez vos chantiers, pas la paperasse",
+    default: "Zolio — Le logiciel de devis & factures pour électriciens",
     template: "%s | Zolio",
   },
-  description: "Le logiciel de devis et factures conçu pour les artisans du bâtiment. Devis en 3 min, signature digitale, facturation automatique. 1 devis offert, sans carte bancaire.",
-  keywords: ["devis artisan", "facture BTP", "logiciel devis", "signature électronique", "artisan bâtiment", "devis painting", "facture electricien", "logiciel plombier", "devis smartphone"],
+  description: "Le logiciel de devis et factures conçu pour les électriciens. Devis d'électricité en 3 min, conformité NF C 15-100, signature digitale, facturation automatique. 1 devis offert, sans carte bancaire.",
+  keywords: ["devis électricien", "facture électricien", "logiciel devis électricité", "signature électronique", "devis IRVE borne de recharge", "mise aux normes NF C 15-100", "logiciel électricien", "devis électricité smartphone"],
   openGraph: {
-    title: "Zolio — Gérez vos chantiers, pas la paperasse",
-    description: "Devis, signature et factures depuis votre téléphone. Conçu pour les artisans du bâtiment. 1 devis gratuit.",
+    title: "Zolio — Le logiciel de devis & factures pour électriciens",
+    description: "Devis d'électricité, signature et factures depuis votre téléphone. Conçu pour les électriciens. 1 devis gratuit.",
     url: "https://www.zolio.site",
     siteName: "Zolio",
     locale: "fr_FR",
@@ -46,8 +46,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Zolio — Devis & Factures pour Artisans",
-    description: "Devis en 3 min depuis le chantier. Signature digitale, facturation en 1 clic. Essayez gratuitement.",
+    title: "Zolio — Devis & Factures pour Électriciens",
+    description: "Devis d'électricité en 3 min depuis le chantier. Signature digitale, facturation en 1 clic. Essayez gratuitement.",
     images: ["/opengraph-image"],
   },
 };
@@ -135,7 +135,7 @@ export default function RootLayout({
           {process.env.NODE_ENV === "production" && (
             <Script id="sw-register" strategy="afterInteractive">{`
               if ("serviceWorker" in navigator) {
-                navigator.serviceWorker.register("/sw.js?v=2").then((reg) => {
+                navigator.serviceWorker.register("/sw.js?v=3").then((reg) => {
                   reg.update();
                 });
               }

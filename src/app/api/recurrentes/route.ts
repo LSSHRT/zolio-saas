@@ -9,9 +9,9 @@ import { calculateNextDate } from "@/lib/recurrentes";
 type RecurrenteRecord = {
   id: string;
   nom: string;
-  montantHT: any;
-  tva: any;
-  montantTTC: any;
+  montantHT: number | Decimal;
+  tva: number | Decimal;
+  montantTTC: number | Decimal;
   frequence: string;
   jourMois: number;
   prochaineDate: Date;

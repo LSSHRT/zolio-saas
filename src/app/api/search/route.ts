@@ -19,7 +19,6 @@ export async function GET(request: Request) {
     }
 
     const where = { userId };
-    const ilike = `%${q}%`;
 
     const [devis, factures, clients, depenses] = await Promise.all([
       prisma.devis.findMany({

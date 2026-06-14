@@ -11,7 +11,7 @@ import {
 } from "../trades";
 
 describe("trades", () => {
-  const allTradeKeys: TradeKey[] = ["peintre", "plaquiste", "plombier", "electricien"];
+  const allTradeKeys: TradeKey[] = ["residentiel", "tertiaire", "irve", "securite"];
 
   describe("isTradeKey", () => {
     it.each(allTradeKeys)("should accept valid trade key: %s", (key) => {
@@ -49,7 +49,7 @@ describe("trades", () => {
     });
 
     it("should fallback to default for invalid key", () => {
-      expect(getTradeLabel("invalide")).toBe("Peintre");
+      expect(getTradeLabel("invalide")).toBe("Élec Résidentielle");
     });
   });
 
@@ -63,8 +63,8 @@ describe("trades", () => {
     });
 
     it("should return copies, not references", () => {
-      const a = getStarterCatalogForTrade("peintre");
-      const b = getStarterCatalogForTrade("peintre");
+      const a = getStarterCatalogForTrade("residentiel");
+      const b = getStarterCatalogForTrade("residentiel");
       expect(a).not.toBe(b);
       a[0].prix = 9999;
       expect(b[0].prix).not.toBe(9999);
@@ -73,7 +73,7 @@ describe("trades", () => {
     it("should fallback to default for invalid key", () => {
       const catalog = getStarterCatalogForTrade("invalide");
       expect(catalog.length).toBeGreaterThan(0);
-      // Should be peintre (default)
+      // Should be residentiel (default)
       const defaultCatalog = getStarterCatalogForTrade(DEFAULT_TRADE);
       expect(catalog[0].nom).toBe(defaultCatalog[0].nom);
     });
@@ -89,8 +89,8 @@ describe("trades", () => {
     });
 
     it("should return copies, not references", () => {
-      const a = getTradeBundlesForTrade("peintre");
-      const b = getTradeBundlesForTrade("peintre");
+      const a = getTradeBundlesForTrade("residentiel");
+      const b = getTradeBundlesForTrade("residentiel");
       expect(a).not.toBe(b);
       a[0].nom = "MODIFIED";
       expect(b[0].nom).not.toBe("MODIFIED");

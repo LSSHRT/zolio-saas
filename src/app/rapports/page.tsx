@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -11,7 +11,6 @@ import {
   FileDown,
   FileText,
   LineChart,
-  Loader2,
   Users,
 } from "lucide-react";
 import useSWR from "swr";

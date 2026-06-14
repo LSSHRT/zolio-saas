@@ -5,7 +5,7 @@ const MONTH_NAMES = ["Jan", "Fev", "Mar", "Avr", "Mai", "Juin", "Juil", "Aout", 
 type RawDashboardQuote = {
   numero: string;
   date: Date;
-  lignesNorm?: any[];
+  lignesNorm?: unknown[];
   statut: string;
   remise: number | null;
   tva: number | null;
@@ -338,7 +338,6 @@ export async function getClientDashboardSummary(userId: string): Promise<ClientD
 
   const caEncaisseSemaine = facturesPayeesSemaine.reduce((s, f) => s + Number(f.totalTTC), 0);
 
-  const devisFacturesIds = new Set(facturesFromDevis.map((f) => f.devisId));
   const nbFacturesFromDevis = facturesFromDevis.length;
   const facturesPayeesFromDevis = facturesFromDevis.filter((f) => f.statut === "Payée");
   const nbFactureesPayees = facturesPayeesFromDevis.length;
