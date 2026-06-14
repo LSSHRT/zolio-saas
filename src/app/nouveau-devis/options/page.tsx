@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import {
   ArrowLeft,
@@ -65,7 +64,6 @@ const emptyOption = (): OptionDraft => ({
 
 export default function NouveauDevisOptionsPage() {
   const router = useRouter();
-  const { user } = useUser();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 

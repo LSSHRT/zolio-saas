@@ -94,7 +94,7 @@ export async function GET(request: Request) {
         "Content-Disposition": `attachment; filename="zolio-pennylane-${annee}.json"`,
       },
     });
-  } catch (error) {
+  } catch {
     return jsonError("Erreur lors de l'export", 500);
   }
 }

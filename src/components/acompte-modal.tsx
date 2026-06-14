@@ -34,8 +34,8 @@ export default function AcompteModal({ open, onClose, devisNumero, onSuccess }: 
       if (!res.ok) throw new Error(data.error || "Erreur");
       onSuccess(data.facture);
       onClose();
-    } catch (e: any) {
-      alert(e.message);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Erreur");
     } finally {
       setLoading(false);
     }
@@ -45,14 +45,14 @@ export default function AcompteModal({ open, onClose, devisNumero, onSuccess }: 
     <MobileDialog open={open} onClose={onClose} title="Facture d'acompte" tone="accent">
       <div className="space-y-6 py-2">
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Créer une facture d'acompte pour le devis <strong className="text-slate-800 dark:text-white">{devisNumero}</strong>.
+          Créer une facture d&apos;acompte pour le devis <strong className="text-slate-800 dark:text-white">{devisNumero}</strong>.
           Le montant sera calculé proportionnellement au total du devis.
         </p>
 
         {/* Présélection */}
         <div>
           <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            Taux d'acompte
+            Taux d&apos;acompte
           </p>
           <div className="flex gap-2">
             {PRESETS.map((p) => (

@@ -1037,10 +1037,6 @@ const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
                         </div>
 
                         {colFactures.map((facture, i) => {
-                          const displayStatut = facture.statut === "Payée" ? "Payée" : isLate(facture) ? "En retard" : facture.statut;
-                          const config = statutConfig[displayStatut] || statutConfig["Émise"];
-                          const Icon = config.icon;
-
                           return (
                             <motion.div
                               key={facture.numero || i}

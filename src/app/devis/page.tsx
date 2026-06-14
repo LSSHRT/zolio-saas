@@ -107,6 +107,8 @@ function buildFollowUpMailTo(devis: Devis) {
   return `mailto:${devis.emailClient || ""}?subject=${subject}&body=${body}`;
 }
 
+const OPTION_ORDER = ["basique", "standard", "premium"];
+
 export default function DevisPage() {
   const router = useRouter();
   const { data, isLoading, mutate } = useSWR('/api/devis', fetcher, { revalidateOnFocus: false, keepPreviousData: true });
@@ -351,14 +353,12 @@ export default function DevisPage() {
     premium: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
   };
 
-  const optionOrder = ["basique", "standard", "premium"];
-
   // Liste de rendu : chaque devis standalone + ses enfants (le cas échéant)
   const renderGroups = useMemo(() => {
     return groupedDevis.standalone.map((d) => ({
       parent: d,
       children: (groupedDevis.parentMap.get(d.id) || []).sort(
-        (a, b) => optionOrder.indexOf(a.optionLabel || "") - optionOrder.indexOf(b.optionLabel || "")
+        (a, b) => OPTION_ORDER.indexOf(a.optionLabel || "") - OPTION_ORDER.indexOf(b.optionLabel || "")
       ),
     }));
   }, [groupedDevis]);

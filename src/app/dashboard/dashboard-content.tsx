@@ -356,7 +356,6 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   const objectifMensuel = Number((clerkUser?.unsafeMetadata as Record<string, unknown>)?.objectifMensuel || 0);
   const objectifInitial = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : 5000;
   const [objectif, setObjectif] = useState(objectifInitial);
-  const [objectifDraftValue, setObjectifDraftValue] = useState(objectifDraft); // Rename conflict resolved if any
   const objectifActif = Number.isFinite(objectifMensuel) && objectifMensuel > 0 ? objectifMensuel : objectif;
 
   useEffect(() => { setObjectifDraft(objectifActif.toString()); }, [objectifActif]);
@@ -421,7 +420,6 @@ export default function DashboardContent({ initialUser, initialData, initialSumm
   const pipelineHT = d?.pipelineRevenueHT ?? 0;
   const conversionRate = d?.conversionRate ?? 0;
   const averageTicket = d?.averageTicket ?? 0;
-  const avgResponseDays = d?.avgResponseDays ?? 0;
   const objectifProgress = objectifActif > 0 ? Math.min((CA_TTC / objectifActif) * 100, 100) : 0;
   const remainingToGoal = Math.max(objectifActif - CA_TTC, 0);
   const devisRecents = (d?.recentQuotes ?? []) as QuoteListItem[];

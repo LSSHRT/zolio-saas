@@ -41,7 +41,6 @@ export function ClientSelector({
   selectedClient,
   showNewClient,
   onToggleNewClient,
-  errors,
 }: ClientSelectorProps) {
   const selectedPrimaryContact = selectedClient?.email || selectedClient?.telephone || selectedClient?.adresse;
 

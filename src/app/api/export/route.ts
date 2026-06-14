@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { generateDevisPDF } from "@/lib/generatePdf";
 import { getCompanyProfile } from "@/lib/company";
 import { currentUser } from "@clerk/nextjs/server";
-import { parseLignes, normalizeLigneForOutput, computeTotals, parseNumber, type LignePayload } from "@/lib/devis-lignes";
+import { normalizeLigneForOutput, computeTotals, parseNumber, type LignePayload } from "@/lib/devis-lignes";
 import { internalServerError, jsonError, rateLimitResponse } from "@/lib/http";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
           const remiseNum = parseNumber(d.remise, 0);
           const { totalHT, totalTTC } = computeTotals(lignes, tvaNum, remiseNum);
 
-          const _pdfBuffer = await generateDevisPDF({
+          await generateDevisPDF({
             numeroDevis: d.numero,
             date: d.date.toLocaleDateString("fr-FR"),
             client: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import type ReactSignatureCanvas from "react-signature-canvas";
 import dynamic from "next/dynamic";
 const SignaturePad = dynamic(() => import("@/components/SignaturePad"), { ssr: false });

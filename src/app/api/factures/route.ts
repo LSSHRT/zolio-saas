@@ -31,7 +31,7 @@ type FactureRecord = {
   statut: string;
   totalHT: number | Decimal;
   totalTTC: number | Decimal;
-  tva: any | Decimal;
+  tva: number | Decimal;
 };
 
 function normalizeText(value: unknown) {

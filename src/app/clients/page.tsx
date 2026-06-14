@@ -35,7 +35,6 @@ import {
   type ClientMobileAction,
 } from "@/components/client-shell";
 import { MobileDialog } from "@/components/mobile-dialog";
-import { CsvUploader } from "@/components/CsvUploader";
 import { EmptyState } from "@/components/empty-state";
 import { DataTable, MetricTile, Toolbar } from "@/components/desktop";
 import { MoreHorizontal } from "lucide-react";
@@ -90,15 +89,14 @@ function ClientsContent() {
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeletingBulk, setIsDeletingBulk] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId] = useState<string | null>(null);
   const [form, setForm] = useState({ nom: "", email: "", telephone: "", adresse: "" });
-  const [saving, setSaving] = useState(false);
+  const [saving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [historyClient, setHistoryClient] = useState<Client | null>(null);
   const [pendingDeleteClient, setPendingDeleteClient] = useState<Client | null>(null);
   const [confirmBulkDeleteOpen, setConfirmBulkDeleteOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -417,6 +415,13 @@ function ClientsContent() {
 
   return (
     <>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
       <ClientSubpageShell
         title="Mes clients"
         description="Gardez vos coordonnées, votre historique et vos fiches de chantier dans un CRM plus propre, plus rapide et bien plus agréable sur mobile."
@@ -464,14 +469,14 @@ function ClientsContent() {
             disabled: isImporting,
             icon: Upload,
             label: isImporting ? "Import en cours..." : "Importer un CSV",
-            onClick: () => setImportDialogOpen(true),
+            onClick: () => fileInputRef.current?.click(),
           },
         ]}
         actions={
           <>
             <button
               type="button"
-              onClick={() => setImportDialogOpen(true)}
+              onClick={() => fileInputRef.current?.click()}
               disabled={isImporting}
               className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-violet-300 hover:text-violet-700 disabled:opacity-50 dark:border-white/10 dark:bg-white/6 dark:text-slate-200 dark:hover:border-violet-400/40 dark:hover:text-white"
             >
@@ -906,7 +911,7 @@ function ClientsContent() {
               <>
                 <button
                   type="button"
-                  onClick={() => setImportDialogOpen(true)}
+                  onClick={() => fileInputRef.current?.click()}
                   disabled={isImporting}
                   className="lg-v2-btn lg-v2-btn-secondary disabled:opacity-50"
                 >

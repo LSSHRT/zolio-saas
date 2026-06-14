@@ -35,14 +35,12 @@ import {
   Sparkles,
   ReceiptText,
   HardHat,
-  PaintRoller,
   Wrench,
-  Hammer,
   Plug,
   Quote
 } from "lucide-react";
 import Image from "next/image";
-import { getSupportHref, isExternalSupportHref } from "@/lib/support";
+import { getSupportHref } from "@/lib/support";
 
 const NOUVEAUTES = [
   { badge: "Nouveau", title: "Planning mensuel", desc: "Calendrier interactif avec vos échéances, fins de devis et factures récurrentes en un coup d'œil.", icon: Zap, tone: "violet" as const },
@@ -114,21 +112,6 @@ const heroSignals = [
   { label: "Pensé pour", value: "Électriciens", detail: "indépendants et TPE de 1 à 5 salariés" },
   { label: "Économie", value: "-10h / sem", detail: "sur votre gestion de devis, factures & Consuel" },
   { label: "Tarif", value: "199 €/mo", detail: "standard tout inclus, premier mois gratuit" },
-] as const;
-
-const trustWidgetCards = [
-  {
-    title: "Widget officiel prêt",
-    description: "La zone peut accueillir Trustpilot proprement, sans casser la direction artistique.",
-  },
-  {
-    title: "Preuve sociale premium",
-    description: "Le bloc reste crédible et élégant même avant le branchement des avis live.",
-  },
-  {
-    title: "Responsive natif",
-    description: "La section reste forte visuellement sur iPhone, tablette et desktop large.",
-  },
 ] as const;
 
 const closingHighlights = [
@@ -446,7 +429,6 @@ export default function LandingPage() {
     message:
       "Bonjour, je m'appelle [Votre Nom] et je suis électricien. Je souhaite réserver un appel gratuit de 15 min pour en savoir plus sur votre offre d'assistant administratif et le premier mois d'essai offert.",
   });
-  const supportIsExternal = isExternalSupportHref(supportHref);
 
   return (
     <>
@@ -1815,7 +1797,7 @@ export default function LandingPage() {
 
               <div className="relative grid gap-10 lg:grid-cols-[1fr_0.82fr] lg:items-end">
                 <div>
-                  <SectionEyebrow>PRÊT À VOUS ALLÉGER L'ADMINISTRATIF</SectionEyebrow>
+                  <SectionEyebrow>PRÊT À VOUS ALLÉGER L&apos;ADMINISTRATIF</SectionEyebrow>
                   <h2 className="mt-8 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
                     Reprenez le contrôle de vos soirées et de vos week-ends.
                   </h2>

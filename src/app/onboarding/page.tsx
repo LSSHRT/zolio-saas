@@ -11,14 +11,8 @@ import {
   Check,
   Loader2,
   HardHat,
-  Palette,
-  Sparkles,
-  Wrench,
-  Brush,
-  Zap,
   Home,
   Car,
-  TreePine,
   Shield,
 } from "lucide-react";
 
@@ -169,7 +163,7 @@ export default function OnboardingPage() {
               </p>
               <div className="mt-6 space-y-4">
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Nom de l'entreprise *</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Nom de l&apos;entreprise *</span>
                   <input
                     value={company.nom}
                     onChange={(e) => setCompany({ ...company, nom: e.target.value })}

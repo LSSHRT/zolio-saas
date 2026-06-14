@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getQuotaInfo } from "@/lib/quota";
-import { rateLimit } from "@/lib/rate-limit";
 import { internalServerError } from "@/lib/http";
 
 export async function GET() {

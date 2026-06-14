@@ -39,22 +39,21 @@ interface NotesResponse {
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function CalepinPage() {
-  const [page, _setPage] = useState(1);
+  const [page] = useState(1);
   const { data, error, isLoading, mutate } = useSWR<NotesResponse>(`/api/notes?page=${page}&limit=20`, fetcher, {
     revalidateOnFocus: false,
     keepPreviousData: true,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentNote, setCurrentNote] = useState<Partial<Note>>({});
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving] = useState(false);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeleting] = useState(false);
   const isEditing = Boolean(currentNote.id);
   const noteDraftLength = (currentNote.contenu || "").trim().length;
   const notePreview = (currentNote.contenu || "").trim();
 
   const noteList = useMemo<Note[]>(() => (Array.isArray(data?.data) ? data.data : []), [data]);
-  const _pagination = data?.pagination ?? null;
   const titledNotes = useMemo(
     () => noteList.filter((note) => Boolean(note.titre && note.titre.trim())).length,
     [noteList],

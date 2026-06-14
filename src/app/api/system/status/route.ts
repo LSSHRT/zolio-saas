@@ -2,21 +2,20 @@ import { NextResponse } from "next/server";
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { getAdminRuntimeState } from "@/lib/admin-settings";
 import { getAdminEmail, isAdminUser } from "@/lib/admin";
-import { internalServerError } from "@/lib/http";
 
 export async function GET() {
   try {
     let runtimeState = { systemBanner: "", maintenanceEnabled: false, maintenanceMessage: "" };
     try {
       runtimeState = await getAdminRuntimeState();
-    } catch (err) {
+    } catch {
       // Ignore or log database/runtime settings retrieval error
     }
 
     let user = null;
     try {
       user = await currentUser();
-    } catch (err) {
+    } catch {
       // Gracefully handle Clerk being unreachable or offline
     }
 
@@ -30,7 +29,7 @@ export async function GET() {
           const adminUsers = await client.users.getUserList({ emailAddress: [adminEmail] });
           const legacyBanner = adminUsers.data[0]?.publicMetadata?.systemBanner;
           systemBanner = typeof legacyBanner === "string" ? legacyBanner : "";
-        } catch (clerkErr) {
+        } catch {
           // Fallback if Clerk API fails
           systemBanner = "";
         }
@@ -43,7 +42,7 @@ export async function GET() {
       maintenanceMessage: runtimeState.maintenanceMessage,
       canBypassMaintenance: isAdminUser(user),
     });
-  } catch (error) {
+  } catch {
     // Return a safe fallback rather than crashing with an internal 500 error
     return NextResponse.json({
       systemBanner: "",
