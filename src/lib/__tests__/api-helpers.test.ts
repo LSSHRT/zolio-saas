@@ -100,13 +100,13 @@ describe("API helpers (couverture complète)", () => {
 
   describe("trades", () => {
     it("should validate trade keys", () => {
-      expect(isTradeKey("peintre")).toBe(true);
+      expect(isTradeKey("residentiel")).toBe(true);
       expect(isTradeKey("invalide")).toBe(false);
     });
 
     it("should return labels", () => {
-      expect(getTradeLabel("peintre")).toBe("Peintre");
-      expect(getTradeLabel("invalide")).toBe("Peintre"); // fallback
+      expect(getTradeLabel("residentiel")).toBe("Élec Résidentielle");
+      expect(getTradeLabel("invalide")).toBe("Élec Résidentielle"); // fallback (DEFAULT_TRADE)
     });
   });
 

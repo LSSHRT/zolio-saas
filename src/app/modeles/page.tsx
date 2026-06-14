@@ -785,11 +785,12 @@ export default function ModelesPage() {
                 onChange={(e) => setSelectedTrade(e.target.value)}
                 className="w-full rounded-lg border border-violet-200/60 bg-white/80 px-3 py-2 text-sm outline-none transition focus:border-violet-400 dark:border-white/10 dark:bg-white/6 dark:text-white"
               >
-                <option value="">Métier (optionnel)</option>
-                <option value="peintre">Peintre</option>
-                <option value="plaquiste">Plaquiste</option>
-                <option value="plombier">Plombier</option>
-                <option value="electricien">Électricien</option>
+                <option value="">Spécialité (optionnel)</option>
+                {TRADE_OPTIONS.map((trade) => (
+                  <option key={trade.key} value={trade.key}>
+                    {trade.label}
+                  </option>
+                ))}
               </select>
               <div className="flex gap-2">
                 <input

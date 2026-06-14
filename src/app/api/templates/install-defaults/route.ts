@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { rateLimitResponse, internalServerError } from "@/lib/http";
-import { getTradeBundlesForTrade, getTradeDefinition, type TradeKey } from "@/lib/trades";
+import { getTradeBundlesForTrade, getTradeDefinition, DEFAULT_TRADE, type TradeKey } from "@/lib/trades";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     if (!rl.allowed) return rateLimitResponse(rl.resetAt);
 
     const body = await req.json().catch(() => ({}));
-    const tradeKey = (body?.trade as TradeKey) || "peintre";
+    const tradeKey = (body?.trade as TradeKey) || DEFAULT_TRADE;
     const trade = getTradeDefinition(tradeKey);
     if (!trade) {
       return NextResponse.json({ error: "Métier invalide" }, { status: 400 });

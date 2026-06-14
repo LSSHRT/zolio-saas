@@ -1,5 +1,23 @@
 # Changelog — Zolio SaaS
 
+## [1.6.0] — 2026-06-14
+
+### ⚡ Spécialisation électricien (finalisation)
+- **Prospection** ciblée électriciens — segments résidentiel, rénovation, IRVE, tertiaire, dépannage, mise aux normes (requêtes et libellés dédiés)
+- **Emails de prospection** — exemples de devis par spécialité électrique (bornes IRVE, RJ45/tertiaire, rénovation, dépannage, NF C 15-100)
+- **Catalogue & modèles** — sélecteur de spécialité dynamique (résidentiel, tertiaire, IRVE, sécurité), fini les métiers génériques codés en dur
+- **SEO** — métadonnées, JSON-LD et manifest PWA orientés « électriciens »
+
+### 🐛 Corrections
+- `install-defaults` : valeur par défaut invalide (`peintre`) remplacée par la spécialité par défaut → l'installation des modèles fonctionne de nouveau
+- Landing par spécialité `/m/[metier]` : métadonnées cassées (`devis peint …e`) réécrites proprement + repli sur la spécialité par défaut
+- Tests `trades` et `api-helpers` réalignés sur les spécialités électricien (132 tests au vert)
+
+### 📱 Mobile & PWA
+- **Dock mobile** — indicateur d'onglet actif animé (transition fluide entre les onglets)
+- **Menu Outils** — bottom sheet avec swipe-to-dismiss et apparition en cascade
+- **Mode hors ligne** — service worker amélioré (navigation network-first, mise en cache des pages visitées) + page de repli hors ligne dédiée
+
 ## [1.5.0] — 2026-03-27
 
 ### ✨ Nouveautés

@@ -573,6 +573,7 @@
 
   .client-nav-link {
     display: inline-flex;
+    position: relative;
     min-width: 0;
     flex: 1 1 0%;
     flex-direction: column;
@@ -596,10 +597,18 @@
   }
 
   .client-nav-link-active {
+    color: #6d28d9;
+  }
+
+  /* Indicateur d'onglet actif animé (framer-motion layoutId) */
+  .client-nav-indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: 1.3rem;
     background:
       linear-gradient(135deg, rgba(124, 58, 237, 0.16), rgba(236, 72, 153, 0.08)),
       rgba(124, 58, 237, 0.06);
-    color: #6d28d9;
     box-shadow:
       0 16px 26px -18px rgba(124, 58, 237, 0.45),
       inset 0 1px 0 rgba(255, 255, 255, 0.4);
@@ -615,10 +624,13 @@
   }
 
   .dark .client-nav-link-active {
+    color: #f8fafc;
+  }
+
+  .dark .client-nav-indicator {
     background:
       linear-gradient(135deg, rgba(124, 58, 237, 0.22), rgba(236, 72, 153, 0.1)),
       rgba(255, 255, 255, 0.04);
-    color: #f8fafc;
     box-shadow:
       0 16px 26px -18px rgba(124, 58, 237, 0.55),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
